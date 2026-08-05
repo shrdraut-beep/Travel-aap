@@ -1,0 +1,75 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'>
+  <defs>
+    <linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#0f172a'/>
+      <stop offset='40%' stop-color='#0f766e'/>
+      <stop offset='100%' stop-color='#0284c7'/>
+    </linearGradient>
+    <linearGradient id='badgeGrad' x1='0%' y1='0%' x2='0%' y2='100%'>
+      <stop offset='0%' stop-color='#ffffff'/>
+      <stop offset='100%' stop-color='#f1f5f9'/>
+    </linearGradient>
+    <linearGradient id='sunGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#fef08a'/>
+      <stop offset='50%' stop-color='#fde047'/>
+      <stop offset='100%' stop-color='#f97316'/>
+    </linearGradient>
+    <linearGradient id='vanGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#38bdf8'/>
+      <stop offset='100%' stop-color='#0369a1'/>
+    </linearGradient>
+    <filter id='shadow' x='-10%' y='-10%' width='120%' height='120%'>
+      <feDropShadow dx='0' dy='12' stdDeviation='16' flood-color='#000000' flood-opacity='0.35'/>
+    </filter>
+  </defs>
+
+  <!-- Background Card Container -->
+  <rect x='16' y='16' width='480' height='480' rx='108' fill='url(#bgGrad)' filter='url(#shadow)'/>
+  <rect x='24' y='24' width='464' height='464' rx='100' fill='none' stroke='#2dd4bf' stroke-width='4' opacity='0.5'/>
+
+  <!-- Outer Ring Accent -->
+  <circle cx='256' cy='220' r='180' fill='none' stroke='#38bdf8' stroke-width='3' stroke-dasharray='10 6' opacity='0.4'/>
+
+  <!-- Sun -->
+  <circle cx='256' cy='180' r='85' fill='url(#sunGrad)'/>
+
+  <!-- Mountains Left -->
+  <polygon points='100,320 190,160 280,320' fill='#1e293b'/>
+  <polygon points='190,160 215,200 190,215 165,200' fill='#f8fafc'/>
+
+  <!-- Pine Trees -->
+  <polygon points='120,320 135,280 150,320' fill='#059669'/>
+  <polygon points='125,290 135,260 145,290' fill='#10b981'/>
+
+  <!-- Palm Tree Right -->
+  <path d='M350,320 Q360,240 390,180' fill='none' stroke='#854d0e' stroke-width='14' stroke-linecap='round'/>
+  <path d='M390,180 Q340,150 310,165' fill='none' stroke='#16a34a' stroke-width='9' stroke-linecap='round'/>
+  <path d='M390,180 Q420,145 445,170' fill='none' stroke='#22c55e' stroke-width='9' stroke-linecap='round'/>
+  <path d='M390,180 Q410,210 435,220' fill='none' stroke='#15803d' stroke-width='9' stroke-linecap='round'/>
+
+  <!-- Ocean Waves -->
+  <path d='M60,320 Q160,290 256,320 T452,320 L452,365 L60,365 Z' fill='#0284c7' opacity='0.9'/>
+  <path d='M60,335 Q160,310 256,335 T452,335 L452,375 L60,375 Z' fill='#0369a1'/>
+
+  <!-- Camper Van -->
+  <g transform='translate(0, -10)'>
+    <rect x='180' y='245' width='152' height='80' rx='20' fill='url(#vanGrad)' stroke='#ffffff' stroke-width='5'/>
+    <!-- Roof rack -->
+    <rect x='200' y='238' width='112' height='8' rx='4' fill='#cbd5e1'/>
+    <!-- Windows -->
+    <rect x='196' y='258' width='45' height='32' rx='8' fill='#e0f2fe' stroke='#0284c7' stroke-width='2'/>
+    <rect x='251' y='258' width='65' height='32' rx='8' fill='#e0f2fe' stroke='#0284c7' stroke-width='2'/>
+    <!-- Wheels -->
+    <circle cx='215' cy='325' r='18' fill='#0f172a' stroke='#ffffff' stroke-width='5'/>
+    <circle cx='215' cy='325' r='6' fill='#94a3b8'/>
+    <circle cx='295' cy='325' r='18' fill='#0f172a' stroke='#ffffff' stroke-width='5'/>
+    <circle cx='295' cy='325' r='6' fill='#94a3b8'/>
+    <!-- Headlight -->
+    <circle cx='326' cy='295' r='6' fill='#fef08a'/>
+  </g>
+
+  <!-- Title Pill Badge Bottom -->
+  <rect x='50' y='380' width='412' height='85' rx='24' fill='url(#badgeGrad)' stroke='#2dd4bf' stroke-width='3' filter='url(#shadow)'/>
+  <text x='256' y='422' font-family='Arial, Helvetica, sans-serif' font-weight='900' font-size='28' fill='#0f172a' text-anchor='middle' letter-spacing='1'>प्रवास वाटाघाटी</text>
+  <text x='256' y='450' font-family='Arial, Helvetica, sans-serif' font-weight='800' font-size='15' fill='#0f766e' text-anchor='middle' letter-spacing='1.5'>दोस्तांची सफर • हिशोब विसर</text>
+</svg>

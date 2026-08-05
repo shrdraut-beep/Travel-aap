@@ -1,0 +1,33 @@
+{
+  "entities": {
+    "TripGroup": {
+      "title": "Trip Group",
+      "description": "Main document for a trip",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "maxLength": 200 },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "members": { "type": "array" },
+        "expenses": { "type": "array" },
+        "deposits": { "type": "array" },
+        "itinerary": { "type": "array" },
+        "tripType": { "type": "string", "enum": ["friends", "family"] },
+        "adminId": { "type": "string" },
+        "defaultCurrency": { "type": "string", "maxLength": 5 },
+        "totalBudget": { "type": "number" },
+        "passcode": { "type": "string", "minLength": 4, "maxLength": 10 },
+        "logoUrl": { "type": "string" },
+        "wallpaperUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "startDate", "endDate", "members", "expenses", "deposits", "itinerary"]
+    }
+  },
+  "firestore": {
+    "/trips/{tripId}": {
+      "schema": "TripGroup",
+      "description": "Individual trip documents"
+    }
+  }
+}

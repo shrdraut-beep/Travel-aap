@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "studio.ai.pravas_wataghati.twa",
+      "sha256_cert_fingerprints": [
+        "DA:CE:73:68:DE:B6:07:D8:84:3D:39:00:A0:47:8F:D6:34:BA:74:9C:6A:04:49:68:A3:76:7B:F3:D8:A5:A5:7A"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.run.asia_southeast1.ais_pre_5vodqbdjbd7trju3mmuvrn_381492601332.twa",
+      "sha256_cert_fingerprints": [
+        "7B:30:9F:13:3C:F5:DB:B4:B5:D6:16:3C:B9:45:E6:DB:B8:F3:DA:B7:C2:E7:45:05:65:88:62:97:5A:73:B8:E2"
+      ]
+    }
+  }
+]

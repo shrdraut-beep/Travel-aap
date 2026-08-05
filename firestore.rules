@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reusable helpers for security hardening
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    function isValidTrip(data) {
+      return data.id is string && data.id.size() <= 64
+        && data.name is string && data.name.size() <= 200
+        && data.startDate is string && data.endDate is string
+        && data.members is list && data.members.size() <= 100
+        && data.expenses is list && data.expenses.size() <= 5000
+        && data.deposits is list && data.deposits.size() <= 5000
+        && data.itinerary is list && data.itinerary.size() <= 100
+        && (!('gallery' in data) || data.gallery is list)
+        && (!('playlist' in data) || data.playlist is list)
+        && (!('sosAlerts' in data) || data.sosAlerts is list)
+        && (!('themeColor' in data) || data.themeColor is string)
+        && (!('passcode' in data) || (data.passcode is string && data.passcode.size() >= 4 && data.passcode.size() <= 10));
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    match /metrics/{metricId} {
+      allow read, write: if true;
+    }
+
+    match /trips/{tripId} {
+      allow list: if isSignedIn() && (
+        resource.data.userEmail == request.auth.token.email ||
+        resource.data.userId == request.auth.uid
+      );
+      
+      allow get: if isValidId(tripId) && (
+        tripId.matches('^SF-.*') ||
+        (isSignedIn() && (resource.data.userEmail == request.auth.token.email || resource.data.userId == request.auth.uid))
+      );
+
+      allow create: if isSignedIn() && isValidId(tripId) && isValidTrip(incoming());
+      
+      allow update: if isValidId(tripId) && isValidTrip(incoming())
+                   && (incoming().id == existing().id)
+                   && (
+                     (isSignedIn() && (existing().userEmail == request.auth.token.email || existing().userId == request.auth.uid)) ||
+                     ('passcode' in existing() && incoming().passcode == existing().passcode)
+                   );
+
+      allow delete: if isSignedIn() && (existing().userEmail == request.auth.token.email || existing().userId == request.auth.uid);
+    }
+    
+    match /support_tickets/{ticketId} {
+      allow read, write: if isSignedIn();
+    }
+    
+    match /_connection_test_/{docId} {
+      allow read: if true;
+    }
+  }
+}
