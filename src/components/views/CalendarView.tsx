@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles, MapPin, Clock, Plus, X, Sun, Sunrise, Sunset, AlertCircle, Info, CalendarDays, Edit3, ArrowRight } from 'lucide-react';
 import { TripPlan, TripGroup } from '../../types';
+import * as freeUtils from '../../services/api/freeUtils';
 import Markdown from 'react-markdown';
 
 interface CalendarViewProps {
@@ -48,7 +49,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     async function fetchSunset() {
       try {
         const dest = (trip as any).destination || trip.name;
-        const freeUtils = await import('../../services/api/freeUtils');
+        // Static import used
         const geocode = await freeUtils.geocodeDestination(dest);
         if (geocode && geocode.lat && geocode.lng) {
           const times = await freeUtils.getSunriseSunset(geocode.lat, geocode.lng);
@@ -356,7 +357,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
           {/* Empty padding cells for first week */}
           {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-            <div key={`empty-${i}`} className="min-h-[70px] sm:min-h-[85px] bg-slate-50/40 rounded-2xl border border-transparent" />
+            <div key={`empty-${i}`} className="min-h-[60px] sm:min-h-[70px] bg-slate-50/40 rounded-2xl border border-transparent" />
           ))}
 
           {/* Actual Month Days */}
@@ -377,7 +378,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedDateCell(dateStr)}
-                className={`min-h-[75px] sm:min-h-[90px] p-1.5 rounded-2xl border text-left transition-all flex flex-col justify-between relative overflow-hidden cursor-pointer ${
+                className={`min-h-[60px] sm:min-h-[70px] p-1.5 rounded-2xl border text-left transition-all flex flex-col justify-between relative overflow-hidden cursor-pointer ${
                   isSelected
                     ? 'ring-2 ring-indigo-600 border-indigo-600 bg-indigo-50/70 shadow-md'
                     : isTripDay
@@ -388,7 +389,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 {/* Date Badge */}
                 <div className="flex items-center justify-between w-full">
                   <span
-                    className={`text-xs sm:text-sm font-black w-6 h-6 rounded-full flex items-center justify-center ${
+                    className={`text-lg sm:text-xl font-black w-8 h-8 rounded-full flex items-center justify-center ${
                       isToday
                         ? 'bg-indigo-600 text-white shadow-sm'
                         : isTripDay

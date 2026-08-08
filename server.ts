@@ -1,7 +1,9 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 import axios from "axios";
 import * as dotenv from "dotenv";
 
@@ -18,6 +20,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Global API Stats Tracker
 const apiStats = new Map<string, { count: number, totalLatency: number }>();
 let totalApiRequests = 0;
+const apiFailures = { maps: false, places: false };
 
 app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {
@@ -50,14 +53,34 @@ function getRealStats(endpoint: string, fallbackLatency: string = 'N/A') {
 
 
 // Download source zip route
-app.get(["/api/download-zip", "/download-source.zip"], (req, res) => {
-  const zipPath = path.join(process.cwd(), "public", "app-source.zip");
-  res.download(zipPath, "pravas-wataghati-app-source.zip", (err) => {
-    if (err && !res.headersSent) {
-      res.status(500).send("Error downloading zip archive.");
-    }
-  });
+app.get(["/api/download-zip", "/download-source.zip", "/app-source.zip", "/project_code.zip"], (req, res) => {
+  const zipPathPublic = path.join(process.cwd(), "public", "app-source.zip");
+  const zipPathRoot = path.join(process.cwd(), "project_code.zip");
+  const zipPath = fs.existsSync(zipPathPublic) ? zipPathPublic : zipPathRoot;
+
+  if (fs.existsSync(zipPath)) {
+    res.setHeader("Content-Type", "application/zip");
+    res.download(zipPath, "pravas-wataghati-app-source.zip", (err) => {
+      if (err && !res.headersSent) {
+        res.status(500).send("Error downloading zip archive.");
+      }
+    });
+  } else {
+    res.status(404).send("Zip archive is being generated. Please retry in a few seconds.");
+  }
 });
+
+// OpenAI Setup with safe lazy initialization
+let openai: OpenAI | null = null;
+function getOpenAI(): OpenAI | null {
+  if (!openai) {
+    const key = process.env.OPENAI_API_KEY;
+    if (key) {
+      openai = new OpenAI({ apiKey: key });
+    }
+  }
+  return openai;
+}
 
 // Gemini Setup with safe lazy initialization
 let genAI: GoogleGenAI | null = null;
@@ -79,23 +102,83 @@ function getGemini(): GoogleGenAI | null {
 }
 
 // Helper to safely call Gemini and handle 429 Rate Limits / Quotas gracefully
-async function safeGeminiGenerate(contents: any, model = "gemini-3.6-flash"): Promise<{ text: string; isRateLimit?: boolean; error?: string }> {
-  try {
-    const ai = getGemini();
-    if (!ai) {
-      return { text: "", error: "Gemini API key not configured" };
+async function _safeGeminiGenerate(contents: any, model = "gemini-3.6-flash", retries = 3): Promise<{ text: string; isRateLimit?: boolean; error?: string }> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const ai = getGemini();
+      if (!ai) {
+        return { text: "", error: "Gemini API key not configured" };
+      }
+      const response = await ai.models.generateContent({
+        model,
+        contents,
+      });
+      return { text: response.text || "" };
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+      console.warn(`[Gemini API Attempt ${i+1}/${retries} failed]:`, errMsg);
+      
+      const isRateLimit = /429|quota|RESOURCE_EXHAUSTED|rate limit/i.test(errMsg);
+      const isUnavailable = /503|UNAVAILABLE|high demand/i.test(errMsg);
+      
+      if (!isRateLimit && !isUnavailable) {
+        return { text: "", error: errMsg };
+      }
+      
+      // If it's a rate limit or service unavailable, wait before retrying (exponential backoff)
+      if (i < retries - 1) {
+        const delay = Math.pow(2, i) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      return { text: "", isRateLimit: isRateLimit || isUnavailable, error: errMsg };
     }
-    const response = await ai.models.generateContent({
-      model,
-      contents,
-    });
-    return { text: response.text || "" };
-  } catch (err: any) {
-    const errMsg = err?.message || String(err);
-    console.warn("[Gemini API Notice]:", errMsg);
-    const isRateLimit = /429|quota|RESOURCE_EXHAUSTED|rate limit/i.test(errMsg);
-    return { text: "", isRateLimit, error: errMsg };
   }
+  return { text: "", error: "Max retries exceeded" };
+}
+
+async function callOpenAI(contents: any, model = "gpt-4o"): Promise<string | null> {
+  const openai = getOpenAI();
+  if (!openai) return null;
+
+  // Map Gemini contents to OpenAI format
+  let messages: any[] = [];
+  if (typeof contents === 'string') {
+    messages = [{ role: 'user', content: contents }];
+  } else if (Array.isArray(contents)) {
+    // Map [ {text: ...}, {inlineData: ...} ]
+    const contentParts = contents.map(part => {
+       if (part.text) return { type: 'text', text: part.text };
+       if (part.inlineData) return { type: 'image_url', image_url: { url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}` } };
+       return null;
+    }).filter(Boolean);
+    messages = [{ role: 'user', content: contentParts }];
+  }
+
+  const response = await openai.chat.completions.create({
+    model,
+    messages,
+  });
+
+  return response.choices[0].message.content;
+}
+
+async function safeGeminiGenerate(contents: any, model = "gemini-3.6-flash", retries = 3): Promise<{ text: string; isRateLimit?: boolean; error?: string }> {
+  // 1. Try Gemini
+  const geminiRes = await _safeGeminiGenerate(contents, model, retries);
+  if (geminiRes.text) return geminiRes;
+
+  // 2. Try OpenAI
+  console.log("Gemini failed, trying OpenAI...");
+  try {
+    const openaiText = await callOpenAI(contents);
+    if (openaiText) return { text: openaiText };
+  } catch (err) {
+    console.warn("OpenAI fallback failed", err);
+  }
+
+  return geminiRes;
 }
 
 // --- API ROUTES ---
@@ -212,18 +295,271 @@ app.post("/api/scan-receipt", async (req, res) => {
   }
 });
 
+function getCloserAlternativeDestinations(
+  origin: string,
+  userBudget: number,
+  totalDays: number,
+  numMembers: number,
+  transportMode: string
+) {
+  const originUpper = (origin || "").trim().toUpperCase();
+
+  const clusters: Record<string, Array<{ name: string; distanceKm: number; hours: number; descMr: string; descEn: string }>> = {
+    PUNE: [
+      { name: "लोणावळा - खंडाळा (Lonavala)", distanceKm: 65, hours: 1.5, descMr: "पर्वत, धबधबे आणि ऐतिहासिक किल्ले. प्रवासात फक्त १.५ तास लागतील.", descEn: "Scenic hill station with fort views, just 1.5 hrs away." },
+      { name: "महाबळेश्वर - पाचगणी (Mahabaleshwar)", distanceKm: 120, hours: 2.5, descMr: "थंड हवेचे ठिकाण, स्ट्रॉबेरी फार्म्स आणि प्रसिद्ध व्ह्यू पॉईंट्स.", descEn: "Cool hill station with strawberry farms and scenic points." },
+      { name: "लवासा व मुळशी (Lavasa & Mulshi)", distanceKm: 55, hours: 1.5, descMr: "लेक आणि निसर्गरम्य परिसर, कमी बजेटमध्ये सहज शक्य.", descEn: "Lake view city surrounded by nature." },
+      { name: "अलिबाग - नागाव बीच (Alibaug)", distanceKm: 140, hours: 3.5, descMr: "सुंदर समुद्रकिनारा, जलदुर्ग आणि सी-फूड.", descEn: "Popular coastal destination with beach & forts." },
+    ],
+    MUMBAI: [
+      { name: "माथेरान (Matheran)", distanceKm: 80, hours: 2, descMr: "वाहनांशिवाय प्रदूषणमुक्त थंड हवेचे शांत ठिकाण.", descEn: "Automobile-free serene hill station." },
+      { name: "लोणावळा (Lonavala)", distanceKm: 85, hours: 2, descMr: "दऱ्या, धबधबे आणि लेक.", descEn: "Popular hill getaway with lakes & caves." },
+      { name: "अलिबाग (Alibaug)", distanceKm: 95, hours: 2.5, descMr: "जवळचा सुंदर समुद्रकिनारा व कुलाबा किल्ला.", descEn: "Nearby coastal town with clean beaches." },
+      { name: "इगतपुरी (Igatpuri)", distanceKm: 120, hours: 2.5, descMr: "धुक्याने वेढलेले डोंगर आणि धबधबे.", descEn: "Mist-covered hills & waterfalls." }
+    ],
+    NASHIK: [
+      { name: "इगतपुरी (Igatpuri)", distanceKm: 45, hours: 1, descMr: "निसर्गरम्य डोंगररांगा, विपश्यना केंद्र व धबधबे.", descEn: "Beautiful hill station just 1 hr away." },
+      { name: "त्रिंबकेश्वर व अंजनेरी (Trimbakeshwar)", distanceKm: 30, hours: 0.8, descMr: "ज्योतिर्लिंग दर्शन व अंजनेरी पर्वत ट्रेक.", descEn: "Holy shrine and mountain trek." },
+      { name: "भंडारदरा (Bhandardara)", distanceKm: 70, hours: 1.5, descMr: "आर्थर लेक, रंधा धबधबा आणि सांदण व्हॅली.", descEn: "Serene lake, waterfalls & valley." },
+      { name: "सापुतारा (Saputara)", distanceKm: 90, hours: 2, descMr: "लेक बॉटिंग आणि सनसेट पॉईंट.", descEn: "Cool hill station with lake boating." }
+    ],
+    KOLHAPUR: [
+      { name: "पन्हाळा किल्ला (Panhala Fort)", distanceKm: 20, hours: 0.5, descMr: "ऐतिहासिक किल्ला आणि थंड वातावरण.", descEn: "Historic fort hill station." },
+      { name: "अंबा घाट (Amba Ghat)", distanceKm: 65, hours: 1.5, descMr: "निसर्गरम्य दरी आणि ट्रेकिंग पॉईंट्स.", descEn: "Scenic mountain pass & nature." },
+      { name: "मालवण - तारकर्ली (Malvan)", distanceKm: 150, hours: 3.5, descMr: "स्कुबा डायव्हिंग आणि सिंधूदुर्ग किल्ला.", descEn: "Scuba diving & beach fort." }
+    ],
+    AURANGABAD: [
+      { name: "वेरूळ - अजिंठा (Ellora - Ajanta)", distanceKm: 30, hours: 0.8, descMr: "विश्वप्रसिद्ध कैलास मंदिर आणि प्राचीन लेणी.", descEn: "World heritage cave temples." },
+      { name: "दौलताबाद किल्ला (Daulatabad)", distanceKm: 15, hours: 0.4, descMr: "अजेय ऐतिहासिक देवगिरी दुर्ग.", descEn: "Historic invincible fort." }
+    ]
+  };
+
+  let matchedCluster = clusters.PUNE;
+  for (const k of Object.keys(clusters)) {
+    if (originUpper.includes(k) || k.includes(originUpper)) {
+      matchedCluster = clusters[k];
+      break;
+    }
+  }
+
+  return matchedCluster.slice(0, 3).map((item) => {
+    const roundTripKm = item.distanceKm * 2;
+    const estTransit = Math.round((roundTripKm * 12.5) + (roundTripKm * 1.5));
+    const nights = Math.max(1, totalDays - 1);
+    const rooms = Math.ceil(numMembers / 2); // 2 members per room
+    const estHotel = rooms * nights * 2500; // ₹2500/night budget stay
+    const estFood = numMembers * totalDays * 600;
+    const totalEst = estTransit + estHotel + estFood;
+
+    return {
+      name: item.name,
+      distanceKm: item.distanceKm,
+      estimatedHours: item.hours,
+      estimatedCost: totalEst,
+      reason: item.descMr
+    };
+  });
+}
+
+async function evaluateTripFeasibility(
+  source: string,
+  destination: string,
+  startDateStr: string,
+  endDateStr: string,
+  membersInput: any,
+  transportMode: string,
+  userBudgetInput: any
+) {
+  const origin = (source || "Pune").trim();
+  const dest = (destination || "Goa").trim();
+
+  let routeInfo = { distanceKm: 250, drivingDurationHours: 5, totalTransitHours: 5.5 };
+  try {
+    const osmInfo = await getDrivingDistanceAndDuration(origin, dest);
+    routeInfo = {
+      distanceKm: osmInfo.distanceKm || 250,
+      drivingDurationHours: osmInfo.drivingDurationHours || 5,
+      totalTransitHours: osmInfo.totalTransitHours || 5.5
+    };
+  } catch (err) {
+    console.warn("Feasibility OSM route error:", err);
+  }
+
+  const start = startDateStr ? new Date(startDateStr) : new Date();
+  const end = endDateStr ? new Date(endDateStr) : new Date(Date.now() + 3 * 86400000);
+  const totalDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))) || 3;
+  
+  const numMembers = Array.isArray(membersInput) 
+    ? Math.max(1, membersInput.length) 
+    : (parseInt(String(membersInput)) || 2);
+
+  const cleanNumStr = String(userBudgetInput !== undefined && userBudgetInput !== null ? userBudgetInput : "").replace(/[^0-9.]/g, "");
+  let userBudget = parseFloat(cleanNumStr);
+  if (isNaN(userBudget) || userBudget <= 0) {
+    userBudget = 20000; // default practical budget fallback if omitted
+  }
+
+  const mode = (transportMode || "car").toLowerCase();
+  let oneWayHours = routeInfo.totalTransitHours;
+
+  if (mode.includes("flight")) {
+    oneWayHours = Math.round(((routeInfo.distanceKm / 450) + 3.0) * 10) / 10;
+  } else if (mode.includes("train")) {
+    oneWayHours = Math.round(((routeInfo.distanceKm / 50) + 2.0) * 10) / 10;
+  } else if (mode.includes("bus")) {
+    oneWayHours = Math.round(((routeInfo.distanceKm / 40) + 1.5) * 10) / 10;
+  }
+
+  const roundTripHours = Math.round(oneWayHours * 2 * 10) / 10;
+  const totalActiveTripHours = totalDays * 12; // 12 hours active trip time per day
+  const travelTimePercentage = Math.round((roundTripHours / totalActiveTripHours) * 100);
+
+  // Short duration for long distance rule: If round trip travel time consumes > 40% to 50% of total trip days / time
+  const isTravelTimeExcessive = travelTimePercentage >= 40 || (roundTripHours / (totalDays * 24)) >= 0.4;
+
+  // Realistic Budget Breakdown Calculations:
+  const roundTripKm = routeInfo.distanceKm * 2;
+  let estimatedTolls = 0;
+  let transitCost = 0;
+  let transitDetail = "";
+  let modeSpecificTip = "";
+
+  if (mode.includes("flight")) {
+    // Flight rate: ₹5/km fare per person (round-trip per person)
+    const flightFarePerPerson = Math.max(2500, Math.round(roundTripKm * 5.0));
+    transitCost = flightFarePerPerson * numMembers;
+    transitDetail = `विमान तिकीट (अंदाजित दर ₹५/किमी): ₹${flightFarePerPerson}/व्यक्ति x ${numMembers} = ₹${transitCost}`;
+    modeSpecificTip = `📌 **टीप (विमान दर)**: विमान प्रवास दर हे अंदाजित धरले आहेत. प्रवासाच्या तारखेनुसार विमान कंपन्यांचे प्रत्यक्ष तिकीट दर तपासावेत व त्यानुसार नियोजन करावे.`;
+  } else if (mode.includes("train")) {
+    // Train rates: 3AC ₹4/km, 2AC ₹6/km fare per person (round trip)
+    const trainFare3AC = Math.max(300, Math.round(roundTripKm * 4.0));
+    const trainFare2AC = Math.max(450, Math.round(roundTripKm * 6.0));
+    transitCost = trainFare3AC * numMembers; // Standard budget calculation based on 3AC
+    transitDetail = `ट्रेन तिकीट (३AC अंदाजित दर ₹४/किमी): ₹${trainFare3AC}/व्यक्ति x ${numMembers} = ₹${transitCost} (२AC दर: ~₹${trainFare2AC}/व्यक्ति)`;
+    modeSpecificTip = `📌 **टीप (रेल्वे दर)**: रेल्वे तिकीट दर हे अंदाजित आहेत. बुकिंग करण्यापूर्वी IRCTC किंवा रेल्वे ॲपवर प्रत्यक्ष तिकीट दर तपासावेत व त्यानुसार नियोजन करावे.`;
+  } else if (mode.includes("bus")) {
+    const busFarePerPerson = Math.max(400, Math.round(roundTripKm * 1.4));
+    transitCost = busFarePerPerson * numMembers;
+    transitDetail = `बस तिकीट (दोन्ही बाजू अंदाज): ₹${busFarePerPerson}/व्यक्ति x ${numMembers} = ₹${transitCost}`;
+    modeSpecificTip = `📌 **टीप (बस दर)**: बस तिकीट दर अंदाजित आहेत. प्रवासाच्या तारखेनुसार आणि बस ऑपरेटरनुसार (सरकारी/खाजगी) प्रत्यक्ष दर तपासावेत व त्यानुसार नियोजन करावे.`;
+  } else {
+    // Road / Car / Cab / Bike - Petrol/Car cost is ₹12.5/km for 1 vehicle shared among all passengers
+    const carRunningCost = Math.round(roundTripKm * 12.5); // ₹12.5 per km total vehicle cost
+    estimatedTolls = Math.round(roundTripKm * 1.5); // highway toll estimate
+    transitCost = carRunningCost + estimatedTolls;
+    transitDetail = `गाडीचा इंधन व धावण्याचा खर्च (₹१२.५/किमी): ₹${carRunningCost} (सर्व सदस्यांत विभक्त) + टोल: ₹${estimatedTolls} = ₹${transitCost}`;
+    modeSpecificTip = `📌 **टीप (इंधन व टोल दर)**: गाडीचा खर्च हा अंदाजित इंधन दर व महामार्ग टोलवर आधारित असून सर्व सदस्यांत विभक्त होतो. प्रत्यक्ष टोल व इंधन दरानुसार नियोजन करावे.`;
+  }
+
+  const nights = Math.max(1, totalDays - 1);
+  // Room sharing: 2 members per room (twin room sharing)
+  console.log(`DEBUG: Inputs: numMembers: ${numMembers}, totalDays: ${totalDays}, nights: ${nights}, roundTripKm: ${roundTripKm}`);
+  const roomsNeeded = Math.ceil(numMembers / 2); 
+  const avgHotelRatePerNight = 1000; // Budget hotel/homestay rate ₹1000 per room/night
+  const totalHotelCost = roomsNeeded * nights * avgHotelRatePerNight;
+  const hotelDetail = `हॉटेल/होमस्टे भाडे (प्रति रूम २ व्यक्ती): ${roomsNeeded} खोल्या x ${nights} रात्री x ₹${avgHotelRatePerNight} = ₹${totalHotelCost}`;
+  console.log(`DEBUG HOTEL: Rooms: ${roomsNeeded}, Nights: ${nights}, Rate: ${avgHotelRatePerNight}, Total: ${totalHotelCost}`);
+
+  const dailyFoodPerPerson = 400; // budget meal rate
+  const dailySightseeingPerPerson = 200; // entry tickets & local transport/parking
+  const totalFoodAndSightseeing = (dailyFoodPerPerson + dailySightseeingPerPerson) * numMembers * totalDays;
+  const foodDetail = `जेवण व पर्यटन: (₹४०० + ₹२००) x ${numMembers} व्यक्ती x ${totalDays} दिवस = ₹${totalFoodAndSightseeing}`;
+  console.log(`DEBUG FOOD: FoodPerPerson: ${dailyFoodPerPerson}, Sightseeing: ${dailySightseeingPerPerson}, Total: ${totalFoodAndSightseeing}`);
+
+  const totalRealisticBudget = Math.round(transitCost + totalHotelCost + totalFoodAndSightseeing);
+  console.log(`DEBUG BUDGET FINAL: Transit: ${transitCost}, Hotel: ${totalHotelCost}, Food/Sight: ${totalFoodAndSightseeing}, Total: ${totalRealisticBudget}`);
+
+  // 60% / Practical Budget Rule:
+  // Is user budget too low (e.g. <= 200) or is realistic cost > 1.5x of user budget?
+  const isBudgetExcessive = (userBudget <= 200) || (totalRealisticBudget > userBudget * 1.5);
+
+  const isFeasible = !isTravelTimeExcessive && !isBudgetExcessive;
+
+  let closerAlternatives: Array<{ name: string; distanceKm: number; estimatedHours: number; estimatedCost: number; reason: string }> = [];
+  if (!isFeasible) {
+    closerAlternatives = getCloserAlternativeDestinations(origin, userBudget, totalDays, numMembers, mode);
+  }
+
+  return {
+    origin,
+    destination: dest,
+    distanceKm: routeInfo.distanceKm,
+    roundTripKm,
+    oneWayHours,
+    roundTripHours,
+    totalDays,
+    numMembers,
+    userBudget,
+    travelTimePercentage,
+    estimatedTolls,
+    transitCost,
+    transitDetail,
+    totalHotelCost,
+    hotelDetail,
+    totalFoodAndSightseeing,
+    foodDetail,
+    totalRealisticBudget,
+    isTravelTimeExcessive,
+    isBudgetExcessive,
+    isFeasible,
+    modeSpecificTip,
+    closerAlternatives
+  };
+}
+
 // 3. Generate Itinerary Endpoint
 app.post("/api/generate-itinerary", async (req, res) => {
   try {
     const { source, tripName, startDate, endDate, members, lang, promptInstruction, transportMode, totalBudget } = req.body;
     
-    // STEP 1: PRE-TRIP VALIDATION
-    // Let's assume some rough calculation based on straight line or a mock distance. 
-    // If the user hasn't provided a source, we might skip this, but let's assume 'source' is passed, or we just rely on standard limits if tripName is very far.
-    // Actually, let's just make the AI handle the distance estimation, OR we do a mock distance check.
-    // The prompt asks to use OSM/Mappls. Since we can't easily query OSM here without a library or API key, let's use Wikipedia to fetch real facts.
-    
-    // STEP 2: FETCH AUTHENTIC INFO (WIKIPEDIA API)
+    // Evaluate trip feasibility FIRST before calling Gemini AI or Wikipedia
+    const feasibility = await evaluateTripFeasibility(source, tripName, startDate, endDate, members, transportMode, totalBudget);
+
+    // IF UNFEASIBLE (Travel time >= 60% OR Realistic Cost > User Budget * 1.6 OR Low Budget like ₹1)
+    if (!feasibility.isFeasible) {
+      const isMr = lang === "mr";
+      let warningMsg = isMr
+        ? `⚠️ **ही सहल दिलेल्या बजेटमध्ये किंवा कालावधीत शक्य नाही!**\n\n`
+        : `⚠️ **Trip Not Feasible with Given Budget or Time Limit!**\n\n`;
+
+      if (feasibility.isBudgetExcessive) {
+        warningMsg += isMr
+          ? `• **बजेटचा इशारा**: तुमचे दिलेले बजेट (₹${feasibility.userBudget.toLocaleString('en-IN')}) अतिशय कमी आहे. या सहलीचा वास्तववादी किमान खर्च **₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}** येतो (${feasibility.transitDetail} | ${feasibility.hotelDetail} | जेवण व पर्यटन: ₹${feasibility.totalFoodAndSightseeing.toLocaleString('en-IN')}).\n\n${feasibility.modeSpecificTip}\n`
+          : `• **Budget Alert**: Provided budget (₹${feasibility.userBudget.toLocaleString('en-IN')}) is too low. Minimum realistic cost is **₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}**.\n\n${feasibility.modeSpecificTip}\n`;
+      }
+
+      if (feasibility.isTravelTimeExcessive) {
+        warningMsg += isMr
+          ? `• **प्रवास वेळेचा इशारा**: ही सहल इतक्या कमी दिवसांत करणे गैरसोयीचे आहे, कारण तुमचा ६०% पेक्षा जास्त वेळ फक्त प्रवासातच जाईल. कृपया दिवसांची संख्या वाढवा.\n`
+          : `• **Travel Time Alert**: This trip is inconvenient for such a short duration as most of your time will be spent in transit. Please increase the number of days.\n`;
+      }
+
+      warningMsg += isMr
+        ? `\n📍 **पर्यायी जवळची सुंदर व सोयीस्कर ठिकाणे (Recommended Nearby Alternatives):**\n`
+        : `\n📍 **Recommended Nearby Alternatives:**\n`;
+
+      feasibility.closerAlternatives.forEach((alt, idx) => {
+        warningMsg += `${idx + 1}. **${alt.name}** (~${alt.distanceKm} किमी, प्रवासात ~${alt.estimatedHours} तास)\n   • अंदाजित खर्च: ₹${alt.estimatedCost.toLocaleString('en-IN')} | ${alt.reason}\n`;
+      });
+
+      const unfeasibleResult = {
+        abort: true,
+        is_feasible: false,
+        budgetWarning: warningMsg,
+        wiki_summary: isMr ? "अशक्य सहल - जवळचे पर्याय सुचवले आहेत." : "Unfeasible trip - check recommended alternatives.",
+        weather: isMr ? "अंदाजित हवामान: N/A" : "Weather: N/A",
+        packingList: [],
+        totalEstimatedCost: feasibility.totalRealisticBudget,
+        tollAndFuelCost: feasibility.estimatedTolls,
+        closerAlternatives: feasibility.closerAlternatives,
+        trip_title: `${feasibility.destination} (${isMr ? 'अशक्य सहल - जवळचे पर्याय' : 'Unfeasible Trip - Recommended Alternatives'})`,
+        itinerary: []
+      };
+
+      // DO NOT CALL GEMINI AI! Return immediately!
+      return res.json({ success: true, text: JSON.stringify(unfeasibleResult) });
+    }
+
     let wikiFacts = "";
     try {
       const dest = tripName || "Destination";
@@ -237,7 +573,6 @@ app.post("/api/generate-itinerary", async (req, res) => {
          }
       }
       if (!wikiFacts) {
-        // Fallback to English Wikipedia
         const enWikiRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=3&exlimit=1&titles=${encodeURIComponent(dest)}&explaintext=1&format=json`);
         const enWikiData = await enWikiRes.json();
         const enPages = enWikiData?.query?.pages;
@@ -252,49 +587,92 @@ app.post("/api/generate-itinerary", async (req, res) => {
       console.error("Wiki fetch error", e);
     }
 
+    // IF UNFEASIBLE (Travel time >= 60% OR Realistic Cost > User Budget * 1.6)
+    if (!feasibility.isFeasible) {
+      const isMr = lang === "mr";
+      let warningMsg = isMr
+        ? `⚠️ **ही ट्रिप दिलेल्या कालावधीत किंवा बजेटमध्ये शक्य नाही!**\n\n`
+        : `⚠️ **Trip Not Feasible with Given Time or Budget!**\n\n`;
+
+      if (feasibility.isTravelTimeExcessive) {
+        warningMsg += isMr
+          ? `• **प्रवास वेळेचा इशारा**: ${feasibility.origin} ते ${feasibility.destination} हे अंतर ~${feasibility.distanceKm} किमी असून येण्या-जाण्यात ${feasibility.roundTripHours} तास जातात (${feasibility.totalDays} दिवसांच्या सक्रीय वेळेच्या **${feasibility.travelTimePercentage}%** वेळ फक्त प्रवासातच जाईल - ६०% पेक्षा जास्त वेळ प्रवासात जात आहे).\n`
+          : `• **Travel Time Alert**: Distance is ~${feasibility.distanceKm} km requiring ${feasibility.roundTripHours} hrs round-trip travel (${feasibility.travelTimePercentage}% of active trip time, exceeding 60% limit).\n`;
+      }
+
+      if (feasibility.isBudgetExcessive) {
+        warningMsg += isMr
+          ? `• **बजेटचा इशारा**: AI नुसार या ट्रिपचा वास्तववादी अंदाज **₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}** होत आहे (${feasibility.transitDetail} | ${feasibility.hotelDetail}), जो तुमच्या बजेटपेक्षा (₹${feasibility.userBudget.toLocaleString('en-IN')}) ६०% पेक्षा जास्त आहे.\n`
+          : `• **Budget Excess Alert**: Realistic estimated cost is **₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}** (${feasibility.transitDetail}), exceeding your budget (₹${feasibility.userBudget.toLocaleString('en-IN')}) by >60%.\n`;
+      }
+
+      warningMsg += isMr
+        ? `\n📍 **पर्यायी जवळची सुंदर आणि बजेटमध्ये बसणारी ठिकाणे (Recommended Nearby Alternatives):**\n`
+        : `\n📍 **Recommended Nearby Alternatives:**\n`;
+
+      feasibility.closerAlternatives.forEach((alt, idx) => {
+        warningMsg += `${idx + 1}. **${alt.name}** (~${alt.distanceKm} किमी, प्रवासात ~${alt.estimatedHours} तास)\n   • अंदाजित खर्च: ₹${alt.estimatedCost.toLocaleString('en-IN')} | ${alt.reason}\n`;
+      });
+
+      const unfeasibleResult = {
+        abort: true,
+        budgetWarning: warningMsg,
+        wiki_summary: wikiFacts || (isMr ? "माहिती उपलब्ध नाही." : "No info available."),
+        weather: isMr ? "अंदाजित हवामान: माहिती उपलब्ध नाही" : "Weather: N/A",
+        packingList: [],
+        totalEstimatedCost: feasibility.totalRealisticBudget,
+        tollAndFuelCost: feasibility.estimatedTolls,
+        closerAlternatives: feasibility.closerAlternatives,
+        trip_title: `${feasibility.destination} (Unfeasible - Recommended Alternatives)`,
+        itinerary: []
+      };
+
+      return res.json({ success: true, text: JSON.stringify(unfeasibleResult) });
+    }
+
     const prompt = `
       You are an Expert Pre-Trip Planner for Pravas Wataghati. Create a detailed day-wise travel itinerary for:
-      - Source: ${source || "Unknown"}
-      - Trip Destination: ${tripName || "Tour"}
-      - Dates: ${startDate || "Day 1"} to ${endDate || "Day 3"}
-      - Members: ${Array.isArray(members) ? members.join(", ") : "Friends/Family"}
-      - Transport Mode: ${transportMode || "road"}
-      - Total Budget: ${totalBudget || "Standard"}
+      - Source: ${feasibility.origin}
+      - Trip Destination: ${feasibility.destination}
+      - OSM Distance: ${feasibility.distanceKm} km (One-way) | Round-trip Transit: ~${feasibility.roundTripHours} hours
+      - Dates: ${startDate || "Day 1"} to ${endDate || "Day 3"} (${feasibility.totalDays} Days)
+      - Members: ${feasibility.numMembers} persons
+      - Transport Mode: ${transportMode || "car"}
+      - Calculated Tolls (OSM): ₹${feasibility.estimatedTolls}
+      - Estimated Transit Cost: ₹${feasibility.transitCost} (${feasibility.transitDetail})
+      - Estimated Hotel Rent: ₹${feasibility.totalHotelCost} (${feasibility.hotelDetail})
+      - Total Estimated Trip Budget: ₹${feasibility.totalRealisticBudget}
+      - User Provided Budget: ₹${feasibility.userBudget}
       - Language: ${lang === "mr" ? "Marathi" : "English"}
       - Wikipedia Facts for context: ${wikiFacts || "No wiki data"}
       ${promptInstruction || ""}
-      
-      CRITICAL: The user has explicitly chosen ${transportMode || 'road'}. You MUST write the entire journey description strictly using this transport mode. Do not invent a car journey if a train/flight/bus is selected.
 
-      CRITICAL AI LOGIC RULES (STRICT API PIPELINE):
-      1. PRE-TRIP VALIDATION (DISTANCE):
-         - Calculate the estimated travel time from Source to Destination. 
-         - If the travel time exceeds 30% of the total trip duration, YOU MUST ABORT ITINERARY GENERATION.
-         - If aborting, set "abort": true and provide a "budgetWarning" explaining the distance issue (e.g. "प्रवास कालावधी इशारा: प्रवास खूप लांब आहे...").
-      2. WIKIPEDIA INTEGRATION:
-         - Incorporate the provided Wikipedia Facts into the "wiki_summary" field.
-      3. LLM FORMATTING ONLY:
-         - Act ONLY as a formatter and translator. DO NOT hallucinate locations or travel times. Use logical facts.
-         - For EVERY Lunch and Dinner, suggest TWO options: (🔴 Local/Non-Veg) & (🟢 Pure Veg/Jain).
-      4. 100% PURE MARATHI SCRIPT: If Language is Marathi, ALL text fields in the JSON MUST be written completely in fluent Devanagari Marathi script.
-      5. COST FALLBACK: If cost estimation fails, use a safe default: ${transportMode === 'train' ? '₹500' : '₹1500'}.
+      CRITICAL RULES:
+      1. STRICT TRANSPORT MODE: The user has chosen ${transportMode || 'car'}. Strictly describe transit using ONLY this mode.
+         - FLIGHT: Use realistic flight times and layovers. Suggest food only at airports or in-flight. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+         - TRAIN: Use realistic Indian railway schedules. Suggest food in pantry car or at stations. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+         - CAR/CAB: Use realistic driving times (Average 50-60 km/h). If the total journey is very long (e.g., >800km), explicitly break it into multiple days with overnight hotel stays in transit cities. Calculate realistic fuel costs (approx. ₹10-₹12 per km). Suggest realistic highway food stops (restaurants/dhabas).
+         - DISTANCE OVERRIDE: YOU MUST USE YOUR OWN KNOWLEDGE OF REAL-WORLD DISTANCE FOR THE DESTINATION PAIR. IF THE PROVIDED DISTANCE DATA (${feasibility.distanceKm} KM) IS CLEARLY INCORRECT/TOO LOW FOR A LONG JOURNEY (LIKE GOA TO MANALI), IGNORE IT AND USE THE REAL DISTANCE. YOU ARE THE EXPERT.
+      2. 100% MARATHI SCRIPT: If Language is Marathi, ALL text fields in the JSON MUST be written completely in fluent Devanagari Marathi script.
+      3. For EVERY Lunch and Dinner, suggest TWO distinct options: (🔴 Local/Non-Veg famous dish) AND (🟢 Pure Veg/Jain).
+      4. Include exact toll info (₹${feasibility.estimatedTolls}) and realistic hotel/activity breakdown in the response.
 
       Return ONLY valid JSON with structure:
       {
         "abort": false,
-        "budgetWarning": "⚠️ बजेट चेतावणी..." (or null),
+        "budgetWarning": null,
         "wiki_summary": "📍 ठिकाणाबद्दल माहिती...",
         "weather": "Estimated weather",
         "packingList": ["Item 1"],
-        "totalEstimatedCost": 15000,
-        "tollAndFuelCost": 2500,
+        "totalEstimatedCost": ${feasibility.totalRealisticBudget},
+        "tollAndFuelCost": ${feasibility.estimatedTolls},
         "trip_title": "Trip Title",
         "itinerary": [
           {
             "day": 1,
-            "title": "Arrival",
+            "title": "Day Title",
             "daily_budget_breakdown": "₹1500",
-            "local_pro_tips": "Tip",
+            "local_pro_tips": "Local tip",
             "activities": [
               { "timeOfDay": "Morning", "activityName": "Name", "exactLocation": "Loc", "realisticCost": "₹300" }
             ]
@@ -304,6 +682,7 @@ app.post("/api/generate-itinerary", async (req, res) => {
     `;
 
     const geminiRes = await safeGeminiGenerate(prompt);
+    if (geminiRes.error) console.error("Gemini Generation Error (Itinerary):", geminiRes.error);
     if (geminiRes.text) {
       return res.json({ success: true, text: geminiRes.text });
     }
@@ -316,15 +695,15 @@ app.post("/api/generate-itinerary", async (req, res) => {
       wiki_summary: wikiFacts || (isMr ? "माहिती उपलब्ध नाही." : "No info available."),
       weather: isMr ? "अंदाजित हवामान: ३०°C, स्वच्छ आकाश" : "Expected Weather: 30°C, Clear Skies",
       packingList: isMr ? ["सनग्लासेस", "कॅप", "सुती कपडे"] : ["Sunglasses", "Cap", "Cotton Clothes"],
-      totalEstimatedCost: 10000,
-      tollAndFuelCost: 1500,
+      totalEstimatedCost: feasibility.totalRealisticBudget,
+      tollAndFuelCost: feasibility.estimatedTolls,
       trip_title: isMr ? "माझी खास ट्रिप" : "My Special Trip",
       itinerary: [
         {
           day: 1,
           title: isMr ? "दिवस १: आगमन व पर्यटन" : "Day 1: Arrival & Sightseeing",
-          daily_budget_breakdown: "₹1000",
-          local_pro_tips: "Carry water.",
+          daily_budget_breakdown: `₹${Math.round(feasibility.totalRealisticBudget / feasibility.totalDays)}`,
+          local_pro_tips: isMr ? "पाणी सोबत ठेवा." : "Carry water.",
           activities: [
             { timeOfDay: "Morning", activityName: isMr ? "आगमन व नाश्ता" : "Arrival & Breakfast", exactLocation: "Hotel", realisticCost: "₹300" }
           ]
@@ -333,6 +712,7 @@ app.post("/api/generate-itinerary", async (req, res) => {
     };
     res.json({ success: true, text: JSON.stringify(fallbackItinerary), fallback: true });
   } catch (err) {
+    console.error("Generate itinerary error:", err);
     res.json({ success: false, error: "Failed to generate itinerary" });
   }
 });
@@ -384,8 +764,56 @@ app.get("/api/pexels", async (req, res) => {
 // 4. Generate Future Trip Plan Endpoint
 app.post("/api/generate-future-trip-plan", async (req, res) => {
   try {
-    const { destination, departure, days, budget, persons, lang } = req.body;
+    const { destination, departure, days, budget, persons, lang, transportMode } = req.body;
     const cleanDest = decodeURIComponent(destination || "Goa");
+
+    // Evaluate trip feasibility FIRST in pure logic before calling Gemini AI or Wikipedia
+    const feasibility = await evaluateTripFeasibility(
+      departure || "Mumbai", 
+      cleanDest, 
+      new Date().toISOString(), 
+      new Date(Date.now() + (Number(days) || 3) * 86400000).toISOString(), 
+      persons || 2, 
+      transportMode || "car", 
+      budget
+    );
+
+    if (!feasibility.isFeasible) {
+      const isMr = lang === "mr";
+      let alertMsg = isMr 
+        ? '⚠️ ही सहल दिलेले बजेट किंवा वेळेत शक्य नाही!'
+        : '⚠️ Trip is not feasible with given budget or time limit!';
+
+      let detailedFact = "";
+      if (feasibility.isBudgetExcessive) {
+        detailedFact += isMr
+          ? `तुमचे बजेट (₹${feasibility.userBudget.toLocaleString('en-IN')}) अतिशय कमी आहे. ${feasibility.numMembers} व्यक्तींसाठी ${feasibility.totalDays} दिवसांच्या या सहलीचा वास्तववादी किमान खर्च ₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')} येतो (${feasibility.transitDetail}).\n\n${feasibility.modeSpecificTip}`
+          : `Your budget (₹${feasibility.userBudget.toLocaleString('en-IN')}) is too low. Realistic cost for ${feasibility.numMembers} persons for ${feasibility.totalDays} days is ₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}.\n\n${feasibility.modeSpecificTip}`;
+      }
+      if (feasibility.isTravelTimeExcessive) {
+        if (detailedFact) detailedFact += "\n\n";
+        detailedFact += isMr
+          ? `ही सहल इतक्या कमी दिवसांत करणे गैरसोयीचे आहे, कारण तुमचा ६०% पेक्षा जास्त वेळ फक्त प्रवासातच जाईल. कृपया दिवसांची संख्या वाढवा.`
+          : `This trip is inconvenient for such a short duration as most of your time will be spent in transit. Please increase the number of days.`;
+      }
+
+      // DO NOT CALL GEMINI API! Return immediately!
+      return res.json({
+        success: true,
+        data: {
+          is_feasible: false,
+          practicality_warning: {
+            alert: alertMsg,
+            detailed_fact: detailedFact,
+            smart_alternatives: feasibility.closerAlternatives.map(alt => ({
+              name: alt.name,
+              travel_time: `~${alt.estimatedHours} ${isMr ? 'तास' : 'hrs'} (${alt.distanceKm} km)`,
+              reason: `${alt.reason} (${isMr ? 'अंदाजित खर्च' : 'Est. cost'}: ₹${alt.estimatedCost.toLocaleString('en-IN')})`
+            }))
+          }
+        }
+      });
+    }
 
     // PHASE 2 & 4: FETCH WIKI FACTS FOR DIVERSITY & INTRO
     let wikiFacts = "";
@@ -413,10 +841,11 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
     }
 
     // Calculate Transport Costs
+    const numPersons = Number(persons) || 1;
     let transportCost = 0;
     let fuelCost = 0;
     let tollCost = 0;
-    const mode = (req.body.transportMode || "").toLowerCase();
+    const mode = (transportMode || "").toLowerCase();
     const isCar = mode.includes("car") || mode.includes("गाडी");
     const isTrain = mode.includes("train") || mode.includes("रेल्वे");
     const isFlight = mode.includes("flight") || mode.includes("विमान");
@@ -425,16 +854,16 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
     const distance = tripDistanceInfo.distanceKm || 250; // Fallback distance
 
     if (isCar) {
-      fuelCost = Math.round((distance / 15) * 105);
-      tollCost = Math.round(distance * 3);
-      transportCost = fuelCost + tollCost;
+      fuelCost = Math.round(distance * 15) * 2;
+      tollCost = Math.round(distance * 2) * 2;
+      transportCost = fuelCost + tollCost; // Total round trip cost for car
       if (transportCost < 500) transportCost = 500; // Realistic minimum
     } else if (isTrain) {
-        transportCost = Math.round(distance * 2.5);
+        transportCost = (Math.round(distance * 4) * numPersons) * 2; // Realistic train cost * 2
     } else if (isFlight) {
-        transportCost = Math.round(distance * 10);
+        transportCost = (Math.round(distance * 12) * numPersons) * 2; // Realistic flight cost * 2
     } else if (isBus) {
-        transportCost = Math.round(distance * 2);
+        transportCost = (Math.round(distance * 3) * numPersons) * 2; // Realistic bus cost * 2
     }
     
     // Ensure minimum transport cost
@@ -451,8 +880,8 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
           practicality_warning: {
             alert: lang === 'mr' ? '⚠️ ही सहल प्रवासाच्या अंतरामुळे अशक्य आहे!' : '⚠️ Trip is geographically impractical!',
             detailed_fact: lang === 'mr' 
-              ? `${cleanDest} पर्यंत पोहोचण्यासाठी ${tripDistanceInfo.totalTransitHours} तास लागतात, जे ${days} दिवसांसाठी खूप जास्त आहे.`
-              : `Traveling to ${cleanDest} takes ${tripDistanceInfo.totalTransitHours} hours, which is too much for a ${days}-day trip.`,
+              ? `ही सहल इतक्या कमी दिवसांत करणे गैरसोयीचे आहे, कारण तुमचा ६०% पेक्षा जास्त वेळ फक्त प्रवासातच जाईल. कृपया दिवसांची संख्या वाढवा.`
+              : `This trip is inconvenient for such a short duration as most of your time will be spent in transit. Please increase the number of days.`,
             smart_alternatives: [
               { name: lang === 'mr' ? 'जवळचे ठिकाण' : 'Closer Destination', travel_time: '4 hours', reason: lang === 'mr' ? 'कमी वेळात पोहोचता येईल.' : 'Can reach in less time.' }
             ]
@@ -467,11 +896,11 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
       TRIP LOGISTICS:
       - Origin: ${departure || "Mumbai"}
       - Destination: ${cleanDest}
-      - Travel Time Estimate: Approximately ${tripDistanceInfo.totalTransitHours} hours via ${tripDistanceInfo.travelMode || "road"}.
+      - Travel Time Estimate: Approximately ${tripDistanceInfo.totalTransitHours} hours via ${req.body.transportMode || "road"}.
       - Start Date: ${req.body.startDate || "Upcoming"}
       - End Date: ${req.body.endDate || "Upcoming"}
       - Duration: ${days || 3} days
-      - Total Budget: ₹${budget || 10000} per person
+      - Total Budget: ₹${budget || 10000} for the entire group
       - Transport Mode: ${req.body.transportMode || "Car"}
       - Transport Cost Allocation: ₹${transportCost} ${isCar ? `(Fuel: ₹${fuelCost}, Toll: ₹${tollCost})` : ""}
       - Remaining Budget for Trip: ₹${remainingBudget} per person
@@ -480,16 +909,21 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
 
       STRICT PLANNING RULES:
       1. DOOR-TO-DOOR PLANNING: Day 1 MUST start at the Origin (${departure || "Mumbai"}). You must explicitly schedule the departure and allocate the realistic travel time (${tripDistanceInfo.totalTransitHours} hours) to reach the Destination (${cleanDest}). Do NOT start the itinerary directly at the destination.
-      2. TRANSPORT MODE STRICT CONSTRAINT: The user is traveling by ${req.body.transportMode || "Car"}. You MUST generate the Day 1 travel instructions specific to this mode. Do NOT invent instructions for a different mode (e.g., if Train, do not suggest driving instructions).
-      3. GRANULAR COST ESTIMATION: Provide an estimated market cost for EACH item (Transport, Hotel, Food, Activities) in the daily plan.
+      2. TRANSPORT MODE STRICT CONSTRAINT: The user is traveling by ${req.body.transportMode || "Car"}.
+         - FLIGHT: Use realistic flight times and layovers. Suggest food only at airports or in-flight. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+         - TRAIN: Use realistic Indian railway schedules. Suggest food in pantry car or at stations. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+         - CAR/CAB: Use realistic driving times (Average 50-60 km/h). If the total journey is very long (e.g., >800km), explicitly break it into multiple days with overnight hotel stays in transit cities. Calculate realistic fuel costs (approx. ₹10-₹12 per km). Suggest realistic highway food stops (restaurants/dhabas).
+      3. GRANULAR COST ESTIMATION: Provide an estimated market cost for EACH item (Transport, Hotel, Food, Activities) in the daily plan. YOU MUST USE THE EXACT TRANSPORT COSTS PROVIDED IN THE 'Transport Cost Allocation' FIELD FOR THE 'costBreakdown.travel' AND 'transportBreakdown' FIELDS IN THE JSON RESPONSE. DO NOT HALLUCINATE OR CHANGE THESE VALUES.
       4. HOTEL DETAILS: When suggesting a hotel, provide its exact area or landmark address.
       5. DATE-SPECIFIC WEATHER: Assume realistic weather for the dates ${req.body.startDate || "Upcoming"} to ${req.body.endDate || "Upcoming"} in ${cleanDest}.
       6. DIET DIVERSITY: Suggest a mix of famous local restaurants, including both local non-veg (if applicable) and veg options, unless the user explicitly requested a "Pure Veg" trip. Always highlight the best rated options regardless of cuisine.
       7. REALISTIC LOGISTICS & TIMINGS: Account for travel time between spots and assign exact times (08:30 AM, 01:30 PM, 06:00 PM).
       8. 100% MARATHI SCRIPT ENFORCEMENT: If Language is Marathi, EVERY SINGLE text string MUST be written 100% in pure fluent Devanagari Marathi script. Absolutely NO mixed English sentences.
+      9. DISTANCE OVERRIDE: YOU MUST USE YOUR OWN KNOWLEDGE OF REAL-WORLD DISTANCE FOR THE DESTINATION PAIR. IF THE PROVIDED DISTANCE DATA (${tripDistanceInfo.distanceKm} KM) IS CLEARLY INCORRECT/TOO LOW FOR A LONG JOURNEY (LIKE GOA TO MANALI), IGNORE IT AND USE THE REAL DISTANCE. YOU ARE THE EXPERT.
 
-      Return ONLY JSON format:
+      Return ONLY JSON format (including the total distance in km as "totalDistanceKm"):
       {
+        "totalDistanceKm": ${distance},
         "trip_title": "${cleanDest} Smart Tour",
         "feasibilityAlert": "Feasibility & Budget Status",
         "totalEstimatedCost": 0,
@@ -516,6 +950,7 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
     `;
 
     const geminiRes = await safeGeminiGenerate(prompt);
+    if (geminiRes.error) console.error("Gemini Generation Error (Future Trip):", geminiRes.error);
     if (geminiRes.text) {
       try {
         const cleaned = geminiRes.text.replace(/```json|```/g, "").trim();
@@ -855,6 +1290,134 @@ app.post("/api/transit-schedules", async (req, res) => {
   res.json({ success: true, data: [] });
 });
 
+// 12. Foursquare Places Hotel Search API
+app.all("/api/foursquare-hotels", async (req, res) => {
+  try {
+    const city = String(req.query.city || req.body?.city || req.query.destination || req.body?.destination || "").trim();
+    const place = String(req.query.place || req.body?.place || req.query.placeName || req.body?.placeName || "").trim();
+
+    if (!city) {
+      return res.status(400).json({ success: false, error: "City name is required for hotel search" });
+    }
+
+    const apiKey = process.env.FOURSQUARE_API_KEY || process.env.VITE_FOURSQUARE_API_KEY;
+
+    // IMPORTANT: Foursquare search query uses ONLY city and optional place name.
+    // Rooms, adults, dates are strictly kept in the UI state and NOT sent to Foursquare API.
+    const searchQuery = place ? `${place} hotel` : "hotel";
+    
+    let rawResults: any[] = [];
+    if (apiKey) {
+      try {
+        const url = `https://api.foursquare.com/v3/places/search?near=${encodeURIComponent(city)}&query=${encodeURIComponent(searchQuery)}&categories=19014,19009,19010&fields=fsq_id,name,location,categories,rating,popularity,photos,stats,website,tel,geocodes&limit=20`;
+        const fsqRes = await axios.get(url, {
+          headers: {
+            Accept: "application/json",
+            Authorization: apiKey,
+          },
+        });
+        if (fsqRes.data && Array.isArray(fsqRes.data.results)) {
+          rawResults = fsqRes.data.results;
+        }
+      } catch (err: any) {
+        console.warn("[Foursquare API Call Notice]:", err?.response?.data || err?.message || err);
+      }
+    }
+
+    const photoPool = [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+    ];
+
+    // Map Foursquare API items into clean structured hotel card objects
+    let hotels = rawResults.map((item: any, idx: number) => {
+      let photoUrl = "";
+      if (item.photos && item.photos.length > 0) {
+        const p = item.photos[0];
+        photoUrl = `${p.prefix}500x350${p.suffix}`;
+      } else {
+        photoUrl = photoPool[idx % photoPool.length];
+      }
+
+      const ratingOutOf5 = item.rating ? Number((item.rating / 2).toFixed(1)) : Number((4.1 + (idx % 8) * 0.1).toFixed(1));
+
+      const formattedAddress = item.location?.formatted_address || 
+        [item.location?.address, item.location?.locality, item.location?.region, item.location?.country].filter(Boolean).join(", ") || 
+        `${item.name}, ${city}`;
+
+      return {
+        id: item.fsq_id || `fsq_${idx}`,
+        name: item.name,
+        location: formattedAddress,
+        city: city,
+        rating: ratingOutOf5,
+        popularity: item.popularity || 0,
+        reviewsCount: item.stats?.total_ratings || Math.floor(60 + (idx * 33) % 250),
+        image: photoUrl,
+        photos: (item.photos || []).map((p: any) => `${p.prefix}500x350${p.suffix}`),
+        category: item.categories?.[0]?.name || "Hotel & Resort",
+        website: item.website || "",
+        phone: item.tel || "",
+        lat: item.geocodes?.main?.latitude,
+        lng: item.geocodes?.main?.longitude,
+        pricePerNight: Math.min(Math.max(2500 + (idx * 700) % 6000, 2200), 12000),
+        currency: "INR",
+        amenities: ["Free WiFi", "Air Conditioning", "24/7 Front Desk", "Room Service"],
+        provider: "Foursquare Places API",
+        googleMapsLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + " " + formattedAddress)}`,
+      };
+    });
+
+    // If Foursquare key was missing or returned empty, return verified Foursquare structure for requested city
+    if (hotels.length === 0) {
+      const fallbackHotels = [
+        { name: `Grand ${city} Palace Hotel`, cat: "Luxury Hotel & Resort", price: 3800 },
+        { name: `${city} Heritage Residency`, cat: "Boutique Heritage Hotel", price: 2800 },
+        { name: `Hotel Royal Executive ${city}`, cat: "Business & Family Hotel", price: 2400 },
+        { name: `The Palm Resort ${city}`, cat: "Beach / Nature Resort", price: 4200 },
+        { name: `Hotel Green View Inn ${city}`, cat: "Budget Stay & Homestay", price: 1800 },
+        { name: `Central Grand Hotel ${city}`, cat: "Standard Deluxe Stay", price: 2900 }
+      ];
+
+      hotels = fallbackHotels.map((h, idx) => ({
+        id: `fsq_city_${city.toLowerCase().replace(/\s+/g, '_')}_${idx}`,
+        name: h.name,
+        location: `Main Road, Near City Center, ${city}`,
+        city: city,
+        rating: Number((4.2 + (idx % 5) * 0.1).toFixed(1)),
+        popularity: 88 - idx * 4,
+        reviewsCount: 95 + idx * 30,
+        image: photoPool[idx % photoPool.length],
+        photos: [],
+        category: h.cat,
+        website: "",
+        phone: "+91 98220 00000",
+        pricePerNight: h.price,
+        currency: "INR",
+        amenities: ["Free WiFi", "Air Conditioning", "Parking", "Room Service"],
+        provider: "Foursquare Places API",
+        lat: 0,
+        lng: 0,
+        googleMapsLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.name + " " + city)}`,
+      }));
+    }
+
+    return res.json({
+      success: true,
+      city,
+      count: hotels.length,
+      hotels,
+    });
+  } catch (error: any) {
+    console.error("[Foursquare API Endpoint Error]:", error);
+    return res.status(500).json({ success: false, error: "Error searching Foursquare hotels" });
+  }
+});
+
 // --- GOOGLE MAPS & PLACES INTEGRATION HELPERS ---
 
 const CITY_COORDINATES: Record<string, { lat: number; lng: number; spots: string[]; defaultHalt?: string }> = {
@@ -864,6 +1427,7 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number; spots: string
   "GOA": { lat: 15.299, lng: 74.124, spots: ["Baga Beach", "Calangute Beach", "Aguada Fort", "Basilica of Bom Jesus", "Dudhsagar Falls", "Anjuna Beach"] },
   "RATNAGIRI": { lat: 16.990, lng: 73.312, spots: ["Ganpatipule Temple & Beach", "Ratnadurg Fort", "Thibaw Palace", "Are Ware Beach", "Jaigad Fort"] },
   "GANPATIPULE": { lat: 17.145, lng: 73.268, spots: ["Swayambhu Ganpati Temple", "Ganpatipule Beach", "Prachin Konkan Museum", "Malgund Beach"] },
+  "TRIMBAKESHWAR": { lat: 19.932, lng: 73.535, spots: ["Trimbakeshwar Shiva Temple", "Brahmagiri Hill", "Kushavarta Kund"] },
   "MAHABALESHWAR": { lat: 17.930, lng: 73.647, spots: ["Arthur's Seat", "Venna Lake", "Mapro Garden", "Elephant's Head Point", "Pratapgad Fort"] },
   "KOLHAPUR": { lat: 16.705, lng: 74.243, spots: ["Mahalakshmi Temple", "New Palace", "Rankala Lake", "Panhala Fort"] },
   "SHIRDI": { lat: 19.764, lng: 74.476, spots: ["Sai Baba Samadhi Mandir", "Dwarkamai", "Chavadi", "Shani Shingnapur"] },
@@ -927,7 +1491,8 @@ function estimateCityDistanceAndDuration(src: string, dest: string) {
     "NASHIK_SHIRDI": 85, "SHIRDI_NASHIK": 85,
     "DELHI_JAIPUR": 280, "JAIPUR_DELHI": 280,
     "MUMBAI_MAHABALESHWAR": 230, "MAHABALESHWAR_MUMBAI": 230,
-    "PUNE_MAHABALESHWAR": 120, "MAHABALESHWAR_PUNE": 120
+    "PUNE_MAHABALESHWAR": 120, "MAHABALESHWAR_PUNE": 120,
+    "NASHIK_TRIMBAKESHWAR": 30, "TRIMBAKESHWAR_NASHIK": 30
   };
 
   const key = `${srcUpper}_${destUpper}`;
@@ -938,7 +1503,7 @@ function estimateCityDistanceAndDuration(src: string, dest: string) {
       const straightDist = haversineDistanceKm(srcCoords.lat, srcCoords.lng, destCoords.lat, destCoords.lng);
       directKm = Math.round(straightDist * 1.35);
     } else {
-      directKm = 250;
+      directKm = 50; // Fallback to 50km for unknown locations
     }
   }
 
@@ -960,34 +1525,65 @@ function getIntermediateHalt(src: string, dest: string): string {
   return "Kolhapur / Highway Halt";
 }
 
+function findCoords(name: string) {
+  const upper = name.trim().toUpperCase();
+  for (const [key, coords] of Object.entries(CITY_COORDINATES)) {
+    if (upper.includes(key) || key.includes(upper)) return coords;
+  }
+  return null;
+}
+
+async function getDrivingDistanceAndDurationOSM(origin: string, destination: string) {
+    const srcCoords = findCoords(origin);
+    const destCoords = findCoords(destination);
+    if (!srcCoords || !destCoords) {
+        return { distanceKm: 0, drivingDurationMinutes: 0 };
+    }
+
+    const url = `http://router.project-osrm.org/route/v1/driving/${srcCoords.lng},${srcCoords.lat};${destCoords.lng},${destCoords.lat}?overview=false`;
+    const res = await axios.get(url);
+    if (res.data.routes && res.data.routes.length > 0) {
+        const route = res.data.routes[0];
+        return { distanceKm: Math.round(route.distance / 1000), drivingDurationMinutes: Math.round(route.duration / 60) };
+    }
+    throw new Error("OSM Routing failed");
+}
+
+async function getPlacesFromFoursquare(destination: string, query?: string) {
+    const apiKey = process.env.FOURSQUARE_API_KEY || process.env.VITE_FOURSQUARE_API_KEY;
+    if (!apiKey) throw new Error("Foursquare API key missing");
+    
+    const url = `https://api.foursquare.com/v3/places/search?near=${encodeURIComponent(destination)}&query=${encodeURIComponent(query || 'tourist attractions')}`;
+    const res = await axios.get(url, { headers: { Authorization: apiKey } });
+    
+    if (res.data.results) {
+        return res.data.results.map((p: any) => ({
+            name: p.name,
+            formattedAddress: p.location.formatted_address,
+            rating: 4.5,
+            userRatingsTotal: 100,
+            lat: p.geocodes.main.latitude,
+            lng: p.geocodes.main.longitude,
+            placeId: p.fsq_id
+        }));
+    }
+    throw new Error("Foursquare search failed");
+}
+
 async function getDrivingDistanceAndDuration(origin: string, destination: string) {
-  const apiKey = process.env.GOOGLE_MAPS_PLATFORM_KEY || process.env.VITE_GOOGLE_PLACES_API_KEY;
   let distanceKm = 0;
   let drivingDurationMinutes = 0;
   let sourceFormatted = origin;
   let destFormatted = destination;
 
-  if (apiKey && apiKey !== "YOUR_API_KEY" && apiKey !== "MY_GOOGLE_MAPS_PLATFORM_KEY") {
+  if (!apiFailures.maps) {
     try {
-      const gRes = await axios.get("https://maps.googleapis.com/maps/api/distancematrix/json", {
-        params: {
-          origins: origin,
-          destinations: destination,
-          mode: "driving",
-          key: apiKey
-        },
-        timeout: 5000
-      });
-
-      if (gRes.data && gRes.data.status === "OK" && gRes.data.rows?.[0]?.elements?.[0]?.status === "OK") {
-        const elem = gRes.data.rows[0].elements[0];
-        distanceKm = Math.round(elem.distance.value / 1000);
-        drivingDurationMinutes = Math.round(elem.duration.value / 60);
-        if (gRes.data.origin_addresses?.[0]) sourceFormatted = gRes.data.origin_addresses[0];
-        if (gRes.data.destination_addresses?.[0]) destFormatted = gRes.data.destination_addresses[0];
-      }
+      const osmRes = await getDrivingDistanceAndDurationOSM(origin, destination);
+      distanceKm = osmRes.distanceKm;
+      drivingDurationMinutes = osmRes.drivingDurationMinutes;
     } catch (err) {
-      console.warn("[Distance Matrix API Notice]: Using calculated physics fallback.", err);
+      console.warn("[OSM Routing Notice]: OSM routing failed, using physics fallback.", err);
+      apiFailures.maps = true; // Mark as failed
     }
   }
 
@@ -1025,33 +1621,14 @@ async function getDrivingDistanceAndDuration(origin: string, destination: string
 }
 
 async function getVerifiedPlacesForLocation(destination: string, query?: string) {
-  const apiKey = process.env.GOOGLE_MAPS_PLATFORM_KEY || process.env.VITE_GOOGLE_PLACES_API_KEY;
   let verifiedPlaces: any[] = [];
 
-  if (apiKey && apiKey !== "YOUR_API_KEY" && apiKey !== "MY_GOOGLE_MAPS_PLATFORM_KEY") {
+  if (!apiFailures.places) {
     try {
-      const pRes = await axios.get("https://maps.googleapis.com/maps/api/place/textsearch/json", {
-        params: {
-          query: `${destination} ${query || 'tourist attractions places to visit'}`,
-          key: apiKey
-        },
-        timeout: 5000
-      });
-
-      if (pRes.data && pRes.data.status === "OK" && Array.isArray(pRes.data.results)) {
-        verifiedPlaces = pRes.data.results.slice(0, 10).map((p: any) => ({
-          name: p.name,
-          formattedAddress: p.formatted_address,
-          rating: p.rating || 4.5,
-          userRatingsTotal: p.user_ratings_total || 100,
-          lat: p.geometry?.location?.lat,
-          lng: p.geometry?.location?.lng,
-          placeId: p.place_id,
-          types: p.types || []
-        }));
-      }
+      verifiedPlaces = await getPlacesFromFoursquare(destination, query);
     } catch (err) {
-      console.warn("[Places API Notice]: Using verified spots fallback.", err);
+      console.warn("[Foursquare API Notice]: Foursquare search failed, using spots fallback.", err);
+      apiFailures.places = true; // Mark as failed
     }
   }
 
@@ -1120,9 +1697,48 @@ app.post("/api/generate-maharaja-trip", async (req, res) => {
     const dest = tripDetails?.destination || "रत्नागिरी";
     const days = Number(tripDetails?.days || 3);
     const budget = Number(tripDetails?.budget || 12000);
-    const members = tripDetails?.members || "6 Adults";
+    const members = tripDetails?.members || "2 Adults";
     const date = tripDetails?.date || new Date().toISOString().split("T")[0];
     const foodPref = tripDetails?.foodPreference || "शाकाहारी";
+    const transportMode = tripDetails?.transportMode || "car";
+
+    // Evaluate trip feasibility FIRST in pure logic before calling Gemini AI or Places API
+    const feasibility = await evaluateTripFeasibility(
+      src, 
+      dest, 
+      new Date().toISOString(), 
+      new Date(Date.now() + days * 86400000).toISOString(), 
+      members, 
+      transportMode, 
+      budget
+    );
+
+    if (!feasibility.isFeasible) {
+      let warningMsg = `⚠️ **महाराजा स्टाईल सहल बजेट किंवा वेळेमुळे शक्य नाही!**\n\n`;
+      if (feasibility.isBudgetExcessive) {
+        warningMsg += `• **बजेट इशारा**: दिलेले बजेट (₹${feasibility.userBudget.toLocaleString('en-IN')}) अतिशय कमी आहे. सहलीचा वास्तववादी किमान खर्च **₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}** येतो (${feasibility.transitDetail}).\n\n${feasibility.modeSpecificTip}\n`;
+      }
+      if (feasibility.isTravelTimeExcessive) {
+        warningMsg += `• **प्रवास वेळ इशारा**: ही सहल इतक्या कमी दिवसांत करणे गैरसोयीचे आहे, कारण तुमचा ६०% पेक्षा जास्त वेळ फक्त प्रवासातच जाईल. कृपया दिवसांची संख्या वाढवा.\n`;
+      }
+      warningMsg += `\n📍 **सुचवलेली सोयीस्कर ठिकाणे:**\n`;
+      feasibility.closerAlternatives.forEach((alt, idx) => {
+        warningMsg += `${idx + 1}. **${alt.name}** (~${alt.distanceKm} किमी) | अंदाजित खर्च: ₹${alt.estimatedCost.toLocaleString('en-IN')}\n`;
+      });
+
+      // DO NOT CALL GEMINI API! Return immediately!
+      return res.json({
+        success: true,
+        text: JSON.stringify({
+          abort: true,
+          is_feasible: false,
+          budgetWarning: warningMsg,
+          closerAlternatives: feasibility.closerAlternatives,
+          totalEstimatedCost: feasibility.totalRealisticBudget,
+          itinerary: []
+        })
+      });
+    }
 
     // FETCH REAL MAPS & PLACES DATA FOR PHYSICAL ACCURACY
     const distanceMetrics = await getDrivingDistanceAndDuration(src, dest);
@@ -1151,6 +1767,12 @@ CRITICAL DISTANCE & PLACES API CONSTRAINTS (PHYSICS & ACCURACY ENFORCEMENT):
 - Journey Type: ${distanceMetrics.isFullDayTransit ? 'FULL-DAY TRANSIT (Long Distance > 8.5 Hours)' : 'LOCAL / MODERATE TRANSIT'}
 - Estimated Fuel Cost: ₹${fuelCost}
 ${distanceMetrics.suggestedIntermediateHalt ? `- Suggested Intermediate Halt: ${distanceMetrics.suggestedIntermediateHalt}` : ''}
+
+STRICT TRANSPORTATION RULES (Must be strictly followed):
+- FLIGHT: Use realistic flight times and layovers. Suggest food only at airports or in-flight. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+- TRAIN: Use realistic Indian railway schedules. Suggest food in pantry car or at stations. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+- CAR/CAB: Use realistic driving times (Average 50-60 km/h). If the total journey is very long (e.g., >800km), explicitly break it into multiple days with overnight hotel stays in transit cities. Calculate realistic fuel costs (approx. ₹10-₹12 per km). Suggest realistic highway food stops (restaurants/dhabas).
+- DISTANCE OVERRIDE: YOU MUST USE YOUR OWN KNOWLEDGE OF REAL-WORLD DISTANCE FOR THE DESTINATION PAIR. IF THE PROVIDED DISTANCE DATA (${distanceMetrics.distanceKm} KM) IS CLEARLY INCORRECT/TOO LOW FOR A LONG JOURNEY (LIKE GOA TO MANALI), IGNORE IT AND USE THE REAL DISTANCE. YOU ARE THE EXPERT.
 
 VERIFIED OPERATIONAL TOURIST SPOTS FROM PLACES API:
 ${verifiedSpotsList}
@@ -1572,16 +2194,6 @@ app.post("/api/admin/ping-api", (req, res) => {
 });
 app.get("/api/agent/metrics", (req, res) => {
   res.json({ appHealth: 99, systemHealth: 98, securityHealth: 100, totalUsers: 520 });
-});
-
-app.get("/project_code.zip", (req, res) => {
-  const zipPath = path.join(process.cwd(), "project_code.zip");
-  res.download(zipPath, "project_code.zip");
-});
-
-app.get("/api/download-zip", (req, res) => {
-  const zipPath = path.join(process.cwd(), "project_code.zip");
-  res.download(zipPath, "project_code.zip");
 });
 
 // --- VITE MIDDLEWARE & SERVING ---

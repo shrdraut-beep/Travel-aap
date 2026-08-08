@@ -15,6 +15,7 @@ import { LiveFlightSearchCard } from '../LiveFlightSearchCard';
 import { useMusicPlayer } from '../MusicPlayerContext';
 import { notifyEmergencySOS, notifyAIBriefing } from '../../utils/notifications';
 import { safeCopyToClipboard, getUniqueMembers } from '../../utils';
+import * as freeUtils from '../../services/api/freeUtils';
 import { LiveCountdownBanner } from '../LiveCountdownBanner';
 import { TripAwardsBanner } from '../TripAwardsBanner';
 import { TimepassGame } from './TimepassGame';
@@ -347,7 +348,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     async function fetchCountry() {
       try {
         const dest = (trip as any).destination || trip.name;
-        const freeUtils = await import('../../services/api/freeUtils');
         const geocode = await freeUtils.geocodeDestination(dest);
         if (geocode && geocode.country) {
           const cInfo = await freeUtils.getCountryDetails(geocode.country);
@@ -928,9 +928,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="grid grid-cols-2 gap-2 w-full pt-1 mb-3">
           {/* LEFT COLUMN: INCOME & BALANCE */}
           <div className="flex flex-col gap-2">
-            {/* TOP: GREEN TOTAL DEPOSIT CARD */}
-            <div className="bg-gradient-to-br from-emerald to-emerald-700 rounded-[20px] p-3 text-white shadow-md border border-emerald/30 flex flex-col justify-between h-36">
-              <div className="flex items-start gap-1.5 text-white/80 h-8">
+            {/* TOP: BLUE TOTAL DEPOSIT CARD */}
+            <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-[20px] p-3 text-blue-950 shadow-sm border border-blue-200/60 flex flex-col justify-between h-36">
+              <div className="flex items-start gap-1.5 text-blue-800/80 h-8">
                 <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider leading-tight line-clamp-2">
                   {lang === 'mr' ? 'एकूण जमा / बजेट' : lang === 'hi' ? 'कुल जमा / बजट' : 'Total Budget'}
@@ -941,28 +941,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {currencySymbol}{new Intl.NumberFormat('en-IN').format(budgetBase)}
                 </p>
               </div>
-              <div className="pt-2 border-t border-white/20 h-8 flex items-center">
-                <p className="text-[10px] font-bold text-white/80 uppercase tracking-tight opacity-90 truncate">
+              <div className="pt-2 border-t border-blue-200 h-8 flex items-center">
+                <p className="text-[10px] font-bold text-blue-800 uppercase tracking-tight opacity-90 truncate">
                   {lang === 'mr' ? 'सहल बजेट' : 'Trip Budget'}
                 </p>
               </div>
             </div>
 
             {/* BOTTOM: TOTAL BALANCE DETAILS CARD - VIBRANT ROYAL BLUE GRADIENT */}
-            <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 rounded-[20px] p-3 text-white shadow-lg border border-emerald/30 flex flex-col justify-between h-36">
-              <div className="flex items-start gap-1.5 text-white/80 h-8">
-                <Wallet className="w-4 h-4 shrink-0 text-white/80 mt-0.5" />
+            <div className="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-[20px] p-3 text-teal-950 shadow-sm border border-teal-200/60 flex flex-col justify-between h-36">
+              <div className="flex items-start gap-1.5 text-teal-800/80 h-8">
+                <Wallet className="w-4 h-4 shrink-0 mt-0.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider leading-tight line-clamp-2">
                   {lang === 'mr' ? 'एकूण शिल्लक' : lang === 'hi' ? 'कुल शेष' : 'Total Balance'}
                 </span>
               </div>
               <div className="flex-grow flex items-center">
-                <p className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-sm">
+                <p className="text-2xl sm:text-3xl font-black tracking-tight text-teal-950 drop-shadow-sm">
                   {currencySymbol}{new Intl.NumberFormat('en-IN').format(remainingBudget)}
                 </p>
               </div>
-              <div className="pt-2 border-t border-white/20 h-8 flex items-center">
-                <p className="text-[10px] font-bold text-white/80 uppercase tracking-tight opacity-95 truncate">
+              <div className="pt-2 border-t border-teal-200 h-8 flex items-center">
+                <p className="text-[10px] font-bold text-teal-800 uppercase tracking-tight opacity-95 truncate">
                   {lang === 'mr' ? 'उपलब्ध शिल्लक' : 'Available balance'}
                 </p>
               </div>
@@ -972,8 +972,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* RIGHT COLUMN: EXPENSE & PERCENTAGE */}
           <div className="flex flex-col gap-2">
             {/* TOP: RED TOTAL EXPENSE CARD */}
-            <div className="bg-gradient-to-br from-coral to-coral-700 rounded-[20px] p-3 text-white shadow-md border border-coral/30 flex flex-col justify-between h-36">
-              <div className="flex items-start gap-1.5 text-white/80 h-8">
+            <div className="bg-gradient-to-br from-rose-50 to-pink-100 rounded-[20px] p-3 text-rose-950 shadow-sm border border-rose-200/60 flex flex-col justify-between h-36">
+              <div className="flex items-start gap-1.5 text-rose-800/80 h-8">
                 <TrendingDown className="w-4 h-4 shrink-0 mt-0.5" />
                 <span className="text-[10px] font-black uppercase tracking-wider leading-tight line-clamp-2">
                   {lang === 'mr' ? 'एकूण खर्च' : lang === 'hi' ? 'कुल खर्च' : 'Total Expense'}
@@ -984,28 +984,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {currencySymbol}{new Intl.NumberFormat('en-IN').format(totalSpent)}
                 </p>
               </div>
-              <div className="pt-2 border-t border-white/20 h-8 flex items-center">
-                <p className="text-[10px] font-bold text-white/80 uppercase tracking-tight opacity-90 truncate">
+              <div className="pt-2 border-t border-rose-200 h-8 flex items-center">
+                <p className="text-[10px] font-bold text-rose-800 uppercase tracking-tight opacity-90 truncate">
                   {lang === 'mr' ? 'आत्तापर्यंतचा खर्च' : 'Spent so far'}
                 </p>
               </div>
             </div>
 
             {/* BOTTOM: CIRCULAR PROGRESS BAR (EXPENSE PERCENTAGE) CARD - VIBRANT PURPLE/VIOLET GRADIENT */}
-            <div className="bg-gradient-to-br from-coral-600 via-coral-700 to-rose-800 rounded-[20px] p-3 text-white shadow-lg border border-coral/30 flex flex-col items-center text-center justify-between h-36">
+            <div className="bg-gradient-to-br from-purple-50 to-fuchsia-100 rounded-[20px] p-3 text-purple-950 shadow-sm border border-purple-200/60 flex flex-col items-center text-center justify-between h-36">
               <div className="h-8 flex items-start justify-center w-full">
-                <span className="text-[10px] font-black uppercase tracking-wider text-white/80 leading-tight line-clamp-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-purple-800/80 leading-tight line-clamp-2">
                   {lang === 'mr' ? 'खर्चाची टक्केवारी' : 'Expense Ratio'}
                 </span>
               </div>
               <div className="flex-grow flex items-center justify-center w-full py-1">
                 <Speedometer
                   percent={percentSpent}
-                  color={percentSpent > 80 ? '#fb7185' : '#38bdf8'}
+                  color={percentSpent > 80 ? '#f43f5e' : '#a855f7'}
                   lang={lang}
                   t={t}
                   size="compact"
-                  isDarkCard={true}
+                  isDarkCard={false}
                 />
               </div>
             </div>
@@ -2081,6 +2081,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             startDate={trip.startDate}
             endDate={trip.endDate}
           />
+        </div>
+
+        {/* Agoda Image Banner */}
+        <div className="mt-8 mb-6 flex justify-center w-full p-2">
+          <a 
+            href="https://www.agoda.com/partners/partnersearch.aspx?pcs=10&cid=1969781&hl=en-us&hid=25963734" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block transition-transform duration-300 hover:scale-105"
+          >
+            <img 
+              src="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180" 
+              srcSet="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180 1x, https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=480x360 2x" 
+              alt="Agoda वर सर्वोत्तम हॉटेल बुक करा" 
+              className="rounded-xl shadow-lg border border-gray-200"
+            />
+          </a>
         </div>
       </div>
 

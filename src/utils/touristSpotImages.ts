@@ -9,8 +9,8 @@ export interface TouristSpot {
 // Destination-aware image resolver for Indian & Global travel
 const resolveDestinationImage = (destName: string, category: 'hero' | 'beach' | 'fort' | 'temple' | 'market' | 'hill'): string => {
   const query = `${destName} ${category}`.replace(/\s+/g, '+');
-  // Use a generic placeholder service that supports dynamic queries
-  return `https://source.unsplash.com/featured/?${query}`;
+  // Use a more stable placeholder service
+  return `https://picsum.photos/seed/${query}/600/400`;
 };
 
 export const getFeaturedSpotsForTrip = (

@@ -1,4 +1,5 @@
 import os
+import shutil
 import zipfile
 
 def create_zip():
@@ -13,12 +14,14 @@ def create_zip():
             dirs[:] = [d for d in dirs if d not in ignore_dirs]
             
             for file in files:
-                if file == 'app-source.zip' or file.endswith('.pyc'):
+                if file.endswith('.zip') or file.endswith('.pyc'):
                     continue
                 file_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_path, '.')
                 zipf.write(file_path, arcname)
 
+    shutil.copyfile(output_filename, 'project_code.zip')
+    shutil.copyfile(output_filename, 'public/project_code.zip')
     print(f"Zip created successfully: {output_filename}, size: {os.path.getsize(output_filename)} bytes")
 
 if __name__ == '__main__':

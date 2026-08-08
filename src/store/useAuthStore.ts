@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { auth, signInWithGoogle, signOutUser } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth, signInWithGoogle, signOutUser, getAuthSafe } from '../firebase';
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
 import { secureStorage } from '../utils/security';
 
 export interface User {
@@ -80,8 +80,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return user;
       }
     } catch (err: any) {
-      console.warn("Google Sign-In popup notice or iframe constraint:", err);
-      throw err;
+      if (
+        err?.code === 'auth/cancelled-popup-request' ||
+        err?.code === 'auth/popup-closed-by-user' ||
+        err?.code === 'auth/popup-blocked'
+      ) {
+        console.warn("Google Sign-In popup was blocked or closed by user/browser.");
+        return null;
+      }
+      console.warn("Google Sign-In error:", err);
+      return null;
     }
     return null;
   },
@@ -99,7 +107,30 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   closeAuthModal: () => set({ isAuthModalOpen: false, pendingAction: null }),
 
   initAuthListener: () => {
-    return onAuthStateChanged(auth, (fbUser) => {
+    const authInst = getAuthSafe();
+
+    // Catch redirect auth completion if popup was blocked
+    getRedirectResult(authInst).then((result) => {
+      if (result?.user) {
+        const fbUser = result.user;
+        const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Google Traveler';
+        const avatar = fbUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&bold=true`;
+        
+        const user: User = {
+          id: fbUser.uid,
+          name,
+          email: fbUser.email || '',
+          avatar,
+        };
+
+        set({ currentUser: user });
+        saveStoredUser(user);
+      }
+    }).catch((err) => {
+      console.warn("Redirect result notice:", err?.message || err);
+    });
+
+    return onAuthStateChanged(authInst, (fbUser) => {
       if (fbUser) {
         const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Traveler';
         const avatar = fbUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&bold=true`;

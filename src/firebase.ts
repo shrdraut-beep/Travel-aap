@@ -23,6 +23,8 @@ import {
   signOut, 
   GoogleAuthProvider, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged 
 } from "firebase/auth";
 import { getStorage, ref, listAll, deleteObject } from "firebase/storage";
@@ -84,18 +86,17 @@ try {
 export const db = dbInstance;
 export const storage = getStorage(app);
 
-// Connection test helper as per Firestore guidelines with fallback timeout
+// Connection test helper with offline fallback
 async function testConnection() {
   try {
-    const { getDocFromServer } = await import("firebase/firestore");
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Connection check timeout')), 2000)
     );
     await Promise.race([
-      getDocFromServer(doc(db, 'test', 'connection')),
+      getDoc(doc(db, 'test', 'connection')),
       timeoutPromise
     ]).catch(() => {
-      // Catch race rejection silently
+      // Offline / cached mode fallback
     });
   } catch (error) {
     console.warn("Firestore client operating in offline/cached mode.");
@@ -107,14 +108,28 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 /**
- * Real Google Sign In via Firebase Auth
+ * Real Google Sign In via Firebase Auth with automatic redirect fallback for popup-blocked environments
  */
 export async function signInWithGoogle() {
+  const authInstance = getAuthSafe();
   try {
-    const result = await signInWithPopup(getAuthSafe(), googleProvider);
+    const result = await signInWithPopup(authInstance, googleProvider);
     return result.user;
   } catch (error: any) {
-    console.warn("Google Sign-In popup notice or iframe constraint:", error?.message || error);
+    if (
+      error?.code === 'auth/popup-blocked' ||
+      error?.code === 'auth/cancelled-popup-request' ||
+      error?.code === 'auth/popup-closed-by-user'
+    ) {
+      console.warn("Google Sign-In popup blocked or closed. Attempting redirect auth fallback:", error?.message);
+      try {
+        await signInWithRedirect(authInstance, googleProvider);
+        return null;
+      } catch (redirectErr: any) {
+        console.warn("signInWithRedirect fallback notice:", redirectErr?.message || redirectErr);
+      }
+    }
+    console.warn("Google Sign-In notice:", error?.message || error);
     throw error;
   }
 }

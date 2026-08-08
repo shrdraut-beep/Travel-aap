@@ -5,7 +5,7 @@ import { WikipediaSnippet } from "../WikipediaSnippet";
 import { TimepassGame } from './TimepassGame';
 import React from 'react';
 import {  motion, AnimatePresence } from 'framer-motion';
-import { Plus, Compass, MapPin, ChevronRight, Music, Camera, ExternalLink, Play, Trash2, Clock, Ticket, Hotel, TreePalm, Sparkles, RefreshCw, MessageSquareQuote, Info, TrendingUp, AlertTriangle, Milestone, Train, Share2, Check, Navigation, Fuel, Calculator, X, ChevronDown, ChevronUp, FileText, Stethoscope, Shirt, Smartphone, Package, List, CalendarDays, Users } from 'lucide-react';
+import { Plus, Compass, MapPin, ChevronRight, Music, Camera, ExternalLink, Play, Trash2, Clock, Ticket, Hotel, TreePalm, Sparkles, RefreshCw, MessageSquareQuote, Info, TrendingUp, AlertTriangle, Milestone, Train, Share2, Check, CheckCircle2, Navigation, Fuel, Calculator, X, ChevronDown, ChevronUp, FileText, Stethoscope, Shirt, Smartphone, Package, List, CalendarDays, Users } from 'lucide-react';
 import { TripPlan, TripGroup, PackingItem, PackingCategory } from '../../types';
 import Markdown from 'react-markdown';
 import { BudgetDashboardModal } from '../modals/BudgetDashboardModal';
@@ -582,44 +582,82 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="relative flex gap-5"
+                      className="relative flex"
                     >
-                      <div className={`relative z-10 w-13 h-13 bg-white border border-slate-200/50 rounded-2xl flex items-center justify-center shadow-sm shrink-0 ${plan.id.includes('ai') ? 'ring-4 ring-amber-50 border-amber-200' : ''}`}>
-                        {plan.id.includes('ai') ? <Sparkles className="w-6 h-6 text-amber-500" /> : getIcon(plan)}
-                      </div>
-
-                      <div className={`flex-1 ${plan.id.includes('ai') ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200' : 'bg-gradient-to-br from-purple-50/80 to-pink-50/80 backdrop-blur-md'} rounded-[28px] p-5 border border-purple-100 shadow-sm space-y-3 active:scale-[0.99] transition-all`}>
+                      <div className={`flex-1 w-full ${
+                        plan.id.includes('ai') 
+                          ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-orange-500/20' 
+                          : [
+                              'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-blue-500/20',
+                              'bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white shadow-purple-500/20',
+                              'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-emerald-500/20',
+                              'bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-rose-500/20',
+                              'bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-indigo-500/20'
+                            ][idx % 5]
+                      } rounded-[28px] p-5 shadow-lg space-y-3 active:scale-[0.99] transition-all`}>
                         <div className="flex justify-between items-start">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-bold text-slate-700 uppercase tracking-widest flex items-center gap-1.5">
+                              <span className={`text-sm font-bold uppercase tracking-widest flex items-center gap-1.5 ${plan.id.includes('ai') ? 'text-white/90' : 'text-white/90'}`}>
                                 <Clock className="w-3 h-3" />
                                 {new Date(plan.datetime).toLocaleTimeString(lang === 'mr' ? 'mr-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' })}
                                 {' • '}
                                 {new Date(plan.datetime).toLocaleDateString(lang === 'mr' ? 'mr-IN' : 'en-IN', { day: 'numeric', month: 'short' })}
                               </span>
                             </div>
-                            <h4 className="text-[17px] font-bold text-slate-800 tracking-tight">{plan.title}</h4>
+                            <h4 className="text-[17px] font-bold text-white tracking-tight drop-shadow-sm">{plan.title}</h4>
                           </div>
-                          {plan.cost && plan.cost > 0 && (
-                            <span className="text-[15px] font-black text-slate-800 bg-white/80 px-2.5 py-1 rounded-xl border border-slate-200/50 shadow-sm">
-                              {currencySymbol}{plan.cost}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {plan.cost && plan.cost > 0 && (
+                              <span className="text-[15px] font-black text-slate-900 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-xl shadow-sm">
+                                {currencySymbol}{plan.cost}
+                              </span>
+                            )}
+                            <div className="flex items-center justify-center w-7 h-7 bg-white/20 backdrop-blur-md rounded-full shadow-sm border border-white/30" title={plan.bookingRef || (!plan.id.includes('ai') && new Date(plan.datetime).getTime() < new Date().getTime()) ? 'Confirmed' : 'Pending'}>
+                              {plan.bookingRef || (!plan.id.includes('ai') && new Date(plan.datetime).getTime() < new Date().getTime()) ? (
+                                <CheckCircle2 className="w-4 h-4 text-green-300 drop-shadow-sm" />
+                              ) : (
+                                <Clock className="w-4 h-4 text-white drop-shadow-sm" />
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className={`text-base sm:text-lg font-bold text-slate-800 leading-relaxed prose prose-base sm:prose-lg max-w-none prose-slate mt-1`}>
-                          <ItineraryCard plan={plan} />
+                        <div className={`text-base sm:text-lg font-bold leading-relaxed prose prose-base sm:prose-lg max-w-none mt-1 text-white/95`}>
+                          <ItineraryCard 
+                            plan={plan} 
+                            transportMode={trip.transportMode} 
+                            dayNumber={Math.floor((new Date(plan.datetime).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
+                            totalDays={Math.floor((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}
+                            city={plan.location?.name}
+                          />
                         </div>
                         {plan.id.includes('ai') && <WikipediaSnippet query={plan.title} lang={lang} />}
                         {plan.bookingRef && (
                           <div className="pt-1">
-                            <span className="px-2.5 py-1 bg-slate-900 text-white text-sm font-bold rounded-lg uppercase tracking-widest">{lang === 'mr' ? 'बुकिंग ID' : 'REF'}: {plan.bookingRef}</span>
+                            <span className="px-2.5 py-1 bg-white/20 text-white text-sm font-bold rounded-lg uppercase tracking-widest backdrop-blur-sm border border-white/30">{lang === 'mr' ? 'बुकिंग ID' : 'REF'}: {plan.bookingRef}</span>
                           </div>
                         )}
                       </div>
                     </motion.div>
                   ))
                 )}
+
+                {/* Agoda Image Banner */}
+                <div className="mt-8 mb-6 flex justify-center w-full p-2">
+                  <a 
+                    href="https://www.agoda.com/partners/partnersearch.aspx?pcs=10&cid=1969781&hl=en-us&hid=25963734" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block transition-transform duration-300 hover:scale-105"
+                  >
+                    <img 
+                      src="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180" 
+                      srcSet="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180 1x, https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=480x360 2x" 
+                      alt="Agoda वर सर्वोत्तम हॉटेल बुक करा" 
+                      className="rounded-xl shadow-lg border border-gray-200"
+                    />
+                  </a>
+                </div>
               </>
             )}
           </>

@@ -1,0 +1,17 @@
+# Pravas Wataghati AI Pre-Trip Planner Codebase Summary
+# Core Logic Files
+
+---
+# 1. Server Entry Point: server.ts (Key Routes)
+(Refer to the actual server.ts for full implementation)
+...
+
+# 2. Main Application Component: src/App.tsx
+(Core React application logic)
+...
+
+# 3. AI Service Logic: src/services/travelAIService.ts
+...
+
+# NOTE: This is a summarized version of the core logic. 
+# For the full application codebase, please use the zip export feature.

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Share2, Download, X, Sparkles, MapPin, Wallet, Calendar, Music, Instagram, LayoutGrid, Camera } from 'lucide-react';
 import { TripGroup, Expense, TripPlan, TripMemory } from '../types';
+import { shareAppOnWhatsApp } from '../utils/shareUtils';
+import { safeCopyToClipboard } from '../utils';
 
 interface TripRecapProps {
   trip: TripGroup;
@@ -25,6 +27,64 @@ export const TripRecap: React.FC<TripRecapProps> = ({ trip, lang, onClose, curre
     return acc;
   }, {});
   const topCategory = Object.keys(categories || {}).sort((a, b) => categories[b] - categories[a])[0];
+
+  const shareOnWhatsApp = () => {
+    // Budget multiplier logic
+    const getMultiplier = (type?: string) => {
+      switch (type?.toLowerCase()) {
+        case 'adventure': return 1.1;
+        case 'religious': return 1.1;
+        case 'family': return 1.2;
+        case 'friends': return 1.0;
+        default: return 1.0;
+      }
+    };
+
+    const multiplier = getMultiplier(trip.tripType as string | undefined);
+    const finalBudget = Math.round(totalSpent * multiplier);
+
+    let shareText = `*स्मार्ट प्रवास आराखडा: ${trip.name}* 🚀\n\n`;
+    shareText += `📅 तारीख: ${trip.startDate || 'N/A'} - ${trip.endDate || 'N/A'}\n`;
+    shareText += `👥 प्रवास प्रकार: ${trip.tripType || 'N/A'}\n`;
+    shareText += `🚗 प्रवासाचे साधन: ${trip.transportMode || 'N/A'}\n`;
+    shareText += `💰 एकूण अंदाजे खर्च: ₹${new Intl.NumberFormat('en-IN').format(finalBudget)}\n\n`;
+    
+    shareText += `*सविस्तर नियोजन:*\n`;
+
+    // Group itinerary items
+    const hotels = trip.itinerary.filter(item => item.type === 'hotel');
+    const spots = trip.itinerary.filter(item => item.type === 'activity');
+    const others = trip.itinerary.filter(item => item.type !== 'hotel' && item.type !== 'activity');
+
+    if (hotels.length > 0) {
+      shareText += `\n🏨 *हॉटेल्स:*\n`;
+      hotels.forEach(hotel => shareText += `- ${hotel.title}: ${hotel.detail}\n`);
+    }
+
+    if (spots.length > 0) {
+      shareText += `\n📍 *पर्यटन स्थळे:*\n`;
+      spots.forEach(spot => shareText += `- ${spot.title}: ${spot.detail}\n`);
+    }
+
+    if (others.length > 0) {
+      shareText += `\n📝 *इतर नियोजन:*\n`;
+      others.forEach(item => shareText += `- ${item.title}: ${item.detail}\n`);
+    }
+
+    if (trip.expenses && trip.expenses.length > 0) {
+      shareText += `\n💸 *खर्च तपशील:*\n`;
+      trip.expenses.forEach(expense => shareText += `- ${expense.title}: ₹${expense.amount}\n`);
+    }
+
+    if (trip.aiPlan) {
+      shareText += `\n\n*AI टीप्स:*\n${trip.aiPlan}`;
+    }
+    
+    shareText += `\n\nही सहल Pravas Wataghati ॲपवर तयार केली आहे!`;
+    
+    // Structured URL scheme for WhatsApp
+    shareAppOnWhatsApp(lang, shareText);
+  };
 
   const slides = [
     {
@@ -148,7 +208,7 @@ export const TripRecap: React.FC<TripRecapProps> = ({ trip, lang, onClose, curre
             </div>
             
             <div className="w-full grid grid-cols-2 gap-3 pt-10">
-              <button className="flex flex-col items-center gap-2 p-4 bg-indigo-600 rounded-[24px] active:scale-95 transition-all">
+              <button onClick={shareOnWhatsApp} className="flex flex-col items-center gap-2 p-4 bg-indigo-600 rounded-[24px] active:scale-95 transition-all">
                 <Share2 className="w-6 h-6 text-white" />
                 <span className="text-sm font-black text-white uppercase">Share</span>
               </button>

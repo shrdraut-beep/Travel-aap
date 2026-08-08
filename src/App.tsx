@@ -1,10 +1,11 @@
 import { safeStorage } from './utils/storage';
 import { fetchLocationImage } from "./services/api/unsplash";
+import { fetchVerifiedPlaces, fetchDrivingDistanceAndTime } from "./services/travelAIService";
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, X, CheckCircle, Info, Map as MapIcon, RefreshCw, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db, sanitizeForFirestore, auth } from './firebase';
-import { doc, onSnapshot, setDoc, deleteDoc, getDoc, collection, query, where, getDocs, getDocFromServer } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, deleteDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { getSyncQueue, removeFromSyncQueue, clearSyncQueue } from './offline';
 import { calculateSettlements, CATEGORY_STYLES, getCurrencySymbol, getLanguageFullName, safeCopyToClipboard, formatDate, formatCurrency, getUniqueMembers } from './utils';
 import { translations } from './translations';
@@ -71,8 +72,8 @@ const DEFAULT_TRIP: TripGroup = {
   itinerary: [],
   tripType: "friends",
   calculationMode: "individual_split",
-  logoUrl: "/logo.svg",
-  wallpaperUrl: "/screenshot-desktop.png",
+  logoUrl: "/logobg.png",
+  wallpaperUrl: "/wallpaper.png",
   status: 'ACTIVE'
 };
 
@@ -144,7 +145,7 @@ function AppContent() {
           setTimeout(() => reject(new Error('Connection check timeout')), 1200)
         );
         await Promise.race([
-          getDocFromServer(doc(db, 'test', 'connection')),
+          getDoc(doc(db, 'test', 'connection')),
           timeoutPromise
         ]).catch(() => {
           // Silent fallback to local offline mode
@@ -1720,21 +1721,23 @@ function AppContent() {
       }
 
       // STEP 1: PRE-TRIP VALIDATION (DISTANCE API)
-      if (trip?.source && trip?.name) {
-        if (trip?.transportMode === 'train') {
+      const sourceCity = trip?.source || "Mumbai";
+      if (sourceCity && trip?.name) {
+        const modeStr = String(trip?.transportMode || "").toLowerCase();
+        if (modeStr.includes('rail') || modeStr.includes('train')) {
           setLoadingSteps(prev => prev.map(s => s.id === '1' ? { ...s, text: lang === 'mr' ? '🚂 रेल्वे मार्ग आणि वेळ तपासत आहे...' : '🚂 Checking train route & time...' } : s));
-        } else if (trip?.transportMode === 'flight') {
+        } else if (modeStr.includes('air') || modeStr.includes('flight')) {
           setLoadingSteps(prev => prev.map(s => s.id === '1' ? { ...s, text: lang === 'mr' ? '✈️ विमान प्रवासाचे पर्याय शोधत आहे...' : '✈️ Searching flight options...' } : s));
         } else {
           setLoadingSteps(prev => prev.map(s => s.id === '1' ? { ...s, text: lang === 'mr' ? '🚗 हायवे आणि टोल तपासत आहे...' : '🚗 Checking highways & tolls...' } : s));
         }
 
-        const distMetrics = await fetchDrivingDistanceAndTime(trip.source, trip.name);
+        const distMetrics = await fetchDrivingDistanceAndTime(sourceCity, trip.name);
         
         // HARD BLOCK VALIDATION
-        const practicalAllowedTime = totalDays * 12; // Increased to 12 hours/day for flexibility
+        const practicalAllowedTime = totalDays * 12; // 12 hours/day
         if (distMetrics.totalTransitHours > practicalAllowedTime) {
-          triggerToast(lang === 'mr' ? `प्रवास कालावधी इशारा: ${trip.source} ते ${trip.name} प्रवास खूप लांब आहे (${distMetrics.totalTransitHours} तास). जवळचे ठिकाण निवडा.` : `Warning: Travel time (${distMetrics.totalTransitHours} hrs) is too long for a ${totalDays} day trip.`, "alert");
+          triggerToast(lang === 'mr' ? `प्रवास कालावधी इशारा: ${sourceCity} ते ${trip.name} प्रवास खूप लांब आहे (${distMetrics.totalTransitHours} तास). जवळचे ठिकाण निवडा.` : `Warning: Travel time (${distMetrics.totalTransitHours} hrs) is too long for a ${totalDays} day trip.`, "alert");
           setIsSmartGenerating(false);
           return;
         }
@@ -1788,7 +1791,11 @@ function AppContent() {
       // 2. Strict AI Instructions
       const strictRules = `
         STRICT RULES FOR ITINERARY GENERATION:
-        1. TRANSPORT MODE: The user is traveling by '${trip?.transportMode || 'road'}'. If they selected Train/Bus/Car, DO NOT mention Airports or Flights under any circumstances.
+        1. TRANSPORT MODE: The user is traveling by '${trip?.transportMode || 'road'}'.
+           - FLIGHT: Use realistic flight times and layovers. Suggest food only at airports or in-flight. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+           - TRAIN: Use realistic Indian railway schedules. Suggest food in pantry car or at stations. NEVER suggest highway dhabas, fuel stops, or car travel segments.
+           - CAR/CAB: Use realistic driving times (Average 50-60 km/h). If the total journey is very long (e.g., >800km), explicitly break it into multiple days with overnight hotel stays in transit cities. Calculate realistic fuel costs (approx. ₹10-₹12 per km). Suggest realistic highway food stops (restaurants/dhabas).
+           - DISTANCE OVERRIDE: YOU MUST USE YOUR OWN KNOWLEDGE OF REAL-WORLD DISTANCE FOR THE DESTINATION PAIR. IF THE PROVIDED DISTANCE DATA IS CLEARLY INCORRECT/TOO LOW FOR A LONG JOURNEY (LIKE GOA TO MANALI), IGNORE IT AND USE THE REAL DISTANCE. YOU ARE THE EXPERT.
         2. DURATION: Generate exactly a ${totalDays}-day itinerary.
         3. FOOD: For EVERY Lunch and Dinner, suggest TWO distinct options: (🔴 Local/Non-Veg famous dish) AND (🟢 Pure Veg option). Do NOT force everything to be Pure Veg unless explicitly requested.
         4. WIKIPEDIA FACTS: Incorporate this context: ${wikiFacts || "General destination knowledge"}
@@ -1798,7 +1805,7 @@ function AppContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          source: trip?.source || "",
+          source: trip?.source || "Mumbai",
           tripName: trip?.name,
           startDate: trip?.startDate,
           endDate: trip?.endDate,
@@ -1975,7 +1982,7 @@ ${dayItem.evening || ''}
   const path = window.location.pathname;
   if (path === '/admin/login') {
     if (!currentUser || currentUser.email?.toLowerCase() !== 'shrd.raut@gmail.com') {
-      return <LoginScreen wallpaperUrl="/screenshot-desktop.png" logoUrl="/logo.svg" isAdminLogin={true} />;
+      return <LoginScreen wallpaperUrl="/wallpaper.png" logoUrl="/logobg.png" isAdminLogin={true} />;
     } else {
       window.history.replaceState({}, '', '/admin/dashboard');
     }
@@ -1983,7 +1990,7 @@ ${dayItem.evening || ''}
   
   if (path === '/admin/dashboard' || (currentUser?.email?.toLowerCase() === 'shrd.raut@gmail.com' && !showAdminPreview)) {
     if (!currentUser || currentUser.email?.toLowerCase() !== 'shrd.raut@gmail.com') {
-      return <LoginScreen wallpaperUrl="/screenshot-desktop.png" logoUrl="/logo.svg" isAdminLogin={true} />;
+      return <LoginScreen wallpaperUrl="/wallpaper.png" logoUrl="/logobg.png" isAdminLogin={true} />;
     }
     return (
       <AdminDashboardView
@@ -2001,8 +2008,8 @@ ${dayItem.evening || ''}
   if (!currentUser) {
     return (
       <LoginScreen
-        wallpaperUrl="/screenshot-desktop.png"
-        logoUrl="/logo.svg"
+        wallpaperUrl="/wallpaper.png"
+        logoUrl="/logobg.png"
       />
     );
   }
@@ -2032,8 +2039,8 @@ ${dayItem.evening || ''}
       <SplashScreen
         onComplete={() => setShowSplash(false)}
         lang={lang}
-        logoUrl="/logo.svg"
-        wallpaperUrl="/screenshot-desktop.png"
+        logoUrl="/logobg.png"
+        wallpaperUrl="/wallpaper.png"
       />
     );
   }
@@ -2939,7 +2946,7 @@ ${dayItem.evening || ''}
       </AnimatePresence>
       <MusicPlayerBar lang={lang} themeColor={trip?.themeColor || '#6366f1'} />
       <SmartPlanLoadingOverlay isVisible={isAIGenerating} steps={loadingSteps} lang={lang} />
-      <AuthModal wallpaperUrl={trip?.wallpaperUrl || '/screenshot-desktop.png'} logoUrl={trip?.logoUrl || '/logo.svg'} />
+      <AuthModal wallpaperUrl={trip?.wallpaperUrl || '/wallpaper.png'} logoUrl={trip?.logoUrl || '/logobg.png'} />
       <WelcomeTourModal
         isOpen={showWelcomeTour}
         onClose={() => {

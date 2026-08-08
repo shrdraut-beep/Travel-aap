@@ -23,7 +23,9 @@ export const WikipediaSnippet: React.FC<WikipediaSnippetProps> = ({ query, lang 
     }
 
     try {
+      console.log("Fetching Wikipedia for:", cleanQuery);
       const res = await fetchWikipediaSummary(cleanQuery);
+      console.log("Wikipedia response:", res);
       setSummary(res);
     } catch (e) {
       console.error("API Rate Limit Hit for: WikipediaSummary", e);

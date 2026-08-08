@@ -5,6 +5,7 @@ import { SmartBudgetModal } from './SmartBudgetModal';
 import { Calculator, Wallet } from 'lucide-react';
 import { X, Sparkles, MapPin, Calendar, DollarSign, Users, Bus, Compass, Loader2, ArrowLeft, CheckCircle2, Navigation, Lightbulb, Sun, Sunrise, Sunset, AlertTriangle, Clock, ArrowRight, Hotel, Download, Share2, FileText, Check, ShieldCheck, Landmark, Camera } from 'lucide-react';
 import { getBrochureHeroContent, getFeaturedSpotsForTrip, getSpotsForDay } from '../../utils/touristSpotImages';
+import { shareAppOnWhatsApp } from '../../utils/shareUtils';
 
 interface FutureTripModalProps {
   isOpen: boolean;
@@ -94,7 +95,7 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
           tripType,
           persons: Number(persons),
           companions,
-          transport,
+          transportMode: transport,
           budget: Number(budget),
           days: Number(days),
           departureDate,
@@ -178,7 +179,7 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
         onApplyBudget={(total) => setBudget(total.toString())}
       />
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
-      <div id="ai-trip-planner-modal" className="relative w-full max-w-xl bg-white rounded-[28px] shadow-2xl border border-slate-100 overflow-hidden my-8">
+      <div id="ai-trip-planner-modal" className="relative w-full max-w-xl bg-white rounded-[28px] shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden my-8">
         
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white relative">
@@ -225,7 +226,7 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
         {previewPlan ? (
           previewPlan.is_feasible === false || previewPlan.practicality_warning ? (
             /* PRACTICALITY WARNING & REFUSAL VIEW */
-            <div className="p-6 space-y-5 max-h-[75vh]    ">
+            <div className="p-6 space-y-5 overflow-y-auto flex-1">
               <div className="bg-gradient-to-br from-rose-50 via-amber-50 to-orange-50 border-2 border-rose-300 rounded-3xl p-5 shadow-sm space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/30 animate-pulse">
@@ -316,7 +317,7 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
             </div>
           ) : (
             /* FEASIBLE DETAILED ITINERARY VIEW */
-            <div className="p-4 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto overflow-x-hidden">
+            <div className="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1 overflow-x-hidden">
               <div className="space-y-6">
                 
                 {/* 0. BUDGET & WEATHER BANNERS */}
@@ -328,6 +329,11 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
                         : (lang === 'mr' ? '✅ तुमची सहल बजेटमध्ये आहे!' : '✅ Your trip is within budget!')
                       }
                     </div>
+                    {previewPlan.totalDistanceKm && (
+                      <div className="text-xs font-semibold opacity-90 mb-1 border-t border-black/10 pt-2">
+                        📍 {lang === 'mr' ? 'अंदाजे अंतर:' : 'Estimated Distance:'} {previewPlan.totalDistanceKm} km
+                      </div>
+                    )}
                     {previewPlan.costBreakdown && (
                       <div className="text-xs font-semibold opacity-90 mb-1 border-t border-black/10 pt-2">
                         {(() => {
@@ -516,6 +522,19 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
                               <Hotel className="w-4 h-4 text-indigo-600 shrink-0" />
                               <span className="truncate">{stay}</span>
                             </div>
+
+                            {/* Agoda Text Link Button */}
+                            <div className="mt-3 mb-2 flex justify-start">
+                              <a 
+                                href="https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=1969781&city=11304" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="inline-block bg-blue-600 text-white font-semibold text-sm px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+                              >
+                                येथे हॉटेल बुक करा 🏨
+                              </a>
+                            </div>
+
                             {tips && (
                               <div className="flex items-start gap-2 text-sm bg-amber-50 px-3 py-2 rounded-xl text-amber-900 font-bold border border-amber-100">
                                 <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -528,32 +547,76 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
                     );
                   })}
                 </div>
+
+                {/* Agoda Image Banner */}
+                <div className="mt-8 mb-6 flex justify-center w-full p-2">
+                  <a 
+                    href="https://www.agoda.com/partners/partnersearch.aspx?pcs=10&cid=1969781&hl=en-us&hid=25963734" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block transition-transform duration-300 hover:scale-105"
+                  >
+                    <img 
+                      src="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180" 
+                      srcSet="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180 1x, https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=480x360 2x" 
+                      alt="Agoda वर सर्वोत्तम हॉटेल बुक करा" 
+                      className="rounded-xl shadow-lg border border-gray-200"
+                    />
+                  </a>
+                </div>
               </div>
 
               {/* Bottom Actions */}
-              <div className="pt-3 border-t border-slate-100 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="w-1/3 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all"
-                >
-                  {lang === 'mr' ? 'बदल करा' : 'Edit Inputs'}
-                </button>
+              <div className="pt-3 border-t border-slate-100 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="w-1/3 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition-all"
+                  >
+                    {lang === 'mr' ? 'बदल करा' : 'Edit Inputs'}
+                  </button>
 
+                  <button
+                    type="button"
+                    onClick={handleConfirmMakeTrip}
+                    className="w-2/3 py-3 rounded-2xl bg-gradient-to-r from-teal-500 via-emerald-500 to-green-600 hover:from-teal-600 hover:to-green-700 text-white font-black text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4 fill-white/20" />
+                    <span>{lang === 'mr' ? 'ही सहल तयार करा 🚀' : 'Make This Trip 🚀'}</span>
+                  </button>
+                </div>
+                {/* WhatsApp Share Button */}
                 <button
                   type="button"
-                  onClick={handleConfirmMakeTrip}
-                  className="w-2/3 py-3 rounded-2xl bg-gradient-to-r from-teal-500 via-emerald-500 to-green-600 hover:from-teal-600 hover:to-green-700 text-white font-black text-sm shadow-lg shadow-teal-500/20 active:scale-98 transition-all flex items-center justify-center gap-2"
+                  onClick={() => {
+                    let shareText = `*${previewPlan.trip_title || "Trip Plan"}*\n\n`;
+                    shareText += `Distance: ${previewPlan.totalDistanceKm} km\n`;
+                    shareText += `Total Estimated Cost: ₹${previewPlan.totalEstimatedCost.toLocaleString('en-IN')}\n\n`;
+                    
+                    if (Array.isArray(previewPlan.itinerary)) {
+                        shareText += `*Itinerary:*\n`;
+                        previewPlan.itinerary.forEach((d: any) => {
+                            shareText += `\n*${d.day_title || ''}*\n`;
+                            if (d.morning) shareText += `☀️ Morning: ${d.morning}\n`;
+                            if (d.afternoon) shareText += `🌤️ Afternoon: ${d.afternoon}\n`;
+                            if (d.evening) shareText += `🌙 Evening: ${d.evening}\n`;
+                        });
+                    }
+
+                    shareText += `\nCheck out my trip plan on Pravas Wataghati!`;
+                    shareAppOnWhatsApp(lang, shareText);
+                  }}
+                  className="w-full py-3 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-black text-xs transition-all flex items-center justify-center gap-2"
                 >
-                  <Sparkles className="w-4 h-4 fill-white/20" />
-                  <span>{lang === 'mr' ? 'ही सहल तयार करा 🚀' : 'Make This Trip 🚀'}</span>
+                  Share on WhatsApp 💬
                 </button>
               </div>
             </div>
           )
         ) : (
           /* STEP 1: FORM INPUTS */
-          <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
             {/* Starting & Destination */}
             <div className="grid grid-cols-2 gap-3">
               <div>

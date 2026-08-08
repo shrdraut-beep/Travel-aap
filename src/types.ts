@@ -60,7 +60,7 @@ export interface Deposit {
 
 export interface TripPlan {
   id: string;
-  type: 'ticket' | 'hotel' | 'activity' | 'other';
+  type: 'ticket' | 'hotel' | 'activity' | 'note' | 'other';
   title: string;
   detail: string;
   datetime: string; // ISO or date-time string
@@ -172,6 +172,7 @@ export interface PublicTripTemplate {
 export interface TripGroup {
   id: string;
   name: string;
+  source?: string;
   startDate: string;
   endDate: string;
   members: Member[];

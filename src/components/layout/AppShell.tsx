@@ -64,23 +64,23 @@ export const AppShell: React.FC<AppShellProps> = ({
   const tabs = [
     { 
       id: 'dashboard', label: getCleanTabLabel('hub', 'Hub', 'हब'), icon: LayoutDashboard, emoji: '🏠',
-      activeText: 'text-coral', activeBg: 'bg-coral/10 border-coral/20', activeBorder: 'bg-coral'
+      activeText: 'text-orange-600', activeBg: 'bg-orange-50 border-orange-200', activeBorder: 'bg-orange-600'
     },
     { 
       id: 'planner', label: lang === 'mr' ? 'प्लॅनिंग' : 'Planning', icon: Compass, emoji: '📅',
-      activeText: 'text-emerald', activeBg: 'bg-emerald/10 border-emerald/20', activeBorder: 'bg-emerald'
+      activeText: 'text-orange-600', activeBg: 'bg-orange-50 border-orange-200', activeBorder: 'bg-orange-600'
     },
     { 
       id: 'expenses', label: getCleanTabLabel('expenses', 'Expenses', 'खर्च'), icon: Receipt, emoji: '💸',
-      activeText: 'text-white', activeBg: 'bg-emerald', activeBorder: 'bg-emerald-700', isCenter: true
+      activeText: 'text-white', activeBg: 'bg-orange-600', activeBorder: 'bg-orange-800', isCenter: true
     },
     { 
       id: 'bookings', label: getCleanTabLabel('bookings', 'Bookings', 'बुकिंग'), icon: Ticket, emoji: '🎟️',
-      activeText: 'text-coral', activeBg: 'bg-coral/10 border-coral/20', activeBorder: 'bg-coral'
+      activeText: 'text-orange-600', activeBg: 'bg-orange-50 border-orange-200', activeBorder: 'bg-orange-600'
     },
     { 
       id: 'social', label: lang === 'mr' ? 'सोशल' : 'Social', icon: Camera, emoji: '📸',
-      activeText: 'text-emerald', activeBg: 'bg-emerald/10 border-emerald/20', activeBorder: 'bg-emerald'
+      activeText: 'text-orange-600', activeBg: 'bg-orange-50 border-orange-200', activeBorder: 'bg-orange-600'
     },
     { 
       id: 'settings', label: getCleanTabLabel('settings', 'Settings', 'सेटिंग्ज'), icon: Settings, emoji: '⚙️',
@@ -110,16 +110,12 @@ export const AppShell: React.FC<AppShellProps> = ({
           title="प्रवास वाटाघाटी (Pravas Wataghati)"
         >
           <img
-            src={logoUrl || '/logo.svg'}
+            src={logoUrl || '/logobg.png'}
             alt="Pravas Wataghati Logo"
-            className="h-10 w-auto rounded-xl object-contain bg-white p-0.5"
+            className="h-10 w-auto object-contain drop-shadow-xs"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              if (!target.src.includes('ic_launcher.png')) {
-                target.src = '/AppIcons/android/mipmap-xxxhdpi/ic_launcher.png';
-              } else {
-                target.src = '/logo.svg';
-              }
+              target.src = '/logobg.png';
             }}
           />
           <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight hidden lg:inline-block pr-1">

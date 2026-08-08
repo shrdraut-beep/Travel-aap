@@ -10,7 +10,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
-  wallpaperUrl = '/screenshot-desktop.png',
+  wallpaperUrl = '/wallpaper.png',
   logoUrl = '/AppIcons/playstore.png'
 }) => {
   const { isAuthModalOpen, closeAuthModal, login, loginWithUser } = useAuthStore();
@@ -66,7 +66,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Full-screen Background Wallpaper with Dark Backdrop Blur */}
         <div
           className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-700"
-          style={{ backgroundImage: "url('/AppIcons/android/wallpaper1.jpeg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
+          style={{ backgroundImage: `url('${wallpaperUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
         >
           <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-md" />
         </div>
@@ -100,7 +100,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 alt="प्रवास वाटाघाटी Logo"
                 className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-2xl"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/logo.svg';
+                  (e.target as HTMLImageElement).src = '/logobg.png';
                 }}
               />
             </div>

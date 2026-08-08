@@ -43,6 +43,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "openai": "^7.4.0",
     "papaparse": "^5.5.4",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
