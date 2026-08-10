@@ -1,0 +1,45 @@
+{
+  "//": [
+    "TEMPLATE ONLY - copy to google-services.json and replace every REPLACE_ME value.",
+    "",
+    "How to get the real file:",
+    "  1. Firebase Console > Project settings > Your apps > Add app > Android.",
+    "  2. Use package name com.pravaswataghati.app (must match applicationId in",
+    "     android/app/build.gradle and appId in capacitor.config.ts).",
+    "  3. Download google-services.json and drop it next to this file, at",
+    "     android/app/google-services.json.",
+    "  4. Run `npm run cap:sync`, then rebuild.",
+    "",
+    "The real file is gitignored. Without it, android/app/build.gradle skips the",
+    "google-services plugin and the app still builds - push notifications just stay",
+    "inactive. Add the SHA-1/SHA-256 of your signing keys in the console too, or",
+    "Google Sign-In will fail on release builds."
+  ],
+  "project_info": {
+    "project_number": "974625843598",
+    "project_id": "gen-lang-client-0070042137",
+    "storage_bucket": "gen-lang-client-0070042137.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "REPLACE_ME_ANDROID_APP_ID",
+        "android_client_info": {
+          "package_name": "com.pravaswataghati.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "REPLACE_ME_ANDROID_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

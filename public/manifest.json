@@ -13,13 +13,6 @@
   "orientation": "portrait",
   "categories": ["travel", "finance", "productivity"],
   "prefer_related_applications": false,
-  "related_applications": [
-    {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=app.run.asia_southeast1.ais_pre_5vodqbdjbd7trju3mmuvrn_381492601332.twa",
-      "id": "app.run.asia_southeast1.ais_pre_5vodqbdjbd7trju3mmuvrn_381492601332.twa"
-    }
-  ],
   "icons": [
     {
       "src": "/icon-192x192.png",

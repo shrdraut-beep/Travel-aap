@@ -33,7 +33,8 @@ import {
 } from 'lucide-react';
 import { TripGroup } from '../../types';
 import { useAuthStore } from '../../store/useAuthStore';
-import { deleteUserAccountAndData, signOutUser, requestAndSaveFCMToken } from '../../firebase';
+import { deleteUserAccountAndData, signOutUser } from '../../firebase';
+import { enablePushNotifications } from '../../utils/push';
 import { shareAppOnWhatsApp } from '../../utils/shareUtils';
 import { PrivacyAndCreditsModal } from '../modals/PrivacyAndCreditsModal';
 
@@ -178,20 +179,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     localStorage.setItem('pref_budget_alerts', String(val));
   };
 
-  const handleTogglePushNotifications = (val: boolean) => {
+  const handleTogglePushNotifications = async (val: boolean) => {
     setPushNotifications(val);
     localStorage.setItem('pref_push_notifications', String(val));
-    if (val && typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission !== 'granted') {
-        Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-            requestAndSaveFCMToken(currentUser?.id);
-          }
-        });
-      } else {
-        requestAndSaveFCMToken(currentUser?.id);
-      }
-    }
+    if (!val) return;
+
+    // enablePushNotifications handles permission prompting and picks the right
+    // mechanism per platform (native FCM on Android, web push in the browser/PWA).
+    // Gating on window.Notification here would have skipped registration entirely
+    // inside the Capacitor WebView.
+    const result = await enablePushNotifications(currentUser?.id);
+    if (result.status === 'registered') return;
+
+    // Leaving the switch on while push is silently inactive would be misleading.
+    setPushNotifications(false);
+    localStorage.setItem('pref_push_notifications', 'false');
+    console.warn('[settings] push notifications not enabled:', result);
   };
 
   const handleToggleSosAlerts = (val: boolean) => {

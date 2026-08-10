@@ -38,6 +38,9 @@ npm test
 Expected output ends with `64 passed, 0 failed`. `PERMISSION_DENIED` lines in the
 output are normal - they are the `assertFails` cases logging their denial.
 
+The suite calls `clearFirestore()` before seeding, so it is safely re-runnable against
+a long-lived emulator; you do not need to restart the emulator between runs.
+
 ## Coverage
 
 - `users` / `metrics` - the two collections that were previously world readable and writable

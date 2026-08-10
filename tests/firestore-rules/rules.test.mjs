@@ -51,6 +51,11 @@ const admin = testEnv.authenticatedContext('admin_uid', { email: ADMIN, email_ve
 const adminUnverified = testEnv.authenticatedContext('au_uid', { email: ADMIN, email_verified: false }).firestore();
 const claimAdmin = testEnv.authenticatedContext('ca_uid', { email: 'ops@x.com', email_verified: true, admin: true }).firestore();
 
+// Start from an empty database. Without this the suite only passes against a freshly
+// started emulator: docs created by a previous run survive, so a `create` assertion
+// silently becomes an `update` and is denied by rules that only allow creates.
+await testEnv.clearFirestore();
+
 // Seed data bypassing rules
 await testEnv.withSecurityRulesDisabled(async (ctx) => {
   const db = ctx.firestore();

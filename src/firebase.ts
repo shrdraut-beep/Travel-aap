@@ -334,6 +334,36 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
+/**
+ * Persists an FCM registration token so the backend can target this device.
+ *
+ * Requires a signed-in user: `fcm_tokens` rules only accept a document whose
+ * `userId` equals the caller's uid, so an anonymous/'guest' write is always denied.
+ * Shared by the web (firebase/messaging) and native (@capacitor/push-notifications)
+ * registration paths.
+ */
+export async function saveFcmToken(
+  token: string,
+  userId: string | undefined,
+  platform: 'web/pwa' | 'android' | 'ios'
+): Promise<boolean> {
+  if (!userId) {
+    console.info('Not saving FCM token: no signed-in user to attribute it to.');
+    return false;
+  }
+  try {
+    await setDoc(
+      doc(db, 'fcm_tokens', token),
+      { token, userId, createdAt: serverTimestamp(), platform },
+      { merge: true }
+    );
+    return true;
+  } catch (error) {
+    console.error('Error saving FCM token:', error);
+    return false;
+  }
+}
+
 export async function requestAndSaveFCMToken(userId?: string) {
   try {
     const supported = await isSupported();
@@ -356,20 +386,12 @@ export async function requestAndSaveFCMToken(userId?: string) {
       return null;
     });
 
-    if (token) {
-      const tokenRef = doc(db, 'fcm_tokens', token);
-      await setDoc(tokenRef, {
-        token: token,
-        userId: userId || 'guest',
-        createdAt: serverTimestamp(),
-        platform: 'web/pwa'
-      }, { merge: true });
-      console.log("Token securely saved to Firestore for future notifications.");
-      return token;
-    } else {
+    if (!token) {
       console.log('No registration token available. Request permission to generate one.');
       return null;
     }
+
+    return (await saveFcmToken(token, userId, 'web/pwa')) ? token : null;
   } catch (error) {
     console.error("Error saving token to DB: ", error);
     return null;
