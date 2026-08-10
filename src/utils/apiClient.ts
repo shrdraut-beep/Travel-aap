@@ -116,8 +116,40 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
   }
 }
 
+/**
+ * Returns the current user's Firebase ID token, or null when signed out.
+ * Firebase refreshes the token automatically when it is close to expiry.
+ */
+export async function getIdToken(): Promise<string | null> {
+  try {
+    const { getAuthSafe } = await import('../firebase');
+    const user = getAuthSafe().currentUser;
+    if (!user) return null;
+    return await user.getIdToken();
+  } catch (err) {
+    console.warn('[apiClient] Could not obtain ID token:', err);
+    return null;
+  }
+}
+
+/**
+ * fetch() wrapper that attaches the Firebase ID token. Use for any endpoint the
+ * server protects with requireAuth / requireAdmin.
+ */
+export async function authedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = await getIdToken();
+  const headers = new Headers(options.headers || {});
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  if (options.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  return fetch(url, { ...options, headers });
+}
+
 export const apiClient = {
   fetch: apiFetch,
+  authedFetch,
+  getIdToken,
   syncOfflineActions,
 };
 

@@ -6,7 +6,24 @@ service cloud.firestore {
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
-    
+
+    // Caller's email, lowercased. Uses token.get() so a missing claim yields ''
+    // instead of erroring. Trip docs store userEmail lowercased (see App.tsx).
+    function authEmail() { return request.auth.token.get('email', '').lower(); }
+
+    // Admin identity. Prefer the `admin` custom claim, set server-side via the Admin
+    // SDK (setCustomUserClaims) - it survives email changes and is not tied to a
+    // hardcoded address. The email branch is a fallback that mirrors the client-side
+    // check in App.tsx; it requires a verified email since email acts as the key here.
+    // Once the custom claim is provisioned, drop the email branch.
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.get('admin', false) == true ||
+        (request.auth.token.get('email_verified', false) == true
+          && authEmail() == 'shrd.raut@gmail.com')
+      );
+    }
+
     function isValidTrip(data) {
       return data.id is string && data.id.size() <= 64
         && data.name is string && data.name.size() <= 200
@@ -19,50 +36,109 @@ service cloud.firestore {
         && (!('playlist' in data) || data.playlist is list)
         && (!('sosAlerts' in data) || data.sosAlerts is list)
         && (!('themeColor' in data) || data.themeColor is string)
-        && (!('passcode' in data) || (data.passcode is string && data.passcode.size() >= 4 && data.passcode.size() <= 10));
+        && (!('memberUids' in data) || (data.memberUids is list && data.memberUids.size() <= 100))
+        // No `passcode` clause: shared-trip passcodes now live in trip_secrets/{tripId},
+        // which no client can read. The create and update rules reject any client that
+        // still sends one, which also migrates legacy documents on first write.
+        && !('passcode' in data);
     }
 
+    // Firestore denies anything not explicitly allowed below. This block documents
+    // that intent; it does not itself deny (rules are OR-ed, so a `false` never
+    // overrides an `allow` in a more specific match).
     match /{document=**} {
       allow read, write: if false;
     }
 
     match /users/{userId} {
-      allow read, write: if true;
+      // A user may only read or modify their own document.
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      // Admin user-management screen lists all users (read-only).
+      allow read: if isAdmin();
     }
 
-    match /metrics/{metricId} {
-      allow read, write: if true;
+    match /user_profiles/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isAdmin();
+    }
+
+    match /fcm_tokens/{tokenId} {
+      // Push tokens are write-only from the client and never client-readable.
+      // A signed-in user may only register a token against their own uid.
+      allow create, update: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
     }
 
     match /trips/{tripId} {
+      // memberUids is maintained exclusively by the backend join/share endpoints.
+      function isTripMember() {
+        return isSignedIn()
+          && 'memberUids' in existing()
+          && existing().memberUids is list
+          && request.auth.uid in existing().memberUids;
+      }
+
       allow list: if isSignedIn() && (
-        resource.data.userEmail == request.auth.token.email ||
-        resource.data.userId == request.auth.uid
+        existing().userEmail == authEmail() ||
+        existing().userId == request.auth.uid
       );
-      
+      // The admin console counts/lists all trips with an unconstrained query, which
+      // the owner-scoped rule above cannot satisfy. This grants the admin read of
+      // every trip document - intentional for that console, but broad.
+      allow list, get: if isAdmin();
+
       allow get: if isValidId(tripId) && (
         tripId.matches('^SF-.*') ||
-        (isSignedIn() && (resource.data.userEmail == request.auth.token.email || resource.data.userId == request.auth.uid))
+        (isSignedIn() && (existing().userEmail == authEmail() || existing().userId == request.auth.uid))
       );
 
-      allow create: if isSignedIn() && isValidId(tripId) && isValidTrip(incoming());
-      
-      allow update: if isValidId(tripId) && isValidTrip(incoming())
+      // Ownership fields, when present, must identify the caller - this stops a
+      // signed-in user from creating trips attributed to somebody else.
+      allow create: if isSignedIn() && isValidId(tripId) && isValidTrip(incoming())
+                   && (!('userEmail' in incoming()) || incoming().userEmail == authEmail())
+                   && (!('userId' in incoming()) || incoming().userId == request.auth.uid);
+
+      // Writes always require authentication. Shared-trip collaborators get access by
+      // joining through POST /api/trips/join, which verifies the passcode server-side
+      // and adds their uid to memberUids. Passcodes are never compared here because
+      // they are no longer stored in this (publicly readable) document.
+      allow update: if isSignedIn() && isValidId(tripId) && isValidTrip(incoming())
                    && (incoming().id == existing().id)
                    && (
-                     (isSignedIn() && (existing().userEmail == request.auth.token.email || existing().userId == request.auth.uid)) ||
-                     ('passcode' in existing() && incoming().passcode == existing().passcode)
+                     existing().userEmail == authEmail() ||
+                     existing().userId == request.auth.uid ||
+                     isTripMember()
+                   )
+                   // Membership is granted only by the backend, so clients may not
+                   // edit the member list.
+                   && (
+                     (!('memberUids' in incoming()) && !('memberUids' in existing())) ||
+                     incoming().memberUids == existing().memberUids
                    );
 
-      allow delete: if isSignedIn() && (existing().userEmail == request.auth.token.email || existing().userId == request.auth.uid);
+      allow delete: if isSignedIn() && (existing().userEmail == authEmail() || existing().userId == request.auth.uid);
     }
-    
+
+    // Shared-trip passcodes. Completely inaccessible to clients: only the backend,
+    // which uses the Admin SDK and therefore bypasses these rules, may read or write
+    // them. Keeping the passcode out of the trip document is what stops anyone with a
+    // share link from reading it and editing the trip.
+    match /trip_secrets/{tripId} {
+      allow read, write: if false;
+    }
+
     match /support_tickets/{ticketId} {
-      allow read, write: if isSignedIn();
+      // A reporter may file a ticket and read back only their own.
+      allow create: if isSignedIn() && incoming().userEmail == authEmail();
+      allow read: if isSignedIn() && existing().userEmail == authEmail();
+      // Only the admin support console may list every ticket or change status.
+      allow read, update, delete: if isAdmin();
     }
-    
-    match /_connection_test_/{docId} {
-      allow read: if true;
+
+    // Connectivity probe read by testConnection() in firebase.ts and App.tsx.
+    // Scoped to this one empty doc rather than a whole public collection.
+    match /test/connection {
+      allow get: if true;
     }
   }
 }

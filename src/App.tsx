@@ -12,7 +12,7 @@ import { translations } from './translations';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { AppShell } from './components/layout/AppShell';
 import { OfflineBanner } from './components/OfflineBanner';
-import { apiFetch, syncOfflineActions } from './utils/apiClient';
+import { apiFetch, authedFetch, syncOfflineActions } from './utils/apiClient';
 import html2canvas from 'html2canvas-pro';
 import QRCode from 'qrcode';
 import { SplashScreen } from './components/SplashScreen';
@@ -1251,24 +1251,9 @@ function AppContent() {
     }
 
     const proceedWithExpense = () => {
-      // Protection for shared trips editing
-      if (editingExpenseId && trip.id.startsWith('SF-')) {
-        showDialog({
-          type: 'prompt',
-          title: lang === 'mr' ? 'पासवर्ड टाका' : 'Enter Passcode',
-          message: lang === 'mr' ? 'बदल करण्यासाठी पासवर्ड टाका:' : 'Enter passcode to save changes:',
-          onConfirm: (enteredPasscode) => {
-            if (enteredPasscode === trip.passcode) {
-              this_submitExpense();
-            } else {
-              triggerToast(lang === 'mr' ? 'चुकीचा पासवर्ड!' : 'Incorrect passcode!', 'alert');
-            }
-            closeDialog();
-          },
-          onCancel: closeDialog
-        });
-        return;
-      }
+      // Shared-trip edits used to be gated by a client-side passcode comparison. That
+      // was bypassable and the passcode is no longer readable by clients; Firestore
+      // rules now enforce that only the owner or a joined member can write.
       this_submitExpense();
     };
 
@@ -1401,22 +1386,10 @@ function AppContent() {
       triggerToast(lang === 'mr' ? 'खर्च हटवला' : "Expense deleted");
     };
 
-    if (trip.id.startsWith('SF-')) {
-      showDialog({
-        type: 'prompt',
-        title: lang === 'mr' ? 'पासवर्ड टाका' : 'Enter Passcode',
-        message: lang === 'mr' ? 'खर्च हटवण्यासाठी पासवर्ड टाका:' : 'Enter passcode to delete expense:',
-        onConfirm: (enteredPasscode) => {
-          if (enteredPasscode === trip.passcode) {
-            performDelete();
-          } else {
-            triggerToast(lang === 'mr' ? 'चुकीचा पासवर्ड!' : 'Incorrect passcode!', 'alert');
-          }
-          closeDialog();
-        },
-        onCancel: closeDialog
-      });
-    } else {
+    {
+      // Shared trips no longer prompt for a passcode here: the value is not readable
+      // by clients any more and Firestore rules already restrict writes to the owner
+      // and joined members.
       showDialog({
         type: 'confirm',
         title: lang === 'mr' ? 'खात्री करा' : 'Confirm Delete',
@@ -1556,10 +1529,29 @@ function AppContent() {
           return;
         }
         const code = "SF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-        const newTrip = { ...trip, id: code, passcode };
+        // The passcode is never written into the trip document - it is stored by the
+        // backend in trip_secrets/{tripId}, which no client can read. Otherwise anyone
+        // holding the share link could read the passcode and edit the trip.
+        const { passcode: _omitPasscode, ...tripWithoutPasscode } = trip as any;
+        const newTrip = { ...tripWithoutPasscode, id: code };
         try {
           await setDoc(doc(db, "trips", code), sanitizeForFirestore(newTrip));
-          setTripsList((prev) => [...prev.filter(t => t.id !== trip.id), newTrip]);
+
+          const res = await authedFetch('/api/trips/share', {
+            method: 'POST',
+            body: JSON.stringify({ tripId: code, passcode }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            triggerToast(err.error || 'Could not enable sharing.', 'alert');
+            closeDialog();
+            return;
+          }
+
+          // The backend added us to memberUids; mirror it locally so the next write
+          // round-trips the field unchanged (security rules require that).
+          const shared = { ...newTrip, memberUids: [currentUser?.id].filter(Boolean) } as TripGroup;
+          setTripsList((prev) => [...prev.filter(t => t.id !== trip.id), shared]);
           setActiveTripId(code);
           setTripCode(code);
           setIsCloudSynced(true);
@@ -1567,6 +1559,7 @@ function AppContent() {
           triggerToast("Cloud sharing active!", "success");
         } catch (e) {
           console.error(e);
+          triggerToast('Could not enable sharing.', 'alert');
         }
         closeDialog();
       },
@@ -1577,34 +1570,58 @@ function AppContent() {
   const handleJoinTrip = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputCode) return;
-    try {
-      const snap = await getDoc(doc(db, "trips", inputCode.toUpperCase()));
-      if (snap.exists()) {
-        const data = snap.data() as TripGroup;
-        
-        if (data.passcode) {
-          showDialog({
-            type: 'prompt',
-            title: lang === 'mr' ? 'पासवर्ड टाका' : 'Enter Passcode',
-            message: lang === 'mr' ? 'या सहलीचा पासवर्ड (Security Code) टाका:' : 'Enter the Security Code for this trip:',
-            onConfirm: (enteredPasscode) => {
-              if (enteredPasscode === data.passcode) {
-                this_completeJoin(data);
-              } else {
-                triggerToast(lang === 'mr' ? 'चुकीचा पासवर्ड!' : 'Incorrect passcode!', 'alert');
-              }
-              closeDialog();
-            },
-            onCancel: closeDialog
-          });
-        } else {
-          this_completeJoin(data);
-        }
-      } else {
-        triggerToast(t("invalidCode"), "alert");
+
+    const tripId = inputCode.toUpperCase();
+
+    // Joining goes through the backend: it verifies the passcode against
+    // trip_secrets/{tripId} (unreadable by clients) and records this user in
+    // memberUids, which is what grants write access under the security rules.
+    const attemptJoin = async (passcode?: string): Promise<'ok' | 'passcode' | 'failed'> => {
+      const res = await authedFetch('/api/trips/join', {
+        method: 'POST',
+        body: JSON.stringify({ tripId, passcode: passcode || '' }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        this_completeJoin(data.trip as TripGroup);
+        return 'ok';
       }
+      if (res.status === 403) return 'passcode';
+      if (res.status === 401) {
+        triggerToast(lang === 'mr' ? 'कृपया प्रथम साइन इन करा' : 'Please sign in to join a trip', 'alert');
+        return 'failed';
+      }
+      if (res.status === 404) {
+        triggerToast(t("invalidCode"), "alert");
+        return 'failed';
+      }
+      const err = await res.json().catch(() => ({}));
+      triggerToast(err.error || t("invalidCode"), "alert");
+      return 'failed';
+    };
+
+    try {
+      // Try without a passcode first so trips that have none join in one step.
+      const first = await attemptJoin();
+      if (first !== 'passcode') return;
+
+      showDialog({
+        type: 'prompt',
+        title: lang === 'mr' ? 'पासवर्ड टाका' : 'Enter Passcode',
+        message: lang === 'mr' ? 'या सहलीचा पासवर्ड (Security Code) टाका:' : 'Enter the Security Code for this trip:',
+        onConfirm: async (enteredPasscode) => {
+          closeDialog();
+          const result = await attemptJoin(enteredPasscode);
+          if (result === 'passcode') {
+            triggerToast(lang === 'mr' ? 'चुकीचा पासवर्ड!' : 'Incorrect passcode!', 'alert');
+          }
+        },
+        onCancel: closeDialog
+      });
     } catch (e) {
       console.error(e);
+      triggerToast(t("invalidCode"), "alert");
     }
   };
 

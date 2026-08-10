@@ -204,7 +204,15 @@ export interface TripGroup {
   gallery?: TripMemory[]; // Shared Trip Gallery
   playlist?: PlaylistItem[]; // Collaborative Trip Playlist
   sosAlerts?: SOSAlert[]; // Emergency SOS alerts
-  passcode?: string; // Security code for the trip
+  /**
+   * @deprecated Shared-trip passcodes now live in `trip_secrets/{tripId}`, which no
+   * client can read. Never write this back to the trip document - security rules
+   * reject any trip payload containing it. Retained only so legacy local records
+   * still type-check while they are migrated on first write.
+   */
+  passcode?: string;
+  /** Uids allowed to write to a shared trip. Maintained solely by the backend. */
+  memberUids?: string[];
   status?: 'PLANNED' | 'ACTIVE' | 'SETTLED' | 'COMPLETED'; // Definitive status of the trip
   savedTickets?: SavedTicket[]; // Saved Tickets & PNR Numbers
   isSynced?: boolean; // Offline-first sync status

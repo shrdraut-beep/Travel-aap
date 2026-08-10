@@ -132,31 +132,19 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
 
   const handleConfirmMakeTrip = async () => {
     if (!previewPlan) return;
-    
-    // Add Firestore import
-    const { db } = await import('../../firebase');
-    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
 
     const aiPlanObj = typeof previewPlan === 'string' ? previewPlan : JSON.stringify(previewPlan);
+    // Persistence is handled by the onConvertSmartTrip handler in App.tsx, which builds
+    // a complete TripGroup (id, endDate, userEmail/userId) and writes it to Firestore.
+    // Writing here as well produced a duplicate document that was missing those fields.
     const tripPayload = {
       name: previewPlan.trip_title || destination,
       startDate: departureDate,
       days: Number(days),
       budget: Number(budget),
       transportMode: transport,
-      aiPlan: aiPlanObj,
-      createdAt: serverTimestamp(),
-      ownerId: 'placeholder-user-id', // Need to get current user ID
-      // Mapping to calendar/list view structure
-      itinerary: previewPlan.itinerary
+      aiPlan: aiPlanObj
     };
-
-    try {
-      await addDoc(collection(db, 'trips'), tripPayload);
-    } catch (e) {
-      console.error("Error saving trip:", e);
-      onAlert(lang === 'mr' ? 'सहल जतन करण्यात त्रुटी आली.' : 'Failed to save trip.');
-    }
 
     if ((window as any).onConvertSmartTrip) {
       (window as any).onConvertSmartTrip(tripPayload);

@@ -34,8 +34,11 @@
     "dotenv": "^17.2.3",
     "esbuild": "^0.25.12",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.6.2",
     "firebase": "^12.16.0",
+    "firebase-admin": "^14.2.0",
     "framer-motion": "^12.43.0",
+    "helmet": "^8.3.0",
     "html2canvas-pro": "^2.3.2",
     "html2pdf.js": "^0.14.0",
     "idb": "^8.0.3",
@@ -60,12 +63,13 @@
     "workbox-build": "^7.4.1",
     "workbox-core": "^7.4.1",
     "workbox-window": "^7.4.1",
-    "xlsx": "^0.18.5",
-    "yt-search": "^2.13.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@types/papaparse": "^5.5.2",
-    "sharp-cli": "^5.2.0"
+    "@types/papaparse": "^5.5.2"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }

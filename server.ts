@@ -1,20 +1,162 @@
 import express from "express";
 import path from "path";
-import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 import axios from "axios";
 import * as dotenv from "dotenv";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { initializeApp, applicationDefault, getApps, type App as AdminApp } from "firebase-admin/app";
+import { getAuth as getAdminAuth, type DecodedIdToken } from "firebase-admin/auth";
+import { getFirestore as getAdminFirestore, FieldValue } from "firebase-admin/firestore";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-// Body parsing
+// --- FIREBASE ADMIN / AUTHENTICATION ---
+
+// Emails allowed to reach admin endpoints. Mirrors isAdmin() in firestore.rules.
+// Prefer provisioning the `admin` custom claim instead of relying on this list.
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "shrd.raut@gmail.com")
+  .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+
+const FIRESTORE_DATABASE_ID =
+  process.env.FIREBASE_DATABASE_ID ||
+  "ai-studio-grouptravelplann-f077e851-c9d2-483d-be19-1d2a3b70ff44";
+
+let adminApp: AdminApp | null = null;
+let adminInitFailed = false;
+
+// Lazily initialise the Admin SDK. On Cloud Run / GCE the default service account is
+// picked up automatically; locally set GOOGLE_APPLICATION_CREDENTIALS. If credentials
+// are unavailable we fail closed - protected routes return 503 rather than opening up.
+function getAdminApp(): AdminApp | null {
+  if (adminApp) return adminApp;
+  if (adminInitFailed) return null;
+  try {
+    adminApp = getApps().length
+      ? getApps()[0]
+      : initializeApp({
+          credential: applicationDefault(),
+          projectId: process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT,
+        });
+    return adminApp;
+  } catch (err: any) {
+    adminInitFailed = true;
+    console.error(
+      "[auth] Firebase Admin SDK unavailable - protected endpoints will return 503. " +
+      "Set GOOGLE_APPLICATION_CREDENTIALS (local) or run with a service account (Cloud Run).",
+      err?.message || err
+    );
+    return null;
+  }
+}
+
+function adminDb() {
+  const a = getAdminApp();
+  if (!a) return null;
+  return getAdminFirestore(a, FIRESTORE_DATABASE_ID);
+}
+
+interface AuthedRequest extends express.Request {
+  user?: DecodedIdToken;
+}
+
+// Verifies the Firebase ID token in `Authorization: Bearer <token>`.
+async function requireAuth(req: AuthedRequest, res: express.Response, next: express.NextFunction) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  const a = getAdminApp();
+  if (!a) {
+    return res.status(503).json({ error: "Authentication is not configured on this server" });
+  }
+
+  try {
+    req.user = await getAdminAuth(a).verifyIdToken(token);
+    return next();
+  } catch {
+    // Deliberately generic - do not disclose why verification failed.
+    return res.status(401).json({ error: "Invalid or expired credentials" });
+  }
+}
+
+function isAdminUser(user?: DecodedIdToken): boolean {
+  if (!user) return false;
+  if (user.admin === true) return true;
+  const email = (user.email || "").toLowerCase();
+  return user.email_verified === true && ADMIN_EMAILS.includes(email);
+}
+
+async function requireAdmin(req: AuthedRequest, res: express.Response, next: express.NextFunction) {
+  await requireAuth(req, res, async () => {
+    if (!isAdminUser(req.user)) {
+      return res.status(403).json({ error: "Administrator access required" });
+    }
+    next();
+  });
+}
+
+// Security headers. CSP is intentionally Report-Only: this app talks to many external
+// origins (Firebase, Google APIs, tile servers, image and AI providers) and an
+// enforcing policy would silently break features. Collect reports, then switch to
+// enforcing by moving these directives under `contentSecurityPolicy`.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  // Allow cross-origin image/media loads (tile servers, Unsplash/Pexels, avatars).
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+}));
+
+// NOTE: no CORS middleware is registered on purpose. With no CORS headers the browser
+// same-origin policy already blocks cross-origin reads, which is the safe default.
+// Only add `cors()` with an explicit origin allowlist if another origin must call this
+// API - never `cors()` with no options, which allows every origin.
+
+// Body parsing. The large limit exists for base64 receipt images posted to
+// /api/scan-receipt; other routes get a much smaller cap below.
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+// Rate limiting. The AI routes proxy paid third-party APIs, so an unauthenticated
+// caller could otherwise run up cost or exhaust quota.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please retry shortly." },
+});
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "AI request limit reached. Please retry in a few minutes." },
+});
+
+app.use("/api/", apiLimiter);
+for (const aiRoute of [
+  "/api/gemini/chat",
+  "/api/scan-receipt",
+  "/api/generate-itinerary",
+  "/api/generate-future-trip-plan",
+  "/api/generate-destination-templates",
+  "/api/parse-booking-text",
+  "/api/parse-voice-command",
+  "/api/transit-schedules",
+  "/api/generate-maharaja-trip",
+]) {
+  app.use(aiRoute, aiLimiter);
+}
 
 
 // Global API Stats Tracker
@@ -52,23 +194,10 @@ function getRealStats(endpoint: string, fallbackLatency: string = 'N/A') {
 }
 
 
-// Download source zip route
-app.get(["/api/download-zip", "/download-source.zip", "/app-source.zip", "/project_code.zip"], (req, res) => {
-  const zipPathPublic = path.join(process.cwd(), "public", "app-source.zip");
-  const zipPathRoot = path.join(process.cwd(), "project_code.zip");
-  const zipPath = fs.existsSync(zipPathPublic) ? zipPathPublic : zipPathRoot;
-
-  if (fs.existsSync(zipPath)) {
-    res.setHeader("Content-Type", "application/zip");
-    res.download(zipPath, "pravas-wataghati-app-source.zip", (err) => {
-      if (err && !res.headersSent) {
-        res.status(500).send("Error downloading zip archive.");
-      }
-    });
-  } else {
-    res.status(404).send("Zip archive is being generated. Please retry in a few seconds.");
-  }
-});
+// NOTE: the source-archive download route that used to live here was removed.
+// It served the full application source tree to any unauthenticated caller and had
+// no callers in the client. If you need source export, do it out of band rather
+// than from the running app.
 
 // OpenAI Setup with safe lazy initialization
 let openai: OpenAI | null = null;
@@ -758,6 +887,147 @@ app.get("/api/pexels", async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to search images" });
+  }
+});
+
+// EarnKaro Affiliate Link Proxy
+// Keeps EARNKARO_API_KEY server-side; the key must never reach the client bundle.
+app.post("/api/affiliate-link", async (req, res) => {
+  const merchantUrl = typeof req.body?.url === "string" ? req.body.url.trim() : "";
+
+  // Require an absolute http(s) URL. The generated link is handed back to the client
+  // and used as an href, so reject schemes like javascript: / data: / file:.
+  let parsed: URL;
+  try {
+    parsed = new URL(merchantUrl);
+  } catch {
+    return res.status(400).json({ error: "A valid absolute URL is required" });
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return res.status(400).json({ error: "Only http and https URLs are supported" });
+  }
+
+  const apiKey = process.env.EARNKARO_API_KEY;
+  if (!apiKey) {
+    // Not configured - let the client fall back to its default link.
+    return res.json({ link: null });
+  }
+
+  const apiUrl = process.env.EARNKARO_API_URL || "https://api.earnkaro.com/v1/generate-link";
+
+  try {
+    const response = await axios.post(
+      apiUrl,
+      { url: parsed.toString() },
+      { headers: { Authorization: `Bearer ${apiKey}` }, timeout: 8000 }
+    );
+    return res.json({ link: response.data?.short_link || null });
+  } catch (err: any) {
+    console.warn("[EarnKaro API Notice]:", err?.response?.status || err?.message || err);
+    return res.json({ link: null });
+  }
+});
+
+// --- SHARED TRIP ACCESS ---
+// The trip passcode lives in `trip_secrets/{tripId}`, which security rules make
+// unreadable and unwritable by every client. Only these endpoints (via the Admin SDK,
+// which bypasses rules) can read or set it. That is what makes the passcode a real
+// secret: previously it sat in the publicly readable trip document, so anyone holding
+// a share link could read it and edit the trip.
+
+function normalisedTripId(raw: unknown): string {
+  return typeof raw === "string" ? raw.trim().toUpperCase() : "";
+}
+
+// Owner enables sharing: stores the passcode out of band and records them as a member.
+app.post("/api/trips/share", requireAuth, async (req: AuthedRequest, res) => {
+  const tripId = normalisedTripId(req.body?.tripId);
+  const passcode = typeof req.body?.passcode === "string" ? req.body.passcode : "";
+
+  if (!/^[A-Z0-9_-]{1,128}$/.test(tripId)) {
+    return res.status(400).json({ error: "A valid tripId is required" });
+  }
+  if (passcode.length < 4 || passcode.length > 10) {
+    return res.status(400).json({ error: "Passcode must be 4 to 10 characters" });
+  }
+
+  const db = adminDb();
+  if (!db) return res.status(503).json({ error: "Server storage is not configured" });
+
+  try {
+    const tripRef = db.collection("trips").doc(tripId);
+    const snap = await tripRef.get();
+    if (!snap.exists) return res.status(404).json({ error: "Trip not found" });
+
+    const trip = snap.data() || {};
+    const uid = req.user!.uid;
+    const email = (req.user!.email || "").toLowerCase();
+    const isOwner = trip.userId === uid || (trip.userEmail || "").toLowerCase() === email;
+    if (!isOwner) {
+      return res.status(403).json({ error: "Only the trip owner can enable sharing" });
+    }
+
+    await db.collection("trip_secrets").doc(tripId).set({
+      passcode,
+      tripId,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    // Ensure the owner keeps write access under the membership-based rules, and drop
+    // any passcode copy left in the publicly readable trip document.
+    await tripRef.update({
+      memberUids: FieldValue.arrayUnion(uid),
+      passcode: FieldValue.delete(),
+    });
+
+    return res.json({ success: true, tripId });
+  } catch (err: any) {
+    console.error("[trips/share] error:", err?.message || err);
+    return res.status(500).json({ error: "Could not enable sharing for this trip" });
+  }
+});
+
+// Joiner proves knowledge of the passcode; the server adds them to memberUids, which is
+// what security rules check for write access.
+app.post("/api/trips/join", requireAuth, async (req: AuthedRequest, res) => {
+  const tripId = normalisedTripId(req.body?.tripId);
+  const passcode = typeof req.body?.passcode === "string" ? req.body.passcode : "";
+
+  if (!/^[A-Z0-9_-]{1,128}$/.test(tripId)) {
+    return res.status(400).json({ error: "A valid trip code is required" });
+  }
+
+  const db = adminDb();
+  if (!db) return res.status(503).json({ error: "Server storage is not configured" });
+
+  try {
+    const tripRef = db.collection("trips").doc(tripId);
+    const snap = await tripRef.get();
+    if (!snap.exists) return res.status(404).json({ error: "Trip not found" });
+
+    const secretSnap = await db.collection("trip_secrets").doc(tripId).get();
+    const expected = secretSnap.exists ? (secretSnap.data() || {}).passcode : null;
+
+    if (expected) {
+      // Constant-time-ish comparison; lengths are short and already bounded.
+      const provided = passcode || "";
+      let mismatch = provided.length === expected.length ? 0 : 1;
+      for (let i = 0; i < Math.max(provided.length, expected.length); i++) {
+        if (provided.charCodeAt(i) !== expected.charCodeAt(i)) mismatch |= 1;
+      }
+      if (mismatch) {
+        return res.status(403).json({ error: "Incorrect passcode" });
+      }
+    }
+
+    await tripRef.update({ memberUids: FieldValue.arrayUnion(req.user!.uid) });
+
+    const fresh = await tripRef.get();
+    const trip = fresh.data() || {};
+    delete (trip as any).passcode;
+    return res.json({ success: true, trip: { ...trip, id: tripId } });
+  } catch (err: any) {
+    console.error("[trips/join] error:", err?.message || err);
+    return res.status(500).json({ error: "Could not join this trip" });
   }
 });
 
@@ -1881,7 +2151,7 @@ ${daysContent}
 
 
 // 12. Admin & Agent API
-app.get("/api/admin/health", (req, res) => {
+app.get("/api/admin/health", requireAdmin, (req, res) => {
   const geminiActive = !!process.env.GEMINI_API_KEY;
   const pexelsActive = !!process.env.PEXELS_API_KEY;
   
@@ -2178,7 +2448,7 @@ app.get("/api/admin/health", (req, res) => {
   }));
 });
 
-app.post("/api/admin/ping-api", (req, res) => {
+app.post("/api/admin/ping-api", requireAdmin, (req, res) => {
   const { apiId, endpoint } = req.body || {};
   const randomLatency = Math.floor(Math.random() * 40) + 12; // 12ms - 52ms
   res.json({
@@ -2192,7 +2462,8 @@ app.post("/api/admin/ping-api", (req, res) => {
     message: `Ping successful! Endpoint ${endpoint || apiId} responded in ${randomLatency}ms with HTTP 200 OK.`
   });
 });
-app.get("/api/agent/metrics", (req, res) => {
+// Agent portal metrics: any signed-in user, not admin-only.
+app.get("/api/agent/metrics", requireAuth, (req, res) => {
   res.json({ appHealth: 99, systemHealth: 98, securityHealth: 100, totalUsers: 520 });
 });
 

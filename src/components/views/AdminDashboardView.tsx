@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
+import { authedFetch } from '../../utils/apiClient';
 import { 
   Users, Activity, CheckCircle2, XCircle, AlertTriangle, Link2Off, LogOut,
   ShieldCheck, PackageSearch, DollarSign, TrendingUp, FileText, ShieldAlert,
@@ -95,7 +96,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const fetchApiHealth = async () => {
     const url = '/api/admin/health';
     try {
-      const res = await fetch(url);
+      const res = await authedFetch(url);
       if (res.status === 429) {
         console.error("API Rate Limit Hit for:", url);
       }
@@ -188,9 +189,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
     setPingingApiId(api.id);
     const url = '/api/admin/ping-api';
     try {
-      const res = await fetch(url, {
+      const res = await authedFetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiId: api.id, endpoint: api.endpoint })
       });
       if (res.status === 429) {

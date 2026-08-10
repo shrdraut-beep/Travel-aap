@@ -36,24 +36,18 @@ export const EARNKARO_PROFIT_LINK = "https://bitli.in/1HdfW4l";
 
 /**
  * EarnKaro Affiliate Link Generator
- * Accepts a merchant/partner URL and generates a tracking link via EarnKaro API.
+ * Generates a tracking link via the /api/affiliate-link backend proxy, which holds
+ * the EarnKaro API key server-side so it is never exposed in the client bundle.
  * Safely falls back to merchantUrl or default EarnKaro profit link if request fails.
  */
 export async function getAffiliateLink(merchantUrl: string): Promise<string> {
   const fallbackUrl = merchantUrl || EARNKARO_PROFIT_LINK;
-  const earnKaroApiUrl = process.env.EARNKARO_API_URL || "https://api.earnkaro.com/v1/generate-link";
-  const myApiKey = process.env.EARNKARO_API_KEY || (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_EARNKARO_API_KEY) || "";
-
-  if (!myApiKey) {
-    return fallbackUrl;
-  }
 
   try {
-    const response = await fetch(earnKaroApiUrl, {
+    const response = await fetch('/api/affiliate-link', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${myApiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         url: merchantUrl || EARNKARO_PROFIT_LINK
@@ -65,12 +59,7 @@ export async function getAffiliateLink(merchantUrl: string): Promise<string> {
     }
 
     const data = await response.json();
-
-    if (data && data.short_link) {  
-      return data.short_link;
-    } else {
-      return fallbackUrl; 
-    }
+    return data?.link || fallbackUrl;
   } catch (error) {
     console.error("Link generation failed:", error);
     return fallbackUrl;

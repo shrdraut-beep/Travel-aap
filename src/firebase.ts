@@ -30,15 +30,21 @@ import {
 import { getStorage, ref, listAll, deleteObject } from "firebase/storage";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
-// Config parsed from firebase-applet-config.json
+// Config parsed from firebase-applet-config.json.
+// NOTE: Firebase web config values (including apiKey) are public identifiers, not
+// secrets - they are required in the client bundle for the SDK to work. Access is
+// controlled by Firestore/Storage security rules, Google Cloud API key referrer
+// restrictions, and App Check - never by hiding these values.
+// The env overrides below exist only to point builds at a different Firebase project.
+const env = (import.meta as any).env || {};
 const firebaseConfig = {
-  projectId: "gen-lang-client-0070042137",
-  appId: "1:974625843598:web:79a85a1f88ddc5fbe95cdf",
-  apiKey: "AIzaSyAqWmoMOZIflucdFRmqV_WJPMvPMBx9LGI",
-  authDomain: "gen-lang-client-0070042137.firebaseapp.com",
-  firestoreDatabaseId: "ai-studio-grouptravelplann-f077e851-c9d2-483d-be19-1d2a3b70ff44",
-  storageBucket: "gen-lang-client-0070042137.firebasestorage.app",
-  messagingSenderId: "974625843598"
+  projectId: env.VITE_FIREBASE_PROJECT_ID || "gen-lang-client-0070042137",
+  appId: env.VITE_FIREBASE_APP_ID || "1:974625843598:web:79a85a1f88ddc5fbe95cdf",
+  apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyAqWmoMOZIflucdFRmqV_WJPMvPMBx9LGI",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0070042137.firebaseapp.com",
+  firestoreDatabaseId: env.VITE_FIREBASE_DATABASE_ID || "ai-studio-grouptravelplann-f077e851-c9d2-483d-be19-1d2a3b70ff44",
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0070042137.firebasestorage.app",
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "974625843598"
 };
 
 // Initialize Firebase
@@ -248,6 +254,14 @@ export async function signOutUser(): Promise<void> {
   }
 }
 
+/**
+ * Fields that must never be persisted to a trip document. `passcode` used to be stored
+ * here, which meant anyone holding a share link could read it and edit the trip; it now
+ * lives in `trip_secrets/{tripId}` and is only handled by the backend. Stripping it at
+ * this single choke point also migrates legacy documents on their next write.
+ */
+const TRIP_FIELD_DENYLIST = ['passcode'];
+
 export function sanitizeForFirestore<T>(data: T): T {
   if (data === undefined || data === null) return data;
 
@@ -270,9 +284,17 @@ export function sanitizeForFirestore<T>(data: T): T {
   };
 
   try {
-    return sanitize(data);
+    const cleaned = sanitize(data);
+    if (cleaned && typeof cleaned === 'object' && !Array.isArray(cleaned)) {
+      for (const field of TRIP_FIELD_DENYLIST) delete cleaned[field];
+    }
+    return cleaned;
   } catch (err) {
-    return JSON.parse(JSON.stringify(data));
+    const fallback = JSON.parse(JSON.stringify(data));
+    if (fallback && typeof fallback === 'object' && !Array.isArray(fallback)) {
+      for (const field of TRIP_FIELD_DENYLIST) delete fallback[field];
+    }
+    return fallback;
   }
 }
 
@@ -319,13 +341,18 @@ export async function requestAndSaveFCMToken(userId?: string) {
       console.log('Firebase Messaging is not supported in this environment.');
       return null;
     }
+    // VAPID public key from the Firebase Console (Cloud Messaging > Web Push
+    // certificates). Without it getToken() cannot produce a usable token, so skip
+    // registration rather than calling with a placeholder that always fails.
+    const vapidKey = env.VITE_FIREBASE_VAPID_KEY;
+    if (!vapidKey) {
+      console.info('Push notifications disabled: VITE_FIREBASE_VAPID_KEY is not configured.');
+      return null;
+    }
+
     const messaging = getMessaging(app);
-    // VAPID key would normally go here if configured in Firebase Console
-    const token = await getToken(messaging, {
-      vapidKey: 'BBE23B33C3B23C3B23C3B23C3B23C3B23C3B23C3B23C3B23C3B23C3B23' // Fake key for preview purposes, or should use actual if provided. The user didn't provide one.
-    }).catch(err => {
-      // It will likely fail without a valid VAPID key on web, but this is the structure requested
-      console.warn('GetToken failed (likely missing VAPID key in preview):', err);
+    const token = await getToken(messaging, { vapidKey }).catch(err => {
+      console.warn('FCM getToken failed:', err);
       return null;
     });
 

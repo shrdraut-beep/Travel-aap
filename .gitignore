@@ -1,7 +1,16 @@
 node_modules/
 build/
+dist/
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
+
+# Source archives must never be committed or placed in public/ - anything under
+# public/ is served statically and copied into dist/, which publishes the app's
+# full source to anyone who requests it.
+*.zip
+*.tar
+*.tar.gz
+*.7z

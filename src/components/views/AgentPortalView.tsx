@@ -45,6 +45,7 @@ import {
   Tooltip, 
   CartesianGrid 
 } from 'recharts';
+import { authedFetch } from '../../utils/apiClient';
 
 interface AgentPortalViewProps {
   lang?: string;
@@ -111,7 +112,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
     const fetchAgentData = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch('/api/agent/metrics').catch(() => null);
+        const res = await authedFetch('/api/agent/metrics').catch(() => null);
         if (res && res.ok) {
            const data = await res.json();
            setAppHealth(data.appHealth || 0);
