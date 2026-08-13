@@ -21,6 +21,7 @@ import { TripAwardsBanner } from '../TripAwardsBanner';
 import { TimepassGame } from './TimepassGame';
 import { BookingsView } from './BookingsView';
 import { PreTripPlanner } from '../PreTripPlanner';
+import { AdSlider } from './AdSlider';
 
 interface DashboardViewProps {
   trip: TripGroup;
@@ -469,7 +470,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const updateAlertsCache = async (enabled: boolean, status?: string) => {
     if ('caches' in window) {
       try {
-        const cache = await caches.open('pravas-wataghati-v6');
+        const cache = await caches.open('routripo-wataghati-v6');
         const response = new Response(JSON.stringify({ alerts_enabled: enabled, tripStatus: status }));
         await cache.put('/alerts_enabled.json', response);
       } catch (err) {
@@ -878,41 +879,48 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
   return (
-    <div className="space-y-5 w-full">
-      <div className="px-5 pt-3 flex flex-col items-center justify-center space-y-4">
-        <div className="flex items-center justify-between w-full">
+    <>
+      <div className="space-y-5 w-full">
+      {trip.destination && (
+        <div className="px-5">
+          <AdSlider city={trip.destination} />
+        </div>
+      )}
+      
+      <div className="px-5 flex items-center justify-between w-full">
+        <button 
+          onClick={() => onNavigate('all-trips')}
+          className="px-3.5 py-1.5 bg-white text-rose-600 rounded-xl flex items-center gap-1.5 border border-slate-200/80 shadow-xs hover:bg-slate-50 active:scale-95 transition-all text-xs font-bold"
+        >
+          <ChevronRight className="w-4 h-4 rotate-180" />
+          <span>{lang === 'mr' ? 'सहली' : 'Trips'}</span>
+        </button>
+      </div>
+
+      <div className="flex flex-col items-center text-center px-5">
+        <div className="flex items-center justify-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{trip.name}</h1>
           <button 
-            onClick={() => onNavigate('trips-list')}
-            className="px-4 py-2 bg-white backdrop-blur-md text-slate-800 rounded-xl flex items-center gap-2 border border-slate-200/50 shadow-sm active:scale-95 transition-all"
+            type="button"
+            onClick={handleInviteFriends}
+            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 rounded-xl shadow-xs active:scale-90 transition-all shrink-0 cursor-pointer"
+            title={lang === 'mr' ? 'सहलीची माहिती शेअर करा' : 'Share Trip'}
           >
-            <ChevronRight className="w-5 h-5 rotate-180" />
-            <span className="text-sm font-bold uppercase tracking-widest">{lang === 'mr' ? 'सहली' : 'Trips'}</span>
+            <Share2 className="w-4.5 h-4.5" />
           </button>
         </div>
-        <div className="flex flex-col items-center text-center">
-          <div className="flex items-center justify-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">{trip.name}</h1>
-            <button 
-              type="button"
-              onClick={handleInviteFriends}
-              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 rounded-xl shadow-xs active:scale-90 transition-all shrink-0 cursor-pointer"
-              title={lang === 'mr' ? 'सहलीची माहिती शेअर करा' : 'Share Trip'}
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-          </div>
-          {countryInfo && (
-            <div className="flex items-center justify-center gap-2 mt-2 text-sm font-semibold text-slate-600 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
-              <span className="text-lg leading-none">{countryInfo.flag}</span>
-              <span>{countryInfo.name}</span>
-              {countryInfo.currencies && (
-                <span className="text-slate-400 border-l border-slate-300 pl-2 ml-1">
-                  {Object.values(countryInfo.currencies).map((c: any) => c.symbol).join(', ')}
-                </span>
-              )}
-            </div>
+      </div>
+      {countryInfo && (
+        <div className="px-5 flex items-center justify-center gap-2 mt-2 text-sm font-semibold text-slate-600 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
+          <span className="text-lg leading-none">{countryInfo.flag}</span>
+          <span>{countryInfo.name}</span>
+          {countryInfo.currencies && (
+            <span className="text-slate-400 border-l border-slate-300 pl-2 ml-1">
+              {Object.values(countryInfo.currencies).map((c: any) => c.symbol).join(', ')}
+            </span>
           )}
         </div>
+      )}
 
         <div className="w-full">
           <HolidayAlertWidget startDate={trip.startDate} endDate={trip.endDate} lang={lang} />
@@ -1060,17 +1068,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </button>
 
           {trip.status !== 'SETTLED' ? (
-            (currentUser?.id === trip.adminId) && <button 
-              onClick={() => { setSettleClickCount(0); setShowSettleModal(true); }}
-              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 p-3 bg-coral hover:bg-coral/90 text-white rounded-2xl shadow-lg active:scale-95 transition-all cursor-pointer font-extrabold"
-            >
-              <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-white shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-xs font-extrabold uppercase tracking-tight truncate">
-                {t('settleTrip')}
-              </span>
-            </button>
+            currentUser?.id === trip.adminId ? (
+              <button 
+                onClick={() => { setSettleClickCount(0); setShowSettleModal(true); }}
+                className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 p-3 bg-coral hover:bg-coral/90 text-white rounded-2xl shadow-lg active:scale-95 transition-all cursor-pointer font-extrabold"
+              >
+                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-white shrink-0">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-extrabold uppercase tracking-tight truncate">
+                  {t('settleTrip')}
+                </span>
+              </button>
+            ) : null
           ) : (
             <button 
               onClick={handleReopenTrip}
@@ -2099,7 +2109,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             />
           </a>
         </div>
-      </div>
 
       {/* Trip Manager Live Advisory Chat Modal */}
       <AnimatePresence>
@@ -2317,7 +2326,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </motion.div>
           </div>
         )}
+      </AnimatePresence>
 
+      <AnimatePresence>
         {showSettleModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
             <motion.div 
@@ -2371,5 +2382,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         )}
       </AnimatePresence>
     </div>
+    </>
   );
 };

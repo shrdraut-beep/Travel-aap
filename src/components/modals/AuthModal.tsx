@@ -97,7 +97,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="p-3 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border-2 border-white/60 inline-flex items-center justify-center">
               <img
                 src={logoUrl}
-                alt="प्रवास वाटाघाटी Logo"
+                alt="राऊट्रिपो Logo"
                 className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-2xl"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = '/logobg.png';
@@ -109,12 +109,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          {/* App Title strictly reads 'प्रवास वाटाघाटी' */}
+          {/* App Title strictly reads 'राऊट्रिपो' */}
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">
-            प्रवास वाटाघाटी
+            राऊट्रिपो
           </h2>
           <p className="text-xs font-bold text-teal-300 uppercase tracking-widest mt-1 drop-shadow">
-            Pravas Wataghati • Trip & Expense Hub
+            Routripo • Trip & Expense Hub
           </p>
 
           <p className="text-xs font-medium text-slate-200 mt-3 mb-8 leading-relaxed max-w-xs mx-auto">
@@ -214,72 +214,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
 
                 <p className="text-xs text-slate-500 font-medium">
-                  Select your verified Google Account to continue to Pravas Wataghati:
+                  Enter your Google email address to continue to Routripo:
                 </p>
 
-                <div className="space-y-2.5">
-                  {/* Admin Account Option */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelectAccount('shrd.raut@gmail.com', 'Shraddha Raut')}
-                    className="w-full p-3 bg-amber-50 hover:bg-amber-100/80 border border-amber-300 rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src="https://ui-avatars.com/api/?name=Shraddha+Raut&background=d97706&color=fff&bold=true"
-                        alt="Shraddha Raut"
-                        className="w-9 h-9 rounded-full border border-amber-400 object-cover"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-black text-xs text-slate-900">Shraddha Raut</span>
-                          <span className="px-1.5 py-0.2 rounded-md bg-amber-500 text-slate-950 font-black text-[9px] uppercase">
-                            Admin
-                          </span>
-                        </div>
-                        <span className="text-[11px] font-mono font-bold text-amber-800">shrd.raut@gmail.com</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-amber-600 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
-                  {/* Tester Account Option */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelectAccount('traveler.demo@gmail.com', 'Beta Traveler')}
-                    className="w-full p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src="https://ui-avatars.com/api/?name=Beta+Traveler&background=4f46e5&color=fff&bold=true"
-                        alt="Beta Traveler"
-                        className="w-9 h-9 rounded-full border border-slate-300 object-cover"
-                      />
-                      <div>
-                        <span className="font-bold text-xs text-slate-900 block">Beta Traveler</span>
-                        <span className="text-[11px] font-mono text-slate-500">traveler.demo@gmail.com</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                </div>
-
                 {/* Custom Google Email Input */}
-                <form onSubmit={handleCustomAccountSubmit} className="pt-2 border-t border-slate-100 space-y-2">
-                  <span className="text-[11px] font-bold text-slate-500 block">Or sign in with another Google email:</span>
-                  <input
-                    type="email"
-                    placeholder="name@gmail.com"
-                    value={customEmail}
-                    onChange={(e) => setCustomEmail(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600"
-                    required
-                  />
+                <form onSubmit={handleCustomAccountSubmit} className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700 block">Your Name (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Rahul Sharma"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-700 block">Google Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="name@gmail.com"
+                      value={customEmail}
+                      onChange={(e) => setCustomEmail(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600"
+                      required
+                    />
+                  </div>
                   <button
                     type="submit"
                     className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition-colors cursor-pointer"
                   >
-                    Continue with Google
+                    Sign In with Google Account
                   </button>
                 </form>
               </motion.div>

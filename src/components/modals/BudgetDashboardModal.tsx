@@ -96,7 +96,7 @@ export const BudgetDashboardModal: React.FC<BudgetDashboardModalProps> = ({ isOp
                     {isMr ? 'बजेट रिपोर्ट' : 'Budget Report'} • {new Date().toLocaleDateString(isMr ? 'mr-IN' : 'en-US')}
                   </p>
                   <p className="text-xs font-semibold text-slate-400 mt-1">
-                    Powered by Pravas Wataghati
+                    Powered by Routripo
                   </p>
                 </div>
 

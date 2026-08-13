@@ -220,143 +220,98 @@ export const TripListView: React.FC<TripListViewProps> = ({
           <div className="w-16" /> {/* Spacer for centering */}
         </div>
       ) : (
-      <div className="px-4 sm:px-5 pt-4 pb-2">
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setActiveView('packages')}
-            className="p-4 rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all shadow-sm border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-          >
-             <span className="text-2xl leading-none">🏝️</span>
-             <span className="font-bold text-xs uppercase tracking-wider text-center">{lang === 'mr' ? 'हॉलिडे पॅकेजेस' : 'Holiday Packages'}</span>
-          </button>
-          <button
-            onClick={() => setActiveView('templates')}
-            className="p-4 rounded-2xl flex flex-col items-center justify-center gap-2 border-2 transition-all shadow-sm border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-          >
-             <span className="text-2xl leading-none">🗺️</span>
-             <span className="font-bold text-xs uppercase tracking-wider text-center">{lang === 'mr' ? 'सहल टेम्पलेट्स' : 'Trip Templates'}</span>
-          </button>
+      <>
+        {/* Top Bar for TripListView */}
+        <div className="flex items-center justify-between px-5 pt-6 pb-2 bg-slate-50">
+          <div>
+            <p className="text-[11px] text-slate-400 font-medium">{t('welcome') || 'Namaste,'}</p>
+            <p className="text-lg font-bold text-slate-800 font-[Poppins] flex items-center gap-2">
+              RouTripO <Sparkles className="w-4 h-4 text-orange-500" />
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="w-9 h-9 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer">
+              <Globe className="w-4 h-4 text-orange-500" />
+            </button>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white text-xs font-bold cursor-pointer">
+              RT
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div className="px-5 mt-2 bg-slate-50">
+          <div className="bg-white rounded-2xl px-4 py-3 flex items-center gap-2 shadow-sm border border-slate-100">
+            <Search className="w-4 h-4 text-orange-400" />
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={lang === 'mr' ? "सहल शोधा..." : "Search trips, destinations..."}
+              className="bg-transparent border-none outline-none w-full text-sm text-slate-700 placeholder:text-slate-400"
+            />
+          </div>
+        </div>
+
+        <div className="px-5 mt-5 bg-slate-50">
+          <div className="flex items-center justify-between px-1 mb-2.5">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-orange-500" />
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Quick actions</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-2.5">
+            <button onClick={() => setActiveView('packages')} className="flex flex-col items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform">
+              <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shadow-md">
+                <Ticket className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] text-slate-500 font-medium text-center leading-tight">Holiday Pkgs</span>
+            </button>
+            <button onClick={() => setActiveView('templates')} className="flex flex-col items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform">
+              <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shadow-md">
+                <MapPin className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] text-slate-500 font-medium text-center leading-tight">Templates</span>
+            </button>
+            <button onClick={onCreateTrip} className="flex flex-col items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform">
+              <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center shadow-md">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] text-slate-500 font-medium text-center leading-tight">New Trip</span>
+            </button>
+            <button onClick={() => { if (onFutureTripPlan) onFutureTripPlan(); else onCreateTrip(); }} className="flex flex-col items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform">
+              <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] text-slate-500 font-medium text-center leading-tight">Smart Planner</span>
+            </button>
+          </div>
+        </div>
+      </>
       )}
 
-      <main className="flex-1 px-4 sm:px-5 pt-2 space-y-5">
+      <main className="flex-1 px-4 sm:px-5 pt-6 space-y-5 bg-slate-50">
         {activeView === 'trips' && (
           <>
-            {/* Action Buttons Section */}
-            <div className="space-y-2 sm:space-y-3">
-              {/* Top Row: 2 Buttons - BLANK TRIP | Smart Planner */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <button 
-              onClick={onCreateTrip}
-              className="flex flex-col items-center justify-center gap-1.5 bg-white border-2 border-slate-300 p-2.5 sm:p-3.5 rounded-2xl shadow-xs active:scale-95 transition-all hover:border-slate-400 group"
-            >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-900 group-hover:bg-coral rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs transition-colors">
-                <Plus className="w-5 h-5 stroke-[3]" />
+            <div className="flex items-center justify-between px-1 mb-1">
+              <div className="flex items-center gap-1.5">
+                <Plane className="w-4 h-4 text-orange-500" />
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{lang === 'mr' ? 'तुमच्या सहली' : 'Your Trips'}</p>
               </div>
-              <div className="text-center w-full">
-                <span className="font-black text-[10px] sm:text-xs text-slate-950 tracking-tight uppercase leading-tight truncate block">
-                  {lang === 'mr' ? 'नवीन सहल' : 'Blank Trip'}
-                </span>
-                <span className="text-[9px] font-extrabold text-slate-500 block mt-0.5">
-                  {lang === 'mr' ? 'मॅन्युअल मसुदा' : 'Add Trip'}
-                </span>
+              <span className="text-[11px] text-orange-500 font-bold cursor-pointer">{trips.length} Total</span>
+            </div>
+
+            {/* List of Trips */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-2 sm:gap-3">
+                <button 
+                  onClick={onJoinTrip}
+                  className="w-full py-3 rounded-2xl border border-dashed border-orange-300 text-orange-500 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white transition-colors cursor-pointer bg-orange-50/50"
+                >
+                  <Users className="w-4 h-4" />{lang === 'mr' ? 'सहलीत सामील व्हा (कोड)' : 'Join trip via Passcode'}
+                </button>
               </div>
-            </button>
 
-            <button 
-              onClick={() => {
-                if (onFutureTripPlan) onFutureTripPlan();
-                else onCreateTrip();
-              }}
-              className="flex flex-col items-center justify-center gap-1.5 bg-emerald-50 border-2 border-emerald-200 p-2.5 sm:p-3.5 rounded-2xl shadow-xs active:scale-95 transition-all hover:border-emerald-400 group relative overflow-hidden"
-            >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-600 group-hover:bg-emerald-700 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs transition-colors">
-                <span className="text-xl leading-none animate-pulse">✨</span>
-              </div>
-              <div className="text-center w-full">
-                <span className="font-black text-[10px] sm:text-xs text-slate-950 tracking-tight uppercase leading-tight truncate block">
-                  {lang === 'mr' ? 'स्मार्ट प्लॅनर' : 'Smart Planner'}
-                </span>
-                <span className="text-[9px] font-extrabold text-emerald-600 block mt-0.5">
-                  {lang === 'mr' ? 'स्मार्ट नियोजन' : 'Smart Route Plan'}
-                </span>
-              </div>
-            </button>
-          </div>
-
-          {/* Bottom Row: 1 Button - BOOK TICKETS */}
-          <div className="grid grid-cols-1 gap-2 sm:gap-3">
-            <button 
-              onClick={() => setIsBookingOpen(!isBookingOpen)}
-              className={`flex flex-col items-center justify-center gap-1.5 border-2 p-3 sm:p-3.5 rounded-2xl shadow-xs active:scale-95 transition-all ${isBookingOpen ? 'bg-amber-50 border-amber-300' : 'bg-white border-slate-300 hover:border-slate-400'}`}
-            >
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs transition-colors ${isBookingOpen ? 'bg-amber-500 text-white' : 'bg-slate-900 text-white'}`}>
-                <span className="text-xl leading-none">🎟️</span>
-              </div>
-              <div className="text-center w-full">
-                <span className="font-black text-[11px] sm:text-xs text-slate-950 tracking-tight uppercase leading-tight truncate block">
-                  {lang === 'mr' ? 'तिकीट बुकिंग' : 'Book Tickets'}
-                </span>
-                <span className="text-[9px] font-extrabold text-amber-600 block mt-0.5">
-                  {lang === 'mr' ? 'रेल्वे / विमान' : 'Flights & Trains'}
-                </span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        
-        {/* Toggleable Shared Booking Widget */}
-        <AnimatePresence>
-          {isBookingOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0, y: -20 }}
-              animate={{ opacity: 1, height: 'auto', y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -20, transition: { duration: 0.2 } }}
-              className="overflow-hidden"
-            >
-              <div className="bg-white/95 backdrop-blur-md rounded-3xl p-3.5 sm:p-4 border-2 border-slate-200/90 shadow-md space-y-3 mb-5">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-black">
-                      <TicketCheck className="w-4 h-4" />
-                    </div>
-
-                    <div>
-                      <h3 className="font-black text-sm text-slate-950 tracking-tight leading-none">
-                        {lang === 'mr' ? 'बुकिंग खिडकी' : 'Booking Window'}
-                      </h3>
-                      <p className="text-[11px] font-bold text-slate-600">
-                        {lang === 'mr' ? 'विमान, हॉटेल व रेल्वे तिकीट बुकिंग' : 'Flight, Hotel & Train Booking'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <SharedBookingWidget lang={lang} currencySymbol={getCurrencySymbol('INR')} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="flex items-center justify-between px-1">
-           <h2 className="text-base sm:text-lg font-black text-slate-800 uppercase tracking-widest">{lang === 'mr' ? 'होम' : 'Home'}</h2>
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={lang === 'mr' ? 'सहल शोधा...' : 'Search trips...'}
-            className="w-full bg-white backdrop-blur-md border border-slate-200 rounded-2xl pl-12 pr-4 py-3 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all text-slate-700 shadow-2xs"
-          />
-        </div>
-
-        <div className="space-y-6">
-          {filteredTrips.map((trip, idx) => {
+              {filteredTrips.map((trip, idx) => {
             const spent = calculateSpent(trip);
             const budget = calculateBudget(trip);
             const durationProgress = getTripDurationProgress(trip);
@@ -386,7 +341,7 @@ export const TripListView: React.FC<TripListViewProps> = ({
                          } else if (navigator.share) {
                            navigator.share({
                              title: trip.name,
-                             text: `Check out our trip ${trip.name} on Pravas Wataghati!`,
+                             text: `Check out our trip ${trip.name} on Routripo!`,
                              url: window.location.href,
                            }).catch(() => {});
                          } else {
@@ -423,58 +378,23 @@ export const TripListView: React.FC<TripListViewProps> = ({
                      </button>
                   </div>
 
-                  <div className="absolute bottom-5 left-6 right-6">
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-white text-2xl leading-tight tracking-tight">{trip.name}</h3>
-                      <div className="flex items-center gap-3 text-sm font-bold text-white">
-                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {getTripDates(trip)}</span>
-                        <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {(trip.members || []).length}</span>
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <p className="text-white/80 text-[11px] font-medium mb-1.5 flex items-center gap-3">
+                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {getTripDates(trip)}</span>
+                      <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {(trip.members || []).length}</span>
+                    </p>
+                    <p className="text-white font-bold font-[Poppins] text-xl">{trip.name}</p>
+                    
+                    <div className="flex items-center justify-between mt-3 gap-3">
+                      <div className="flex-1 h-1.5 bg-white/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-orange-400 to-rose-500 rounded-full" style={{ width: `${Math.min((spent / (budget || 1)) * 100, 100)}%` }} />
                       </div>
+                      <span className="text-white text-[10px] font-semibold tracking-wide">{Math.round(Math.min((spent / (budget || 1)) * 100, 100))}% spent</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-6 space-y-5">
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-1.5">
-                       <p className="text-sm font-bold text-slate-700 uppercase tracking-[0.2em]">{lang === 'mr' ? 'एकूण हिशोब' : 'Summary'}</p>
-                       <p className="text-[17px] font-black text-slate-800">
-                         {getCurrencySymbol(trip.defaultCurrency)}{new Intl.NumberFormat('en-IN').format(budget)} / <span className="text-rose-500">{getCurrencySymbol(trip.defaultCurrency)}{new Intl.NumberFormat('en-IN').format(spent)}</span>
-                       </p>
-                    </div>
-                    <div className="px-5 py-2.5 text-white rounded-2xl text-sm font-bold uppercase tracking-widest shadow-lg" style={{ backgroundColor: themeColor }}>
-                       {lang === 'mr' ? 'पहा' : 'View'}
-                    </div>
-                  </div>
-                  
-                  {/* Budget progress bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-sm font-bold text-slate-700 uppercase tracking-widest">
-                      <span>{lang === 'mr' ? 'खर्च' : 'Budget'}</span>
-                      <span>{Math.round(Math.min((spent / (budget || 1)) * 100, 100))}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full transition-all rounded-full" 
-                        style={{ width: `${Math.min((spent / (budget || 1)) * 100, 100)}%`, backgroundColor: themeColor }} 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Duration progress bar */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm font-bold text-slate-800 uppercase">
-                      <span>{lang === 'mr' ? 'कालावधी' : 'Duration'}</span>
-                      <span>{durationProgress.daysElapsed} / {durationProgress.totalDays} {lang === 'mr' ? 'दिवस' : 'Days'}</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-amber-400 transition-all" 
-                        style={{ width: `${durationProgress.percentage}%` }} 
-                      />
-                    </div>
-                  </div>
-                  
+                <div className="p-4 bg-white shadow-sm border border-slate-100 rounded-b-[32px]">
                   {/* Trip Memories Section (Requirement 4) */}
                   <TripCardMemories trip={trip} themeColor={themeColor} lang={lang} />
                 </div>

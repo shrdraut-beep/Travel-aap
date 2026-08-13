@@ -37,13 +37,13 @@ const LANGUAGE_NAMES: Record<string, string> = {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem('pravas_language') as Language) || 'mr';
+    return (localStorage.getItem('routripo_language') as Language) || 'mr';
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('pravas_language', lang);
-    localStorage.setItem('pravas_language_selected', 'true');
+    localStorage.setItem('routripo_language', lang);
+    localStorage.setItem('routripo_language_selected', 'true');
   };
 
   const currentAppLanguage = LANGUAGE_NAMES[language] || 'Marathi';
@@ -85,10 +85,29 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
+const defaultLanguageContext: LanguageContextType = {
+  language: 'en',
+  lang: 'en',
+  setLanguage: () => {},
+  setLang: () => {},
+  currentAppLanguage: 'English (Nawab Mode 🎩)',
+  t: (key: string) => {
+    if (!key) return '';
+    const dict = (translations as any)['en'];
+    if (dict && dict[key] !== undefined) return dict[key];
+    let cleaned = key.replace(/(Tab|Key|_TAB|_KEY)$/i, '');
+    cleaned = cleaned.replace(/([A-Z])/g, ' $1').trim();
+    if (cleaned.length > 0) {
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    }
+    return key;
+  }
+};
+
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    return defaultLanguageContext;
   }
   return context;
 };

@@ -71,7 +71,7 @@ export const geocodePlace = async (query: string): Promise<{lat: number, lon: nu
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanQuery)}&format=json&limit=1`,
       {
         headers: {
-          'User-Agent': 'PravasWataghatiTravelApp/1.0'
+          'User-Agent': 'RoutripoTravelApp/1.0'
         }
       }
     );

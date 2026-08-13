@@ -16,6 +16,7 @@ import { loadTrainCatalog, searchTrainCatalog, TrainCatalogEntry } from '../../s
 
 interface TrainInfoTabProps {
   lang: string;
+  currencySymbol?: string;
 }
 
 const formatDate = (dateString: string) => {

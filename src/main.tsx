@@ -2,6 +2,8 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import ErrorBoundary from './ErrorBoundary.tsx';
+import { LanguageProvider } from './context/LanguageContext.tsx';
+import { TripProvider } from './context/TripContext.tsx';
 import './index.css';
 
 // Monkeypatch XMLHttpRequest to prevent "Invalid URL" crashes safely
@@ -69,9 +71,11 @@ window.addEventListener('error', (event) => {
 });
 
 createRoot(document.getElementById('root')!).render(
-  
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  ,
+  <ErrorBoundary>
+    <LanguageProvider>
+      <TripProvider>
+        <App />
+      </TripProvider>
+    </LanguageProvider>
+  </ErrorBoundary>,
 );

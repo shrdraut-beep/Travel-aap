@@ -25,7 +25,7 @@ export const TripItineraryTab: React.FC<TripItineraryTabProps> = ({ lang, curren
   // Load saved trips from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('pravas_saved_trips');
+      const stored = localStorage.getItem('routripo_saved_trips');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -63,7 +63,7 @@ export const TripItineraryTab: React.FC<TripItineraryTabProps> = ({ lang, curren
     const updated = [newTrip, ...savedTrips];
     setSavedTrips(updated);
     try {
-      localStorage.setItem('pravas_saved_trips', JSON.stringify(updated));
+      localStorage.setItem('routripo_saved_trips', JSON.stringify(updated));
     } catch (e) {
       console.warn('Storage save failed:', e);
     }
@@ -83,7 +83,7 @@ export const TripItineraryTab: React.FC<TripItineraryTabProps> = ({ lang, curren
     const updated = savedTrips.filter(t => t.id !== id);
     setSavedTrips(updated);
     try {
-      localStorage.setItem('pravas_saved_trips', JSON.stringify(updated));
+      localStorage.setItem('routripo_saved_trips', JSON.stringify(updated));
     } catch (e) {
       console.warn('Storage update failed:', e);
     }

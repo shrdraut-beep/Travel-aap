@@ -80,7 +80,7 @@ export const TripRecap: React.FC<TripRecapProps> = ({ trip, lang, onClose, curre
       shareText += `\n\n*AI टीप्स:*\n${trip.aiPlan}`;
     }
     
-    shareText += `\n\nही सहल Pravas Wataghati ॲपवर तयार केली आहे!`;
+    shareText += `\n\nही सहल Routripo ॲपवर तयार केली आहे!`;
     
     // Structured URL scheme for WhatsApp
     shareAppOnWhatsApp(lang, shareText);
@@ -204,7 +204,7 @@ export const TripRecap: React.FC<TripRecapProps> = ({ trip, lang, onClose, curre
             
             <div className="space-y-2">
               <h2 className="text-2xl font-black text-white uppercase tracking-tight">{lang === 'mr' ? 'पुन्हा भेटूया!' : 'Until next time!'}</h2>
-              <p className="text-slate-800 font-bold text-sm uppercase tracking-widest">{lang === 'mr' ? 'प्रवास वाटाघाटी सोबत' : 'With Pravas Wataghati'}</p>
+              <p className="text-slate-800 font-bold text-sm uppercase tracking-widest">{lang === 'mr' ? 'राऊट्रिपो सोबत' : 'With Routripo'}</p>
             </div>
             
             <div className="w-full grid grid-cols-2 gap-3 pt-10">

@@ -16,18 +16,6 @@ app.get("/api/admin/health", (req, res) => {
       description: 'Core conversational AI assistant for group itinerary planning, travel advice, and real-time query resolution.'
     },
     {
-      id: 'api-maharaja-trip',
-      name: 'Maharaja Royal Itinerary Generator',
-      endpoint: '/api/generate-maharaja-trip',
-      method: 'POST',
-      category: 'AI & Gemini Services',
-      status: 'Active',
-      lastChecked: 'Just now',
-      latency: '110ms',
-      workload: '9%',
-      description: 'Generates custom-tailored Konkan & Maharashtra Maharaja itineraries in native Marathi and English.'
-    },
-    {
       id: 'api-future-trip',
       name: 'Smart Future Trip Planner',
       endpoint: '/api/generate-future-trip-plan',

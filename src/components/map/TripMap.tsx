@@ -296,7 +296,7 @@ export const TripMap: React.FC<TripMapProps> = ({
   const handleAskShareLocation = (memName: string) => {
     const text = isMr
       ? `नमस्कार ${memName}! 📍 ${trip.name} च्या प्रवासात मला नकाशावर तुमचे लाईव्ह लोकेशन पाहायचे आहे. कृपया प्रवासाचे अ‍ॅप उघडून लाईव्ह लोकेशन ऑन करा.`
-      : `Hey ${memName}! 📍 Turn on your live location on the ${trip.name} map in Pravas Wataghati so we can spot each other!`;
+      : `Hey ${memName}! 📍 Turn on your live location on the ${trip.name} map in Routripo so we can spot each other!`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };

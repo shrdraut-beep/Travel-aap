@@ -124,7 +124,7 @@ export async function initNativePushListeners(handlers: {
 
   await PushNotifications.addListener('pushNotificationReceived', (notification) => {
     handlers.onForeground?.({
-      title: notification.title || 'प्रवास वाटाघाटी',
+      title: notification.title || 'राऊट्रिपो',
       body: notification.body || '',
       data: notification.data || {},
     });

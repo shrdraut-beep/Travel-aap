@@ -71,7 +71,7 @@ export const PDFLayoutWrapper: React.FC<PDFLayoutWrapperProps> = ({
             <div className="flex items-center gap-3.5">
               <img
                 src="/AppIcons/playstore.png"
-                alt="Pravas Wataghati Logo"
+                alt="Routripo Logo"
                 crossOrigin="anonymous"
                 loading="eager"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
@@ -79,7 +79,7 @@ export const PDFLayoutWrapper: React.FC<PDFLayoutWrapperProps> = ({
               />
               <div>
                 <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
-                  <span>प्रवास वाटाघाटी</span>
+                  <span>राऊट्रिपो</span>
                   <span className="text-[10px] font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider">
                     Official PDF
                   </span>
@@ -139,10 +139,10 @@ export const PDFLayoutWrapper: React.FC<PDFLayoutWrapperProps> = ({
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
               className="w-4 h-4 rounded-md"
             />
-            <span>प्रवास वाटाघाटी - Pravas Wataghati AI Travel Companion</span>
+            <span>राऊट्रिपो - Routripo AI Travel Companion</span>
           </div>
           <p className="text-[10px] font-medium text-slate-400">
-            Generated automatically via Pravas Wataghati App • Verified Group Travel Report
+            Generated automatically via Routripo App • Verified Group Travel Report
           </p>
         </footer>
       </div>

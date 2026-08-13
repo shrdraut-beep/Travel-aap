@@ -1,7 +1,7 @@
 import { openDB, IDBPDatabase } from 'idb';
 import { TripGroup } from './types';
 
-const DB_NAME = 'pravas_wataghati_offline';
+const DB_NAME = 'routripo_wataghati_offline';
 const SYNC_STORE = 'sync_queue';
 const TRIPS_STORE = 'trips_store';
 

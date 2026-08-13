@@ -8,7 +8,7 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
-  role?: 'user' | 'agent';
+  role?: 'user' | 'agent' | 'admin' | 'vendor';
 }
 
 interface AuthState {
@@ -27,12 +27,12 @@ interface AuthState {
 const getStoredUser = (): User | null => {
   if (typeof window !== 'undefined') {
     try {
-      const user = secureStorage.getItem<User>('pravas_user');
+      const user = secureStorage.getItem<User>('routripo_user');
       if (user && typeof user === 'object' && typeof user.id === 'string' && typeof user.email === 'string') {
         return user;
       }
     } catch (e) {
-      console.error("Failed to parse pravas_user from secureStorage", e);
+      console.error("Failed to parse routripo_user from secureStorage", e);
     }
   }
   return null;
@@ -41,9 +41,9 @@ const getStoredUser = (): User | null => {
 const saveStoredUser = (user: User | null) => {
   if (typeof window === 'undefined') return;
   if (user) {
-    secureStorage.setItem('pravas_user', user);
+    secureStorage.setItem('routripo_user', user);
   } else {
-    secureStorage.removeItem('pravas_user');
+    secureStorage.removeItem('routripo_user');
   }
 };
 
@@ -107,30 +107,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   closeAuthModal: () => set({ isAuthModalOpen: false, pendingAction: null }),
 
   initAuthListener: () => {
-    const authInst = getAuthSafe();
+    // Safely check redirect auth result if redirected back from auth provider
+    try {
+      getRedirectResult(auth).then((result) => {
+        if (result?.user) {
+          const fbUser = result.user;
+          const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Google Traveler';
+          const avatar = fbUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&bold=true`;
+          
+          const user: User = {
+            id: fbUser.uid,
+            name,
+            email: fbUser.email || '',
+            avatar,
+          };
 
-    // Catch redirect auth completion if popup was blocked
-    getRedirectResult(authInst).then((result) => {
-      if (result?.user) {
-        const fbUser = result.user;
-        const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Google Traveler';
-        const avatar = fbUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&bold=true`;
-        
-        const user: User = {
-          id: fbUser.uid,
-          name,
-          email: fbUser.email || '',
-          avatar,
-        };
+          set({ currentUser: user });
+          saveStoredUser(user);
+        }
+      }).catch((err) => {
+        console.debug("Redirect result check completed:", err?.message || err);
+      });
+    } catch (err) {
+      console.debug("getRedirectResult exception handled:", err);
+    }
 
-        set({ currentUser: user });
-        saveStoredUser(user);
-      }
-    }).catch((err) => {
-      console.warn("Redirect result notice:", err?.message || err);
-    });
-
-    return onAuthStateChanged(authInst, (fbUser) => {
+    return onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Traveler';
         const avatar = fbUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&bold=true`;

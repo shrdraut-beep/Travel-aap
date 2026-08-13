@@ -165,7 +165,7 @@ export const BalancesView: React.FC<BalancesViewProps> = ({
                 transfers.forEach(trans => {
                   shareText += `💸 ${trans.from} owes ${trans.to}: ${currencySymbol}${trans.amount}\n`;
                 });
-                shareText += `\nShared via Pravas Wataghati`;
+                shareText += `\nShared via Routripo`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
               }}
               className="flex items-center gap-1.5 px-4 py-2.5 bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/20 rounded-full text-xs font-bold uppercase tracking-widest transition-colors shadow-sm active:scale-95"

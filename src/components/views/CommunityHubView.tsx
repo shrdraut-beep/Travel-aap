@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Share2, Copy, Sparkles, User, Calendar, MapPin, Globe, ArrowRight, Heart, MessageSquare, Download, CloudDownload, X, Eye, Clock, CheckCircle2 } from 'lucide-react';
 import { PublicTripTemplate, TransportMode, TripPlan } from '../../types';
+import { TopBannerCarousel } from '../common/TopBannerCarousel';
+import { OffersForYouSection } from '../common/OffersForYouSection';
 
 interface CommunityHubViewProps {
   lang: string;
@@ -171,7 +173,13 @@ export const CommunityHubView: React.FC<CommunityHubViewProps> = ({ lang, onClon
       </div>
 
       {/* Search & Filters */}
-      <div className="px-6 -mt-8 relative z-20 max-w-4xl mx-auto w-full space-y-3">
+      <div className="px-6 -mt-8 relative z-20 max-w-4xl mx-auto w-full space-y-5">
+        
+        {/* Dynamic Promotional Ads */}
+        <div className="bg-white p-3 rounded-3xl shadow-lg border border-slate-200">
+          <TopBannerCarousel tab="all-trips" />
+        </div>
+
         <div className="bg-white rounded-[28px] p-2 shadow-2xl shadow-emerald-900/10 border border-slate-100 flex items-center gap-2 sm:gap-3">
           <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-slate-700 shrink-0">
             <Search className="w-5 h-5" />

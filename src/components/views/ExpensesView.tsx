@@ -133,23 +133,23 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
     });
 
   return (
-    <div className="px-5 py-2 space-y-4">
-      <div className="flex flex-col items-center justify-center space-y-2">
-        <h2 className="text-3xl font-bold text-slate-800 tracking-tight text-center">
+    <div className="px-5 py-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">
           {t('expensesTab')}
         </h2>
-        <div className="w-full flex justify-between items-center px-1">
-          <div className="bg-white/90 backdrop-blur-md border border-slate-200/50 px-3 py-1 rounded-full shadow-sm">
-             <span className="text-sm font-bold text-slate-800 uppercase tracking-widest">
-               {expenses.length} {lang === 'mr' ? 'एकूण' : 'Total'}
+        <div className="flex items-center gap-2">
+           <div className="bg-slate-100 px-3 py-1 rounded-lg">
+             <span className="text-xs font-bold text-slate-700 uppercase tracking-widest">
+               {expenses.length}
              </span>
-          </div>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className={`p-2 rounded-xl shadow-sm active:scale-95 transition-all border ${showFilters ? 'bg-slate-900 text-white border-slate-900' : 'bg-white/80 backdrop-blur-xl text-slate-700 border-slate-200'}`}
-          >
-            <Filter className="w-5 h-5" />
-          </button>
+           </div>
+           <button 
+             onClick={() => setShowFilters(!showFilters)}
+             className={`p-2 rounded-xl transition-all border ${showFilters ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border-slate-200'}`}
+           >
+             <Filter className="w-4 h-4" />
+           </button>
         </div>
       </div>
 
@@ -157,10 +157,10 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
         <motion.div 
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
-          className="bg-white/80 backdrop-blur-xl rounded-3xl p-5 border border-slate-100 shadow-xl shadow-slate-200/40 space-y-4 overflow-hidden"
+          className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-4 overflow-hidden"
         >
           <div className="space-y-2">
-            <label className="text-sm font-black uppercase tracking-widest text-indigo-300">{lang === 'mr' ? 'क्रमवारी' : 'Sort By'}</label>
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">{lang === 'mr' ? 'क्रमवारी' : 'Sort By'}</label>
             <div className="flex flex-wrap gap-2">
               {(['date', 'amount', 'category', 'payer'] as const).map(s => (
                 <button
@@ -173,8 +173,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                       setSortOrder('desc'); // Reset to default when changing sort type
                     }
                   }}
-                  className={`flex items-center gap-1.5 px-6 py-2 rounded-xl text-sm font-bold transition-all shadow-md ${sortBy === s ? 'text-white' : 'bg-white border border-slate-100'}`}
-                  style={sortBy === s ? { backgroundColor: themeColor } : { color: themeColor }}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${sortBy === s ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}`}
                 >
                   <span>
                   {s === 'date' ? (lang === 'mr' ? 'दिनांक' : 'Date') : 
@@ -191,11 +190,11 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-black uppercase tracking-widest text-indigo-300">{lang === 'mr' ? 'व्यक्तीनुसार' : 'By Person'}</label>
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">{lang === 'mr' ? 'व्यक्तीनुसार' : 'By Person'}</label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilterPayer('all')}
-                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${filterPayer === 'all' ? 'bg-slate-800 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border border-slate-100'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterPayer === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700'}`}
               >
                 {lang === 'mr' ? 'सर्व' : 'All'}
               </button>
@@ -203,20 +202,20 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 <button
                   key={`${m.id}-${idx}`}
                   onClick={() => setFilterPayer(m.id)}
-                  className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${filterPayer === m.id ? 'bg-slate-800 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border border-slate-100'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterPayer === m.id ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700'}`}
                 >
-                  {m.name} {m.id === adminId ? `(${lang === 'mr' ? 'अ‍ॅडमिन' : 'Admin'})` : ''}
+                  {m.name}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-black uppercase tracking-widest text-indigo-300">{lang === 'mr' ? 'प्रकारानुसार' : 'By Category'}</label>
+            <label className="text-xs font-black uppercase tracking-widest text-slate-400">{lang === 'mr' ? 'प्रकारानुसार' : 'By Category'}</label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setFilterCategory('all')}
-                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${filterCategory === 'all' ? 'bg-slate-800 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border border-slate-100'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterCategory === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700'}`}
               >
                 {lang === 'mr' ? 'सर्व' : 'All'}
               </button>
@@ -224,7 +223,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 <button
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
-                  className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${filterCategory === cat ? 'bg-slate-800 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border border-slate-100'}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterCategory === cat ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700'}`}
                 >
                   {cat}
                 </button>
@@ -274,7 +273,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
                 }}
                 whileHover={{ scale: 1.01, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="bg-white backdrop-blur-md border border-slate-200/50 rounded-[28px] p-4 shadow-xs hover:shadow-md flex items-center justify-between group transition-all"
+                className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md flex items-center justify-between group transition-all"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className={`w-13 h-13 rounded-2xl flex items-center justify-center text-xl shadow-inner border shrink-0 ${categoryColors[exp.category] || 'bg-indigo-50 border-slate-100/50'}`}>

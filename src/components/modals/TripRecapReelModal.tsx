@@ -50,7 +50,10 @@ export const TripRecapReelModal: React.FC<TripRecapReelModalProps> = ({
           />
 
           <button
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             className="absolute top-5 right-5 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors z-10"
             aria-label="Close"
           >

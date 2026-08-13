@@ -416,43 +416,38 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
           lang={lang}
         />
 
-        <div className="flex p-1.5 bg-white backdrop-blur-md rounded-[24px] w-full border border-slate-200/50 shadow-sm overflow-x-auto scrollbar-hide gap-1">
+        <div className="flex p-1 bg-white rounded-2xl w-full border border-slate-100 shadow-sm overflow-x-auto gap-1">
            <button 
              onClick={() => onSubTabChange('itinerary')}
-             className={`flex-1 min-w-[85px] py-3 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'itinerary' ? 'text-white shadow-lg' : 'text-slate-800 hover:bg-slate-200/50'}`}
-             style={activeSubTab === 'itinerary' ? { backgroundColor: themeColor } : {}}
+             className={`flex-1 min-w-[85px] py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'itinerary' ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
            >
              <Clock className="w-3.5 h-3.5" />
              {lang === 'mr' ? 'नियोजन' : 'Schedule'}
            </button>
            <button 
              onClick={() => onSubTabChange('prep')}
-             className={`flex-1 min-w-[85px] py-3 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'prep' || activeSubTab === 'packing' ? 'text-white shadow-lg' : 'text-slate-800 hover:bg-slate-200/50'}`}
-             style={activeSubTab === 'prep' || activeSubTab === 'packing' ? { backgroundColor: themeColor } : {}}
+             className={`flex-1 min-w-[85px] py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'prep' || activeSubTab === 'packing' ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
            >
              <List className="w-3.5 h-3.5" />
              {lang === 'mr' ? 'तयारी' : 'Prep'}
            </button>
            <button 
              onClick={() => onSubTabChange('fun')}
-             className={`flex-1 min-w-[100px] py-3 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'fun' || activeSubTab === 'playlist' ? 'text-white shadow-lg' : 'text-slate-800 hover:bg-slate-200/50'}`}
-             style={activeSubTab === 'fun' || activeSubTab === 'playlist' ? { backgroundColor: themeColor } : {}}
+             className={`flex-1 min-w-[100px] py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'fun' || activeSubTab === 'playlist' ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
            >
              <Sparkles className="w-3.5 h-3.5" />
              {lang === 'mr' ? 'मनोरंजन' : 'Fun'}
            </button>
            <button 
              onClick={() => onSubTabChange('tracking_guide')}
-             className={`flex-1 min-w-[110px] py-3 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'tracking_guide' ? 'text-white shadow-lg' : 'text-slate-800 hover:bg-slate-200/50'}`}
-             style={activeSubTab === 'tracking_guide' ? { backgroundColor: themeColor } : {}}
+             className={`flex-1 min-w-[110px] py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'tracking_guide' ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
            >
              <Compass className="w-3.5 h-3.5" />
              {lang === 'mr' ? 'ट्रॅकिंग व गाईड' : 'Tracking & Guide'}
            </button>
            <button 
              onClick={() => onSubTabChange('map')}
-             className={`flex-1 min-w-[90px] py-3 px-2 rounded-[18px] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'map' ? 'text-white shadow-lg' : 'text-slate-800 hover:bg-slate-200/50'}`}
-             style={activeSubTab === 'map' ? { backgroundColor: themeColor } : {}}
+             className={`flex-1 min-w-[90px] py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1 ${activeSubTab === 'map' ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'}`}
            >
              <Navigation className="w-3.5 h-3.5" />
              {lang === 'mr' ? 'दोस्त नकाशा' : 'Find Friends'}
@@ -464,7 +459,7 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
 
       {activeSubTab === 'itinerary' && forecastBudget && (
         <div className="mb-6">
-          <div className="bg-white backdrop-blur-md rounded-[32px] p-6 shadow-sm border border-slate-200/50 relative overflow-hidden">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2 relative z-10">
               <TrendingUp className="w-4 h-4 text-slate-700" />
               {lang === 'mr' ? 'बजेट अंदाज' : 'Budget Forecast'}
@@ -584,45 +579,40 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
                       transition={{ delay: idx * 0.05 }}
                       className="relative flex"
                     >
-                      <div className={`flex-1 w-full ${
-                        plan.id.includes('ai') 
-                          ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-orange-500/20' 
-                          : [
-                              'bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-blue-500/20',
-                              'bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white shadow-purple-500/20',
-                              'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-emerald-500/20',
-                              'bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-rose-500/20',
-                              'bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-indigo-500/20'
-                            ][idx % 5]
-                      } rounded-[28px] p-5 shadow-lg space-y-3 active:scale-[0.99] transition-all`}>
-                        <div className="flex justify-between items-start">
+                      <div className="flex-1 w-full bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3 active:scale-[0.99] transition-all relative overflow-hidden">
+                        {/* Accent Bar */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${
+                          plan.id.includes('ai') ? 'bg-amber-500' : 'bg-indigo-500'
+                        }`} />
+                        
+                        <div className="flex justify-between items-start pl-2">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className={`text-sm font-bold uppercase tracking-widest flex items-center gap-1.5 ${plan.id.includes('ai') ? 'text-white/90' : 'text-white/90'}`}>
-                                <Clock className="w-3 h-3" />
+                              <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-500">
+                                <Clock className="w-3.5 h-3.5" />
                                 {new Date(plan.datetime).toLocaleTimeString(lang === 'mr' ? 'mr-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' })}
                                 {' • '}
                                 {new Date(plan.datetime).toLocaleDateString(lang === 'mr' ? 'mr-IN' : 'en-IN', { day: 'numeric', month: 'short' })}
                               </span>
                             </div>
-                            <h4 className="text-[17px] font-bold text-white tracking-tight drop-shadow-sm">{plan.title}</h4>
+                            <h4 className="text-base font-bold text-slate-800 tracking-tight">{plan.title}</h4>
                           </div>
                           <div className="flex items-center gap-2">
                             {plan.cost && plan.cost > 0 && (
-                              <span className="text-[15px] font-black text-slate-900 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-xl shadow-sm">
+                              <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">
                                 {currencySymbol}{plan.cost}
                               </span>
                             )}
-                            <div className="flex items-center justify-center w-7 h-7 bg-white/20 backdrop-blur-md rounded-full shadow-sm border border-white/30" title={plan.bookingRef || (!plan.id.includes('ai') && new Date(plan.datetime).getTime() < new Date().getTime()) ? 'Confirmed' : 'Pending'}>
+                            <div className="flex items-center justify-center w-7 h-7 bg-slate-50 rounded-full border border-slate-100" title={plan.bookingRef || (!plan.id.includes('ai') && new Date(plan.datetime).getTime() < new Date().getTime()) ? 'Confirmed' : 'Pending'}>
                               {plan.bookingRef || (!plan.id.includes('ai') && new Date(plan.datetime).getTime() < new Date().getTime()) ? (
-                                <CheckCircle2 className="w-4 h-4 text-green-300 drop-shadow-sm" />
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                               ) : (
-                                <Clock className="w-4 h-4 text-white drop-shadow-sm" />
+                                <Clock className="w-4 h-4 text-slate-400" />
                               )}
                             </div>
                           </div>
                         </div>
-                        <div className={`text-base sm:text-lg font-bold leading-relaxed prose prose-base sm:prose-lg max-w-none mt-1 text-white/95`}>
+                        <div className="text-sm font-medium leading-relaxed prose max-w-none mt-1 text-slate-600 pl-2">
                           <ItineraryCard 
                             plan={plan} 
                             transportMode={trip.transportMode} 
@@ -631,10 +621,10 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
                             city={plan.location?.name}
                           />
                         </div>
-                        {plan.id.includes('ai') && <WikipediaSnippet query={plan.title} lang={lang} />}
+                        {plan.id.includes('ai') && <div className="pl-2"><WikipediaSnippet query={plan.title} lang={lang} /></div>}
                         {plan.bookingRef && (
-                          <div className="pt-1">
-                            <span className="px-2.5 py-1 bg-white/20 text-white text-sm font-bold rounded-lg uppercase tracking-widest backdrop-blur-sm border border-white/30">{lang === 'mr' ? 'बुकिंग ID' : 'REF'}: {plan.bookingRef}</span>
+                          <div className="pt-1 pl-2">
+                            <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md uppercase tracking-widest border border-slate-200">{lang === 'mr' ? 'बुकिंग ID' : 'REF'}: {plan.bookingRef}</span>
                           </div>
                         )}
                       </div>

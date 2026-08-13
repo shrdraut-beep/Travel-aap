@@ -1,22 +1,36 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 export const SmartPackingAlert = ({ destinationCity, temp, isRaining }: { destinationCity: string; temp: number; isRaining: boolean }) => {
+  const { lang } = useLanguage();
   if (!destinationCity) return null;
 
   let alertMessage = "";
   if (isRaining) {
-    alertMessage = `🌧️ पावसाचा अंदाज आहे! ${destinationCity} ला जाताना छत्री किंवा रेनकोट नक्की सोबत ठेवा.`;
+    alertMessage = lang === 'mr'
+      ? `🌧️ पावसाचा अंदाज आहे! ${destinationCity} ला जाताना छत्री किंवा रेनकोट नक्की सोबत ठेवा.`
+      : lang === 'hi'
+      ? `🌧️ बारिश की संभावना है! ${destinationCity} जाते समय छाता या रेनकोट जरूर साथ रखें।`
+      : `🌧️ Rain expected! Don't forget an umbrella or raincoat when traveling to ${destinationCity}.`;
   } else if (temp > 35) {
-    alertMessage = `☀️ कडक ऊन आहे! ${destinationCity} ला जाताना सनग्लासेस, टोपी आणि सुती कपडे सोबत ठेवायला विसरू नका.`;
+    alertMessage = lang === 'mr'
+      ? `☀️ कडक ऊन आहे! ${destinationCity} ला जाताना सनग्लासेस, टोपी आणि सुती कपडे सोबत ठेवायला विसरू नका.`
+      : lang === 'hi'
+      ? `☀️ तेज धूप है! ${destinationCity} जाते समय धूप का चश्मा, टोपी और सूती कपड़े रखना न भूलें।`
+      : `☀️ It's hot! Make sure to pack sunglasses, a cap, and cotton clothes for ${destinationCity}.`;
   } else if (temp < 15) {
-    alertMessage = `❄️ तिथे थंडी आहे! स्वेटर किंवा जॅकेट नक्की पॅक करा.`;
+    alertMessage = lang === 'mr'
+      ? `❄️ तिथे थंडी आहे! स्वेटर किंवा जॅकेट नक्की पॅक करा.`
+      : lang === 'hi'
+      ? `❄️ वहाँ ठंड है! स्वेटर या जैकेट जरूर पैक करें।`
+      : `❄️ It's chilly there! Make sure to pack a sweater or jacket for ${destinationCity}.`;
   } else {
     return null; // Don't show alert if weather is normal
   }
 
   return (
-    <div style={{ padding: '10px', backgroundColor: '#fff3cd', color: '#856404', borderRadius: '8px', margin: '10px 0' }}>
-      <strong>🎒 स्मार्ट पॅकिंग अलर्ट:</strong> {alertMessage}
+    <div className="p-3 bg-amber-50 text-amber-900 rounded-xl border border-amber-200 text-xs font-semibold my-2 shadow-sm">
+      <strong>🎒 {lang === 'mr' ? 'स्मार्ट पॅकिंग अलर्ट:' : lang === 'hi' ? 'स्मार्ट पैकिंग अलर्ट:' : 'Smart Packing Alert:'}</strong> {alertMessage}
     </div>
   );
 };

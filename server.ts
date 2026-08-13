@@ -10,11 +10,27 @@ import rateLimit from "express-rate-limit";
 import { initializeApp, applicationDefault, getApps, type App as AdminApp } from "firebase-admin/app";
 import { getAuth as getAdminAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore as getAdminFirestore, FieldValue } from "firebase-admin/firestore";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import fs from "fs";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
+
+// Read config safely
+let firebaseConfig: any = {};
+try {
+  firebaseConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), "firebase-applet-config.json"), "utf8"));
+} catch (e) {
+  console.warn("Could not load firebase-applet-config.json");
+}
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummykeyid123',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummysecret321'
+});
 
 // --- FIREBASE ADMIN / AUTHENTICATION ---
 
@@ -25,6 +41,7 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "shrd.raut@gmail.com")
 
 const FIRESTORE_DATABASE_ID =
   process.env.FIREBASE_DATABASE_ID ||
+  firebaseConfig.firestoreDatabaseId ||
   "ai-studio-grouptravelplann-f077e851-c9d2-483d-be19-1d2a3b70ff44";
 
 let adminApp: AdminApp | null = null;
@@ -41,7 +58,7 @@ function getAdminApp(): AdminApp | null {
       ? getApps()[0]
       : initializeApp({
           credential: applicationDefault(),
-          projectId: process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT,
+          projectId: process.env.FIREBASE_PROJECT_ID || firebaseConfig.projectId || process.env.GCLOUD_PROJECT,
         });
     return adminApp;
   } catch (err: any) {
@@ -128,12 +145,15 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Rate limiting. The AI routes proxy paid third-party APIs, so an unauthenticated
 // caller could otherwise run up cost or exhaust quota.
+app.set("trust proxy", 1); // Trust the first proxy (e.g. Cloud Run / AI Studio ingress)
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 300,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "Too many requests. Please retry shortly." },
+  validate: { xForwardedForHeader: false, forwardedHeader: false },
 });
 const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -141,6 +161,7 @@ const aiLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "AI request limit reached. Please retry in a few minutes." },
+  validate: { xForwardedForHeader: false, forwardedHeader: false },
 });
 
 app.use("/api/", apiLimiter);
@@ -153,7 +174,6 @@ for (const aiRoute of [
   "/api/parse-booking-text",
   "/api/parse-voice-command",
   "/api/transit-schedules",
-  "/api/generate-maharaja-trip",
 ]) {
   app.use(aiRoute, aiLimiter);
 }
@@ -1958,194 +1978,6 @@ app.post("/api/maps/places-search", async (req, res) => {
   }
 });
 
-// 11b. Maharaja Style Trip Generator Proxy Endpoint
-app.post("/api/generate-maharaja-trip", async (req, res) => {
-  try {
-    const { systemPrompt, userPrompt, tripDetails } = req.body;
-
-    const src = tripDetails?.source || "मुंबई";
-    const dest = tripDetails?.destination || "रत्नागिरी";
-    const days = Number(tripDetails?.days || 3);
-    const budget = Number(tripDetails?.budget || 12000);
-    const members = tripDetails?.members || "2 Adults";
-    const date = tripDetails?.date || new Date().toISOString().split("T")[0];
-    const foodPref = tripDetails?.foodPreference || "शाकाहारी";
-    const transportMode = tripDetails?.transportMode || "car";
-
-    // Evaluate trip feasibility FIRST in pure logic before calling Gemini AI or Places API
-    const feasibility = await evaluateTripFeasibility(
-      src, 
-      dest, 
-      new Date().toISOString(), 
-      new Date(Date.now() + days * 86400000).toISOString(), 
-      members, 
-      transportMode, 
-      budget
-    );
-
-    if (!feasibility.isFeasible) {
-      let warningMsg = `⚠️ **महाराजा स्टाईल सहल बजेट किंवा वेळेमुळे शक्य नाही!**\n\n`;
-      if (feasibility.isBudgetExcessive) {
-        warningMsg += `• **बजेट इशारा**: दिलेले बजेट (₹${feasibility.userBudget.toLocaleString('en-IN')}) अतिशय कमी आहे. सहलीचा वास्तववादी किमान खर्च **₹${feasibility.totalRealisticBudget.toLocaleString('en-IN')}** येतो (${feasibility.transitDetail}).\n\n${feasibility.modeSpecificTip}\n`;
-      }
-      if (feasibility.isTravelTimeExcessive) {
-        warningMsg += `• **प्रवास वेळ इशारा**: ही सहल इतक्या कमी दिवसांत करणे गैरसोयीचे आहे, कारण तुमचा ६०% पेक्षा जास्त वेळ फक्त प्रवासातच जाईल. कृपया दिवसांची संख्या वाढवा.\n`;
-      }
-      warningMsg += `\n📍 **सुचवलेली सोयीस्कर ठिकाणे:**\n`;
-      feasibility.closerAlternatives.forEach((alt, idx) => {
-        warningMsg += `${idx + 1}. **${alt.name}** (~${alt.distanceKm} किमी) | अंदाजित खर्च: ₹${alt.estimatedCost.toLocaleString('en-IN')}\n`;
-      });
-
-      // DO NOT CALL GEMINI API! Return immediately!
-      return res.json({
-        success: true,
-        text: JSON.stringify({
-          abort: true,
-          is_feasible: false,
-          budgetWarning: warningMsg,
-          closerAlternatives: feasibility.closerAlternatives,
-          totalEstimatedCost: feasibility.totalRealisticBudget,
-          itinerary: []
-        })
-      });
-    }
-
-    // FETCH REAL MAPS & PLACES DATA FOR PHYSICAL ACCURACY
-    const distanceMetrics = await getDrivingDistanceAndDuration(src, dest);
-    const verifiedPlaces = await getVerifiedPlacesForLocation(dest);
-
-    // FIX ₹0 COST BUG: FALLBACK
-    let distance = distanceMetrics.distanceKm || 0;
-    if (distance === 0) {
-      // Very crude estimate if API failed: 150km as a safe minimum
-      distance = 150; 
-    }
-    const costPerKm = 15; // Realistic fuel cost estimation
-    let fuelCost = Math.round(distance * costPerKm);
-    if (fuelCost === 0) {
-       fuelCost = (distance * 1.5) * costPerKm;
-    }
-    
-    const verifiedSpotsList = verifiedPlaces.map(p => `• ${p.name} (${p.formattedAddress || dest})`).join("\n");
-
-    const mapsAugmentedInstruction = `
-CRITICAL DISTANCE & PLACES API CONSTRAINTS (PHYSICS & ACCURACY ENFORCEMENT):
-- Driving Distance (${src} to ${dest}): ${distanceMetrics.distanceKm} km
-- Net Driving Time: ${distanceMetrics.drivingDurationHours} hours
-- Recommended Mandatory Rest/Meal Breaks: ${distanceMetrics.recommendedRestBreaks} breaks (${distanceMetrics.totalBreakMinutes} mins)
-- Total Real-World Transit Duration: ${distanceMetrics.totalTransitHours} hours
-- Journey Type: ${distanceMetrics.isFullDayTransit ? 'FULL-DAY TRANSIT (Long Distance > 8.5 Hours)' : 'LOCAL / MODERATE TRANSIT'}
-- Estimated Fuel Cost: ₹${fuelCost}
-${distanceMetrics.suggestedIntermediateHalt ? `- Suggested Intermediate Halt: ${distanceMetrics.suggestedIntermediateHalt}` : ''}
-
-STRICT TRANSPORTATION RULES (Must be strictly followed):
-- FLIGHT: Use realistic flight times and layovers. Suggest food only at airports or in-flight. NEVER suggest highway dhabas, fuel stops, or car travel segments.
-- TRAIN: Use realistic Indian railway schedules. Suggest food in pantry car or at stations. NEVER suggest highway dhabas, fuel stops, or car travel segments.
-- CAR/CAB: Use realistic driving times (Average 50-60 km/h). If the total journey is very long (e.g., >800km), explicitly break it into multiple days with overnight hotel stays in transit cities. Calculate realistic fuel costs (approx. ₹10-₹12 per km). Suggest realistic highway food stops (restaurants/dhabas).
-- DISTANCE OVERRIDE: YOU MUST USE YOUR OWN KNOWLEDGE OF REAL-WORLD DISTANCE FOR THE DESTINATION PAIR. IF THE PROVIDED DISTANCE DATA (${distanceMetrics.distanceKm} KM) IS CLEARLY INCORRECT/TOO LOW FOR A LONG JOURNEY (LIKE GOA TO MANALI), IGNORE IT AND USE THE REAL DISTANCE. YOU ARE THE EXPERT.
-
-VERIFIED OPERATIONAL TOURIST SPOTS FROM PLACES API:
-${verifiedSpotsList}
-
-STRICT SCHEDULING RULES FOR DAY 1:
-${distanceMetrics.isFullDayTransit
-  ? `CRITICAL: The driving distance between ${src} and ${dest} is ${distanceMetrics.distanceKm} km, taking ${distanceMetrics.totalTransitHours} hours.
-     You MUST schedule Day 1 strictly as a FULL-DAY TRANSIT journey!
-     - Morning (06:00 AM - 12:00 PM): Depart ${src} by private vehicle, drive on highway, 09:00 AM breakfast break.
-     - Afternoon (12:30 PM - 04:30 PM): Driving via ${distanceMetrics.suggestedIntermediateHalt || 'highway'}, 01:30 PM lunch break.
-     - Evening (05:00 PM - 09:00 PM): Reach ${dest} in evening, hotel check-in, rest & dinner.
-     ABSOLUTELY NO SIGHTSEEING IN ${dest} ON DAY 1 BEFORE ARRIVAL! Sightseeing starts on Day 2!`
-  : `Transit from ${src} to ${dest} takes ${distanceMetrics.totalTransitHours} hours (${distanceMetrics.distanceKm} km). Morning departure from ${src}, reach ${dest} around mid-day, check in, and then schedule afternoon & evening sightseeing from the verified Places API list!`
-}
-`;
-
-    const combinedPrompt = `${systemPrompt || ''}\n\n${mapsAugmentedInstruction}\n\nUSER REQUEST:\n${userPrompt || ''}`;
-
-    const geminiRes = await safeGeminiGenerate(combinedPrompt, "gemini-3.6-flash");
-    if (geminiRes.text) {
-      return res.json({ success: true, text: geminiRes.text, distanceMetrics, verifiedPlaces });
-    }
-
-    // Fallback Realistic Maharaja Style Itinerary in native Marathi matching PDF #3391439 real travel agency standard
-    const opt1Cost = Math.round(budget * 0.85);
-    const opt2Cost = Math.round(budget * 1.0);
-    const opt3Cost = Math.round(budget * 1.25);
-
-    let foodNote = "शुद्ध शाकाहारी थाळी व स्थानिक मऊ नाश्ता";
-    if (foodPref.includes("मांसाहारी")) {
-      foodNote = "स्थानिक अस्सल मालवणी/कोकणी चिकन/मटण थाळी";
-    } else if (foodPref.includes("सी-फूड") || foodPref.includes("सीफूड")) {
-      foodNote = "ताजे सुरमई, पापलेट फ्राय व कोळंबी रस्सा";
-    } else if (foodPref.includes("जैन")) {
-      foodNote = "शुद्ध जैन थाळी (कांदा-लसूण विरहित)";
-    }
-
-    let daysContent = "";
-    for (let d = 1; d <= days; d++) {
-      if (d === 1 && distanceMetrics.isFullDayTransit) {
-        daysContent += `
-📌 *दिवस १: ${src} ते ${dest} प्रवास (${distanceMetrics.distanceKm} किमी / ${distanceMetrics.totalTransitHours} तास प्रवास)*
-🌅 *सकाळ:* [०६:०० AM - १२:०० PM]: ${src} वरून खाजगी AC वाहनाने (Innova/Xylo) ${dest} साठी प्रवास सुरू. सकाळी ०९:०० वाजता हायवेवर नाश्ता आणि टी ब्रेक.
-☀️ *दुपार:* [१२:३० PM - ०४:३० PM]: ${distanceMetrics.suggestedIntermediateHalt ? distanceMetrics.suggestedIntermediateHalt + ' मार्गे प्रवास.' : 'हायवे प्रवास.'} दुपारी ०१:३० वाजता अस्सल ${foodNote}.
-🌆 *संध्याकाळ:* [०५:०० PM - ०९:०० PM]: ${dest} येथे रात्री आगमन. हॉटेल/रिसॉर्ट चेक-इन, आराम व रात्रीचे जेवण.
-🏨 *मुक्काम:* ${dest} मुक्काम (ऑप्शन १/२/३ हॉटेल).
-`;
-      } else {
-        const spot1 = verifiedPlaces[(d - 1) % verifiedPlaces.length]?.name || `${dest} मुख्य पर्यटन स्थळ`;
-        const spot2 = verifiedPlaces[(d) % verifiedPlaces.length]?.name || `${dest} बीच व सनसेट पॉईंट`;
-        daysContent += `
-📌 *दिवस ${d}: ${dest} प्रेक्षणीय स्थळे (${spot1}) व ${foodPref} भोजन*
-🌅 *सकाळ:* [०८:३० AM - १२:०० PM]: हॉटेलमध्ये नाश्ता. **${spot1}** दर्शन आणि परिसर फेरफटका.
-☀️ *दुपार:* [१२:३० PM - ०४:३० PM]: दुपारी प्रसिद्ध रेस्टॉरंटमध्ये ${foodNote}. **${spot2}** भेट आणि फोटोग्राफी.
-🌆 *संध्याकाळ:* [०५:०० PM - ०९:०० PM]: स्थानिक बाजारपेठ खरेदी, सांस्कृतिक कार्यक्रम / बीच सायंकाळ आणि जेवण.
-🏨 *मुक्काम:* ${dest} मुक्काम (ऑप्शन १/२/३ हॉटेल).
-`;
-      }
-    }
-
-    const fallbackMarathiPlan = `🚩 *${src} ते ${dest} - ${days} दिवसांची महाराजा टूर कोटेशन (#PW-3391439)*
-📅 प्रवासाची तारीख: ${date} (${days - 1} रात्री / ${days} दिवस)
-👥 प्रवासी: ${members}
-🚘 अंतर व वेळ (Maps API Verified): ${distanceMetrics.distanceKm} किमी (${distanceMetrics.totalTransitHours} तास)
-👤 ट्रॅव्हल कन्सल्टंट: Pravas Wataghati AI Desk (+91-9876543210)
---------------------------------------------------
-💰 *३ विशेष पॅकेज पर्याय (Package Options)*:
-1️⃣ **ऑप्शन १ (बजेट पर्याय)**: ₹${opt1Cost.toLocaleString('en-IN')} /- (करांशिवाय)
-2️⃣ **ऑप्शन २ (डिलक्स पर्याय)**: ₹${opt2Cost.toLocaleString('en-IN')} /- (करांशिवाय)
-3️⃣ **ऑप्शन ३ (महाराजा प्रीमियम)**: ₹${opt3Cost.toLocaleString('en-IN')} /- (करांशिवाय)
-
-🏨 *हॉटेल व मुक्काम पर्याय (Hotel Accommodations)*:
-• **मुक्काम रात १ व २ (${dest})**:
-  - ऑप्शन १: Hotel Comfort Inn / Beach Stay (Standard Room)
-  - ऑप्शन २: Hotel Sea View / Grand Heritage (Deluxe Room)
-  - ऑप्शन ३: Maharaja Royal Resort & Spa (Executive Suite)
-  - खोल्या: ${Math.max(1, Math.ceil((parseInt(members) || 2) / 2))} x Double Sharing Rooms | CP Plan (नाश्ता समाविष्ट)
-
-🚗 *वाहतूक व ऍक्टिव्हिटी तपशील (Transportation & Activities)*:
-• **खाजगी गाडी**: 1 x AC Xylo / Ertiga / Innova (पॉइंट-टू-पॉइंट पिकअप, ड्रॉप व पर्यटन)
-• **फेरी/बोट तिकिटे**: स्पेशल कॅटामारन/फेरी १ तास ३० मि. प्रवासी पास समाविष्ट
-• **प्रवेश व परवाने**: सर्व प्रसिद्ध प्रेक्षणीय स्थळे, किल्ले व बीच प्रवेश तिकिटे समाविष्ट
-
---------------------------------------------------
-${daysContent}
---------------------------------------------------
-✅ *पॅकेज समाविष्ट (Inclusions)*:
-• रोजचा नाश्ता (Daily Breakfast)
-• खाजगी AC गाडी (Private AC Vehicle with Driver Allowances & Fuel)
-• सर्व प्रवेश तिकिटे आणि फेरी पास (Entry Tickets & Ferry Passes)
-• २४x७ एआय ट्रिप असिस्टंट आणि टूर मॅनेजर सहाय्य
-
-❌ *पॅकेज वगळलेले (Exclusions)*:
-• विमान/ट्रेन तिकीट (Airfare / Train fare)
-• दुपारचे व रात्रीचे जेवण (Lunch & Dinner)
-• वैयक्तिक खरेदी व वॉटर स्पोर्ट्स (Personal expenses & Water sports)
-• GST (५%)`;
-
-    res.json({ success: true, text: fallbackMarathiPlan, distanceMetrics, verifiedPlaces, fallback: true });
-  } catch (err) {
-    res.json({ success: false, error: "प्लॅन बनवताना अडचण आली आहे. कृपया पुन्हा प्रयत्न करा." });
-  }
-});
 
 
 
@@ -2165,16 +1997,6 @@ app.get("/api/admin/health", requireAdmin, (req, res) => {
       status: geminiActive ? 'Active' : 'Active (Fallback Enabled)',
       lastChecked: 'Just now',
       description: 'Core conversational AI assistant for group itinerary planning, travel advice, and real-time query resolution.'
-    },
-    {
-      id: 'api-maharaja-trip',
-      name: 'Maharaja Royal Itinerary Generator',
-      endpoint: '/api/generate-maharaja-trip',
-      method: 'POST',
-      category: 'AI & Gemini Services',
-      status: 'Active',
-      lastChecked: 'Just now',
-      description: 'Generates custom-tailored Konkan & Maharashtra Maharaja itineraries in native Marathi and English.'
     },
     {
       id: 'api-future-trip',
@@ -2467,11 +2289,330 @@ app.get("/api/agent/metrics", requireAuth, (req, res) => {
   res.json({ appHealth: 99, systemHealth: 98, securityHealth: 100, totalUsers: 520 });
 });
 
+// --- WALLET ENDPOINTS ---
+app.get("/api/wallet/balance", requireAuth, async (req, res) => {
+  try {
+    const uid = (req as any).user.uid;
+    const db = adminDb();
+    if (!db) return res.status(500).json({ error: "Firebase Admin not initialized" });
+    const agentDoc = await db.collection("agents").doc(uid).get();
+    const balance = agentDoc.exists ? (agentDoc.data()?.walletBalance || 0) : 0;
+    res.json({ balance });
+  } catch (error) {
+    console.error("Error fetching balance", error);
+    res.status(500).json({ error: "Failed to fetch balance" });
+  }
+});
+
+app.post("/api/wallet/create-order", requireAuth, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
+    
+    const options = {
+      amount: amount * 100, // Razorpay works in paise
+      currency: "INR",
+      receipt: `rcpt_wallet_${Date.now()}`
+    };
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    console.error("Error creating Razorpay order", error);
+    res.status(500).json({ error: "Failed to create order" });
+  }
+});
+
+app.post("/api/wallet/verify-payment", requireAuth, async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+    const uid = (req as any).user.uid;
+    
+    // Verify signature
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'dummysecret321';
+    const generated_signature = crypto.createHmac('sha256', secret)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest('hex');
+      
+    if (generated_signature !== razorpay_signature) {
+      return res.status(400).json({ error: "Invalid payment signature" });
+    }
+    
+    const db = adminDb();
+    if (!db) return res.status(500).json({ error: "Firebase Admin not initialized" });
+    
+    await db.runTransaction(async (transaction) => {
+      const agentRef = db.collection("agents").doc(uid);
+      const agentDoc = await transaction.get(agentRef);
+      
+      const currentBalance = agentDoc.exists ? (agentDoc.data()?.walletBalance || 0) : 0;
+      const newBalance = currentBalance + amount;
+      
+      if (!agentDoc.exists) {
+         transaction.set(agentRef, { walletBalance: newBalance }, { merge: true });
+      } else {
+         transaction.update(agentRef, { walletBalance: newBalance });
+      }
+      
+      const txRef = db.collection("wallet_transactions").doc();
+      transaction.set(txRef, {
+        agentId: uid,
+        amount: amount,
+        type: "CREDIT",
+        purpose: "ADD_MONEY",
+        referenceId: razorpay_payment_id,
+        status: "SUCCESS",
+        timestamp: FieldValue.serverTimestamp()
+      });
+    });
+    
+    res.json({ success: true, message: "Wallet updated successfully" });
+  } catch (error) {
+    console.error("Error verifying payment", error);
+    res.status(500).json({ error: "Payment verification failed" });
+  }
+});
+
+// --- AGENT ADS MODERATION ---
+app.post("/api/ads/create", requireAuth, async (req, res) => {
+  try {
+    const { title, description, imageUrl, targetCity, startDate, endDate } = req.body;
+    const uid = (req as any).user.uid;
+    
+    // Simulate Text Moderation (Profanity Check)
+    const adText = `${title} ${description}`.toLowerCase();
+    const badWords = ['casino', 'betting', 'scam', 'offensiveword', 'escort'];
+    const hasProfanity = badWords.some(word => adText.includes(word));
+
+    if (hasProfanity) {
+      return res.status(400).json({
+        status: 'REJECTED',
+        reason: 'Policy Violation: Ad text contains restricted or profane keywords.'
+      });
+    }
+
+    // Simulate Image Moderation API (e.g., Google Cloud Vision SafeSearch)
+    if (imageUrl && (imageUrl.includes('nsfw') || imageUrl.includes('violence'))) {
+      return res.status(400).json({
+        status: 'REJECTED',
+        reason: 'Policy Violation: Image violates community safety guidelines.'
+      });
+    }
+
+    // Fixed Rent Payment Simulation
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+    const fixedRatePerDay = 200; // As requested, Rs 200/day
+    const totalCost = days * fixedRatePerDay;
+
+    let transactionStatus = 'APPROVED';
+
+    // Save to Firestore DB and deduct from wallet
+    const db = adminDb();
+    if (db) {
+      try {
+        await db.runTransaction(async (transaction) => {
+          const agentRef = db.collection("agents").doc(uid);
+          const agentDoc = await transaction.get(agentRef);
+          
+          const balance = agentDoc.exists ? (agentDoc.data()?.walletBalance || 0) : 0;
+          if (balance < totalCost) {
+            throw new Error("INSUFFICIENT_FUNDS");
+          }
+          
+          // Deduct from wallet
+          transaction.update(agentRef, { walletBalance: balance - totalCost });
+          
+          // Log wallet transaction
+          const txRef = db.collection("wallet_transactions").doc();
+          transaction.set(txRef, {
+            agentId: uid,
+            amount: totalCost,
+            type: "DEBIT",
+            purpose: "AD_PAYMENT",
+            referenceId: "N/A", // could be adRef id in a more complex setup
+            status: "SUCCESS",
+            timestamp: FieldValue.serverTimestamp()
+          });
+
+          // Determine moderation status based on AI confidence
+          const adStatus = (imageUrl && imageUrl.includes('review')) ? 'PENDING_MODERATION' : 'PENDING_MODERATION'; // Changed to always PENDING_MODERATION as requested
+
+          // Create Ad Record
+          const adRef = db.collection("agent_ads").doc();
+          transaction.set(adRef, {
+            title,
+            description,
+            imageUrl: imageUrl || '',
+            targetCity,
+            startDate,
+            endDate,
+            totalCost,
+            status: adStatus,
+            agentId: uid,
+            createdAt: FieldValue.serverTimestamp()
+          });
+        });
+      } catch (err: any) {
+         if (err.message === "INSUFFICIENT_FUNDS") {
+            return res.status(400).json({ status: 'REJECTED', reason: 'Insufficient wallet balance.' });
+         }
+         throw err;
+      }
+    }
+
+    return res.status(200).json({
+      status: 'PENDING_MODERATION',
+      message: 'Ad successfully submitted and wallet debited. Pending admin moderation.'
+    });
+
+  } catch (error) {
+    console.error('Moderation Error:', error);
+    res.status(500).json({ error: 'Internal Server Error during ad processing' });
+  }
+});
+
+app.get("/api/get-ads", async (req, res) => {
+  try {
+    const { city } = req.query;
+    if (!city) return res.status(400).json({ error: 'City is required' });
+    
+    const db = adminDb();
+    if (!db) {
+      return res.json({ ads: [] });
+    }
+    
+    // We only fetch APPROVED ads for the given targetCity
+    const adsSnapshot = await db.collection("agent_ads")
+      .where("targetCity", "==", city)
+      .where("status", "==", "APPROVED")
+      .get();
+      
+    const now = new Date();
+    const ads: any[] = [];
+    
+    adsSnapshot.forEach(doc => {
+      const ad = doc.data();
+      const startDate = new Date(ad.startDate);
+      const endDate = new Date(ad.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      
+      if (now >= startDate && now <= endDate) {
+        ads.push({ id: doc.id, ...ad });
+      }
+    });
+    
+    // Mock data for preview if empty (to showcase the carousel functionality)
+    if (ads.length === 0) {
+      ads.push({
+        id: 'mock-1',
+        title: `Explore ${city} with Local Experts`,
+        description: `Book highly-rated local tours and secret experiences. Limited time 20% discount.`,
+        imageUrl: 'https://images.unsplash.com/photo-1517400508447-f8dd518b86e3?auto=format&fit=crop&q=80&w=1000',
+        targetCity: city
+      });
+      ads.push({
+        id: 'mock-2',
+        title: `Luxury Stays in ${city}`,
+        description: `Premium 5-star villas available now. Use code WELCOME for free upgrades.`,
+        imageUrl: 'https://images.unsplash.com/photo-1542314831-c53cd4b85ca4?auto=format&fit=crop&q=80&w=1000',
+        targetCity: city
+      });
+    }
+    
+    res.json({ ads });
+  } catch (error: any) {
+    console.error("Error fetching ads:", error);
+    res.status(500).json({ error: error.message || 'Failed to fetch ads', details: error.toString() });
+  }
+});
+
+// --- SUPPORT TICKETS API ---
+import nodemailer from "nodemailer";
+import twilio from "twilio";
+
+// Mock initialization for Twilio (in production, use real credentials)
+const twilioClient = twilio('ACdummyAccountSid12345678901234567', 'dummyAuthToken1234567890123456789');
+
+app.post("/api/support/ticket", requireAuth, async (req, res) => {
+  try {
+    const { category, description, fileBase64, fileName, fileSize } = req.body;
+    const uid = (req as any).user.uid;
+
+    if (!category || !description) {
+      return res.status(400).json({ error: "Category and description are required." });
+    }
+
+    // 1. Strict Word Count Validation (Max 500 words)
+    const wordCount = description.trim().split(/\s+/).length;
+    if (wordCount > 500) {
+      return res.status(400).json({ error: "Description exceeds the maximum limit of 500 words." });
+    }
+
+    // 2. Strict File Size Validation (Max 200 KB)
+    // fileSize is provided by frontend, but we should also check the payload length to be safe.
+    // 200 KB = 204800 bytes. Base64 is roughly 33% larger, so payload limit ~273KB.
+    if (fileSize && fileSize > 200 * 1024) {
+      return res.status(400).json({ error: "File exceeds the maximum limit of 200 KB." });
+    }
+
+    // 3. Generate Unique Ticket ID
+    const ticketId = `TKT-${Math.floor(10000 + Math.random() * 90000)}`;
+
+    const db = adminDb();
+    if (!db) return res.status(500).json({ error: "Firebase Admin not initialized." });
+
+    // Fetch user details for auto-responder
+    const agentDoc = await db.collection("agents").doc(uid).get();
+    const agentEmail = agentDoc.exists ? agentDoc.data()?.email : "agent@routripo.com";
+    const agentPhone = agentDoc.exists ? agentDoc.data()?.phone : "+919999999999";
+
+    // 4. Save to Firestore DB
+    await db.collection("support_tickets").doc(ticketId).set({
+      ticketId,
+      uid,
+      category,
+      description,
+      hasAttachment: !!fileBase64,
+      fileName: fileName || null,
+      status: "OPEN",
+      createdAt: FieldValue.serverTimestamp()
+    });
+
+    // 5. Auto-Responder Simulation (Email & WhatsApp)
+    const autoResponderMessage = `Hi, your support ticket ${ticketId} has been generated successfully. Our team is already looking into it and will resolve it soon.`;
+
+    // Simulated Nodemailer Email
+    console.log(`[Email Simulator] Sending email to ${agentEmail}: ${autoResponderMessage}`);
+    /* 
+    const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: 'admin@routripo.com', pass: '...' } });
+    await transporter.sendMail({ from: 'admin@routripo.com', to: agentEmail, subject: `Support Ticket ${ticketId}`, text: autoResponderMessage });
+    */
+
+    // Simulated Twilio WhatsApp Message
+    console.log(`[Twilio Simulator] Sending WhatsApp to ${agentPhone}: ${autoResponderMessage}`);
+    /*
+    await twilioClient.messages.create({
+      body: autoResponderMessage,
+      from: 'whatsapp:+14155238886',
+      to: \`whatsapp:\${agentPhone}\`
+    });
+    */
+
+    res.json({ success: true, ticketId, message: "Ticket generated successfully." });
+  } catch (error) {
+    console.error("Support Ticket Error:", error);
+    res.status(500).json({ error: "Failed to generate support ticket." });
+  }
+});
+
 // --- VITE MIDDLEWARE & SERVING ---
 
 
 
 async function startServer() {
+  app.use('/public', express.static(path.join(process.cwd(), 'public')));
+  
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true, hmr: false },

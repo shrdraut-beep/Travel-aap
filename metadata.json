@@ -1,5 +1,5 @@
 {
-  "name": "प्रवास वाटाघाटी (Pravas Wataghati)",
+  "name": "RouTripO",
   "description": "सहलीचे नियोजन करा, खर्चाचे बिल स्कॅन करा (Gemini AI द्वारे), आणि मित्रांमध्ये खर्चाचे अचूक विभाजन करा। Plan group trips, scan bills using Gemini AI, and split expenses seamlessly with friends.",
   "requestFramePermissions": [
     "camera",

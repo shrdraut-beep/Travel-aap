@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
             
             <div>
-              <h2 className="text-xl font-black text-white">Pravas Wataghati Notice</h2>
+              <h2 className="text-xl font-black text-white">Routripo Notice</h2>
               <p className="text-xs font-semibold text-slate-400 mt-1">
                 An unexpected display issue occurred or an API request exceeded rate limits.
               </p>

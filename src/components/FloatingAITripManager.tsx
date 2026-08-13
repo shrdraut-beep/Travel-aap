@@ -8,9 +8,9 @@ import { TripGroup } from '../types';
 import { AIChatAssistant } from './AIChatAssistant';
 
 interface FloatingAITripManagerProps {
-  trip: TripGroup;
+  trip?: TripGroup;
   lang: string;
-  t: (key: string) => string;
+  t?: (key: string) => string;
   currencySymbol: string;
   isHidden?: boolean;
   onAddExpense?: () => void;
@@ -259,9 +259,9 @@ const AITranslatorView: React.FC<{
 };
 
 export const FloatingAITripManager: React.FC<FloatingAITripManagerProps> = ({
-  trip,
+  trip = { id: 'default', name: 'My Trip', startDate: '', endDate: '', members: [], expenses: [], itinerary: [], calculationMode: 'admin_pooled', deposits: {} } as TripGroup,
   lang,
-  t,
+  t = (k) => k,
   currencySymbol,
   isHidden = false,
   onAddExpense,
@@ -278,7 +278,7 @@ export const FloatingAITripManager: React.FC<FloatingAITripManagerProps> = ({
 
   const getBotProfile = (l: string, g: 'male' | 'female') => {
     switch (l) {
-      case 'mr': return { name: g === 'male' ? 'तात्या विंचू (Tatya Vinchu)' : 'मावशी (Mavshi)', gradient: 'from-orange-500 to-red-600', emoji: g === 'male' ? '🧔🏽‍♂️' : '🥻', greeting: 'ओम फट् स्वाहा! मी तुमचा Smart प्रवास वाटाघाटी मित्र तात्या विंचू आहे 🚩.' };
+      case 'mr': return { name: g === 'male' ? 'तात्या विंचू (Tatya Vinchu)' : 'मावशी (Mavshi)', gradient: 'from-orange-500 to-red-600', emoji: g === 'male' ? '🧔🏽‍♂️' : '🥻', greeting: 'ओम फट् स्वाहा! मी तुमचा Smart राऊट्रिपो मित्र तात्या विंचू आहे 🚩.' };
       case 'en': return { name: g === 'male' ? 'Lord Alfred' : 'Lady Victoria', gradient: 'from-slate-700 to-black', emoji: g === 'male' ? '🎩' : '👒', greeting: 'Greetings! I am your Elite Trip Manager.' };
       case 'hi': return { name: g === 'male' ? 'मुन्ना भाई' : 'सर्किट की बहन', gradient: 'from-yellow-500 to-orange-600', emoji: g === 'male' ? '💪🏽' : '👸🏽', greeting: 'नमस्ते भिडू! मैं तेरा Smart ट्रैवल पार्टनर हूँ 💪.' };
       case 'gu': return { name: g === 'male' ? 'જીગ્નેશ ભાઈ' : 'દયા બેન', gradient: 'from-green-500 to-emerald-700', emoji: g === 'male' ? '🤓' : '💃🏽', greeting: 'કેમ છો! I am your Bapu Mode travel guide.' };

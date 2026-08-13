@@ -1,28 +1,47 @@
-export const getWhatsAppShareMessage = (lang: string = 'mr') => {
-  const appLink = `${window.location.origin}/app.apk`;
-  if (lang === 'mr') {
-    return `नमस्कार मित्रा! 'प्रवास वाटाघाटी' (Pravas Wataghati) हे आमचं नवीन ट्रॅव्हल प्लॅनर ॲप आहे. खालील लिंकवरून ॲप डाऊनलोड करा आणि इन्स्टॉल करा:\n${appLink}`;
+export const getBaseUrl = () => {
+  try {
+    if (window.location.origin && window.location.origin !== 'null' && window.location.origin !== 'about:blank') {
+      return window.location.origin;
+    }
+    const currentHref = window.location.href || '';
+    if (currentHref.startsWith('http')) {
+      return new URL(currentHref).origin;
+    }
+  } catch (e) {
+    console.warn("Could not parse origin from window.location:", e);
   }
-  return `Hey friend! 'Pravas Wataghati' is our trip expense & itinerary planner app. Download and install the app from this link:\n${appLink}`;
+  return 'https://routripo.app';
+};
+
+export const getWhatsAppShareMessage = (lang: string = 'mr') => {
+  const appLink = `${getBaseUrl()}/app.apk`;
+  if (lang === 'mr') {
+    return `नमस्कार मित्रा! 'राऊट्रिपो' (Routripo) हे आमचं नवीन ट्रॅव्हल प्लॅनर ॲप आहे. खालील लिंकवरून ॲप डाऊनलोड करा आणि इन्स्टॉल करा:\n${appLink}`;
+  }
+  return `Hey friend! 'Routripo' is our trip expense & itinerary planner app. Download and install the app from this link:\n${appLink}`;
 };
 
 export const shareAppOnWhatsApp = async (lang: string = 'mr', customMessage?: string) => {
   const message = customMessage || getWhatsAppShareMessage(lang);
   
-  if (navigator.share) {
-    try {
+  try {
+    if (navigator.share) {
       await navigator.share({
-        title: 'Pravas Wataghati',
+        title: 'Routripo',
         text: message,
       });
       return;
-    } catch (err) {
-      console.error("Native share failed, falling back", err);
     }
+  } catch (err) {
+    console.warn("Native share skipped or failed, opening WhatsApp URL", err);
   }
   
-  const encodedText = encodeURIComponent(message);
-  // Using api.whatsapp.com/send which works seamlessly on both mobile app and web browser
-  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
-  window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  try {
+    const encodedText = encodeURIComponent(message);
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  } catch (err) {
+    console.error("Failed to open WhatsApp URL:", err);
+  }
 };
+

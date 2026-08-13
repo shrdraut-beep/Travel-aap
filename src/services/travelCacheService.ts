@@ -6,7 +6,7 @@
 
 import { getTrainFromCatalog } from './trainCatalogService';
 
-const CACHE_KEY = 'pravas_travel_cache_v2';
+const CACHE_KEY = 'routripo_travel_cache_v2';
 const NAMES_CACHE_KEY = 'names_cache_v1';
 
 // In-memory runtime cache for sub-millisecond lookups

@@ -42,7 +42,7 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({ isOpen, onCl
 
   const steps = [
     {
-      title: isMr ? 'प्रवास वाटाघाटी मध्ये तुमचे स्वागत आहे! 🚩' : 'Welcome to Pravas Wataghati! 🚩',
+      title: isMr ? 'राऊट्रिपो मध्ये तुमचे स्वागत आहे! 🚩' : 'Welcome to Routripo! 🚩',
       subtitle: isMr ? 'सहलीचे नियोजन, मित्रांचे लाईव्ह लोकेशन आणि खर्चाचा हिशोब - सर्व एकाच जागी.' : 'All-in-one trip manager, live location tracking, and smart group expenses.',
       icon: Compass,
       color: 'from-amber-500 to-orange-600',

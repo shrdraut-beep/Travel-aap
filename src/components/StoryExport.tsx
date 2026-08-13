@@ -183,7 +183,7 @@ export const StoryExport: React.FC<StoryExportProps> = ({ isOpen, onClose, trip,
                   <span 
                     className="text-sm font-black uppercase tracking-[0.3em]"
                     style={{ color: 'rgba(255, 255, 255, 0.4)' }}
-                  >Pravas Wataghati</span>
+                  >Routripo</span>
                 </div>
               </div>
             </div>

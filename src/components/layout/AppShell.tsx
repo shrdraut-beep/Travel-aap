@@ -99,7 +99,7 @@ export const AppShell: React.FC<AppShellProps> = ({
 
       {/* Global Header */}
       <header className="sticky top-0 left-0 right-0 glass-effect border-b border-slate-200/60 px-3 py-2.5 flex items-center justify-between z-[60] shadow-sm shrink-0 bg-white/90 backdrop-blur-md gap-2">
-        {/* Extreme Left: Pravas Wataghati App Logo */}
+        {/* Extreme Left: Routripo App Logo */}
         <div className="flex items-center gap-2">
         <button
           type="button"
@@ -107,11 +107,11 @@ export const AppShell: React.FC<AppShellProps> = ({
             if (onLogoClick) onLogoClick();
           }}
           className="relative shrink-0 flex items-center gap-2 p-1 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200/80 shadow-xs transition-all active:scale-95 cursor-pointer"
-          title="प्रवास वाटाघाटी (Pravas Wataghati)"
+          title="राऊट्रिपो (Routripo)"
         >
           <img
             src={logoUrl || '/logobg.png'}
-            alt="Pravas Wataghati Logo"
+            alt="Routripo Logo"
             className="h-10 w-auto object-contain drop-shadow-xs"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
@@ -119,7 +119,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             }}
           />
           <span className="font-black text-slate-900 text-xs sm:text-sm tracking-tight hidden lg:inline-block pr-1">
-            प्रवास वाटाघाटी
+            राऊट्रिपो
           </span>
         </button>
         </div>
@@ -318,45 +318,26 @@ export const AppShell: React.FC<AppShellProps> = ({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed-bottom-nav fixed bottom-0 left-0 right-0 glass-effect border-t border-slate-200 px-1 pb-safe z-50 shadow-2xl bg-white/95 h-[68px]"
+          className="fixed-bottom-nav fixed bottom-3 left-3 right-3 z-50 max-w-md mx-auto"
         >
-          <div className="flex justify-around items-center max-w-md mx-auto h-full px-1">
+          <div className="bg-white/90 backdrop-blur-xl rounded-[1.75rem] shadow-xl shadow-slate-300/40 border border-white flex items-center justify-between px-1.5 py-2">
             {tabs.map((tab, idx) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
-                <motion.button
+                <button
                   key={tab.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 + idx * 0.04, duration: 0.25, ease: "easeOut" }}
-                  whileTap={{ scale: 0.92 }}
                   onClick={() => onTabChange(tab.id)}
-                  className="flex flex-col items-center justify-center flex-1 transition-all duration-200 min-w-0 h-full relative cursor-pointer"
+                  className="relative flex-1 flex flex-col items-center gap-1 py-1 cursor-pointer transition-all min-w-0"
                 >
-                  {tab.isCenter ? (
-                    <div className="absolute -top-5">
-                      <motion.div 
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className={`w-13 h-13 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 border-4 border-white text-2xl drop-shadow-sm ${isActive ? 'bg-emerald scale-110 shadow-emerald/30' : 'bg-emerald hover:bg-emerald/90'}`}
-                      >
-                        {tab.emoji}
-                      </motion.div>
-                    </div>
-                  ) : (
-                    <div className={`relative flex items-center justify-center w-10 h-7 rounded-xl shrink-0 transition-all duration-200 text-xl drop-shadow-sm ${
-                      isActive ? `${tab.activeBg} ${tab.activeText} shadow-2xs` : 'bg-transparent text-slate-600 hover:bg-slate-100'
-                    }`}>
-                      {tab.emoji}
-                    </div>
-                  )}
-                  <span className={`text-[10px] font-black uppercase tracking-tight transition-all truncate w-full text-center px-0.5 leading-none ${tab.isCenter ? 'mt-8' : 'mt-1'} ${
-                    isActive ? 'text-slate-900 scale-105 font-black' : 'text-slate-500 font-bold'
-                  }`}>
+                  {isActive && <span className="absolute -top-1 w-1.5 h-1.5 rounded-full bg-orange-500" />}
+                  <div className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-300 ${isActive ? "bg-gradient-to-br from-orange-400 to-rose-500 shadow-md shadow-orange-500/30 scale-105" : "bg-transparent"}`}>
+                    <Icon className={`w-4.5 h-4.5 transition-colors ${isActive ? "text-white" : "text-slate-400"}`} />
+                  </div>
+                  <span className={`text-[10px] font-bold tracking-wide ${isActive ? "text-slate-800" : "text-slate-400"}`}>
                     {tab.label}
                   </span>
-                </motion.button>
+                </button>
               );
             })}
           </div>

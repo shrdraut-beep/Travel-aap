@@ -19,8 +19,7 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.get('admin', false) == true ||
-        (request.auth.token.get('email_verified', false) == true
-          && authEmail() == 'shrd.raut@gmail.com')
+        (authEmail() == 'shrd.raut@gmail.com')
       );
     }
 
@@ -139,6 +138,10 @@ service cloud.firestore {
     // Scoped to this one empty doc rather than a whole public collection.
     match /test/connection {
       allow get: if true;
+    }
+    match /agent_ads/{adId} {
+      allow read: if true; // Public can read ads
+      allow create, update, delete: if isAdmin() || (isSignedIn() && existing().agentId == request.auth.uid);
     }
   }
 }

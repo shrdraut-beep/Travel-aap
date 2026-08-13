@@ -137,7 +137,7 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
             {customMessage || (lang === 'mr' ? "कृपया प्रतीक्षा करा, आम्ही तुमच्यासाठी सर्वोत्तम पर्याय शोधत आहोत।" : "Please wait while we fetch options for you.")}
           </div>
           <p className="text-xs text-slate-500 font-semibold pt-1">
-            {lang === 'mr' ? 'प्रवास वाटाघाटी ट्रॅव्हल असिस्टन्स' : 'Pravas Wataghati Travel Assistance'}
+            {lang === 'mr' ? 'राऊट्रिपो ट्रॅव्हल असिस्टन्स' : 'Routripo Travel Assistance'}
           </p>
         </div>
       </div>
@@ -171,7 +171,7 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
               : `No direct flights available for route (${origin || 'From'} ➔ ${destination || 'To'}).`)}
           </div>
           <p className="text-xs text-slate-500 font-semibold pt-1">
-            {lang === 'mr' ? 'प्रवास वाटाघाटी ट्रॅव्हल असिस्टन्स' : 'Pravas Wataghati Travel Assistance'}
+            {lang === 'mr' ? 'राऊट्रिपो ट्रॅव्हल असिस्टन्स' : 'Routripo Travel Assistance'}
           </p>
         </div>
       </div>
@@ -283,13 +283,13 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
               <div className="pt-2 flex items-center justify-between border-t border-slate-100">
                 <span className="text-[11px] font-extrabold text-slate-500 flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>{lang === 'mr' ? 'एजंट असिस्टन्स' : 'Agent Assistance'}</span>
+                  <span>{lang === 'mr' ? 'पार्टनर असिस्टन्स' : 'Partner Assistance'}</span>
                 </span>
                 <button
                   className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-blue-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
-                  onClick={() => alert(lang === 'mr' ? "ट्रॅव्हल एजंटशी संपर्क साधण्यासाठी कृपया ९८७६५४३२१० वर कॉल करा।" : "To contact a travel agent, please call 9876543210.")}
+                  onClick={() => alert(lang === 'mr' ? "ट्रॅव्हल पार्टनरशी संपर्क साधण्यासाठी कृपया ९८७६५४३२१० वर कॉल करा।" : "To contact a travel partner, please call 9876543210.")}
                 >
-                  <span>{lang === 'mr' ? 'एजंटशी संपर्क साधा' : 'Contact Agent / Request Booking'}</span>
+                  <span>{lang === 'mr' ? 'पार्टनरशी संपर्क साधा' : 'Contact Partner / Request Booking'}</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </button>
               </div>

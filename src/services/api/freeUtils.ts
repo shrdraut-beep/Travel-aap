@@ -15,7 +15,7 @@ export async function getCountryDetails(countryName: string, retries = 2) {
     try {
       const res = await fetch(`https://restcountries.com/v3.1/name/${encodeURIComponent(countryName)}`, {
           headers: {
-              "User-Agent": "PravasWataghati/1.0"
+              "User-Agent": "Routripo/1.0"
           }
       });
       if (res.ok) {
@@ -43,7 +43,7 @@ export async function geocodeDestination(destination: string) {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`, {
         headers: {
-            "User-Agent": "PravasWataghati/1.0"
+            "User-Agent": "Routripo/1.0"
         }
     });
     if (!res.ok) return null;

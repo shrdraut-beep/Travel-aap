@@ -1,0 +1,46 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='1024' viewBox='0 0 1024 1024'>
+  <defs>
+    <!-- Background Card -->
+    <linearGradient id='bgGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' stop-color='#FFFFFF'/>
+      <stop offset='100%' stop-color='#F8FAFC'/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id='softShadow' x='-20%' y='-20%' width='140%' height='140%'>
+      <feDropShadow dx='0' dy='16' stdDeviation='24' flood-color='#0F172A' flood-opacity='0.08'/>
+    </filter>
+  </defs>
+
+  <!-- Clean Container Card -->
+  <rect x='64' y='64' width='896' height='896' rx='160' fill='url(#bgGrad)' stroke='#E2E8F0' stroke-width='6' filter='url(#softShadow)'/>
+
+  <!-- Top Header Brand Logo exact replication -->
+  <g transform='translate(512, 480)'>
+    <!-- "Rou" in Red -->
+    <text x='-260' y='40' font-family='Poppins, Arial, sans-serif' font-weight='800' font-size='140' fill='#EF4444' text-anchor='start'>
+      Rou
+    </text>
+
+    <!-- [T] Red Badge Container -->
+    <rect x='30' y='-85' width='120' height='140' rx='28' fill='#EF4444' />
+    <!-- "T" White Text inside Badge -->
+    <text x='90' y='28' font-family='Poppins, Arial, sans-serif' font-weight='800' font-size='120' fill='#FFFFFF' text-anchor='middle'>
+      T
+    </text>
+
+    <!-- "ripO" in Pink -->
+    <text x='165' y='40' font-family='Poppins, Arial, sans-serif' font-weight='800' font-size='140' fill='#EC4899' text-anchor='start'>
+      ripO
+    </text>
+  </g>
+
+  <!-- Tagline Subtitle -->
+  <text x='512' y='660' font-family='Poppins, Arial, sans-serif' font-weight='700' font-size='36' fill='#64748B' text-anchor='middle' letter-spacing='4'>
+    GROUP TRAVEL &amp; EXPENSE PLANNER
+  </text>
+
+  <text x='512' y='720' font-family='Arial, sans-serif' font-weight='700' font-size='30' fill='#EF4444' text-anchor='middle' letter-spacing='2'>
+    प्रवास वाटाघाटी • हिशोब सोपा
+  </text>
+</svg>

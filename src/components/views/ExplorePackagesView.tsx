@@ -208,12 +208,12 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
   // CHECKOUT & PAYMENT FLOW STATE (COMMISSION SPLIT ARCHITECTURE)
   const [checkoutPkg, setCheckoutPkg] = useState<TourPackage | null>(null);
   const [travelersCount, setTravelersCount] = useState<number>(1);
-  const [tripStartDate, setTripStartDate] = useState<string>('2026-08-15');
-  const [custName, setCustName] = useState<string>('Rahul Sharma');
-  const [custPhone, setCustPhone] = useState<string>('+91 98765 43210');
-  const [custEmail, setCustEmail] = useState<string>('rahul.sharma@gmail.com');
+  const [tripStartDate, setTripStartDate] = useState<string>(() => new Date().toISOString().substring(0, 10));
+  const [custName, setCustName] = useState<string>('');
+  const [custPhone, setCustPhone] = useState<string>('');
+  const [custEmail, setCustEmail] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
-  const [upiVpa, setUpiVpa] = useState<string>('rahul@upi');
+  const [upiVpa, setUpiVpa] = useState<string>('');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [completedVoucher, setCompletedVoucher] = useState<any | null>(null);
 
@@ -247,15 +247,15 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
 
       const newBooking = {
         id: refId,
-        customerName: custName || 'Rahul Sharma',
-        customerPhone: custPhone || '+91 98765 43210',
-        customerEmail: custEmail || 'rahul.sharma@gmail.com',
+        customerName: custName || 'Valued Traveler',
+        customerPhone: custPhone || '',
+        customerEmail: custEmail || '',
         packageName: checkoutPkg.title,
         total_amount: totalAmount,
         platform_commission: platformCommission,
         vendor_amount: vendorAmount,
         amount: totalAmount,
-        tripStartDate: 'Aug 15, 2026',
+        tripStartDate: tripStartDate || new Date().toLocaleDateString(),
         payment_status: 'Held securely' as const,
         paymentStatus: 'Held in Escrow' as const,
         paymentMethod: paymentMethod === 'upi' ? `UPI (${upiVpa})` : paymentMethod === 'card' ? 'Visa / MasterCard' : 'Net Banking',
@@ -442,7 +442,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
             }`}
           >
             <ShieldCheck className={`w-4 h-4 ${verifiedOnly ? 'text-emerald-600' : 'text-slate-400'}`} />
-            <span>Verified Agents Only</span>
+            <span>Verified Partners Only</span>
             {verifiedOnly && <Check className="w-3.5 h-3.5 text-emerald-600 ml-1" />}
           </button>
 
@@ -577,7 +577,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                   {/* Escrow text snippet below booking button */}
                   <p className="text-[10px] font-bold text-slate-600 leading-tight flex items-start gap-1">
                     <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>Your money is safe. Payments are held securely and released to the agent only after your trip starts.</span>
+                    <span>Your money is safe. Payments are held securely and released to the partner only after your trip starts.</span>
                   </p>
                 </div>
 
@@ -648,7 +648,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                 {selectedModalPackage.isVerifiedAgent && (
                   <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    Verified Partner Agent
+                    Verified Partner
                   </span>
                 )}
               </div>
@@ -712,7 +712,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
 
               {/* Exact snippet below booking button */}
               <p className="text-xs font-bold text-slate-700 leading-relaxed bg-white/80 p-3 rounded-2xl border border-emerald-200/60">
-                "Your money is safe. Payments are held securely and released to the agent only after your trip starts."
+                "Your money is safe. Payments are held securely and released to the partner only after your trip starts."
               </p>
             </div>
 
@@ -1056,7 +1056,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                 </div>
                 <h3 className="text-xl font-black text-white">Offer Sent!</h3>
                 <p className="text-sm text-slate-400">
-                  Your offer of ₹{offerPrice} for {selectedBargainPkg.title} has been sent to top-rated agents. They will contact you shortly if accepted.
+                  Your offer of ₹{offerPrice} for {selectedBargainPkg.title} has been sent to top-rated partners. They will contact you shortly if accepted.
                 </p>
               </div>
             ) : (
@@ -1067,7 +1067,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                       <MessageCircle className="w-5 h-5 text-indigo-400" />
                       वाटाघाटी करा (Negotiate)
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1">Submit your counter-offer directly to the agent.</p>
+                    <p className="text-xs text-slate-400 mt-1">Submit your counter-offer directly to the partner.</p>
                   </div>
                   <button onClick={() => setBargainModalOpen(false)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 transition-colors cursor-pointer">
                     <X className="w-4 h-4" />

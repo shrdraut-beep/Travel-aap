@@ -173,6 +173,7 @@ export interface TripGroup {
   id: string;
   name: string;
   source?: string;
+  destination?: string;
   startDate: string;
   endDate: string;
   members: Member[];
@@ -279,3 +280,25 @@ export interface DialogConfig {
   onConfirm: (value?: string) => void;
   onCancel?: () => void;
 }
+
+export type OfferCategory = 'Banner' | 'Bank Offers' | 'Flights' | 'Hotels' | 'Cabs' | 'Flagship Store' | 'Pocket Friendly' | 'All';
+
+export type OfferTabContext = 'all' | 'hub' | 'all-trips' | 'planning' | 'booking' | 'social' | 'expenses';
+
+export interface Offer {
+  id: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  category: OfferCategory;
+  targetTab?: OfferTabContext; // Target tab: 'all' | 'hub' | 'all-trips' | 'planning' | 'booking' | 'social' | 'expenses'
+  couponCode?: string;
+  discountBadge?: string; // e.g. "Up to 20% OFF", "UNDER ₹999", "FLAT ₹1,500 OFF"
+  priceTag?: string; // e.g. "UNDER ₹999"
+  validTill?: string;
+  targetLink?: string;
+  isActive: boolean;
+  createdBy?: string;
+  createdAt: string;
+}
+

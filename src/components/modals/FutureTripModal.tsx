@@ -519,7 +519,7 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
                                 rel="noopener noreferrer" 
                                 className="inline-block bg-blue-600 text-white font-semibold text-sm px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
                               >
-                                येथे हॉटेल बुक करा 🏨
+                                {lang === 'mr' ? 'येथे हॉटेल बुक करा 🏨' : lang === 'hi' ? 'यहाँ होटल बुक करें 🏨' : 'Book Hotel Here 🏨'}
                               </a>
                             </div>
 
@@ -592,7 +592,7 @@ export const FutureTripModal: React.FC<FutureTripModalProps> = ({ isOpen, onClos
                         });
                     }
 
-                    shareText += `\nCheck out my trip plan on Pravas Wataghati!`;
+                    shareText += `\nCheck out my trip plan on Routripo!`;
                     shareAppOnWhatsApp(lang, shareText);
                   }}
                   className="w-full py-3 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-black text-xs transition-all flex items-center justify-center gap-2"

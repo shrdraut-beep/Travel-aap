@@ -1,6 +1,6 @@
 export const translations: Record<string, Record<string, string>> = {
   mr: {
-    title: "प्रवास वाटाघाटी",
+    title: "राऊट्रिपो",
     subtitle: "दोस्तांची सफर, हिशेब विसर",
     tripName: "सहलीचे नाव",
     startDate: "सुरुवात तारीख",
@@ -299,7 +299,7 @@ export const translations: Record<string, Record<string, string>> = {
     defaultMemoryCaption: "सहलीच्या छान आठवणी ✨"
   },
   en: {
-    title: "Pravas Wataghati",
+    title: "Routripo",
     subtitle: "Friends' Journey, Zero Worries",
     tripName: "Trip Name",
     startDate: "Start Date",
@@ -1126,7 +1126,7 @@ translations.ur = fillMissingKeys({
 });
 
 translations.es = fillMissingKeys({
-  title: "Pravas Wataghati (Amigo Mode 🌮)",
+  title: "Routripo (Amigo Mode 🌮)",
   subtitle: "Viaja con amigos, olvida los gastos",
   addExpense: "Gasta Dinero 💸",
   btn_add_expense: "Hazlo Llover 💸",
@@ -1148,7 +1148,7 @@ translations.es = fillMissingKeys({
 });
 
 translations.fr = fillMissingKeys({
-  title: "Pravas Wataghati (Oui Oui Mode 🥖)",
+  title: "Routripo (Oui Oui Mode 🥖)",
   subtitle: "Voyagez entre amis, oubliez les comptes",
   addExpense: "Fais pleuvoir 💸",
   btn_add_expense: "Fais pleuvoir 💸",
@@ -1170,7 +1170,7 @@ translations.fr = fillMissingKeys({
 });
 
 translations.de = fillMissingKeys({
-  title: "Pravas Wataghati (Pro Mode 🍺)",
+  title: "Routripo (Pro Mode 🍺)",
   subtitle: "Reisen mit Freunden, vergisst das Geld",
   addExpense: "Geld verpulvern 💸",
   btn_add_expense: "Geld verpulvern 💸",

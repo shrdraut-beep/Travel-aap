@@ -113,8 +113,8 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({ childr
           try {
             navigator.mediaSession.metadata = new MediaMetadata({
               title: currentTrack.title,
-              artist: currentTrack.artist || 'Pravas Wataghati',
-              album: 'Pravas Roadtrip Hits',
+              artist: currentTrack.artist || 'Routripo',
+              album: 'Routripo Roadtrip Hits',
               artwork: [
                 { 
                   src: currentTrack.thumbnailUrl || '', 

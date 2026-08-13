@@ -29,7 +29,8 @@ import {
   Loader2,
   UserX,
   LogOut,
-  Download
+  Download,
+  Share2
 } from 'lucide-react';
 import { TripGroup } from '../../types';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -219,319 +220,174 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   return (
-    <div className="px-4 sm:px-6 py-6 space-y-6 max-w-3xl mx-auto pb-32">
+    <div className="pt-6 pb-24 px-5 space-y-6 max-w-2xl mx-auto bg-slate-50 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <button 
-          onClick={onBackToTrips}
-          className="px-3.5 py-2 bg-indigo-600 text-white rounded-xl flex items-center gap-1.5 border border-indigo-500 active:scale-95 transition-all shadow-md shadow-indigo-200"
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md">
+          <Settings className="w-5 h-5" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold font-[Poppins] text-slate-800">{t('settings') || 'Settings'}</h2>
+          <p className="text-xs text-slate-500">{lang === 'mr' ? 'तुमची प्राधान्ये व्यवस्थापित करा' : 'Manage your preferences'}</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        
+        {/* Settings Options */}
+        <div 
+          onClick={onOpenLanguageModal}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
         >
-          <ChevronRight className="w-4 h-4 rotate-180 text-white" />
-          <span className="text-xs font-black uppercase tracking-wider">{t('back') || 'मागे'}</span>
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+              <Languages className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">{t('language') || 'Language'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'मराठी' : 'English'}</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+              <Bell className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">{lang === 'mr' ? 'सूचना (Notifications)' : 'Notifications'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'ॲलर्ट्स आणि अपडेट्स व्यवस्थापित करा' : 'Manage alerts and updates'}</p>
+            </div>
+          </div>
+          <ToggleSwitch checked={pushNotifications} onChange={handleTogglePushNotifications} />
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">{lang === 'mr' ? 'सुरक्षा व आपत्कालीन' : 'Privacy & Security'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'एसओएस व अलर्ट्स' : 'Data and permissions'}</p>
+            </div>
+          </div>
+          <ToggleSwitch checked={sosAlerts} onChange={handleToggleSosAlerts} />
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+              <Coins className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">{t('currency') || 'Currency'}</p>
+              <p className="text-[11px] text-slate-500">{currency || 'INR'}</p>
+            </div>
+          </div>
+          <select 
+            value={currency}
+            onChange={(e) => onSetCurrency(e.target.value)}
+            className="bg-slate-50 border-none rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none cursor-pointer"
+          >
+            <option value="INR">₹ INR</option>
+            <option value="USD">$ USD</option>
+            <option value="EUR">€ EUR</option>
+            <option value="GBP">£ GBP</option>
+            <option value="AED">د.إ AED</option>
+            <option value="AUD">A$ AUD</option>
+          </select>
+        </div>
+        
+        <div 
+          onClick={onExportPDF}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+              <Download className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-slate-800">{lang === 'mr' ? 'PDF डाउनलोड' : 'Export PDF'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'सहलीचा अहवाल डाउनलोड करा' : 'Download trip report'}</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
+        </div>
+
+        {/* Logout Button */}
+        <button 
+          onClick={() => setShowLogoutModal(true)}
+          className="w-full mt-8 py-3.5 bg-rose-50 hover:bg-rose-100 active:scale-95 transition-all text-rose-600 font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-sm"
+        >
+          <LogOut className="w-4 h-4" /> {lang === 'mr' ? 'लॉग आऊट' : 'Log Out'}
         </button>
-
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-            <Settings className="w-4 h-4" />
-          </div>
-          <h2 className="text-xl font-black text-slate-800 tracking-tight">
-            {t('settings') || 'अ‍ॅप सेटिंग्ज'}
-          </h2>
-        </div>
       </div>
 
-      {/* 1. Language & Regional Settings */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest px-2">
-          {lang === 'mr' ? '१. भाषा व प्रादेशिक सेटिंग्ज' : '1. Language & Regional'}
-        </h3>
+      {/* Support & Legal */}
+      <div className="space-y-4 pt-4 border-t border-slate-200">
+        <h3 className="text-sm font-bold text-slate-800 px-2">{lang === 'mr' ? 'मदत व सपोर्ट' : 'Help & Support'}</h3>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm divide-y divide-slate-100">
-          {/* Language Preference Card */}
-          <div className="p-4 flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
-                <Languages className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-extrabold text-slate-800">{lang === 'mr' ? 'ॲप भाषा' : 'App Language'}</span>
+        <div 
+          onClick={() => shareAppOnWhatsApp(lang)}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <Share2 className="w-5 h-5" />
             </div>
-
-            <div className="flex items-center gap-2">
-              <select 
-                value={lang}
-                onChange={(e) => setLang(e.target.value)}
-                className="bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 max-w-[190px] shadow-2xs"
-              >
-                <option value="mr">मराठी (गावठी मोड 🚩)</option>
-                <option value="en">English (Nawab Mode 🎩)</option>
-                <option value="hi">हिंदी (भाईगिरी मोड 💪)</option>
-                <option value="gu">ગુજરાતી (Bapu Mode 👓)</option>
-                <option value="ta">தமிழ் (Thalaiva Mode 🕶️)</option>
-                <option value="te">తెలుగు (Mass Mode ⚡)</option>
-                <option value="kn">ಕನ್ನಡ (Boss Mode 👑)</option>
-                <option value="bn">বাংলা (Roshogolla Mode 🍯)</option>
-                <option value="pa">ਪੰਜਾਬੀ (Swagger Mode 👳)</option>
-                <option value="ml">മലയാളം (Mallu Mode 🌴)</option>
-                <option value="es">Español (Amigo Mode 🌮)</option>
-                <option value="fr">Français (Oui Oui Mode 🥖)</option>
-                <option value="de">Deutsch (Pro Mode 🍺)</option>
-                <option value="ja">日本語 (Anime Mode 🥷)</option>
-              </select>
-
-              {onOpenLanguageModal && (
-                <button
-                  type="button"
-                  onClick={onOpenLanguageModal}
-                  className="px-3 py-2 rounded-xl bg-amber-500 text-white hover:bg-amber-600 text-xs font-black shadow-sm transition-all shrink-0 active:scale-95"
-                  title={lang === 'mr' ? 'मोड निवडा' : 'Change Vibe'}
-                >
-                  {lang === 'mr' ? 'मोड बदला 🚩' : 'Change Vibe'}
-                </button>
-              )}
+            <div>
+              <p className="font-semibold text-slate-800">{lang === 'mr' ? 'WhatsApp वर ॲप शेअर करा' : 'Share App on WhatsApp'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'मित्रांना ॲप डाऊनलोड लिंक पाठवा' : 'Send app download link to friends'}</p>
             </div>
           </div>
-
-          {/* Currency Selector */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                <Coins className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-extrabold text-slate-800">{t('currency') || 'चलण (Currency)'}</span>
-            </div>
-            <select 
-              value={currency}
-              onChange={(e) => onSetCurrency(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-black text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="INR">₹ INR (भारतीय रुपये)</option>
-              <option value="USD">$ USD (US Dollar)</option>
-              <option value="EUR">€ EUR (Euro)</option>
-              <option value="AED">AED (Emirati Dirham)</option>
-            </select>
-          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
         </div>
-      </div>
 
-      {/* 2. Notifications & Alerts */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest px-2">
-          {lang === 'mr' ? '२. सूचना व अलर्ट्स (Notifications)' : '2. Notifications & Alerts'}
-        </h3>
-
-        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm divide-y divide-slate-100">
-          {/* Budget Alerts Switch */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-                <Bell className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">
-                  {lang === 'mr' ? 'बजेट ओव्हरफ्लो अलर्ट्स' : 'Budget & Overflow Alerts'}
-                </span>
-                <span className="text-xs font-medium text-slate-500">
-                  {lang === 'mr' ? 'हिशोब बजेटपेक्षा जास्त झाल्यास लगेच अलर्ट पाठवा' : 'Notify when expenses exceed planned trip budget'}
-                </span>
-              </div>
+        <div 
+          onClick={() => setShowFeedbackModal(true)}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <MessageSquare className="w-5 h-5" />
             </div>
-
-            <ToggleSwitch checked={budgetAlerts} onChange={handleToggleBudgetAlerts} />
-          </div>
-
-          {/* Push Notifications Switch */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
-                <Smartphone className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">
-                  {lang === 'mr' ? 'पुश नोटिफिकेशन्स (Real-time Push)' : 'Push Notifications'}
-                </span>
-                <span className="text-xs font-medium text-slate-500">
-                  {lang === 'mr' ? 'नवीन खर्च जोडल्यास किंवा मित्रांनी पेमेंट केल्यास कळवा' : 'Get instant alerts when members add new expenses'}
-                </span>
-              </div>
+            <div>
+              <p className="font-semibold text-slate-800">{t('sendFeedback') || 'Send Feedback'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'तुमचा अनुभव व सूचना शेअर करा' : 'Rate us and share your suggestions'}</p>
             </div>
-
-            <ToggleSwitch checked={pushNotifications} onChange={handleTogglePushNotifications} />
           </div>
-
-          {/* Emergency & SOS Alerts Switch */}
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center shrink-0">
-                <Siren className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">
-                  {lang === 'mr' ? 'आपत्कालीन SOS अलर्ट्स' : 'Emergency & SOS Alerts'}
-                </span>
-                <span className="text-xs font-medium text-slate-500">
-                  {lang === 'mr' ? 'मित्रांनी SOS दाबल्यास सायरन व लोकेशन अलर्ट मिळवा' : 'Receive instant location broadcast if SOS is triggered'}
-                </span>
-              </div>
-            </div>
-
-            <ToggleSwitch checked={sosAlerts} onChange={handleToggleSosAlerts} />
-          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
         </div>
-      </div>
 
-      {/* 4. About & Legal Support */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest px-2">
-          {lang === 'mr' ? '४. मदत आणि अ‍ॅपबद्दल (About & Support)' : '4. About & Support'}
-        </h3>
-
-        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm divide-y divide-slate-100">
-          {/* WhatsApp Share App Option */}
-          <button
-            type="button"
-            onClick={() => shareAppOnWhatsApp(lang)}
-            className="w-full p-4 flex items-center justify-between bg-gradient-to-r from-emerald-50/90 via-teal-50/90 to-emerald-50/90 hover:bg-emerald-100/70 transition-colors text-left cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-                <svg className="w-5 h-5 fill-current text-white" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.205 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l.281.449-1.156 4.225 4.315-1.132.303.175z" />
-                </svg>
-              </div>
-              <div>
-                <span className="text-sm font-black text-slate-900 flex items-center gap-2">
-                  <span>{lang === 'mr' ? 'WhatsApp वर ॲप शेअर करा' : 'Share App on WhatsApp'}</span>
-                  <span className="bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black uppercase">Instant</span>
-                </span>
-                <span className="text-xs font-semibold text-emerald-700 block">
-                  {lang === 'mr' ? 'मित्रांना ॲप डाऊनलोड व इन्स्टॉल करण्यासाठी मेसेज पाठवा' : 'Send app download & install link to friends on WhatsApp'}
-                </span>
-              </div>
+        <div 
+          onClick={() => setShowPrivacyModal(true)}
+          className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <ShieldCheck className="w-5 h-5" />
             </div>
-            <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-xs">
-              <ChevronRight className="w-4 h-4" />
-            </div>
-          </button>
-
-          {/* Send In-App Feedback */}
-          <button 
-            type="button"
-            onClick={() => setShowFeedbackModal(true)}
-            className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">{t('sendFeedback') || 'अभिप्राय नोंदवा'}</span>
-                <span className="text-xs font-medium text-slate-500">{lang === 'mr' ? 'तुमचा अनुभव व सूचना शेअर करा' : 'Rate us and share your suggestions'}</span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
-          </button>
-
-          {/* Send Feedback / Report Bug (Mailto Direct Contact) */}
-          <a 
-            href="mailto:shrd.raut@gmail.com?subject=Send%20Feedback%20%2F%20Report%20Bug%20-%20Pravas%20Wataghati&body=Hi%20Developer%2C%0A%0AFeedback%2FBug%20Details%3A%0A"
-            className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center shrink-0">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">
-                  {lang === 'mr' ? 'फीडबॅक द्या / त्रुटी नोंदवा (Send Feedback / Report Bug)' : 'Send Feedback / Report Bug'}
-                </span>
-                <span className="text-xs font-medium text-slate-500">shrd.raut@gmail.com</span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
-          </a>
-
-          {/* Privacy Policy & Open-Source Credits */}
-          <button
-            type="button"
-            onClick={() => setShowPrivacyModal(true)}
-            className="w-full p-4 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">
-                  {lang === 'mr' ? 'गोपनीयता आणि क्रेडिट्स (Privacy Policy & Credits)' : 'Privacy Policy & Credits'}
-                </span>
-                <span className="text-xs font-medium text-slate-500">
-                  {lang === 'mr' ? 'डेटा सुरक्षा आणि मुक्त-स्रोत क्रेडिट्स पाहा' : 'Read privacy policy & open-source credits'}
-                </span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400" />
-          </button>
-
-          {/* Credits & Data Sources */}
-          <div className="p-4 flex items-center justify-between border-t border-slate-100 bg-white hover:bg-slate-50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center shrink-0">
-                <Info className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-sm font-extrabold text-slate-800 block">
-                  {lang === 'mr' ? 'क्रेडिट्स व डेटा स्रोत' : 'Credits & Data Sources'}
-                </span>
-                <span className="text-xs font-medium text-slate-500">
-                  {lang === 'mr' ? 'उड्डाण ट्रॅकिंग डेटा: ' : 'Flight data provided by '}
-                  <a href="https://opensky-network.org" target="_blank" rel="noreferrer" className="underline hover:text-slate-800 text-blue-600">
-                    The OpenSky Network
-                  </a>
-                </span>
-              </div>
+            <div>
+              <p className="font-semibold text-slate-800">{lang === 'mr' ? 'गोपनीयता आणि क्रेडिट्स' : 'Privacy Policy & Credits'}</p>
+              <p className="text-[11px] text-slate-500">{lang === 'mr' ? 'डेटा सुरक्षा आणि मुक्त-स्रोत क्रेडिट्स पाहा' : 'Read privacy policy & open-source credits'}</p>
             </div>
           </div>
-
-          {/* Logout Section */}
-          <div className="p-4 border-t border-slate-100 bg-slate-50/70">
-            <button
-              type="button"
-              id="logout-trigger-btn"
-              onClick={() => setShowLogoutModal(true)}
-              className="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md shadow-slate-200 transition-all cursor-pointer"
-            >
-              <LogOut className="w-4 h-4 stroke-[2.5]" />
-              <span>{lang === 'mr' ? 'लॉगआउट करा (Logout)' : 'Logout / Sign Out'}</span>
-            </button>
-          </div>
-
-          {/* Red Delete Account Button Section (Google Play Data Safety Compliant) */}
-          <div className="p-4 border-t border-red-100 bg-red-50/60">
-            <button
-              type="button"
-              id="delete-account-trigger-btn"
-              onClick={() => {
-                setDeleteError(null);
-                setShowDeleteAccountModal(true);
-              }}
-              className="w-full py-3.5 px-4 bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md shadow-red-200 transition-all cursor-pointer"
-            >
-              <UserX className="w-4 h-4 stroke-[2.5]" />
-              <span>{lang === 'mr' ? 'खाते व डेटा कायमचा हटवा (Delete Account)' : 'Delete Account & All Data'}</span>
-            </button>
-          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
         </div>
-      </div>
-
-      {/* App Version & Branding */}
-      <div className="pt-6 pb-4 text-center space-y-1.5">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black">
-          <Info className="w-3.5 h-3.5" />
-          <span>प्रवास वाटाघाटी (Pravas Wataghati)</span>
-        </div>
-        <p className="text-xs font-extrabold text-slate-400">
-          Version 2.0.4 • Native Android Edition
-        </p>
+        
+        {/* Red Delete Account Button */}
+        <button 
+          onClick={() => {
+            setDeleteError(null);
+            setShowDeleteAccountModal(true);
+          }}
+          className="w-full mt-2 py-3.5 bg-red-50 hover:bg-red-100 active:scale-95 transition-all text-red-600 font-semibold rounded-2xl flex items-center justify-center gap-2 shadow-sm"
+        >
+          <UserX className="w-4 h-4" /> {lang === 'mr' ? 'खाते व डेटा कायमचा हटवा' : 'Delete Account & All Data'}
+        </button>
       </div>
 
       {/* PRIVACY POLICY & OPEN-SOURCE CREDITS MODAL */}
@@ -565,7 +421,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   {lang === 'mr' ? 'तुमचा अभिप्राय नोंदवा' : 'Send In-App Feedback'}
                 </h3>
                 <p className="text-xs text-slate-300 mt-1 font-medium">
-                  {lang === 'mr' ? 'प्रवास वाटाघाटी मधील तुमचा अनुभव कसा होता?' : 'How is your experience with Pravas Wataghati?'}
+                  {lang === 'mr' ? 'राऊट्रिपो मधील तुमचा अनुभव कसा होता?' : 'How is your experience with Routripo?'}
                 </p>
               </div>
 

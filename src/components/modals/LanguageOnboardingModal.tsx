@@ -38,7 +38,7 @@ export const LanguageOnboardingModal: React.FC<LanguageOnboardingModalProps> = (
 
   const handleConfirm = () => {
     setLang(selected);
-    localStorage.setItem('pravas_language_selected', 'true');
+    localStorage.setItem('routripo_language_selected', 'true');
     onClose();
   };
 
@@ -65,7 +65,7 @@ export const LanguageOnboardingModal: React.FC<LanguageOnboardingModalProps> = (
                 <span>🤖 Per-App Language Preferences</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-sm">
-                प्रवास वाटाघाटी 🚩
+                राऊट्रिपो 🚩
               </h2>
               <p className="text-sm font-semibold text-amber-100 mt-1 max-w-md">
                 सरकास्टिक व गावठी/स्ट्रीट-स्टाईल व्हॉईस मोड / Sarcastic & Street Voice Vibe

@@ -51,25 +51,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Auth, Firestore & Storage
-let _authInstance: ReturnType<typeof getAuth> | null = null;
+export const auth = getAuth(app);
 export function getAuthSafe() {
-  if (!_authInstance) {
-    _authInstance = getAuth(app);
-  }
-  return _authInstance;
+  return auth;
 }
-
-export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
-  get(_target, prop, receiver) {
-    const instance = getAuthSafe();
-    const value = Reflect.get(instance, prop, receiver);
-    return typeof value === 'function' ? value.bind(instance) : value;
-  },
-  set(_target, prop, value, receiver) {
-    const instance = getAuthSafe();
-    return Reflect.set(instance, prop, value, receiver);
-  }
-});
 
 let dbInstance: any;
 try {
@@ -242,15 +227,15 @@ export async function signOutUser(): Promise<void> {
     console.error("Firebase signOut error:", err);
   }
   if (typeof window !== 'undefined') {
-    const savedLang = localStorage.getItem('pravas_language');
-    const savedLangSelected = localStorage.getItem('pravas_language_selected');
+    const savedLang = localStorage.getItem('routripo_language');
+    const savedLangSelected = localStorage.getItem('routripo_language_selected');
 
-    localStorage.removeItem('pravas_user');
+    localStorage.removeItem('routripo_user');
     localStorage.removeItem('tripPlanner_activeTripId');
     sessionStorage.clear();
 
-    if (savedLang) localStorage.setItem('pravas_language', savedLang);
-    if (savedLangSelected) localStorage.setItem('pravas_language_selected', savedLangSelected);
+    if (savedLang) localStorage.setItem('routripo_language', savedLang);
+    if (savedLangSelected) localStorage.setItem('routripo_language_selected', savedLangSelected);
   }
 }
 
