@@ -1,15 +1,18 @@
 import re
-import random
 
 with open("server.ts", "r") as f:
     content = f.read()
 
-def add_workload(match):
-    latency_line = match.group(0)
-    workload = random.randint(1, 45)
-    return latency_line + f",\n      workload: '{workload}%'"
+import_statement = "import partnerKycRouter from './server/routes/partnerKyc';\n"
+mount_statement = "\n// --- PARTNER KYC ROUTES ---\napp.use('/api/partner', partnerKycRouter);\n\n"
 
-content = re.sub(r'latency:\s*\'[^\']+\'', add_workload, content)
+# Add import
+if "import partnerKycRouter" not in content:
+    content = content.replace("import express from \"express\";", "import express from \"express\";\n" + import_statement)
+
+# Mount it before the first API route
+if "/api/partner" not in content:
+    content = content.replace("app.post(\"/api/gemini/chat\"", mount_statement + "app.post(\"/api/gemini/chat\"")
 
 with open("server.ts", "w") as f:
     f.write(content)

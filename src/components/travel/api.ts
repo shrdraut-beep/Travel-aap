@@ -37,6 +37,8 @@ export interface FlightOption {
 }
 
 export interface HotelOption {
+  lat?: number;
+  lng?: number;
   id: string;
   name: string;
   location: string;

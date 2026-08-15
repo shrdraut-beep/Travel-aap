@@ -10,8 +10,18 @@ export interface InventoryItem {
   price: number;
   location: string;
   availability: string;
-  status: 'Active' | 'Sold Out';
+  status: 'Active' | 'Sold Out' | 'pending_approval' | 'suspended';
   photo?: string;
+  // Cab compliance fields
+  driverAadhar?: string;
+  drivingLicense?: string;
+  dlExpiry?: string;
+  pcc?: string;
+  carRc?: string;
+  puc?: string;
+  pucExpiry?: string;
+  insurance?: string;
+  insuranceExpiry?: string;
 }
 
 export const PartnerInventoryManager: React.FC = () => {
@@ -23,7 +33,7 @@ export const PartnerInventoryManager: React.FC = () => {
       price: 2500,
       location: 'Goa',
       availability: 'Available All Year',
-      status: 'Active',
+      status: 'pending_approval',
     },
     {
       id: 'inv-2',
@@ -32,8 +42,20 @@ export const PartnerInventoryManager: React.FC = () => {
       price: 1800,
       location: 'Delhi',
       availability: 'Weekends Only',
-      status: 'Sold Out',
+      status: 'pending_approval',
     },
+    {
+      id: 'inv-3',
+      type: 'Cab',
+      title: 'Swift Dzire - AC',
+      price: 1200,
+      location: 'Mumbai',
+      availability: 'Available',
+      status: 'pending_approval',
+      dlExpiry: '2023-01-01',
+      pucExpiry: '2025-01-01',
+      insuranceExpiry: '2025-01-01'
+    }
   ]);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -44,6 +66,18 @@ export const PartnerInventoryManager: React.FC = () => {
     location: '',
     availability: '',
   });
+
+    const checkExpiries = (item: InventoryItem) => {
+    if (item.type !== 'Cab') return null;
+    const now = new Date();
+    const expiredDocs = [];
+    if (item.dlExpiry && new Date(item.dlExpiry) < now) expiredDocs.push('Driving License');
+    if (item.pucExpiry && new Date(item.pucExpiry) < now) expiredDocs.push('PUC');
+    if (item.insuranceExpiry && new Date(item.insuranceExpiry) < now) expiredDocs.push('Insurance');
+    
+    if (expiredDocs.length > 0) return expiredDocs;
+    return null;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -64,7 +98,7 @@ export const PartnerInventoryManager: React.FC = () => {
       price: formData.price,
       location: formData.location,
       availability: formData.availability || 'Contact for dates',
-      status: 'Active',
+      status: 'pending_approval',
     };
 
     setInventoryList([newItem, ...inventoryList]);
@@ -183,6 +217,55 @@ export const PartnerInventoryManager: React.FC = () => {
                 <Plus className="w-4 h-4 mr-2" /> Upload Photos
               </div>
             </div>
+
+            {formData.type === 'Cab' && (
+              <>
+                <div className="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-slate-100">
+                  <h5 className="text-xs font-extrabold text-slate-800 mb-3 flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    Mandatory Cab KYC Documents
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Driver Aadhar</label>
+                      <input type="file" name="driverAadhar" className="w-full text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Police Clearance (PCC)</label>
+                      <input type="file" name="pcc" className="w-full text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Car RC (Commercial)</label>
+                      <input type="file" name="carRc" className="w-full text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Driving License Upload</label>
+                      <input type="file" name="drivingLicense" className="w-full text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">DL Expiry Date</label>
+                      <input type="date" name="dlExpiry" onChange={handleInputChange} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">PUC Upload</label>
+                      <input type="file" name="puc" className="w-full text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">PUC Expiry Date</label>
+                      <input type="date" name="pucExpiry" onChange={handleInputChange} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance Upload</label>
+                      <input type="file" name="insurance" className="w-full text-xs" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Insurance Expiry Date</label>
+                      <input type="date" name="insuranceExpiry" onChange={handleInputChange} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs" />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           
           <div className="pt-2 flex justify-end">
@@ -204,9 +287,19 @@ export const PartnerInventoryManager: React.FC = () => {
             <p className="text-sm font-bold text-slate-600">No inventory added yet</p>
           </div>
         ) : (
-          inventoryList.map((item) => (
-            <div key={item.id} className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
+          inventoryList.map((item) => {
+            const expiredDocs = checkExpiries(item);
+            const isSuspended = expiredDocs && expiredDocs.length > 0;
+            const displayStatus = isSuspended ? 'suspended' : item.status;
+            
+            return (
+            <div key={item.id} className={`bg-white border \${isSuspended ? 'border-red-300 shadow-red-500/10' : 'border-slate-200'} rounded-3xl p-5 shadow-xs space-y-4 flex flex-col justify-between`}>
               <div>
+                {isSuspended && (
+                  <div className="bg-red-50 text-red-700 p-3 rounded-xl text-xs font-bold mb-3 border border-red-200">
+                    Hidden from Search: {expiredDocs.join(', ')} expired. Please upload a renewed document to reactivate.
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
                     {item.type === 'Hotel Room' ? (
@@ -216,10 +309,12 @@ export const PartnerInventoryManager: React.FC = () => {
                     )}
                     <h4 className="text-sm font-extrabold text-slate-900">{item.title}</h4>
                   </div>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase shrink-0 ${
-                    item.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                  <span className={`px-2.5 py-0.5 rounded-full text-\[10px\] font-extrabold uppercase shrink-0 \${
+                    displayStatus === 'Active' ? 'bg-emerald-100 text-emerald-800' :
+                    displayStatus === 'pending_approval' ? 'bg-amber-100 text-amber-800' :
+                    'bg-rose-100 text-rose-800'
                   }`}>
-                    {item.status}
+                    {displayStatus === 'pending_approval' ? 'Pending Admin Approval' : displayStatus}
                   </span>
                 </div>
 
@@ -236,12 +331,15 @@ export const PartnerInventoryManager: React.FC = () => {
                 {/* Toggle Status */}
                 <button
                   onClick={() => toggleStatus(item.id)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 ${
-                    item.status === 'Active' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  disabled={displayStatus === 'pending_approval' || isSuspended}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 \${
+                    displayStatus === 'Active' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 
+                    displayStatus === 'pending_approval' || isSuspended ? 'bg-slate-100 text-slate-400 cursor-not-allowed' :
+                    'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                   }`}
                 >
-                  {item.status === 'Active' ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle className="w-3.5 h-3.5" />}
-                  {item.status === 'Active' ? 'Mark Sold Out' : 'Mark Active'}
+                  {displayStatus === 'Active' ? <XCircle className="w-3.5 h-3.5" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                  {displayStatus === 'Active' ? 'Mark Sold Out' : 'Mark Active'}
                 </button>
                 
                 {/* Edit Button */}
@@ -258,7 +356,8 @@ export const PartnerInventoryManager: React.FC = () => {
                 </button>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

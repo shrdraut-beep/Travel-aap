@@ -21,7 +21,6 @@ import { TripAwardsBanner } from '../TripAwardsBanner';
 import { TimepassGame } from './TimepassGame';
 import { BookingsView } from './BookingsView';
 import { PreTripPlanner } from '../PreTripPlanner';
-import { AdSlider } from './AdSlider';
 
 interface DashboardViewProps {
   trip: TripGroup;
@@ -883,33 +882,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="space-y-5 w-full">
       {trip.destination && (
         <div className="px-5">
-          <AdSlider city={trip.destination} />
-        </div>
+                  </div>
       )}
       
-      <div className="px-5 flex items-center justify-between w-full">
-        <button 
-          onClick={() => onNavigate('all-trips')}
-          className="px-3.5 py-1.5 bg-white text-rose-600 rounded-xl flex items-center gap-1.5 border border-slate-200/80 shadow-xs hover:bg-slate-50 active:scale-95 transition-all text-xs font-bold"
-        >
-          <ChevronRight className="w-4 h-4 rotate-180" />
-          <span>{lang === 'mr' ? 'सहली' : 'Trips'}</span>
-        </button>
-      </div>
-
-      <div className="flex flex-col items-center text-center px-5">
-        <div className="flex items-center justify-center gap-2.5">
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{trip.name}</h1>
-          <button 
-            type="button"
-            onClick={handleInviteFriends}
-            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200/80 rounded-xl shadow-xs active:scale-90 transition-all shrink-0 cursor-pointer"
-            title={lang === 'mr' ? 'सहलीची माहिती शेअर करा' : 'Share Trip'}
-          >
-            <Share2 className="w-4.5 h-4.5" />
-          </button>
-        </div>
-      </div>
+      
       {countryInfo && (
         <div className="px-5 flex items-center justify-center gap-2 mt-2 text-sm font-semibold text-slate-600 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
           <span className="text-lg leading-none">{countryInfo.flag}</span>
@@ -932,1155 +908,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         )}
 
-        {/* TWO-COLUMN GRID LAYOUT (LEFT: INCOME & BALANCE | RIGHT: EXPENSE & PERCENTAGE) */}
-        <div className="grid grid-cols-2 gap-2 w-full pt-1 mb-3">
-          {/* LEFT COLUMN: INCOME & BALANCE */}
-          <div className="flex flex-col gap-2">
-            {/* TOP: BLUE TOTAL DEPOSIT CARD */}
-            <div className="bg-gradient-to-br from-sky-50 to-blue-100 rounded-[20px] p-3 text-blue-950 shadow-sm border border-blue-200/60 flex flex-col justify-between h-36">
-              <div className="flex items-start gap-1.5 text-blue-800/80 h-8">
-                <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
-                <span className="text-[10px] font-black uppercase tracking-wider leading-tight line-clamp-2">
-                  {lang === 'mr' ? 'एकूण जमा / बजेट' : lang === 'hi' ? 'कुल जमा / बजट' : 'Total Budget'}
-                </span>
-              </div>
-              <div className="flex-grow flex items-center">
-                <p className="text-2xl font-black tracking-tight">
-                  {currencySymbol}{new Intl.NumberFormat('en-IN').format(budgetBase)}
-                </p>
-              </div>
-              <div className="pt-2 border-t border-blue-200 h-8 flex items-center">
-                <p className="text-[10px] font-bold text-blue-800 uppercase tracking-tight opacity-90 truncate">
-                  {lang === 'mr' ? 'सहल बजेट' : 'Trip Budget'}
-                </p>
-              </div>
-            </div>
-
-            {/* BOTTOM: TOTAL BALANCE DETAILS CARD - VIBRANT ROYAL BLUE GRADIENT */}
-            <div className="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-[20px] p-3 text-teal-950 shadow-sm border border-teal-200/60 flex flex-col justify-between h-36">
-              <div className="flex items-start gap-1.5 text-teal-800/80 h-8">
-                <Wallet className="w-4 h-4 shrink-0 mt-0.5" />
-                <span className="text-[10px] font-black uppercase tracking-wider leading-tight line-clamp-2">
-                  {lang === 'mr' ? 'एकूण शिल्लक' : lang === 'hi' ? 'कुल शेष' : 'Total Balance'}
-                </span>
-              </div>
-              <div className="flex-grow flex items-center">
-                <p className="text-2xl sm:text-3xl font-black tracking-tight text-teal-950 drop-shadow-sm">
-                  {currencySymbol}{new Intl.NumberFormat('en-IN').format(remainingBudget)}
-                </p>
-              </div>
-              <div className="pt-2 border-t border-teal-200 h-8 flex items-center">
-                <p className="text-[10px] font-bold text-teal-800 uppercase tracking-tight opacity-95 truncate">
-                  {lang === 'mr' ? 'उपलब्ध शिल्लक' : 'Available balance'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT COLUMN: EXPENSE & PERCENTAGE */}
-          <div className="flex flex-col gap-2">
-            {/* TOP: RED TOTAL EXPENSE CARD */}
-            <div className="bg-gradient-to-br from-rose-50 to-pink-100 rounded-[20px] p-3 text-rose-950 shadow-sm border border-rose-200/60 flex flex-col justify-between h-36">
-              <div className="flex items-start gap-1.5 text-rose-800/80 h-8">
-                <TrendingDown className="w-4 h-4 shrink-0 mt-0.5" />
-                <span className="text-[10px] font-black uppercase tracking-wider leading-tight line-clamp-2">
-                  {lang === 'mr' ? 'एकूण खर्च' : lang === 'hi' ? 'कुल खर्च' : 'Total Expense'}
-                </span>
-              </div>
-              <div className="flex-grow flex items-center">
-                <p className="text-2xl font-black tracking-tight">
-                  {currencySymbol}{new Intl.NumberFormat('en-IN').format(totalSpent)}
-                </p>
-              </div>
-              <div className="pt-2 border-t border-rose-200 h-8 flex items-center">
-                <p className="text-[10px] font-bold text-rose-800 uppercase tracking-tight opacity-90 truncate">
-                  {lang === 'mr' ? 'आत्तापर्यंतचा खर्च' : 'Spent so far'}
-                </p>
-              </div>
-            </div>
-
-            {/* BOTTOM: CIRCULAR PROGRESS BAR (EXPENSE PERCENTAGE) CARD - VIBRANT PURPLE/VIOLET GRADIENT */}
-            <div className="bg-gradient-to-br from-purple-50 to-fuchsia-100 rounded-[20px] p-3 text-purple-950 shadow-sm border border-purple-200/60 flex flex-col items-center text-center justify-between h-36">
-              <div className="h-8 flex items-start justify-center w-full">
-                <span className="text-[10px] font-black uppercase tracking-wider text-purple-800/80 leading-tight line-clamp-2">
-                  {lang === 'mr' ? 'खर्चाची टक्केवारी' : 'Expense Ratio'}
-                </span>
-              </div>
-              <div className="flex-grow flex items-center justify-center w-full py-1">
-                <Speedometer
-                  percent={percentSpent}
-                  color={percentSpent > 80 ? '#f43f5e' : '#a855f7'}
-                  lang={lang}
-                  t={t}
-                  size="compact"
-                  isDarkCard={false}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* FULL-WIDTH WARNING ALERT AT BOTTOM */}
-        <div className="w-full mb-3">
-          {percentSpent > 80 ? (
-            <div className="bg-coral/10 text-coral p-3.5 rounded-2xl flex items-center justify-center gap-2.5 border border-coral/20 shadow-xs animate-bounce">
-              <AlertTriangle className="w-5 h-5 shrink-0 text-coral" />
-              <p className="text-xs sm:text-sm font-extrabold leading-tight uppercase tracking-wider text-center">
-                {lang === 'mr' ? 'खर्च कमी करा! बजेट संपत आले आहे!' : lang === 'hi' ? 'धीमे हो जाओ! बजट कम हो रहा है!' : 'Slow down! Budget is running low!'}
-              </p>
-            </div>
-          ) : (
-            <div className="w-full bg-emerald-50/90 text-emerald-800 p-3 rounded-2xl flex items-center justify-center gap-2 border border-emerald-200/80 shadow-xs">
-              <p className="text-xs font-extrabold uppercase tracking-wider text-center">
-                {lang === 'mr' ? 'हळूहळू खर्च करा! बजेट सुरक्षित आहे.' : 'Spending looking good! Budget is safe.'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* PROMINENT PRIMARY ACTION BUTTONS: ADD EXPENSE & ADD DEPOSIT */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 w-full mt-1">
-          <button 
-            onClick={() => onNavigate('expenses')}
-            className="flex items-center justify-center gap-2 p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer"
-          >
-            <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-white shrink-0">
-              <Plus className="w-4 h-4 stroke-[3]" />
-            </div>
-            <span className="text-xs font-black uppercase tracking-tight truncate">
-              {lang === 'mr' ? 'खर्च जोडा' : 'Add Expense'}
-            </span>
-          </button>
-
-          <button 
-            onClick={() => {
-              if (onAddDeposit) onAddDeposit();
-              else window.dispatchEvent(new CustomEvent('open-deposit-modal'));
-            }}
-            className="flex items-center justify-center gap-2 p-3 bg-emerald hover:bg-emerald/90 text-white rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer"
-          >
-            <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-white shrink-0">
-              <Wallet className="w-4 h-4 stroke-[2.5]" />
-            </div>
-            <span className="text-xs font-black uppercase tracking-tight truncate">
-              {lang === 'mr' ? 'जमा करा' : lang === 'hi' ? 'जमा करें' : 'Add Deposit'}
-            </span>
-          </button>
-
-          {trip.status !== 'SETTLED' ? (
-            currentUser?.id === trip.adminId ? (
-              <button 
-                onClick={() => { setSettleClickCount(0); setShowSettleModal(true); }}
-                className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 p-3 bg-coral hover:bg-coral/90 text-white rounded-2xl shadow-lg active:scale-95 transition-all cursor-pointer font-extrabold"
-              >
-                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center text-white shrink-0">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-xs font-extrabold uppercase tracking-tight truncate">
-                  {t('settleTrip')}
-                </span>
-              </button>
-            ) : null
-          ) : (
-            <button 
-              onClick={handleReopenTrip}
-              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 rounded-2xl shadow-2xs active:scale-95 transition-all cursor-pointer"
-            >
-              <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-white shrink-0">
-                <RefreshCw className="w-3.5 h-3.5" />
-              </div>
-              <span className="text-xs font-extrabold uppercase tracking-tight truncate">
-                {t('reopenTrip')}
-              </span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="px-5 space-y-4">
-        {/* Upgraded Proactive Trip Manager Suggestions - PERSISTENT HEADER & SMOOTH CONTENT */}
-        <div className="space-y-3 mb-6">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-coral rounded-full animate-ping" />
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.15em]">{t('aiTripManager')}</h3>
-            </div>
-            <button 
-              onClick={handleOpenAIManagerDirectly}
-              className="px-3 py-1.5 bg-gradient-to-r from-coral to-coral-600 hover:from-coral-700 hover:to-coral-800 text-white font-extrabold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95"
-            >
-              <Sparkles className="w-3.5 h-3.5 fill-white/20" />
-              <span>{lang === 'mr' ? 'मॅनेजरशी चर्चा करा' : lang === 'hi' ? 'मैनेजर से बात करें' : 'Chat with Manager'}</span>
-            </button>
-          </div>
-          
-          <AnimatePresence mode="wait">
-            {isFetchingSuggestions ? (
-              <motion.div 
-                key="loading-suggestions"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="bg-emerald/5 rounded-[24px] border-2 border-emerald/10 p-4 flex items-center justify-between shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald text-white flex items-center justify-center shadow-md shadow-emerald/20">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-900 leading-tight">
-                      {lang === 'mr' ? 'आजचे मॉर्निंग ब्रीफिंग' : 'Today\'s Morning Briefing'}
-                    </h4>
-                    <p className="text-xs text-emerald font-semibold mt-0.5 animate-pulse">
-                      {lang === 'mr' ? 'ब्रीफिंग तयार करत आहे...' : 'Generating morning briefing...'}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ) : suggestions.length > 0 ? (
-              <motion.div 
-                key="suggestions-list"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-3"
-              >
-                {suggestions.map((suggestion) => (
-                  <motion.div
-                    key={suggestion.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    onClick={() => setSelectedAlert(suggestion)}
-                    className="relative group overflow-hidden bg-white rounded-[24px] border-2 border-slate-200 hover:border-emerald/30 shadow-xl p-4 flex gap-4 cursor-pointer transition-colors"
-                  >
-                    <div className={`w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center ${
-                      suggestion.type === 'budget' ? 'bg-coral/10 text-coral' :
-                      suggestion.type === 'weather' ? 'bg-emerald/10 text-emerald' :
-                      'bg-emerald/10 text-emerald'
-                    }`}>
-                      {suggestion.type === 'budget' ? <Wallet className="w-6 h-6" /> :
-                       suggestion.type === 'weather' ? <AlertTriangle className="w-6 h-6" /> :
-                       <Sparkles className="w-6 h-6" />}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0 pr-8">
-                      <h4 className="text-sm font-black text-slate-800 leading-tight mb-1">{typeof suggestion.title === "string" ? suggestion.title : JSON.stringify(suggestion.title)}</h4>
-                      <p className="text-sm font-bold text-slate-800 leading-relaxed mb-2">{typeof suggestion.message === "string" ? suggestion.message : JSON.stringify(suggestion.message)}</p>
-                      
-                      {suggestion.actionData && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            applySuggestion(suggestion);
-                          }}
-                          className="w-full py-2.5 bg-coral text-white rounded-xl text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-coral/10 mb-2"
-                        >
-                          <Zap className="w-3.5 h-3.5 text-white" />
-                          {suggestion.actionLabel || (lang === 'mr' ? 'लागू करा' : 'Apply')}
-                        </button>
-                      )}
-
-                      <div className="text-xs font-bold text-emerald flex items-center gap-1 uppercase tracking-wider">
-                        <span>💬 {lang === 'mr' ? 'मॅनेजरशी चर्चा करा' : 'Chat with Manager'}</span>
-                      </div>
-                    </div>
-                    
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
-                      }}
-                      className="absolute top-3 right-3 p-1 text-slate-400 hover:text-slate-800 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="empty-briefing"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                onClick={handleOpenAIManagerDirectly}
-                className="bg-coral/5 rounded-[24px] border-2 border-coral/20 p-4 flex items-center justify-between cursor-pointer hover:border-coral/40 transition-all shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-coral text-white flex items-center justify-center shadow-md shadow-coral/20">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-900 leading-tight">
-                      {lang === 'mr' ? 'आजचे मॉर्निंग ब्रीफिंग व ट्रिप असिस्टंट' : lang === 'hi' ? 'आज का मॉर्निंग ब्रीफिंग और मैनेजर' : 'Daily Morning Briefing & Manager'}
-                    </h4>
-                    <p className="text-xs text-coral font-semibold mt-0.5">
-                      {morningBriefingText || (lang === 'mr' ? 'ब्रीफिंग तयार आहे - क्लिक करा' : 'Briefing ready - Tap to view')}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-coral" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Live Trip Countdown Banner */}
         
-        
-        {/* Trip Awards Banner */}
-        <TripAwardsBanner trip={trip} lang={lang} />
-
-        {/* Member Avatars Row - Always visible at top */}
-        <div className="bg-white backdrop-blur-md rounded-[24px] p-5 border border-slate-200/50 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-slate-800">
-              <Users className="w-4 h-4" style={{ color: themeColor }} />
-              <span className="text-sm font-bold uppercase tracking-widest">{lang === 'mr' ? 'सहभागी' : 'Members'}</span>
-            </div>
-
-          </div>
-          <div className="flex -space-x-2 overflow-hidden">
-            {getUniqueMembers(trip.members || []).map((member, i) => (
-              <div 
-                key={`${member.id}-${i}`}
-                className="w-11 h-11 rounded-2xl border-[3px] border-white flex items-center justify-center text-sm font-black text-white shadow-sm overflow-hidden"
-                style={{ backgroundColor: member.avatar ? 'transparent' : member.color, zIndex: 10 - i }}
-              >
-                {member.avatar ? (
-                  <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
-                ) : (
-                  member.name.charAt(0)
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dynamic Re-designed Tabs Section */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
-          <button
-            onClick={() => setActiveSubTab('expenses')}
-            className={`px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all duration-300 snap-start shrink-0 ${
-              activeSubTab === 'expenses'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 shadow-sm'
-            }`}
-          >
-            <Wallet className="w-4 h-4" />
-            {lang === 'mr' ? 'हिशोब आणि तोडगा' : 'Expenses & Settled'}
-          </button>
-          
-          <button
-            onClick={() => setActiveSubTab('itinerary')}
-            className={`px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all duration-300 snap-start shrink-0 ${
-              activeSubTab === 'itinerary'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 shadow-sm'
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            {lang === 'mr' ? 'नियोजन' : 'Itinerary'}
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('bookings')}
-            className={`px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all duration-300 snap-start shrink-0 ${
-              activeSubTab === 'bookings'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 shadow-sm'
-            }`}
-          >
-            <Ticket className="w-4 h-4" />
-            {lang === 'mr' ? 'बुकिंग्ज' : 'Bookings'}
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('playlist')}
-            className={`px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all duration-300 snap-start shrink-0 ${
-              activeSubTab === 'playlist'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 shadow-sm'
-            }`}
-          >
-            <Music className="w-4 h-4" />
-            {lang === 'mr' ? 'प्लेलिस्ट' : 'Playlist'}
-          </button>
-          
-          <button
-            onClick={() => setActiveSubTab('timepass')}
-            className={`px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all duration-300 snap-start shrink-0 ${
-              activeSubTab === 'timepass'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 shadow-sm'
-            }`}
-          >
-            <Gamepad2 className="w-4 h-4 text-purple-500" />
-            {lang === 'mr' ? 'टाईमपास' : 'Timepass'}
-          </button>
-
-          <button
-            onClick={() => setActiveSubTab('checklist')}
-            className={`px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all duration-300 snap-start shrink-0 ${
-              activeSubTab === 'checklist'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-100 shadow-sm'
-            }`}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            {t('smartChecklist')}
-          </button>
-        </div>
-
-        {/* Weather Alerts - NEW Section */}
-        {activeSubTab === 'itinerary' && (() => {
-          const alerts = (trip.weatherForecast || []).filter(f => 
-            f.condition.toLowerCase().includes('rain') || 
-            f.condition.toLowerCase().includes('storm') || 
-            f.temp >= 35
-          );
-
-          if (alerts.length === 0) return null;
-
-          const isHeat = alerts.some(f => f.temp >= 35);
-          const isRain = alerts.some(f => f.condition.toLowerCase().includes('rain') || f.condition.toLowerCase().includes('storm'));
-
-          return (
-            <div className="bg-coral/10 rounded-2xl p-5 border border-coral/20 shadow-sm space-y-3 animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-coral rounded-xl flex items-center justify-center shadow-lg shadow-coral/20">
-                  <AlertTriangle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">
-                    {lang === 'mr' ? 'हवामान सतर्कता' : 'Weather Alert'}
-                  </h3>
-                  <p className="text-sm font-bold text-coral/60 mt-1 uppercase tracking-wider">
-                    {lang === 'mr' ? 'सावधान राहा' : 'Stay Alert'}
-                  </p>
-                </div>
-              </div>
-              <div className="bg-white/80 p-3 rounded-xl border border-coral/20">
-                <p className="text-sm font-bold text-slate-800 leading-relaxed">
-                  {lang === 'mr' 
-                    ? `तुमच्या सहली दरम्यान ${isHeat ? 'अतिउष्णता' : ''}${isHeat && isRain ? ' आणि ' : ''}${isRain ? 'मुसळधार पाऊस' : ''} पडण्याची शक्यता आहे. कृपया नियोजन त्याप्रमाणे करा.`
-                    : `Severe weather detected: ${isHeat ? 'Extreme Heat' : ''}${isHeat && isRain ? ' & ' : ''}${isRain ? 'Heavy Rain/Storm' : ''} forecast during your trip. Please plan accordingly.`}
-                </p>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Dynamic Travel Hub (Smart Dashboard) */}
-        {activeSubTab === 'bookings' && (
-          <div className="space-y-4">
-            {!trip.transportMode ? (
-              <div className="bg-white backdrop-blur-md rounded-[24px] p-6 border border-slate-200/50 shadow-sm space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-                    <Globe className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">{lang === 'mr' ? 'प्रवासाचे माध्यम निवडा' : 'Select Transport Mode'}</h3>
-                    <p className="text-sm font-bold text-slate-700 uppercase tracking-widest leading-none">{lang === 'mr' ? 'तुमचा डॅशबोर्ड सानुकूलित करा' : 'Customize your dashboard'}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    onClick={() => onUpdateTrip({ ...trip, transportMode: 'road' })}
-                    className="p-4 bg-emerald/5 rounded-2xl border border-emerald/10 text-emerald flex flex-col items-center gap-2 active:scale-95 transition-all"
-                  >
-                    <Car className="w-6 h-6" />
-                    <span className="text-sm font-black uppercase tracking-widest">{t('road')}</span>
-                  </button>
-                  <button 
-                    onClick={() => onUpdateTrip({ ...trip, transportMode: 'air' })}
-                    className="p-4 bg-emerald/5 rounded-2xl border border-emerald/10 text-emerald flex flex-col items-center gap-2 active:scale-95 transition-all"
-                  >
-                    <Plane className="w-6 h-6" />
-                    <span className="text-sm font-black uppercase tracking-widest">{t('air')}</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {trip.transportMode === 'road' && <RoadTripHub trip={trip} lang={lang} currency={currencySymbol} t={t} />}
-                {trip.transportMode === 'air' && <AirTripHub trip={trip} onUpdateTrip={onUpdateTrip} lang={lang} />}
-                <button 
-                  onClick={() => onUpdateTrip({ ...trip, transportMode: undefined })}
-                  className="w-full py-2 text-sm font-black text-slate-800 uppercase tracking-[0.3em] hover:text-slate-800 transition-colors"
-                >
-                  {t('changeTransportMode')}
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Local Lingo (Voice Translator) */}
-        {activeSubTab === 'playlist' && <VoiceTranslator lang={lang} />}
-
-        {/* SOS Alerts Notification */}
-        {activeSubTab === 'itinerary' && (trip.sosAlerts || []).filter(a => !a.isResolved).map(alert => (
-          <motion.div 
-            key={alert.id}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-coral text-white p-5 rounded-[28px] shadow-2xl flex flex-col gap-3 border-4 border-white"
-          >
-            <div className="flex items-center gap-3">
-              <Siren className="w-8 h-8 animate-pulse" />
-              <div>
-                <p className="text-sm font-bold uppercase tracking-widest opacity-80">{t('emergencyAlert')}</p>
-                <p className="text-xl font-black">{alert.memberName} {t('needsHelp')}</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => onNavigate('map')}
-              className="w-full py-3 bg-white text-coral rounded-2xl font-bold uppercase tracking-widest text-sm shadow-lg"
-            >
-              {t('viewOnMap')}
-            </button>
-          </motion.div>
-        ))}
-
-        {/* Collaborative Playlist Section */}
-        {activeSubTab === 'playlist' && (
-          <div className="bg-white/70 backdrop-blur-md rounded-[24px] p-5 border border-slate-200/50 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-800">
-                <Music className="w-4 h-4" style={{ color: themeColor }} />
-                <span className="text-sm font-bold uppercase tracking-widest">{t('tripPlaylist')}</span>
-              </div>
-              <button 
-                onClick={() => {
-                  setShowPlaylistAdd(!showPlaylistAdd);
-                  // Clear search on toggle
-                  setSongSearchQuery('');
-                  setSongSearchResults([]);
-                }}
-                className={`p-2 rounded-xl transition-all border shadow-sm ${showPlaylistAdd ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-900 border-slate-400'}`}
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-
-            {showPlaylistAdd && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-3 p-4 bg-slate-50/80 backdrop-blur-md rounded-2xl border border-slate-200/50 relative"
-              >
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    placeholder={t('searchSongPlaceholder')}
-                    value={songSearchQuery}
-                    onChange={(e) => setSongSearchQuery(e.target.value)}
-                    className="w-full pl-3 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-coral/20"
-                  />
-                  {isSearchingSongs && (
-                    <div className="absolute right-3 top-3">
-                      <RefreshCw className="w-4 h-4 animate-spin text-slate-400" />
-                    </div>
-                  )}
-
-                  {/* Autocomplete Dropdown UI */}
-                  {(songSearchResults.length > 0 || isSearchingSongs) && (
-                    <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/60 shadow-xl divide-y divide-slate-100 flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
-                      {songSearchResults.map((result: any) => (
-                        <button
-                          key={result.trackId || `${result.trackName}-${result.artistName}`}
-                          onClick={() => {
-                            onAddPlaylistItem(result.trackName, result.previewUrl || result.trackViewUrl, result.artistName, result.artworkUrl100);
-                            setSongSearchQuery('');
-                            setSongSearchResults([]);
-                            setShowPlaylistAdd(false);
-                          }}
-                          className="flex items-center gap-3 p-3 hover:bg-coral/5 cursor-pointer text-left w-full transition-colors first:rounded-t-2xl last:rounded-b-2xl"
-                        >
-                          <img 
-                            src={result.artworkUrl100 || ''} 
-                            alt={result.trackName} 
-                            className="w-10 h-10 rounded-lg object-cover bg-slate-100 shadow-sm"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-black text-slate-800 truncate">{result.trackName}</p>
-                            <p className="text-xs font-bold text-slate-500 truncate">{result.artistName}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Toggle manual fallback button */}
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setShowManualPlaylistAdd(!showManualPlaylistAdd)}
-                    className="text-xs font-bold text-coral hover:text-coral/80 transition-colors uppercase tracking-wider"
-                  >
-                    {showManualPlaylistAdd 
-                      ? t('goBackToSearch')
-                      : t('addUrlManually')
-                    }
-                  </button>
-                </div>
-
-                {/* Manual mode inputs */}
-                {showManualPlaylistAdd && (
-                  <div className="space-y-3 pt-2 border-t border-slate-200/50 animate-fade-in">
-                    <input 
-                      type="text" 
-                      placeholder={t('songTitlePlaceholder')}
-                      value={playlistTitle}
-                      onChange={(e) => setPlaylistTitle(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-coral/20"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="Spotify/YouTube URL..."
-                      value={playlistUrl}
-                      onChange={(e) => setPlaylistUrl(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-coral/20"
-                    />
-                    <button 
-                      onClick={() => {
-                        if (playlistTitle && playlistUrl) {
-                          onAddPlaylistItem(playlistTitle, playlistUrl);
-                          setPlaylistTitle('');
-                          setPlaylistUrl('');
-                          setShowPlaylistAdd(false);
-                          setShowManualPlaylistAdd(false);
-                        }
-                      }}
-                      className="w-full py-2 bg-slate-900 text-white rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg"
-                    >
-                      {t('addToPlaylist')}
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            <div className="space-y-2">
-              {(trip.playlist || []).length > 0 ? (
-                (trip.playlist || []).map((item) => (
-                  <div key={typeof item?.id === 'string' || typeof item?.id === 'number' ? String(item.id) : Math.random()} className="flex items-center justify-between p-3 bg-white/40 backdrop-blur-md rounded-[20px] border border-white/50 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {item?.thumbnailUrl && typeof item.thumbnailUrl === 'string' ? (
-                        <img 
-                          src={item.thumbnailUrl} 
-                          alt={typeof item?.title === 'string' ? item.title : 'Thumbnail'} 
-                          className="w-12 h-12 rounded-xl object-cover shadow-md shrink-0 border border-white/40"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-coral/10 flex items-center justify-center shrink-0 shadow-inner">
-                          <Music className="w-5 h-5 text-coral animate-pulse" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black text-slate-800 truncate">
-                          {item?.title && (typeof item.title === 'string' || typeof item.title === 'number') ? String(item.title) : 'Unknown Title'}
-                        </p>
-                        <p className="text-xs font-bold text-slate-500 truncate mt-0.5">
-                          {item?.artist && (typeof item.artist === 'string' || typeof item.artist === 'number') 
-                            ? String(item.artist) 
-                            : ((typeof item?.url === 'string' && item.url.includes('spotify.com')) ? 'Spotify' : (typeof item?.url === 'string' && (item.url.includes('youtube.com') || item.url.includes('youtu.be')) ? 'YouTube' : 'Web Link'))}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          if (currentTrack?.id === item?.id) {
-                            togglePlay();
-                          } else {
-                            playTrack(item, trip.playlist || []);
-                          }
-                        }}
-                        className={`p-2.5 rounded-full transition-all active:scale-95 flex items-center justify-center shadow-sm cursor-pointer ${
-                          currentTrack?.id === item?.id 
-                            ? 'bg-coral text-white animate-pulse' 
-                            : 'bg-coral/10 hover:bg-coral text-coral hover:text-white'
-                        }`}
-                      >
-                        {currentTrack?.id === item?.id && isPlaying ? (
-                          <Pause className="w-3.5 h-3.5 fill-current" />
-                        ) : (
-                          <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                        )}
-                      </motion.button>
-                      {item?.addedBy === userId && (
-                        <button 
-                          onClick={() => item?.id && onRemovePlaylistItem(String(item.id))} 
-                          className="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center bg-slate-50/30 rounded-2xl border border-dashed border-slate-200/50">
-                  <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">
-                    {t('noMusicShared')}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Timepass Tab */}
-        {activeSubTab === 'timepass' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <TimepassGame trip={trip} lang={lang} />
-          </div>
-        )}
-
-        {/* Smart Checklist Tab */}
-        {activeSubTab === 'checklist' && (
-          <div className="bg-white rounded-[24px] p-5 border border-slate-200/50 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-800">
-                <CheckCircle2 className="w-4 h-4" style={{ color: themeColor }} />
-                <span className="text-sm font-bold uppercase tracking-widest">{t('smartChecklist')}</span>
-              </div>
-              <button 
-                onClick={generateDetailedPackingList}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-colors active:scale-95"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                {lang === 'mr' ? 'रीफ्रेश' : 'Refresh'}
-              </button>
-            </div>
-
-            <div className="space-y-6 mt-4">
-              {trip.detailedPackingList && trip.detailedPackingList.length > 0 ? (
-                trip.detailedPackingList.map((cat: any) => (
-                  <div key={cat.id} className="space-y-3">
-                    <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">{cat.name}</h4>
-                    <div className="space-y-2">
-                      {cat.items.map((item: any) => (
-                        <button
-                          key={item.id}
-                          onClick={() => handleToggleDetailedItem(cat.id, item.id)}
-                          className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border transition-all text-left ${item.isChecked ? 'bg-slate-50/50 border-slate-100 opacity-70' : 'bg-white border-slate-200 shadow-sm active:scale-[0.98]'}`}
-                        >
-                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-colors ${item.isChecked ? 'bg-emerald border-emerald text-white' : 'border-slate-300 bg-white'}`}>
-                            {item.isChecked && <Check className="w-3.5 h-3.5" />}
-                          </div>
-                          <span className={`flex-1 font-bold text-sm ${item.isChecked ? 'line-through text-slate-500' : 'text-slate-800'}`}>
-                            {item.name}
-                          </span>
-                          {item.essential && !item.isChecked && (
-                            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-coral/10 text-coral rounded-lg">
-                              {lang === 'mr' ? 'अत्यावश्यक' : lang === 'hi' ? 'जरूरी' : 'Essential'}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-12 text-center flex flex-col items-center">
-                  <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-3">
-                    <CheckCircle2 className="w-6 h-6 text-slate-400" />
-                  </div>
-                  <p className="text-sm font-bold text-slate-600 uppercase tracking-widest mb-1">{t('smartChecklist')}</p>
-                  <p className="text-xs text-slate-500 font-medium">{lang === 'mr' ? 'तुमची यादी तयार करत आहे...' : lang === 'hi' ? 'आपकी सूची तैयार कर रहा है...' : 'Generating your dynamic list...'}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Polling System & Next Plan - Itinerary Tab */}
-        {activeSubTab === 'itinerary' && (
-          <>
-            {/* Polling System - NEW SECTION */}
-            <PollsCard 
-              trip={trip} 
-              lang={lang} 
-              userId={userId} 
-              onVote={onVote} 
-              onCreatePoll={onCreatePoll} 
-              onClosePoll={onClosePoll} 
-            />
-
-            {/* Next Plan Card */}
-            {nextPlan && (
-              <div 
-                onClick={() => onNavigate('planner')}
-                className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-emerald/5 rounded-xl flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-emerald" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-800 uppercase tracking-wide">{t('nextPlan')}</p>
-                    <p className="text-lg font-black text-slate-800 tracking-tight">{nextPlan.title}</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-slate-700" />
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Ticket Wallet & PNR Manager - Labeled "🎟️ Bookings & Deals" */}
-        {activeSubTab === 'bookings' && (
-          <div className="space-y-4">
-            {/* Booking Inner Sub-Tabs Header */}
-            <div className="flex items-center gap-2 p-1.5 bg-slate-100/90 backdrop-blur rounded-2xl border border-slate-200/80 shadow-inner">
-              <button
-                type="button"
-                onClick={() => setBookingSubTab('flights')}
-                className={`flex-1 py-3 px-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                  bookingSubTab === 'flights'
-                    ? 'bg-white text-emerald shadow-sm border border-slate-200/80 scale-[1.01]'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Plane className="w-4 h-4 text-emerald" />
-                <span>{t('searchLiveFlights') || (lang === 'mr' ? 'विमान शोध (Live)' : 'Search Live Flights')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setBookingSubTab('deals')}
-                className={`flex-1 py-3 px-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
-                  bookingSubTab === 'deals'
-                    ? 'bg-white text-emerald shadow-sm border border-slate-200/80 scale-[1.01]'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Ticket className="w-4 h-4 text-emerald" />
-                <span>{lang === 'mr' ? 'ऑफर्स आणि वॉलेट' : 'Partner Deals & Wallet'}</span>
-              </button>
-            </div>
-
-            {/* Inner SubTab 1: Live Flight Search Engine (Duffel API) */}
-            {bookingSubTab === 'flights' && (
-              <LiveFlightSearchCard
-                lang={lang}
-                t={t}
-                currencySymbol={currencySymbol}
-                themeColor={themeColor}
-                defaultDestination={(trip as any).destination || trip.name || 'DEL'}
-              />
-            )}
-
-            {/* Inner SubTab 2: Partner Deals & Ticket Wallet */}
-            {bookingSubTab === 'deals' && (
-              <div className="bg-white/40 backdrop-blur-md rounded-[24px] p-5 border border-white/50 shadow-sm space-y-5">
-                {/* Main Title & Header */}
-                <div className="flex items-center gap-2" style={{ color: '#10b981' }}>
-                  <Ticket className="w-5 h-5" />
-                  <h3 className="text-base font-black text-slate-800 uppercase tracking-widest">
-                    {t('bookingsAndDeals')}
-                  </h3>
-                </div>
-
-          {/* Section 1: Main Booking Integration */}
-          <div className="space-y-3">
-             <button
-               onClick={() => setShowBookings(!showBookings)}
-               className="w-full py-4 bg-emerald hover:bg-emerald/90 text-white rounded-2xl font-black text-sm sm:text-base uppercase tracking-wider shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-             >
-               {showBookings ? (lang === 'mr' ? 'बुकिंग विंडो लपवा' : 'Hide Booking Window') : (lang === 'mr' ? '✈️ तिकीट आणि हॉटेल बुकिंग करा' : '✈️ Book Flights & Hotels')}
-             </button>
-
-             {showBookings && (
-               <div className="mt-4 -mx-5 sm:mx-0">
-                  <BookingsView 
-                    trip={trip as any} 
-                    lang={lang} 
-                    t={t} 
-                    currencySymbol={currencySymbol} 
-                    themeColor={themeColor} 
-                    onUpdateTrip={onUpdateTrip} 
-                  />
-               </div>
-             )}
-          </div>
-
-          <hr className="border-slate-100 my-4" />
-
-          {/* Section 2: Ticket Wallet / PNR Manager */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  {t('personalWallet')}
-                </span>
-                <h4 className="text-sm font-black text-slate-800 tracking-tight">
-                  {t('manualTicketWallet')}
-                </h4>
-              </div>
-              <button 
-                type="button"
-                onClick={() => setShowAddTicket(!showAddTicket)}
-                className="p-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl transition-all shadow-sm active:scale-95 flex items-center justify-center"
-              >
-                <Plus className={`w-4 h-4 transition-transform duration-300 ${showAddTicket ? 'rotate-45' : ''}`} />
-              </button>
-            </div>
-
-            <AnimatePresence>
-              {showAddTicket && (
-                <motion.form 
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleAddTicket(e);
-                  }}
-                  className="overflow-hidden space-y-3 p-4 bg-white/80 rounded-2xl border border-slate-100 shadow-inner"
-                >
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      {t('bookingType')}
-                    </label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {(['Flight', 'Train', 'Hotel', 'Other'] as const).map((type) => {
-                        const isSelected = ticketType === type;
-                        return (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() => setTicketType(type)}
-                            className={`py-2 px-1 text-xs font-black uppercase tracking-wider rounded-xl border transition-all text-center ${
-                              isSelected 
-                                ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
-                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                            }`}
-                          >
-                            {type === 'Flight' && '✈️ ' + t('flight')}
-                            {type === 'Train' && '🚂 ' + t('train')}
-                            {type === 'Hotel' && '🏨 ' + t('hotel')}
-                            {type === 'Other' && '🎟️ ' + t('other')}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      {t('pnrNumber')}
-                    </label>
-                    <input 
-                      type="text"
-                      required
-                      placeholder={t('pnrPlaceholder')}
-                      value={pnrNumber}
-                      onChange={(e) => setPnrNumber(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold font-mono tracking-widest text-center uppercase outline-none focus:ring-2 focus:ring-emerald/20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      {t('detailsNotesOptional')}
-                    </label>
-                    <input 
-                      type="text"
-                      placeholder={t('pnrDetailsPlaceholder')}
-                      value={ticketNotes}
-                      onChange={(e) => setTicketNotes(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald/20"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      type="submit"
-                      className="flex-1 py-2.5 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md transition-all active:scale-95"
-                      style={{ backgroundColor: themeColor }}
-                    >
-                      {t('saveTicket')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddTicket(false)}
-                      className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-200/50 hover:bg-slate-200 transition-all"
-                    >
-                      {t('cancel')}
-                    </button>
-                  </div>
-                </motion.form>
-              )}
-            </AnimatePresence>
-
-            <div className="space-y-2">
-              {(trip.savedTickets || []).length > 0 ? (
-                (trip.savedTickets || []).map((ticket) => {
-                  const isCopied = copiedId === ticket.id;
-                  return (
-                    <div 
-                      key={ticket.id} 
-                      className="flex items-center justify-between p-3.5 bg-white/80 rounded-[20px] border border-slate-100 shadow-sm"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                          ticket.type === 'Flight' ? 'bg-emerald/10 text-emerald border border-emerald/20' :
-                          ticket.type === 'Train' ? 'bg-emerald/10 text-emerald border border-emerald/20' :
-                          ticket.type === 'Hotel' ? 'bg-emerald/10 text-emerald border border-emerald/20' :
-                          'bg-slate-100 text-slate-600 border border-slate-200'
-                        }`}>
-                          {ticket.type === 'Flight' && <Plane className="w-5 h-5" />}
-                          {ticket.type === 'Train' && <Car className="w-5 h-5" />}
-                          {ticket.type === 'Hotel' && <MapPin className="w-5 h-5" />}
-                          {ticket.type === 'Other' && <Ticket className="w-5 h-5" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                              {ticket.type === 'Flight' && t('flight')}
-                              {ticket.type === 'Train' && t('train')}
-                              {ticket.type === 'Hotel' && t('hotel')}
-                              {ticket.type === 'Other' && t('other')}
-                            </span>
-                          </div>
-                          <p className="text-base font-black font-mono tracking-widest text-slate-800 truncate select-all">
-                            {ticket.pnr}
-                          </p>
-                          {ticket.notes && (
-                            <p className="text-xs font-bold text-slate-500 truncate mt-0.5">
-                              {ticket.notes}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                        <button 
-                          onClick={() => handleCopyPnr(ticket.pnr, ticket.id)}
-                          className={`p-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center border shadow-sm ${
-                            isCopied 
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
-                              : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                          }`}
-                          title={t('copyPnr')}
-                        >
-                          {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        </button>
-                        <button 
-                          onClick={() => handleRemoveTicket(ticket.id)} 
-                          className="p-2 text-rose-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
-                          title={t('deleteTicket')}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="py-6 px-4 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200/50">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
-                    {lang === 'mr' 
-                      ? 'अजून कोणतेही तिकीट सेव्ह केलेले नाही. प्रवासाच्या दिवशी झटपट प्रवेशासाठी तुमचे पीएनआर येथे जोडा.'
-                      : 'No tickets saved yet. Add your PNRs here for quick copy on the day of the trip.'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Legal Compliance Disclaimer */}
-          <div className="pt-6 border-t border-slate-200/40 text-center">
-            <p className="text-[10px] md:text-xs font-semibold text-slate-500 leading-relaxed max-w-lg mx-auto">
-              Disclaimer: All bookings are managed securely by our trusted third-party partners. We do not process payments and are not legally responsible for cancellations, refunds, or any service-related issues.
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  )}
-
-        {/* Chart Section */}
-        {activeSubTab === 'expenses' && chartData.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2" style={{ color: themeColor }}>
-                {chartType === 'pie' ? <PieChartIcon className="w-5 h-5" /> : <BarChartIcon className="w-5 h-5" />}
-                <span className="text-sm font-bold uppercase tracking-wide">{t('expenseBreakdown')}</span>
-              </div>
-              <div className="flex bg-slate-100 p-1 rounded-xl">
-                <button
-                  onClick={() => setChartType('pie')}
-                  className={`px-3 py-1 text-sm font-bold uppercase rounded-lg transition-all ${chartType === 'pie' ? 'bg-white shadow-sm' : 'text-slate-800 hover:text-slate-700'}`}
-                  style={chartType === 'pie' ? { color: themeColor } : {}}
-                >
-                  {t('pie')}
-                </button>
-                <button
-                  onClick={() => setChartType('bar')}
-                  className={`px-3 py-1 text-sm font-bold uppercase rounded-lg transition-all ${chartType === 'bar' ? 'bg-white shadow-sm' : 'text-slate-800 hover:text-slate-700'}`}
-                  style={chartType === 'bar' ? { color: themeColor } : {}}
-                >
-                  {t('bar')}
-                </button>
-              </div>
-            </div>
-
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                {chartType === 'pie' ? (
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend 
-                      verticalAlign="bottom" 
-                      height={36}
-                      iconType="circle"
-                      formatter={(value, entry, index) => (
-                        <span className="text-sm font-bold text-slate-800 uppercase">{value}</span>
-                      )}
-                    />
-                  </PieChart>
-                ) : (
-                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(value) => `${value}`} />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                )}
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
 
         {/* Weather Forecast - Moved to Bottom */}
         <div className="bg-white rounded-2xl p-1 border border-slate-100 shadow-sm">
@@ -2093,21 +921,130 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           />
         </div>
 
-        {/* Agoda Image Banner */}
-        <div className="mt-8 mb-6 flex justify-center w-full p-2">
-          <a 
-            href="https://www.agoda.com/partners/partnersearch.aspx?pcs=10&cid=1969781&hl=en-us&hid=25963734" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block transition-transform duration-300 hover:scale-105"
-          >
-            <img 
-              src="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180" 
-              srcSet="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180 1x, https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=480x360 2x" 
-              alt="Agoda वर सर्वोत्तम हॉटेल बुक करा" 
-              className="rounded-xl shadow-lg border border-gray-200"
-            />
-          </a>
+        
+
+      
+        {/* Playlist UI */}
+        <div className="bg-white/70 backdrop-blur-md rounded-[24px] p-5 border border-slate-200/50 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-slate-800">
+              <Music className="w-4 h-4" style={{ color: themeColor }} />
+              <span className="text-sm font-bold uppercase tracking-widest">{t('tripPlaylist')}</span>
+            </div>
+            <button 
+              onClick={() => {
+                setShowPlaylistAdd(!showPlaylistAdd);
+                setPlaylistUrl('');
+                setPlaylistTitle('');
+              }}
+              className={`p-2 rounded-xl transition-all border shadow-sm ${showPlaylistAdd ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-900 border-slate-400'}`}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+
+          {showPlaylistAdd && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-3 p-4 bg-slate-50/80 backdrop-blur-md rounded-2xl border border-slate-200/50 relative"
+            >
+              {/* Toggle manual fallback button */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowManualPlaylistAdd(!showManualPlaylistAdd)}
+                  className="text-xs font-bold text-coral hover:text-coral/80 transition-colors uppercase tracking-wider"
+                >
+                  {showManualPlaylistAdd 
+                    ? t('goBackToSearch')
+                    : t('addUrlManually')
+                  }
+                </button>
+              </div>
+
+              {/* Manual mode inputs */}
+              {showManualPlaylistAdd && (
+                <div className="space-y-3 pt-2 border-t border-slate-200/50 animate-fade-in">
+                  <input 
+                    type="text" 
+                    placeholder={t('songTitlePlaceholder')}
+                    value={playlistTitle}
+                    onChange={(e) => setPlaylistTitle(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-coral/20"
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Spotify/YouTube URL..."
+                    value={playlistUrl}
+                    onChange={(e) => setPlaylistUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-coral/20"
+                  />
+                  <button 
+                    onClick={() => {
+                      if (playlistTitle && playlistUrl) {
+                        onAddPlaylistItem(playlistTitle, playlistUrl);
+                        setPlaylistTitle('');
+                        setPlaylistUrl('');
+                        setShowPlaylistAdd(false);
+                        setShowManualPlaylistAdd(false);
+                      }
+                    }}
+                    className="w-full py-2 bg-slate-900 text-white rounded-xl text-sm font-bold uppercase tracking-widest shadow-lg"
+                  >
+                    {t('addToPlaylist')}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          <div className="space-y-2">
+            {(trip.playlist || []).length > 0 ? (
+              (trip.playlist || []).map((item) => (
+                <div key={typeof item?.id === 'string' || typeof item?.id === 'number' ? String(item.id) : Math.random()} className="flex items-center justify-between p-3 bg-white/40 backdrop-blur-md rounded-[20px] border border-white/50 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {item?.thumbnailUrl && typeof item.thumbnailUrl === 'string' ? (
+                      <img 
+                        src={item.thumbnailUrl} 
+                        alt={typeof item?.title === 'string' ? item.title : 'Thumbnail'} 
+                        className="w-12 h-12 rounded-xl object-cover shadow-md shrink-0 border border-white/40"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-coral/10 flex items-center justify-center shrink-0 shadow-inner">
+                        <Music className="w-5 h-5 text-coral animate-pulse" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-slate-800 truncate">
+                        {item?.title && (typeof item.title === 'string' || typeof item.title === 'number') ? String(item.title) : 'Unknown Title'}
+                      </p>
+                      <p className="text-xs font-bold text-slate-500 truncate mt-0.5">
+                        {item?.artist && (typeof item.artist === 'string' || typeof item.artist === 'number') 
+                          ? String(item.artist) 
+                          : ((typeof item?.url === 'string' && item.url.includes('spotify.com')) ? 'Spotify' : (typeof item?.url === 'string' && (item.url.includes('youtube.com') || item.url.includes('youtu.be')) ? 'YouTube' : 'Web Link'))}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => { window.open(item.url, '_blank'); }} className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-slate-600"><Play className="w-3.5 h-3.5" /></button>
+                    {item?.addedBy === userId && (
+                      <button onClick={() => onRemovePlaylistItem(item.id)} className="p-2.5 rounded-full hover:bg-rose-100 text-slate-400 hover:text-rose-500 transition-all">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center bg-slate-50/30 rounded-2xl border border-dashed border-slate-200/50">
+                <p className="text-sm font-bold text-slate-700 uppercase tracking-widest">
+                  {t('noMusicShared')}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
       {/* Trip Manager Live Advisory Chat Modal */}

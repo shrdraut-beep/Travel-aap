@@ -26,6 +26,11 @@ import { AgentWalletView } from './AgentWalletView';
 import { SupportTicketView } from './SupportTicketView';
 import { PartnerInventoryManager } from './PartnerInventoryManager';
 
+import { MarkupEngineView } from './MarkupEngineView';
+import { AgencyStatementView } from './AgencyStatementView';
+import { PartnerProfileKYCView } from './PartnerProfileKYCView';
+
+
 interface AgentPortalViewProps {
   lang?: string;
   onShowToast?: (msg: string) => void;
@@ -48,10 +53,12 @@ export interface AgentBooking {
   customerName: string;
   customerPhone: string;
   packageName: string;
+  packageType?: 'Hotel Room' | 'Cab' | 'Package';
   amount: number;
   travelDate: string;
-  bookingStatus: 'Confirmed' | 'Completed' | 'Pending';
-  paymentStatus: 'Held in Escrow' | 'Released';
+  bookingStatus: 'Confirmed' | 'Completed' | 'Pending' | 'in_progress';
+  paymentStatus: 'Held in Escrow' | 'Released' | 'held_in_escrow';
+  userOtp?: string;
 }
 
 export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
@@ -79,6 +86,25 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
   const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
 
   // Data state
+    const [otpInputs, setOtpInputs] = useState<Record<string, string>>({});
+
+  const handleOtpChange = (bookingId: string, value: string) => {
+    setOtpInputs(prev => ({ ...prev, [bookingId]: value }));
+  };
+
+  const handleStartTrip = (b: AgentBooking) => {
+    const entered = otpInputs[b.id];
+    if (entered === b.userOtp) {
+      setBookings(prev => prev.map(booking => 
+        booking.id === b.id 
+          ? { ...booking, bookingStatus: 'in_progress', paymentStatus: 'Held in Escrow' } 
+          : booking
+      ));
+      notify(`Trip Started! Payment status updated.`);
+    } else {
+      notify('Invalid PIN. Please enter the correct 4-digit PIN provided by the customer.');
+    }
+  };
   const [bookings, setBookings] = useState<AgentBooking[]>([]);
   const [packages, setPackages] = useState<ActivePackageItem[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -109,7 +135,9 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
         if (res && res.ok) {
           const data = await res.json();
           setChartData(data.chartData || []);
+          
           setBookings(data.bookings || []);
+
           setPackages(data.packages || []);
         } else {
           setChartData([]);
@@ -216,10 +244,10 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
     { id: 'dashboard', icon: TrendingUp, label: 'Overview & Analytics' },
     { id: 'inventory', icon: Package, label: `Inventory & Packages (${packages.length})` },
     { id: 'bookings', icon: Users, label: `Bookings & Leads (${bookings.length})` },
-    { id: 'earnings', icon: Wallet, label: 'Earnings & Wallet' },
-    { id: 'marketing', icon: Gift, label: 'Ads & Marketing' },
+    { id: 'earnings', icon: Wallet, label: 'Earnings & Statement' },
+    { id: 'markups', icon: Tag, label: 'Markup Engine' },
     { id: 'support', icon: LifeBuoy, label: 'Agency Support' },
-    { id: 'settings', icon: Settings, label: 'Settings & Profile' },
+    { id: 'settings', icon: Settings, label: 'Profile & KYC' },
   ] as const;
 
   return (
@@ -233,6 +261,9 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
             <LogoName className="text-xl" />
             <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-sky-500 to-pink-500 text-white font-extrabold text-[10px] uppercase tracking-wider shadow-xs">
               Partner Hub
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-[10px] uppercase tracking-wider shadow-xs flex items-center gap-1 ml-2">
+              RouTriO Verified 🟢
             </span>
           </div>
         }
@@ -484,23 +515,62 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                               <p className="font-extrabold text-slate-900">{b.customerName}</p>
                               <p className="text-[11px] font-mono text-slate-500">{b.customerPhone}</p>
                             </td>
-                            <td className="p-4 font-bold text-slate-700">{b.packageName}</td>
+                            <td className="p-4">
+                              <p className="font-bold text-slate-700">{b.packageName}</p>
+                              {b.packageType === 'Cab' && (
+                                <span className="inline-block mt-1 bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase">
+                                  Cab Booking
+                                </span>
+                              )}
+                            </td>
                             <td className="p-4 font-black text-slate-900">₹{b.amount.toLocaleString('en-IN')}</td>
-                            <td className="p-4 text-slate-600">{b.travelDate}</td>
+                            <td className="p-4">
+                              <p className="text-slate-600 font-medium">{b.travelDate}</p>
+                              <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                b.bookingStatus === 'in_progress' ? 'bg-sky-100 text-sky-800' :
+                                b.bookingStatus === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'
+                              }`}>
+                                {b.bookingStatus === 'in_progress' ? 'Trip In Progress' : b.bookingStatus}
+                              </span>
+                            </td>
                             <td className="p-4">
                               <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                b.paymentStatus === 'Released' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                                b.paymentStatus === 'Released' ? 'bg-emerald-100 text-emerald-800' : 
+                                b.paymentStatus === 'held_in_escrow' ? 'bg-rose-100 text-rose-800' :
+                                'bg-amber-100 text-amber-800'
                               }`}>
-                                {b.paymentStatus}
+                                {b.paymentStatus === 'held_in_escrow' ? 'Pending OTP' : b.paymentStatus}
                               </span>
                             </td>
                             <td className="p-4 text-right">
-                              <button
-                                onClick={() => handleToggleEscrowRelease(b.id)}
-                                className="px-3 py-1.5 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer shadow-xs"
-                              >
-                                {b.paymentStatus === 'Held in Escrow' ? 'Release Escrow' : 'Hold Escrow'}
-                              </button>
+                              {b.packageType === 'Cab' && b.bookingStatus === 'Confirmed' ? (
+                                <div className="flex items-center justify-end gap-2">
+                                  <input 
+                                    type="text" 
+                                    maxLength={4}
+                                    placeholder="PIN"
+                                    className="w-16 p-1.5 text-center text-xs font-bold border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500"
+                                    value={otpInputs[b.id] || ''}
+                                    onChange={(e) => handleOtpChange(b.id, e.target.value)}
+                                  />
+                                  <button
+                                    onClick={() => handleStartTrip(b)}
+                                    className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors shadow-xs"
+                                  >
+                                    Start Trip
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => handleToggleEscrowRelease(b.id)}
+                                  disabled={b.paymentStatus === 'held_in_escrow'}
+                                  className={`px-3 py-1.5 text-white rounded-xl text-xs font-bold transition-opacity cursor-pointer shadow-xs ${
+                                    b.paymentStatus === 'held_in_escrow' ? 'bg-slate-300 cursor-not-allowed' : 'bg-gradient-to-r from-sky-500 to-pink-500 hover:opacity-95'
+                                  }`}
+                                >
+                                  {b.paymentStatus === 'Held in Escrow' || b.paymentStatus === 'held_in_escrow' ? 'Release Escrow' : 'Hold Escrow'}
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))

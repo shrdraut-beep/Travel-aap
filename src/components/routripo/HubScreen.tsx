@@ -3,10 +3,6 @@ import { Package, Plus, Sparkles, Plane, Hotel, Train, Bus, Car, Search, Share2,
 import { TopBar, SectionTitle, useScrolled, Card, Stagger, CountUp, LogoName } from "./SharedUI";
 import { MusicPlayerProvider } from "../MusicPlayerContext";
 import { DashboardView } from "../views/DashboardView";
-import { TopBannerCarousel } from "../common/TopBannerCarousel";
-import { OffersForYouSection } from "../common/OffersForYouSection";
-import { FlagshipStoresSection } from "../common/FlagshipStoresSection";
-import { TravelSearchWidget } from "../TravelSearchWidget";
 import { translations } from "../../translations";
 import { TripGroup, Poll } from "../../types";
 import { useTripContext } from "../../context/TripContext";
@@ -68,13 +64,9 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
 
       {/* Dynamic Swipeable Image Banner Carousel for Major Promotions */}
       <div className="px-4 mt-2">
-        <TopBannerCarousel tab="hub" activeOffers={activeOffers} />
-      </div>
+              </div>
 
-      {/* Travel Search Widget */}
-      <div className="px-4 mt-4">
-        <TravelSearchWidget onSearch={(data) => console.log('Search Triggered', data)} />
-      </div>
+
 
       {/* ================= FULL ACTIVE TRIP DASHBOARD VIEW ================= */}
       <div className="mt-4">
@@ -82,7 +74,7 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
           <DashboardView
             trip={activeTrip}
             lang="en"
-            userId="m1"
+            userId={currentUser?.id || ""}
             t={t}
             currencySymbol="₹"
             poolBalance={15000}
@@ -126,8 +118,6 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
 
       {/* Offers For You & Flagship Hotel Stores */}
       <div className="px-4 border-t border-slate-200 pt-4 bg-slate-50">
-        <OffersForYouSection tab="hub" />
-        <FlagshipStoresSection tab="hub" />
       </div>
 
       {/* Ready Trips Modal */}
@@ -168,9 +158,15 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
           </div>
         </div>
       )}
+      {/* Floating Action Button for New Trip */}
+      <button 
+        onClick={() => {
+          if (onOpenCreateTrip) onOpenCreateTrip();
+        }}
+        className="fixed bottom-24 right-5 w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full flex flex-col items-center justify-center text-white shadow-lg shadow-rose-500/30 z-[90] active:scale-95 transition-transform border border-rose-400"
+      >
+        <Plus className="w-7 h-7 stroke-[3]" />
+      </button>
     </div>
   );
 }
-
-
-

@@ -1,49 +1,56 @@
+import { useAuthStore } from '../../store/useAuthStore';
 import React, { useState, useRef, useEffect } from "react";
-import { 
-  Plus, 
-  Sparkles, 
-  Calendar, 
-  ClipboardList, 
-  Compass, 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  MapPin, 
-  Check, 
-  Trash2, 
-  Edit3, 
-  X, 
-  ChevronRight, 
-  Share2, 
-  QrCode, 
-  Clock, 
-  Tag, 
-  Search, 
-  Plane, 
-  Train, 
-  Hotel, 
-  Ticket, 
-  FileText, 
-  CheckCircle2, 
+import {
+  Plus,
+  Sparkles,
+  Calendar,
+  ClipboardList,
+  Compass,
+  Users,
+  DollarSign,
+  TrendingUp,
+  MapPin,
+  Check,
+  Trash2,
+  Edit3,
+  X,
+  ChevronRight,
+  Share2,
+  QrCode,
+  Clock,
+  Tag,
+  Search,
+  Plane,
+  Train,
+  Hotel,
+  Ticket,
+  FileText,
+  CheckCircle2,
   Info,
   CalendarDays,
-  ListFilter
+  ListFilter,
+  ShieldCheck,
+  Wallet,
+  TrendingDown
 } from "lucide-react";
+
+import { DashboardView } from '../views/DashboardView';
+
+
+
 import { TopBar, useScrolled, LogoName } from "./SharedUI";
 import { TripGroup, TripPlan, PackingItem, Poll, Member } from "../../types";
 import { SmartPackingAlert } from "../SmartPackingAlert";
 import { TripAwardsBanner } from "../TripAwardsBanner";
 import { PollsCard } from "../PollsCard";
-import { LiveFlightSearchCard } from "../LiveFlightSearchCard";
+import { FlightTrackerWidget } from "../FlightTrackerWidget";
 import { TransitSchedules } from "../TransitSchedules";
 import { WeatherWidget } from "../WeatherWidget";
 import { QuirkyLanguageSelector } from "../QuirkyLanguageSelector";
 import { WikipediaSnippet } from "../WikipediaSnippet";
-import { SharedBookingWidget } from "../SharedBookingWidget";
 import { UpiQrModal } from "../UpiQrModal";
 import { useTripContext } from "../../context/TripContext";
-import { TopBannerCarousel } from "../common/TopBannerCarousel";
-import { OffersForYouSection } from "../common/OffersForYouSection";
+import { useLanguage } from "../../context/LanguageContext";
 
 interface PlanningScreenProps {
   onLogout: () => void;
@@ -63,7 +70,7 @@ const DEFAULT_TRIP: TripGroup = {
   endDate: new Date(Date.now() + 86400000 * 3).toISOString().substring(0, 10),
   totalBudget: 0,
   calculationMode: "admin_pooled",
-  adminId: "m1",
+  adminId: "",
   status: "ACTIVE",
   members: [],
   deposits: [],
@@ -83,6 +90,7 @@ const INITIAL_PACKING_ITEMS: PackingItem[] = [
   { id: "pk8", name: "Cash / UPI Scanner", isChecked: true, category: "Essentials", essential: true }
 ];
 
+import { TripMap } from '../map/TripMap';
 export function PlanningScreen({
   onLogout,
   onOpenCreateTrip,
@@ -94,6 +102,10 @@ export function PlanningScreen({
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrolled = useScrolled(scrollRef);
   const { activeTrip, updateActiveTrip } = useTripContext();
+  const { lang, t } = useLanguage();
+  const themeColor = '#6366f1';
+
+  const currentUser = useAuthStore(state => state.currentUser);
 
   const currentTrip = initialTrip || activeTrip;
   const setCurrentTrip = (updated: TripGroup | ((prev: TripGroup) => TripGroup)) => {
@@ -124,20 +136,9 @@ export function PlanningScreen({
   const [newPlanLocation, setNewPlanLocation] = useState("");
 
   // Packing List State
-  const [packingItems, setPackingItems] = useState<PackingItem[]>(() => {
-    const saved = localStorage.getItem("routripo_packing_items");
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* fallback */ }
-    }
-    return INITIAL_PACKING_ITEMS;
-  });
-
+  const packingItems = currentTrip.packingList?.length ? currentTrip.packingList : INITIAL_PACKING_ITEMS;
   const [newPackingName, setNewPackingName] = useState("");
   const [newPackingCategory, setNewPackingCategory] = useState("Essentials");
-
-  useEffect(() => {
-    localStorage.setItem("routripo_packing_items", JSON.stringify(packingItems));
-  }, [packingItems]);
 
   // Add Plan Handler
   const handleAddPlan = () => {
@@ -174,7 +175,13 @@ export function PlanningScreen({
 
   // Toggle Packing Checkbox
   const togglePackingItem = (id: string) => {
-    setPackingItems(prev => prev.map(item => item.id === id ? { ...item, isChecked: !item.isChecked } : item));
+    setCurrentTrip(prev => {
+      const currentList = prev.packingList?.length ? prev.packingList : INITIAL_PACKING_ITEMS;
+      return {
+        ...prev,
+        packingList: currentList.map(item => item.id === id ? { ...item, isChecked: !item.isChecked } : item)
+      };
+    });
   };
 
   // Add Packing Item
@@ -186,13 +193,19 @@ export function PlanningScreen({
       isChecked: false,
       category: newPackingCategory
     };
-    setPackingItems(prev => [...prev, newItem]);
+    setCurrentTrip(prev => {
+      const currentList = prev.packingList?.length ? prev.packingList : INITIAL_PACKING_ITEMS;
+      return {
+        ...prev,
+        packingList: [...currentList, newItem]
+      };
+    });
     setNewPackingName("");
   };
 
   // Poll Handlers
   const handleVotePoll = (pollId: string, optionId: string) => {
-    const userId = "m1";
+    const userId = currentUser?.id || "";
     setCurrentTrip(prev => ({
       ...prev,
       polls: (prev.polls || []).map(poll => {
@@ -219,7 +232,7 @@ export function PlanningScreen({
       id: `poll-${Date.now()}`,
       question,
       options: options.map((opt, i) => ({ id: `opt-${i}`, text: opt, votes: [] })),
-      createdBy: "m1",
+      createdBy: currentUser?.id || "",
       createdAt: new Date().toISOString(),
       isOpen: true
     };
@@ -237,6 +250,9 @@ export function PlanningScreen({
   };
 
   // Packing Statistics
+  
+  const showToast = (message: string) => alert(message);
+
   const packedCount = packingItems.filter(i => i.isChecked).length;
   const totalPacking = packingItems.length;
   const packingPct = totalPacking > 0 ? Math.round((packedCount / totalPacking) * 100) : 0;
@@ -254,42 +270,126 @@ export function PlanningScreen({
 
       <div className="px-4 sm:px-5 mt-2 space-y-4 max-w-4xl mx-auto">
 
-        {/* Dynamic Ad & Offers Top Banner */}
-        <TopBannerCarousel tab="planning" />
-
-        {/* Header Title Card */}
-        <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-              <Compass className="w-4 h-4 text-indigo-500" />
-              <span>{currentTrip.destination || "Active Trip"}</span>
-            </div>
-            {setActive && (
-              <button 
-                onClick={() => setActive('all-trips')}
-                className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-              >
-                <span>Change Trip</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
-            {currentTrip.name || "TRIP PLANNER"}
-          </h1>
-
-          {/* Primary Budget vs Actual Action Button (matching screenshot) */}
-          <button
-            onClick={() => setActive ? setActive('expenses') : null}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 active:scale-98 transition-all cursor-pointer"
-          >
-            <TrendingUp className="w-4 h-4 text-indigo-200" />
-            <span>BUDGET VS ACTUAL EXPENSES</span>
-          </button>
+        
+        
+        {/* MERGED HUB DASHBOARD */}
+        <div className="mb-6 -mx-4 sm:mx-0">
+          
+            <DashboardView
+              trip={currentTrip}
+              lang="en"
+              userId={currentUser?.id || ""}
+              t={t}
+              currencySymbol="₹"
+              poolBalance={0}
+              onNavigate={(tab) => { if (setActive) setActive(tab); }}
+              onVote={(pollId, optionId) => {}}
+              onCreatePoll={() => {}}
+              onClosePoll={() => {}}
+              onSOS={() => { if (onSOS) onSOS(); }}
+              onAddPlaylistItem={() => {}}
+              onRemovePlaylistItem={() => {}}
+              onAddGalleryItem={() => {}}
+              onUpdateTrip={(updated) => setCurrentTrip(updated)}
+              onShowToast={(m) => showToast(m)}
+              onAddDeposit={() => { if (setActive) setActive("expenses"); }}
+            />
+            
+          
         </div>
 
-        {/* Planner Category Sub-Nav Pill Bar (Matching old screenshot, redesigned) */}
+        
+        
+        {/* Budget Grid & AI Manager */}
+        <div className="px-5 pt-4 pb-2 space-y-4">
+          
+          {/* Budget Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Total Budget */}
+            <div className="bg-sky-50/60 p-4 rounded-3xl border border-sky-100 flex flex-col justify-between">
+              <div className="flex items-center gap-1.5 text-sky-600 mb-3">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">TOTAL BUDGET</span>
+              </div>
+              <div className="text-2xl font-black text-slate-800">
+                ₹{currentTrip.totalBudget || 0}
+              </div>
+              <div className="text-[10px] font-bold text-sky-600 uppercase tracking-widest mt-3">
+                TRIP BUDGET
+              </div>
+            </div>
+            {/* Total Expense */}
+            <div className="bg-rose-50/60 p-4 rounded-3xl border border-rose-100 flex flex-col justify-between">
+              <div className="flex items-center gap-1.5 text-rose-600 mb-3">
+                <TrendingDown className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">TOTAL EXPENSE</span>
+              </div>
+              <div className="text-2xl font-black text-slate-800">
+                ₹{(currentTrip.expenses || []).reduce((sum, e) => sum + e.amount, 0)}
+              </div>
+              <div className="text-[10px] font-bold text-rose-600 uppercase tracking-widest mt-3">
+                SPENT SO FAR
+              </div>
+            </div>
+            {/* Total Balance */}
+            <div className="bg-emerald-50/60 p-4 rounded-3xl border border-emerald-100 flex flex-col justify-between">
+              <div className="flex items-center gap-1.5 text-emerald-600 mb-3">
+                <Wallet className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">TOTAL BALANCE</span>
+              </div>
+              <div className="text-2xl font-black text-slate-800">
+                ₹{(currentTrip.totalBudget || 0) - (currentTrip.expenses || []).reduce((sum, e) => sum + e.amount, 0)}
+              </div>
+              <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-3">
+                AVAILABLE BALANCE
+              </div>
+            </div>
+            {/* Expense Ratio */}
+            <div className="bg-purple-50/60 p-4 rounded-3xl border border-purple-100 flex flex-col items-center justify-center">
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-600 mb-2 w-full text-left">EXPENSE RATIO</span>
+              <div className="relative flex items-center justify-center">
+                <svg className="w-16 h-16 transform -rotate-90">
+                  <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="5" fill="transparent" className="text-purple-100" />
+                  <circle cx="32" cy="32" r="28" stroke="#a855f7" strokeWidth="5" fill="transparent" strokeDasharray="175.9" strokeDashoffset={175.9 - (Math.min(((currentTrip.totalBudget ? (currentTrip.expenses || []).reduce((sum, e) => sum + e.amount, 0) / currentTrip.totalBudget : 0) * 100), 100) / 100) * 175.9} strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-sm font-black text-slate-800">{Math.round(currentTrip.totalBudget ? ((currentTrip.expenses || []).reduce((sum, e) => sum + e.amount, 0) / currentTrip.totalBudget) * 100 : 0)}%</span>
+                  <span className="text-[8px] font-bold text-slate-500 uppercase">USED</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Spending Status Pill */}
+          <div className={`py-2.5 rounded-2xl border flex items-center justify-center font-black text-xs tracking-widest uppercase ${(currentTrip.totalBudget ? ((currentTrip.expenses || []).reduce((sum, e) => sum + e.amount, 0) / currentTrip.totalBudget) * 100 : 0) <= 85 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
+            SPENDING IS {(currentTrip.totalBudget ? ((currentTrip.expenses || []).reduce((sum, e) => sum + e.amount, 0) / currentTrip.totalBudget) * 100 : 0) <= 85 ? 'SAFE' : 'OVER BUDGET'}.
+          </div>
+
+          {/* AI TRIP MANAGER HEADER */}
+          <div className="flex items-center justify-between pt-2">
+            <h3 className="font-black text-slate-800 tracking-widest uppercase text-sm">AITRIPMANAGER</h3>
+            <button onClick={onOpenPlanner} className="px-3 py-1.5 bg-rose-400 hover:bg-rose-500 text-white rounded-full text-[10px] font-bold flex items-center gap-1.5 uppercase tracking-wider transition-all">
+              <Sparkles className="w-3 h-3" /> Chat with Manager
+            </button>
+          </div>
+
+          {/* AI Manager Card */}
+          <div className="bg-gradient-to-r from-rose-100/50 to-orange-100/50 p-4 rounded-3xl border border-rose-200/50 flex items-center justify-between cursor-pointer" onClick={onOpenPlanner}>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-2xl shadow-lg">🎩</div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <Sparkles className="w-2.5 h-2.5 text-white" />
+                </div>
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-800">Daily Morning Briefing & Manager</h4>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-slate-400" />
+          </div>
+        </div>
+{/* Planner Category Sub-Nav Pill Bar (Matching old screenshot, redesigned) */}
         <div className="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
           <button
             onClick={() => setActiveSubTab('schedule')}
@@ -315,29 +415,9 @@ export function PlanningScreen({
             <span>Prep</span>
           </button>
 
-          <button
-            onClick={() => setActiveSubTab('fun')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
-              activeSubTab === 'fun' 
-                ? 'bg-indigo-600 text-white shadow-md' 
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Fun</span>
-          </button>
+          
 
-          <button
-            onClick={() => setActiveSubTab('tracking')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 transition-all cursor-pointer ${
-              activeSubTab === 'tracking' 
-                ? 'bg-indigo-600 text-white shadow-md' 
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Tracking & Guide</span>
-          </button>
+          
 
           <button
             onClick={() => setActiveSubTab('friends')}
@@ -627,7 +707,13 @@ export function PlanningScreen({
 
             {/* Packing List Items Grouped */}
             <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-              {packingItems.map(item => (
+              
+              {[...packingItems].sort((a, b) => {
+                if (a.isChecked !== b.isChecked) return a.isChecked ? 1 : -1;
+                if (a.category !== b.category) return (a.category || '').localeCompare(b.category || '');
+                return a.name.localeCompare(b.name);
+              }).map(item => (
+
                 <div 
                   key={item.id}
                   onClick={() => togglePackingItem(item.id)}
@@ -671,47 +757,10 @@ export function PlanningScreen({
             <PollsCard 
               trip={currentTrip} 
               lang="en" 
-              userId="m1" 
+              userId={currentUser?.id || ""} 
               onVote={handleVotePoll} 
               onCreatePoll={handleCreatePoll} 
               onClosePoll={handleClosePoll} 
-            />
-          </div>
-        )}
-
-        {/* TAB 4: TRACKING & GUIDE */}
-        {activeSubTab === 'tracking' && (
-          <div className="space-y-4">
-            
-            {/* Live Destination Weather */}
-            <WeatherWidget 
-              location={currentTrip.destination || "Ujjain"} 
-              startDate={currentTrip.startDate} 
-              endDate={currentTrip.endDate} 
-              lang="en" 
-            />
-
-            {/* Flight Search & Tracker */}
-            <LiveFlightSearchCard 
-              lang="en" 
-              t={(key) => key} 
-              currencySymbol="₹" 
-              defaultDestination={currentTrip.destination} 
-            />
-
-            {/* Transit Schedules (Train, Bus, Cab) */}
-            <TransitSchedules 
-              source={currentTrip.source || "Mumbai"} 
-              destination={currentTrip.destination || "Ujjain"} 
-            />
-
-            {/* Local Language Guide */}
-            <QuirkyLanguageSelector />
-
-            {/* Destination Cultural Snippet */}
-            <WikipediaSnippet 
-              query={currentTrip.destination || "Ujjain"} 
-              lang="en" 
             />
           </div>
         )}
@@ -720,6 +769,19 @@ export function PlanningScreen({
         {activeSubTab === 'friends' && (
           <div className="space-y-4">
             
+            {/* Find Friends Live Map */}
+            
+              <div className="h-[400px] w-full rounded-3xl overflow-hidden shadow-sm border border-slate-200">
+                <TripMap 
+                  trip={currentTrip} 
+                  lang="en" 
+                  userId={currentUser?.id} 
+                  isSharingLocation={true} 
+                  onUpdateTrip={(t) => setCurrentTrip(t)}
+                />
+              </div>
+            
+
             {/* Invite Friends Card */}
             <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
@@ -781,12 +843,9 @@ export function PlanningScreen({
               </div>
             </div>
 
-            {/* Shared Hotel & Booking Widget */}
-            <SharedBookingWidget lang="en" currencySymbol="₹" />
+            
 
-            {/* Planning Specific Offers & Deals */}
-            <OffersForYouSection tab="planning" />
-          </div>
+                      </div>
         )}
 
       </div>

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+const LazyMapView = React.lazy(() => import('../map/MapView'));
+
 import { generateEarnKaroLink } from "./config";
 import { Building2, Search, Star, ExternalLink, MapPin, ShieldCheck, Loader2, Navigation, Phone, Globe, CheckCircle2, Layers, Sparkles, UserPlus } from 'lucide-react';
 import { HotelOption } from './api';
@@ -13,80 +15,7 @@ interface HotelSearchTabProps {
 }
 
 // Registered Direct Vendor Hotels (Higher Profit Margin & Verified Direct Contracts)
-const DIRECT_VENDOR_HOTELS: InventoryItem[] = [
-  {
-    id: 'direct-hotel-1',
-    name: 'Express Inn Hotel & Suites',
-    location: 'Pathardi Phata, Mumbai-Agra Highway, Nashik, Maharashtra',
-    city: 'Nashik',
-    lat: 19.9575,
-    lng: 73.7667,
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-    rating: 4.9,
-    category: '5 Star Luxury Hotel',
-    amenities: ['Pool', 'Free WiFi', 'Buffet Breakfast', 'Spa', 'Direct Partner Discount'],
-    googleMapsLink: 'https://maps.google.com/?q=Express+Inn+Nashik',
-    price: '₹4,800/night',
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'RouTriO Verified'
-  },
-  {
-    id: 'direct-hotel-2',
-    name: 'Taj Fort Aguada Resort & Spa',
-    location: 'Sinquerim, Candolim, Goa 403515',
-    city: 'Goa',
-    lat: 15.4925,
-    lng: 73.7686,
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
-    rating: 5.0,
-    category: 'Luxury Beach Resort',
-    amenities: ['Beachfront', 'Private Beach', 'Infinity Pool', 'RouTriO VIP Perks'],
-    googleMapsLink: 'https://maps.google.com/?q=Taj+Fort+Aguada+Goa',
-    price: '₹14,500/night',
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'Direct Partner'
-  },
-  {
-    id: 'direct-hotel-3',
-    name: 'Grape County Eco Resort',
-    location: 'Anjaneri, Trimbakeshwar Road, Nashik, Maharashtra 422213',
-    city: 'Nashik',
-    lat: 19.9320,
-    lng: 73.5350,
-    image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80',
-    rating: 4.8,
-    category: 'Eco Luxury Resort',
-    amenities: ['Lake View', 'Kayaking', 'Organic Dining', 'RouTriO Direct Special'],
-    googleMapsLink: 'https://maps.google.com/?q=Grape+County+Nashik',
-    price: '₹5,200/night',
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'RouTriO Verified'
-  },
-  {
-    id: 'direct-hotel-4',
-    name: 'Hotel Sai Palace Express',
-    location: 'Pimpalwadi Road, Opposite Sai Baba Temple, Shirdi',
-    city: 'Shirdi',
-    lat: 19.7680,
-    lng: 74.4780,
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
-    rating: 4.7,
-    category: 'Temple View Hotel',
-    amenities: ['200m from Temple', 'Pure Veg Restaurant', '24x7 Hot Water'],
-    googleMapsLink: 'https://maps.google.com/?q=Hotel+Sai+Palace+Shirdi',
-    price: '₹2,400/night',
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'Direct Partner'
-  }
-];
+const DIRECT_VENDOR_HOTELS: InventoryItem[] = [];
 
 interface HotelSearchTabProps {
   lang: string;
@@ -110,6 +39,7 @@ export const HotelSearchTab: React.FC<HotelSearchTabProps> = ({ lang }) => {
 
   const { applications: vendorApps } = useVendorStore();
   const [showVendorRegistration, setShowVendorRegistration] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   const [destination, setDestination] = useState('');
   const [placeName, setPlaceName] = useState('');
@@ -479,9 +409,14 @@ export const HotelSearchTab: React.FC<HotelSearchTabProps> = ({ lang }) => {
           </div>
 
           <div className="flex items-center justify-between px-1">
-            <h4 className="font-black text-slate-900 text-base">
-              {lang === 'mr' ? 'हॉटेल शोध निकाल' : 'Hotel Search Results'} ({destination})
-            </h4>
+            <div className="flex items-center gap-3">
+               <h4 className="font-black text-slate-900 text-base">
+                 {lang === 'mr' ? 'हॉटेल शोध निकाल' : 'Hotel Search Results'} ({destination})
+               </h4>
+               <button type="button" onClick={() => setShowMap(!showMap)} className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 hover:bg-purple-200 transition-colors">
+                 <MapPin className="w-3.5 h-3.5" /> {showMap ? 'List View' : 'Map View'}
+               </button>
+            </div>
             <div className="flex items-center gap-2">
               {dedupStats.directPartnerCount > 0 && (
                 <span className="text-[11px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -495,7 +430,13 @@ export const HotelSearchTab: React.FC<HotelSearchTabProps> = ({ lang }) => {
             </div>
           </div>
 
-          {hotels.length === 0 ? (
+          {showMap && hotels.length > 0 ? (
+            <div className="h-[400px] w-full rounded-3xl overflow-hidden border border-slate-200 shadow-md">
+              <Suspense fallback={<div className="h-full flex items-center justify-center bg-slate-50 text-purple-600 font-bold text-sm"><Loader2 className="animate-spin w-5 h-5 mr-2" /> Loading Interactive Map...</div>}>
+                 <LazyMapView lat={hotels[0].lat || 15.2993} lng={hotels[0].lng || 74.1240} popupText={`${hotels.length} hotels found near ${destination}`} />
+              </Suspense>
+            </div>
+          ) : hotels.length === 0 ? (
             <div className="bg-white rounded-3xl p-8 border border-slate-200 text-center space-y-4 shadow-sm">
               <div className="w-16 h-16 bg-purple-50 border border-purple-100 rounded-2xl flex items-center justify-center mx-auto text-purple-600">
                 <Building2 className="w-8 h-8" />

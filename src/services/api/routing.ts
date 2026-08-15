@@ -22,15 +22,51 @@ export const fetchOptimizedRoute = async (points: {lat: number, lon: number}[], 
         instructions: [], // OSRM doesn't return instructions by default unless requested
       };
     }
-    return getFallbackRoute(points);
+    return await getFallbackRoute(points, vehicle);
   } catch (error: any) {
     console.warn('OSRM API notice:', error?.message || error);
-    return getFallbackRoute(points);
+    return await getFallbackRoute(points, vehicle);
   }
 };
 
-function getFallbackRoute(points: {lat: number, lon: number}[]): RouteResult | null {
+
+async function getFallbackRoute(points: {lat: number, lon: number}[], vehicle: string): Promise<RouteResult | null> {
   if (!points || points.length < 2) return null;
+  
+  // Try Google Maps API as fallback
+  const googleApiKey = (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY || 
+                       (import.meta as any).env?.VITE_GOOGLE_PLACES_API_KEY || 
+                       (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY;
+                       
+  if (googleApiKey) {
+    try {
+      const origin = `${points[0].lat},${points[0].lon}`;
+      const dest = `${points[points.length-1].lat},${points[points.length-1].lon}`;
+      const waypoints = points.slice(1, -1).map(p => `${p.lat},${p.lon}`).join('|');
+      
+      let url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${dest}&key=${googleApiKey}`;
+      if (waypoints) {
+        url += `&waypoints=${waypoints}`;
+      }
+      
+      const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.routes && data.routes.length > 0) {
+          const leg = data.routes[0].legs[0];
+          return {
+            distance: leg.distance.value,
+            time: leg.duration.value * 1000,
+            instructions: []
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Google Maps fallback failed:", err);
+    }
+  }
+
+  // Final fallback: straight line math
   let totalMeters = 0;
   for (let i = 0; i < points.length - 1; i++) {
     const p1 = points[i];
@@ -54,6 +90,7 @@ function getFallbackRoute(points: {lat: number, lon: number}[]): RouteResult | n
     instructions: []
   };
 }
+
 
 const geocodeCache: Record<string, {lat: number, lon: number} | null> = {};
 

@@ -14,7 +14,7 @@ import { CalendarView } from './CalendarView';
 import { WeatherWidget } from '../WeatherWidget';
 import { ItineraryCard } from '../ItineraryCard';
 
-const TripMap = React.lazy(() => import('../map/TripMap').then(m => ({ default: m.TripMap })));
+import { TripMap } from '../map/TripMap';
 
 const HARDCODED_PACKING_CATEGORIES = (lang: string): PackingCategory[] => {
   const isMr = lang === 'mr';
@@ -632,22 +632,7 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
                   ))
                 )}
 
-                {/* Agoda Image Banner */}
-                <div className="mt-8 mb-6 flex justify-center w-full p-2">
-                  <a 
-                    href="https://www.agoda.com/partners/partnersearch.aspx?pcs=10&cid=1969781&hl=en-us&hid=25963734" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block transition-transform duration-300 hover:scale-105"
-                  >
-                    <img 
-                      src="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180" 
-                      srcSet="https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=240x180 1x, https://pix8.agoda.net/hotelImages/18952579/0/48512318c6f01ac53d2b7d9556d9b37c.jpg?ca=28&ce=0&s=480x360 2x" 
-                      alt="Agoda वर सर्वोत्तम हॉटेल बुक करा" 
-                      className="rounded-xl shadow-lg border border-gray-200"
-                    />
-                  </a>
-                </div>
+
               </>
             )}
           </>
@@ -1140,14 +1125,6 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
         
         {activeSubTab === 'map' && (
           <div className="space-y-6 relative z-10">
-            <React.Suspense fallback={
-              <div className="w-full h-[500px] bg-slate-100 rounded-3xl flex flex-col items-center justify-center gap-3 border border-slate-200">
-                <RefreshCw className="w-8 h-8 text-emerald animate-spin" />
-                <p className="text-xs font-bold text-slate-500">
-                  {lang === 'mr' ? 'दोस्त नकाशा लोड होत आहे...' : 'Loading Dost Nakasha Map...'}
-                </p>
-              </div>
-            }>
               <TripMap 
                 trip={trip} 
                 lang={lang} 
@@ -1156,7 +1133,7 @@ export const PlannerView: React.FC<PlannerViewProps> = ({
                 isSharingLocation={isSharingLocation}
                 onToggleLocationShare={onToggleLocationShare}
               />
-            </React.Suspense>
+            
           </div>
         )}
       </div>

@@ -3,8 +3,10 @@ import { Car, Calendar, MapPin, Users, Clock, ShieldCheck, Star, ExternalLink, C
 import { SearchInput } from '../SearchInput';
 import { mergeAndDeduplicateInventory, InventoryItem } from '../../utils/inventoryDeduplication';
 import { useVendorStore } from '../../store/useVendorStore';
+import { checkRestrictedZones, getCurrentLocation } from '../../services/LocationService';
 import { VendorRegistrationScreen } from '../views/VendorRegistrationScreen';
 
+const restrictedCabRegions = ['Goa', 'Sikkim'];
 interface CarSearchTabProps {
   lang: string;
   currencySymbol: string;
@@ -63,65 +65,7 @@ const THIRD_PARTY_API_CABS: InventoryItem[] = [
 ];
 
 // 2. Direct Vendor Registrations (Higher Profit Margin & Direct Contracts)
-const DIRECT_VENDOR_CABS: InventoryItem[] = [
-  {
-    id: 'direct-cab-1',
-    name: 'Dzire / Etios',
-    location: 'Nashik to Goa Direct Partner Fleet',
-    city: 'Nashik',
-    type: 'Comfort Sedan (AC)',
-    seats: 4,
-    bags: 3,
-    perKm: '₹13/km',
-    estimatedTotal: '₹2,800',
-    rating: '4.9',
-    reviews: 210,
-    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600',
-    features: ['Extra Legroom', 'Boot Space for 3 Large Bags', 'Top Rated Driver', 'RouTriO VIP Perks'],
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'RouTriO Verified'
-  },
-  {
-    id: 'direct-cab-2',
-    name: 'Toyota Innova Crysta',
-    location: 'Nashik Direct VIP Fleet',
-    city: 'Nashik',
-    type: 'Premium SUV (7 Seater)',
-    seats: 7,
-    bags: 5,
-    perKm: '₹21/km',
-    estimatedTotal: '₹5,200',
-    rating: '5.0',
-    reviews: 320,
-    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600',
-    features: ['Captain Seats', 'Dual Climate AC', 'Luxury Interior', 'Verified Expressway Driver'],
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'Direct Partner'
-  },
-  {
-    id: 'direct-cab-3',
-    name: 'Ertiga / Triber',
-    location: 'Direct Partner Fleet',
-    city: 'Nashik',
-    type: 'Family SUV (6 Seater)',
-    seats: 6,
-    bags: 4,
-    perKm: '₹16/km',
-    estimatedTotal: '₹3,900',
-    rating: '4.9',
-    reviews: 185,
-    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600',
-    features: ['6 Comfort Seats', 'Rear AC Vents', 'Carrier Available', 'Long Distance Special'],
-    source: 'direct',
-    isDirectPartner: true,
-    isRouTriOVerified: true,
-    badgeText: 'RouTriO Verified'
-  }
-];
+const DIRECT_VENDOR_CABS: InventoryItem[] = [];
 
 export const CarSearchTab: React.FC<CarSearchTabProps> = ({ lang, currencySymbol }) => {
   const isMr = lang === 'mr';
@@ -141,6 +85,28 @@ export const CarSearchTab: React.FC<CarSearchTabProps> = ({ lang, currencySymbol
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [contactName, setContactName] = useState('');
   const [contactPhone, setContactPhone] = useState('');
+
+  const [isLocating, setIsLocating] = useState(false);
+  const handleLocateMe = async () => {
+    setIsLocating(true);
+    try {
+      const loc = await getCurrentLocation();
+      if (loc.address) {
+         setPickupCity(loc.address);
+      } else {
+         setPickupCity(`${loc.lat}, ${loc.lng}`);
+      }
+    } catch (e) {
+       console.error("Location error", e);
+       alert("Failed to get location.");
+    }
+    setIsLocating(false);
+  };
+
+  const isRestricted = checkRestrictedZones(pickupCity) || checkRestrictedZones(dropCity);
+
+
+
 
   // Map approved vendor cab applications
   const approvedVendorCabs: InventoryItem[] = vendorApps
@@ -192,6 +158,7 @@ export const CarSearchTab: React.FC<CarSearchTabProps> = ({ lang, currencySymbol
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRestricted) return;
     setHasSearched(true);
     const { mergedResults, deduplicatedCount, directPartnerCount, apiCount } = mergeAndDeduplicateInventory(
       THIRD_PARTY_API_CABS,
@@ -262,8 +229,11 @@ export const CarSearchTab: React.FC<CarSearchTabProps> = ({ lang, currencySymbol
       <form onSubmit={handleSearch} className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xl space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">
-              {isMr ? 'पिकअप शहर / स्थान' : 'Pickup Location'}
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1 flex justify-between items-center">
+              <span>{isMr ? 'पिकअप शहर / स्थान' : 'Pickup Location'}</span>
+              <button type="button" onClick={handleLocateMe} disabled={isLocating} className="text-orange-500 hover:text-orange-600">
+                {isLocating ? 'Locating...' : 'Locate Me'}
+              </button>
             </label>
             <div className="relative">
               <MapPin className="w-4 h-4 text-orange-500 absolute left-3 top-3.5" />
@@ -339,9 +309,28 @@ export const CarSearchTab: React.FC<CarSearchTabProps> = ({ lang, currencySymbol
           </div>
         </div>
 
+        {isRestricted && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl mb-4 text-xs font-bold flex flex-col gap-2 shadow-sm">
+            <div className="flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />
+              <p>
+                Due to local government regulations, real-time app-based cab booking is currently restricted for {dropCity || pickupCity}. 
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-3 mt-2 border border-rose-100 flex flex-col sm:flex-row gap-2 w-full justify-between">
+               <button type="button" className="flex-1 py-2 bg-orange-100 text-orange-800 rounded-lg text-center font-bold text-[10px] uppercase">Self-Drive Cars</button>
+               <button type="button" className="flex-1 py-2 bg-blue-100 text-blue-800 rounded-lg text-center font-bold text-[10px] uppercase">Bike Rentals</button>
+               <button type="button" className="flex-1 py-2 bg-emerald-100 text-emerald-800 rounded-lg text-center font-bold text-[10px] uppercase">Tour Packages</button>
+            </div>
+          </div>
+        )}
+
         <button
           type="submit"
-          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+          disabled={isRestricted}
+          className={`w-full py-4 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-all ${
+            isRestricted ? 'bg-slate-400 cursor-not-allowed shadow-none' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/25 active:scale-95 cursor-pointer'
+          }`}
         >
           <Car className="w-5 h-5" />
           <span>{isMr ? 'गाड्या आणि टॅक्सी शोधा' : 'Search Cabs & Cars'}</span>

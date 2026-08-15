@@ -3,8 +3,13 @@ import { TopBar, useScrolled, LogoName } from "./SharedUI";
 import { MemoriesView } from "../views/MemoriesView";
 import { useTripContext } from "../../context/TripContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { TopBannerCarousel } from "../common/TopBannerCarousel";
-import { OffersForYouSection } from "../common/OffersForYouSection";
+
+import { TripAwardsBanner } from "../TripAwardsBanner";
+import { FlightTrackerWidget } from "../FlightTrackerWidget";
+import { TransitSchedules } from "../TransitSchedules";
+import { TimepassGame } from "../views/TimepassGame";
+import { QuirkyLanguageSelector } from "../QuirkyLanguageSelector";
+
 
 interface SocialScreenProps {
   onLogout: () => void;
@@ -30,8 +35,7 @@ export function SocialScreen({ onLogout, onSOS, onOpenSettings }: SocialScreenPr
       />
       
       <div className="px-4 mt-2">
-        <TopBannerCarousel tab="social" />
-      </div>
+              </div>
 
       <MemoriesView
         trip={activeTrip}
@@ -40,9 +44,15 @@ export function SocialScreen({ onLogout, onSOS, onOpenSettings }: SocialScreenPr
         onUpdateTrip={updateActiveTrip}
       />
 
-      <div className="px-4 mt-4">
-        <OffersForYouSection tab="social" />
+      
+      <div className="px-4 mt-4 space-y-4">
+        {activeTrip && <TripAwardsBanner trip={activeTrip} lang={lang} />}
+        {activeTrip && <FlightTrackerWidget lang={lang} />}
+        {activeTrip && <TransitSchedules source={activeTrip.source || "Mumbai"} destination={activeTrip.destination || "Ujjain"} />}
+        {activeTrip && <TimepassGame trip={activeTrip} lang={lang} />}
+        <QuirkyLanguageSelector />
       </div>
+
     </div>
   );
 }

@@ -76,7 +76,7 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
 
   const handleExportExcel = () => {
     if (!trip.expenses || trip.expenses.length === 0) {
-      alert(lang === 'mr' ? 'डाऊनलोड करण्यासाठी कोणताही खर्च आढळला नाही.' : 'No expenses available to export.');
+      alert('No expenses available to export.');
       return;
     }
 
@@ -87,13 +87,13 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
         .join(', ');
 
       return {
-        'अ.क्र. (Sr. No)': index + 1,
-        'दिनांक (Date)': exp.date ? exp.date.substring(0, 10) : '',
-        'खर्चाचा तपशील (Title)': exp.title,
-        'प्रकार (Category)': exp.category,
-        'रक्कम (Amount)': exp.amount,
-        'कोणी दिले (Paid By)': payerName,
-        'सहभागी (Split With)': splitNames
+        'Sr. No': index + 1,
+        'Date': exp.date ? exp.date.substring(0, 10) : '',
+        'Title': exp.title,
+        'Category': exp.category,
+        'Amount': exp.amount,
+        'Paid By': payerName,
+        'Split With': splitNames
       };
     });
 
@@ -138,18 +138,20 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
   return (
     <div className="flex flex-col h-full w-full overflow-y-auto no-scrollbar pb-32 flex-1">
       {/* Dynamic Pinned Top Summary Card */}
+      
+      
+      {/* Dynamic Pinned Top Summary Card */}
       <div className="px-4 sm:px-5 pt-3 mb-4">
         <div className="bg-white rounded-[28px] p-5 shadow-xl border-2 space-y-4" style={{ borderColor: themeColor }}>
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <span className="text-[11px] font-black uppercase tracking-widest text-slate-800 block">
-                {lang === 'mr' ? 'एकूण सहल खर्च' : 'Total Trip Expense'}
+                Total Trip Expense
               </span>
               <h2 className="text-3xl font-black text-slate-950 font-mono tracking-tight" style={{ color: themeColor }}>
                 {currencySymbol}{new Intl.NumberFormat('en-IN').format(totalSpent)}
               </h2>
             </div>
-
             <div className="relative w-20 h-20 shrink-0">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
@@ -180,47 +182,44 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
                   {budgetBase > 0 ? `${percentDisplay}%` : 'N/A'}
                 </span>
                 <span className="text-[8px] font-black text-slate-800 uppercase tracking-widest">
-                  {lang === 'mr' ? (rawPercent > 100 ? 'अतिरिक्त' : 'बजेट') : 'Budget'}
+                  Budget
                 </span>
               </div>
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
               <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest block">
-                {lang === 'mr' ? 'प्रति व्यक्ती सरासरी' : 'Avg Per Person'}
+                Avg Per Person
               </span>
               <span className="text-base font-black text-indigo-900 font-mono block my-0.5">
                 {currencySymbol}{new Intl.NumberFormat('en-IN').format(avgCostPerPerson)}
               </span>
               <span className="text-[10px] font-extrabold text-slate-700 block">
-                ({memberCount} {lang === 'mr' ? 'सभासद' : 'members'})
+                ({memberCount} members)
               </span>
             </div>
-
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl">
               <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest block">
-                {lang === 'mr' ? 'एकूण बजेट / जमा' : 'Total Budget'}
+                Total Budget
               </span>
               <span className="text-base font-black text-slate-950 font-mono block my-0.5">
                 {currencySymbol}{new Intl.NumberFormat('en-IN').format(budgetBase)}
               </span>
               {totalSpent > budgetBase ? (
                 <span className="text-[10px] font-black text-rose-600 block">
-                  {lang === 'mr' ? 'अतिरिक्त खर्च:' : 'Deficit:'} {currencySymbol}{new Intl.NumberFormat('en-IN').format(totalSpent - budgetBase)}
+                  Deficit: {currencySymbol}{new Intl.NumberFormat('en-IN').format(totalSpent - budgetBase)}
                 </span>
               ) : (
                 <span className="text-[10px] font-black text-emerald-700 block">
-                  {lang === 'mr' ? 'शिल्लक:' : 'Left:'} {currencySymbol}{new Intl.NumberFormat('en-IN').format(budgetBase - totalSpent)}
+                  Left: {currencySymbol}{new Intl.NumberFormat('en-IN').format(budgetBase - totalSpent)}
                 </span>
               )}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Sub Tabs - High Contrast & Bold Text Visibility Fix */}
+{/* Sub Tabs - High Contrast & Bold Text Visibility Fix */}
       <div className="px-5 mb-3">
         <div className="flex bg-slate-200/90 p-1.5 rounded-[22px] border border-slate-300/80 shadow-inner">
           <button
@@ -234,7 +233,7 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
           >
             <Wallet className={`w-4 h-4 shrink-0 ${activeSubTab === 'expenses' ? 'text-indigo-400' : 'text-slate-800'}`} />
             <span className={activeSubTab === 'expenses' ? 'text-white font-extrabold' : 'text-slate-800 font-extrabold'}>
-              {lang === 'mr' ? 'खर्च यादी' : 'Expenses'}
+              Expenses
             </span>
           </button>
           <button
@@ -248,7 +247,7 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
           >
             <PieChart className={`w-4 h-4 shrink-0 ${activeSubTab === 'settlement' ? 'text-indigo-400' : 'text-slate-800'}`} />
             <span className={activeSubTab === 'settlement' ? 'text-white font-extrabold' : 'text-slate-800 font-extrabold'}>
-              {lang === 'mr' ? 'हिशोब' : 'Settlement'}
+              Settlement
             </span>
           </button>
         </div>
@@ -259,7 +258,7 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
         <div className="flex items-center justify-between gap-2 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200/90 shadow-sm">
           <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider shrink-0 flex items-center gap-1.5 pl-1">
             <Download className="w-4 h-4 text-indigo-600" />
-            {lang === 'mr' ? 'रिपोर्ट डाऊनलोड:' : 'Export Report:'}
+            Export Report:
           </span>
           <div className="flex items-center gap-2">
             <button

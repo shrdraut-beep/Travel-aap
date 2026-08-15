@@ -55,9 +55,8 @@ export const ROLE_THEME: Record<AppRole, { grad: string; glow: string; solid: st
 
 /* ============ 3. NAV ICON CONFIG (drop-in replacement for NAV_USER's `icon` field) ============ */
 export const NAV_USER_ICONS = [
-  { key: "hub", label: "Hub", icon: HomeIcon },
+  { key: "planning", label: "Planning", icon: HomeIcon },
   { key: "trips", label: "Trips", icon: TripsIcon },
-  { key: "planning", label: "Planning", icon: PlanningIcon },
   { key: "social", label: "Social", icon: SocialIcon },
   { key: "booking", label: "Booking", icon: BookingIcon },
   { key: "expenses", label: "Expenses", icon: ExpensesIcon },

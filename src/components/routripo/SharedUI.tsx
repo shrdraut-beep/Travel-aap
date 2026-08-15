@@ -91,11 +91,7 @@ export function TopBar({
   const userName = currentUser?.name || "Traveler";
   const userEmail = currentUser?.email || "traveler@routripo.com";
 
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "Trip Update", text: "New expense added to Goa Beach Tour", time: "10m ago", icon: Info, unread: true },
-    { id: 2, title: "Weather Alert", text: "Sunny 29°C expected in Goa today", time: "1h ago", icon: CheckCircle, unread: true },
-    { id: 3, title: "Booking Confirmation", text: "Resort booking confirmed securely", time: "3h ago", icon: CheckCircle, unread: false },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const unreadCount = notifications.filter(n => n.unread).length;
 

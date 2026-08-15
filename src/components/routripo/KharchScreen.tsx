@@ -1,3 +1,4 @@
+import { useAuthStore } from '../../store/useAuthStore';
 import React, { useRef, useState, useMemo } from "react";
 import { TopBar, useScrolled, LogoName } from "./SharedUI";
 import { ExpensesTabContainer } from "../views/ExpensesTabContainer";
@@ -7,8 +8,6 @@ import { calculateSettlements } from "../../utils";
 import { Expense, Deposit, Member, Category } from "../../types";
 import { UpiQrModal } from "../UpiQrModal";
 import { X, Plus, Receipt, IndianRupee } from "lucide-react";
-import { TopBannerCarousel } from "../common/TopBannerCarousel";
-import { OffersForYouSection } from "../common/OffersForYouSection";
 
 interface KharchScreenProps {
   onLogout: () => void;
@@ -20,6 +19,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrolled = useScrolled(scrollRef);
   const { activeTrip, updateActiveTrip } = useTripContext();
+  const currentUser = useAuthStore(state => state.currentUser);
 
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isAddDepositOpen, setIsAddDepositOpen] = useState(false);
@@ -29,11 +29,11 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<Category>("food");
-  const [paidBy, setPaidBy] = useState(activeTrip.members[0]?.id || "m1");
+  const [paidBy, setPaidBy] = useState(activeTrip.members[0]?.id || currentUser?.id || "");
   const [splitWith, setSplitWith] = useState<string[]>(activeTrip.members.map(m => m.id));
 
   // New Deposit Form State
-  const [depMemberId, setDepMemberId] = useState(activeTrip.members[0]?.id || "m1");
+  const [depMemberId, setDepMemberId] = useState(activeTrip.members[0]?.id || currentUser?.id || "");
   const [depAmount, setDepAmount] = useState("");
   const [depNote, setDepNote] = useState("Pool Deposit");
 
@@ -68,7 +68,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
       title,
       amount: parsedAmount,
       category,
-      paidBy: paidBy || activeTrip.members[0]?.id || "m1",
+      paidBy: paidBy || activeTrip.members[0]?.id || currentUser?.id || "",
       splitWith: splitWith.length > 0 ? splitWith : activeTrip.members.map(m => m.id),
       date: new Date().toISOString().substring(0, 10)
     };
@@ -130,8 +130,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
       <TopBar title={<LogoName />} sub="Expenses & Settlement" scrolled={scrolled} onLogout={onLogout} onSOS={onSOS || (() => alert("SOS Triggered!"))} onOpenSettings={onOpenSettings} />
 
       <div className="px-4 mt-2">
-        <TopBannerCarousel tab="expenses" />
-      </div>
+              </div>
 
       <div className="mt-1">
         <ExpensesTabContainer
@@ -139,7 +138,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
           lang="en"
           t={t}
           currencySymbol="₹"
-          adminId={activeTrip.adminId || "m1"}
+          adminId={activeTrip.adminId || currentUser?.id || ""}
           balances={settlements.balances}
           transfers={settlements.transfers}
           poolBalance={poolBalance}
@@ -157,8 +156,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
       </div>
 
       <div className="px-4 my-4">
-        <OffersForYouSection tab="expenses" />
-      </div>
+              </div>
 
       {/* Add Expense Modal */}
       {isAddExpenseOpen && (

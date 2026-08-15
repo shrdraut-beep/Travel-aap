@@ -34,7 +34,9 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: { include: ['react', 'react-dom', 'react-leaflet', 'leaflet'] },
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },

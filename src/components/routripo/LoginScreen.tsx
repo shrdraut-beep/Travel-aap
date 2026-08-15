@@ -11,14 +11,14 @@ const ROLES = {
 export function LoginScreen({ onLogin }: { onLogin: (role: string) => void }) {
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (role: string = 'user') => {
     setLoading(true);
     console.log("Starting Google login...");
     try {
       const user = await signInWithGoogle();
       console.log("Google login success:", user);
       if (user) {
-        onLogin('user');
+        onLogin(role);
       } else {
         console.log("No user returned, assuming redirect fallback.");
       }
@@ -38,15 +38,15 @@ export function LoginScreen({ onLogin }: { onLogin: (role: string) => void }) {
         <p className="text-slate-500 mb-8">Login / Signup with</p>
 
         <button 
-          onClick={handleGoogleLogin} 
+          onClick={() => handleGoogleLogin('user')} 
           className="w-full py-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-semibold text-sm flex items-center justify-center gap-3 shadow-md hover:shadow-lg hover:border-slate-300 transition-all"
         >
-           {loading ? <span className="w-4.5 h-4.5 border-2 border-slate-400 border-t-slate-700 rounded-full animate-spin" /> : 
-             <>
-               <svg viewBox="0 0 24 24" className="w-5 h-5"><path fill="#EA4335" d="M12.53,10.64l4.57-4.57c-1.39-2.03-3.76-3.37-6.42-3.37C6.18,2.7,2.7,6.18,2.7,10.45s3.48,7.75,7.75,7.75 c3.76,0,6.9-2.61,7.66-6.11H12.53V10.64z"/><path fill="#4285F4" d="M22.5,12c0-0.74-0.07-1.45-0.2-2.14H12.5v4.28h5.65c-0.24,1.28-0.97,2.37-2.05,3.09l4.54,3.52C21.46,17.58,22.5,15.1,22.5,12z"/><path fill="#FBBC05" d="M7.74,15.22c-0.54-0.16-1.04-0.42-1.48-0.75l-4.24,3.31c2.1,2.8,5.4,4.59,9.15,4.59c3.75,0,7.05-1.79,9.15-4.59l-4.54-3.52c-1.08,0.72-2.19,1.15-3.39,1.15C10.15,15.22,8.83,14.89,7.74,15.22z"/><path fill="#34A853" d="M2.7,10.45c0-1.33,0.35-2.58,0.97-3.66l4.24,3.31c-0.2,0.47-0.31,0.99-0.31,1.55c0,0.56,0.11,1.08,0.31,1.55L3.67,14.11C3.05,13.03,2.7,11.78,2.7,10.45z"/></svg>
-               Google
-             </>
-           }
+          {loading ? <span className="w-4.5 h-4.5 border-2 border-slate-400 border-t-slate-700 rounded-full animate-spin" /> : 
+            <>
+              <svg viewBox="0 0 24 24" className="w-5 h-5"><path fill="#EA4335" d="M12.53,10.64l4.57-4.57c-1.39-2.03-3.76-3.37-6.42-3.37C6.18,2.7,2.7,6.18,2.7,10.45s3.48,7.75,7.75,7.75 c3.76,0,6.9-2.61,7.66-6.11H12.53V10.64z"/><path fill="#4285F4" d="M22.5,12c0-0.74-0.07-1.45-0.2-2.14H12.5v4.28h5.65c-0.24,1.28-0.97,2.37-2.05,3.09l4.54,3.52C21.46,17.58,22.5,15.1,22.5,12z"/><path fill="#FBBC05" d="M7.74,15.22c-0.54-0.16-1.04-0.42-1.48-0.75l-4.24,3.31c2.1,2.8,5.4,4.59,9.15,4.59c3.75,0,7.05-1.79,9.15-4.59l-4.54-3.52c-1.08,0.72-2.19,1.15-3.39,1.15C10.15,15.22,8.83,14.89,7.74,15.22z"/><path fill="#34A853" d="M2.7,10.45c0-1.33,0.35-2.58,0.97-3.66l4.24,3.31c-0.2,0.47-0.31,0.99-0.31,1.55c0,0.56,0.11,1.08,0.31,1.55L3.67,14.11C3.05,13.03,2.7,11.78,2.7,10.45z"/></svg>
+              Google
+            </>
+          }
         </button>
 
         {/* Developer / Testing Mode */}
@@ -82,7 +82,7 @@ export function LoginScreen({ onLogin }: { onLogin: (role: string) => void }) {
       </div>
 
       <button 
-        onClick={() => onLogin('agent')}
+        onClick={() => handleGoogleLogin('agent')}
         className="fixed bottom-6 text-slate-500 font-semibold text-xs hover:text-slate-800 transition-colors"
       >
         Partner Login

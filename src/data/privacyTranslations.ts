@@ -46,7 +46,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "mr": {
@@ -96,7 +96,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "आम्ही या धोरणात कधीही बदल करण्याचा अधिकार राखून ठेवतो. बदल या पानावर अद्ययावत केले जातील.",
     "h10": "१०. संपर्क",
     "p10": "या धोरणाबाबत काही प्रश्न असल्यास आमच्याशी संपर्क साधा:",
-    "contactEmail": "ईमेल: shrd.raut@gmail.com",
+    "contactEmail": "ईमेल: contact@raoutripo.com",
     "closeBtn": "समजले व बंद करा"
   },
   "hi": {
@@ -146,7 +146,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "हम इस नीति को किसी भी समय अपडेट करने का अधिकार सुरक्षित रखते हैं।",
     "h10": "१०. हमसे संपर्क करें",
     "p10": "इस गोपनीयता नीति के संबंध में किसी भी प्रश्न के लिए हमसे संपर्क करें:",
-    "contactEmail": "ईमेल: shrd.raut@gmail.com",
+    "contactEmail": "ईमेल: contact@raoutripo.com",
     "closeBtn": "समझ गया और बंद करें"
   },
   "gu": {
@@ -196,7 +196,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "ta": {
@@ -246,7 +246,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "te": {
@@ -296,7 +296,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "kn": {
@@ -346,7 +346,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "bn": {
@@ -396,7 +396,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "pa": {
@@ -446,7 +446,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "ml": {
@@ -496,7 +496,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "es": {
@@ -546,7 +546,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "fr": {
@@ -596,7 +596,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "de": {
@@ -646,7 +646,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   },
   "ja": {
@@ -696,7 +696,7 @@ export const privacyTranslations: Record<string, Record<string, string>> = {
     "p9": "We reserve the right to update or modify this Privacy Policy at any time. Any changes will be posted on this page with an updated \"Effective Date\". We encourage you to review this policy periodically. Your continued use of the app after any changes signifies your acceptance of the updated terms.",
     "h10": "10. Contact Us",
     "p10": "If you have any questions, concerns, or feedback regarding this Privacy Policy, the open-source credits, or our data practices, please do not hesitate to contact us at:",
-    "contactEmail": "Email: shrd.raut@gmail.com",
+    "contactEmail": "Email: contact@raoutripo.com",
     "closeBtn": "I Understand & Close"
   }
 };

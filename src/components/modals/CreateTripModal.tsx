@@ -10,6 +10,7 @@ import { sanitizeString } from '../../utils/security';
 import { PrimaryButton } from '../common/PrimaryButton';
 import { OldTripImportModal } from './OldTripImportModal';
 import { SmartBudgetModal } from './SmartBudgetModal';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface CreateTripModalProps {
   trips?: TripGroup[];
@@ -29,6 +30,7 @@ interface CreateTripModalProps {
 }
 
 export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClose, onCreate, initialData, trips = [] }) => {
+  const { lang, t } = useLanguage();
   const [name, setName] = React.useState('');
   const [startDate, setStartDate] = React.useState('');
   const [endDate, setEndDate] = React.useState('');
@@ -144,7 +146,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
             >
               <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-emerald-50">
                 <h3 className="text-xl font-black text-emerald-950 tracking-tight">
-                  {initialData ? 'सहल अपडेट करा' : 'नवीन सहल सुरू करा'}
+                  {initialData ? (lang === 'mr' ? 'सहल अपडेट करा' : 'Update Trip') : (lang === 'mr' ? 'नवीन सहल सुरू करा' : 'Start a new trip')}
                 </h3>
                 <button onClick={onClose} className="p-2 bg-white rounded-full shadow-sm hover:bg-slate-50 transition-colors">
                   <X className="w-5 h-5 text-emerald-600" />
@@ -160,11 +162,11 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                       Import Old Trip
                     </span>
                     <p className="text-xs font-bold text-slate-300 leading-tight">
-                      जुनी सहल? एक्सेलवरून हिशोब थेट इम्पोर्ट करा
+                      {lang === 'mr' ? 'जुनी सहल? एक्सेलवरून हिशोब थेट इम्पोर्ट करा' : 'Old trip? Import expenses directly from Excel'}
                     </p>
                     {importedExpenses.length > 0 && (
                       <span className="inline-block mt-2 px-2.5 py-1 bg-emerald-500/20 text-emerald-300 font-black text-[10px] rounded-lg border border-emerald-500/30">
-                        ✅ {importedExpenses.length} खर्च लोड झाले!
+                        ✅ {importedExpenses.length} {lang === 'mr' ? 'खर्च लोड झाले!' : 'expenses loaded!'}
                       </span>
                     )}
                   </div>
@@ -182,14 +184,14 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2">
-                      <MapPin className="w-3 h-3" /> सहल नाव (Destination)
+                      <MapPin className="w-3 h-3" /> {lang === 'mr' ? 'सहल नाव (Destination)' : 'Destination'}
                     </label>
                     <input
                       required
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="उदा. लोणावळा पावसाळी सहल"
+                      placeholder={lang === 'mr' ? "उदा. लोणावळा पावसाळी सहल" : "e.g. Lonavala Monsoon Trip"}
                       className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-900 transition-all placeholder:text-slate-400 shadow-sm"
                     />
                   </div>
@@ -197,7 +199,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2">
-                        <Calendar className="w-3 h-3" /> सुरु तारीख
+                        <Calendar className="w-3 h-3" /> {lang === 'mr' ? 'सुरु तारीख' : 'Start Date'}
                       </label>
                       <input
                         required
@@ -209,7 +211,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2">
-                        <Calendar className="w-3 h-3" /> शेवटची तारीख
+                        <Calendar className="w-3 h-3" /> {lang === 'mr' ? 'शेवटची तारीख' : 'End Date'}
                       </label>
                       <input
                         required
@@ -228,7 +230,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Wallet className="w-3 h-3" /> एकूण बजेट (Total Budget)
+                        <Wallet className="w-3 h-3" /> {lang === 'mr' ? 'एकूण बजेट (Total Budget)' : 'Total Budget'}
                       </div>
                     </label>
                     <div className="relative">
@@ -252,7 +254,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">
-                      🪙 मुख्य चलन
+                      🪙 {lang === 'mr' ? 'मुख्य चलन' : 'Base Currency'}
                     </label>
                     <select
                       value={defaultCurrency}
@@ -269,7 +271,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                 {/* Calculation Mode */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2">
-                    📊 हिशोब पद्धत (Calculation Mode)
+                    📊 {lang === 'mr' ? 'हिशोब पद्धत (Calculation Mode)' : 'Calculation Mode'}
                   </label>
                   <div className="grid grid-cols-1 gap-3">
                     <button
@@ -283,12 +285,12 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                     >
                       <div className="flex items-center justify-between">
                         <span className={`font-black text-xs uppercase tracking-wider ${calculationMode === 'admin_pooled' ? 'text-emerald-700' : 'text-slate-800'}`}>
-                          💰 अ‍ॅडमिन कडे पैसे जमा (Pool)
+                          💰 {lang === 'mr' ? 'अ‍ॅडमिन कडे पैसे जमा (Pool)' : 'Admin Pool (Pool)'}
                         </span>
                         {calculationMode === 'admin_pooled' && <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />}
                       </div>
                       <p className={`text-[11px] font-bold leading-relaxed ${calculationMode === 'admin_pooled' ? 'text-emerald-600' : 'text-slate-500'}`}>
-                        सर्व मित्र अ‍ॅडमिनकडे पैसे जमा करतील आणि अ‍ॅडमिन खर्च करेल.
+                        {lang === 'mr' ? 'सर्व मित्र अ‍ॅडमिनकडे पैसे जमा करतील आणि अ‍ॅडमिन खर्च करेल.' : 'All friends deposit money to admin and admin spends.'}
                       </p>
                     </button>
 
@@ -303,12 +305,12 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                     >
                       <div className="flex items-center justify-between">
                         <span className={`font-black text-xs uppercase tracking-wider ${calculationMode === 'individual_split' ? 'text-emerald-700' : 'text-slate-800'}`}>
-                          🤝 प्रत्येकाने खर्च करणे (Split)
+                          🤝 {lang === 'mr' ? 'प्रत्येकाने खर्च करणे (Split)' : 'Split Expense (Split)'}
                         </span>
                         {calculationMode === 'individual_split' && <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-sm" />}
                       </div>
                       <p className={`text-[11px] font-bold leading-relaxed ${calculationMode === 'individual_split' ? 'text-emerald-600' : 'text-slate-500'}`}>
-                        प्रत्येकजण स्वतःचे पैसे खर्च करेल आणि शेवटी आपापसात हिशोब होईल.
+                        {lang === 'mr' ? 'प्रत्येकजण स्वतःचे पैसे खर्च करेल आणि शेवटी आपापसात हिशोब होईल.' : 'Everyone spends their own money and settles up later.'}
                       </p>
                     </button>
                   </div>
@@ -318,7 +320,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2">
-                      <Users className="w-3 h-3" /> सहभागी मित्र ({members.length})
+                      <Users className="w-3 h-3" /> {lang === 'mr' ? 'सहभागी मित्र' : 'Trip Members'} ({members.length})
                     </label>
                   </div>
 
@@ -365,7 +367,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                             type="text"
                             value={member.name}
                             onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
-                            placeholder="मित्राचे नाव"
+                            placeholder={lang === 'mr' ? "मित्राचे नाव" : "Friend Name"}
                             className="flex-1 min-w-0 px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-900 text-sm"
                           />
                           {members.length > 1 && (
@@ -386,7 +388,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                               type="number"
                               value={member.deposit}
                               onChange={(e) => handleMemberChange(idx, 'deposit', e.target.value)}
-                              placeholder="जमा रक्कम"
+                              placeholder={lang === 'mr' ? "जमा रक्कम" : "Deposit"}
                               className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-900 text-xs"
                             />
                           </div>
@@ -394,7 +396,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                             type="text"
                             value={member.upiId || ''}
                             onChange={(e) => handleMemberChange(idx, 'upiId', e.target.value)}
-                            placeholder="UPI ID (उदा. name@upi)"
+                            placeholder={lang === 'mr' ? "UPI ID (उदा. name@upi)" : "UPI ID (e.g. name@upi)"}
                             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-900 text-xs"
                           />
                         </div>
@@ -414,7 +416,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                             </div>
                             <span className="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
                               <Crown className={`w-4 h-4 ${member.isAdmin ? 'text-amber-600 fill-amber-300' : 'text-slate-400'}`} />
-                              प्रशासक (Trip Admin)
+                              {lang === 'mr' ? 'प्रशासक (Trip Admin)' : 'Admin (Trip Admin)'}
                             </span>
                           </div>
                           {member.isAdmin && (
@@ -430,13 +432,13 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
                     onClick={handleAddMember}
                     className="w-full py-4 border-2 border-dashed border-emerald-200 text-emerald-600 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-50 transition-all active:scale-[0.98]"
                   >
-                    <Plus className="w-4 h-4 stroke-[3]" /> आणखी सभासद जोडा
+                    <Plus className="w-4 h-4 stroke-[3]" /> {lang === 'mr' ? 'आणखी सभासद जोडा' : 'Add another member'}
                   </button>
                 </div>
 
                 <PrimaryButton
                   type="submit"
-                  label={initialData ? 'सहल अपडेट करा' : 'सहल तयार करा'}
+                  label={initialData ? (lang === 'mr' ? 'सहल अपडेट करा' : 'Update Trip') : (lang === 'mr' ? 'सहल तयार करा' : 'Create Trip')}
                   fullWidth
                   className="bg-emerald-600 hover:bg-emerald-700 py-4 text-xs uppercase tracking-widest shadow-xl shadow-emerald-200 mt-4 rounded-2xl font-black"
                 />
@@ -449,7 +451,7 @@ export const CreateTripModal: React.FC<CreateTripModalProps> = ({ isOpen, onClos
       <OldTripImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
-        lang="mr"
+        lang={lang}
         onImportSuccess={(extracted) => {
           if (extracted.name) setName(extracted.name);
           if (extracted.startDate) setStartDate(extracted.startDate);

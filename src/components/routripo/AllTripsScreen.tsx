@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import { Search, Compass, Plane, Hotel, Train, Bus, Car, Package, Plus, Sparkles, MapPin } from "lucide-react";
 import { TopBar, SectionTitle, LogoName } from "./SharedUI";
 import { useTripContext } from "../../context/TripContext";
-import { TopBannerCarousel } from "../common/TopBannerCarousel";
-import { OffersForYouSection } from "../common/OffersForYouSection";
-import { FlagshipStoresSection } from "../common/FlagshipStoresSection";
 
 export function AllTripsScreen({ 
   onBack, 
@@ -50,7 +47,7 @@ export function AllTripsScreen({
         <div className="flex items-center justify-between">
           <button 
             type="button"
-            onClick={() => setActive('trips')} 
+            onClick={() => setActive('planning')} 
             className="text-xs font-bold text-rose-600 cursor-pointer flex items-center gap-1 hover:underline"
           >
             Go to Active Trip Workspace →
@@ -96,9 +93,7 @@ export function AllTripsScreen({
           </button>
         </div>
 
-        {/* Dynamic Top Banner Carousel */}
-        <TopBannerCarousel tab="all-trips" />
-        
+                
         {/* Explore Services */}
         <div className="space-y-4">
           <SectionTitle icon={Compass}>Book Travel Services</SectionTitle>
@@ -122,11 +117,8 @@ export function AllTripsScreen({
           </div>
         </div>
 
-        {/* Offers For You Section */}
-        <OffersForYouSection tab="all-trips" />
-
+        
         {/* Flagship Hotel Stores */}
-        <FlagshipStoresSection tab="all-trips" />
 
         {/* Trips List */}
         <div className="space-y-4">
@@ -147,7 +139,7 @@ export function AllTripsScreen({
                 key={t.id} 
                 onClick={() => {
                   selectTripById(t.id);
-                  setActive("trips");
+                  setActive('planning');
                 }}
                 className="p-3 bg-white rounded-2xl border border-slate-200 flex items-center justify-between gap-3 cursor-pointer hover:border-rose-300 active:scale-98 transition-all shadow-xs"
               >

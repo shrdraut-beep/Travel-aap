@@ -28,56 +28,7 @@ interface VendorStoreState {
   resetApplications: () => void;
 }
 
-const DEFAULT_APPLICATIONS: VendorApplication[] = [
-  {
-    id: 'vendor-app-1',
-    ownerName: 'Rajesh Sharma',
-    businessName: 'Express Inn Hotel & Suites',
-    email: 'rajesh@expressinnhotels.com',
-    phone: '+91 98220 12345',
-    category: 'Hotel',
-    city: 'Nashik',
-    address: 'Pathardi Phata, Mumbai-Agra Highway, Nashik',
-    pricingDetails: '₹4,800/night (5-Star Luxury Suite)',
-    photoUrls: ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80'],
-    licenseGst: '27AABCU9603R1ZM',
-    description: 'Premier 5-star luxury hotel on Mumbai-Agra highway with rooftop swimming pool and spa.',
-    status: 'APPROVED',
-    submittedAt: '2026-08-10 10:30 AM'
-  },
-  {
-    id: 'vendor-app-2',
-    ownerName: 'Vikramaditya Deshmukh',
-    businessName: 'Grape County Eco Resort',
-    email: 'contact@grapecounty.in',
-    phone: '+91 94222 88990',
-    category: 'Hotel',
-    city: 'Nashik',
-    address: 'Anjaneri, Trimbakeshwar Road, Nashik 422213',
-    pricingDetails: '₹5,200/night (Lake View Eco Villa)',
-    photoUrls: ['https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80'],
-    licenseGst: '27AAECG1029K1Z4',
-    description: 'Organic eco resort with private lake, kayaking, and natural flora habitat.',
-    status: 'PENDING',
-    submittedAt: '2026-08-12 04:15 PM'
-  },
-  {
-    id: 'vendor-app-3',
-    ownerName: 'Amitabh Sen',
-    businessName: 'Royal Express Cabs & SUV Fleet',
-    email: 'info@royalexpresscabs.com',
-    phone: '+91 98231 55443',
-    category: 'Cab',
-    city: 'Nashik',
-    address: 'Near CBS Bus Stand, Nashik',
-    pricingDetails: '₹21/km (Innova Crysta VIP 7-Seater)',
-    photoUrls: ['https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600'],
-    licenseGst: '27AABCR8830L1Z9',
-    description: 'Fleet of 15 Innova Crysta & Dzire vehicles with verified expressway drivers.',
-    status: 'PENDING',
-    submittedAt: '2026-08-13 09:00 AM'
-  }
-];
+const DEFAULT_APPLICATIONS: VendorApplication[] = [];
 
 const getStoredVendorApps = (): VendorApplication[] => {
   if (typeof window !== 'undefined') {

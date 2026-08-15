@@ -42,8 +42,8 @@ interface SettingsScreenProps {
 
 const LANGUAGE_OPTIONS = [
   { code: "en", label: "English (Nawab Mode 🎩)" },
-  { code: "mr", label: "मराठी (गावठी मोड 🚩)" },
-  { code: "hi", label: "हिंदी (भाईगिरी मोड 💪)" },
+  { code: "mr", label: "Marathi (Local Mode 🚩)" },
+  { code: "hi", label: "Hindi (Bhaigiri Mode 💪)" },
   { code: "gu", label: "ગુજરાતી (Bapu Mode 👓)" },
   { code: "ta", label: "தமிழ் (Thalaiva Mode 🕶️)" },
   { code: "te", label: "తెలుగు (Mass Mode ⚡)" },
@@ -58,7 +58,7 @@ const LANGUAGE_OPTIONS = [
 ];
 
 const CURRENCY_OPTIONS = [
-  { code: "INR", label: "₹ INR (भारतीय रुपये)" },
+  { code: "INR", label: "₹ INR (Indian Rupee)" },
   { code: "USD", label: "$ USD (US Dollar)" },
   { code: "EUR", label: "€ EUR (Euro)" },
   { code: "GBP", label: "£ GBP (British Pound)" },
@@ -183,15 +183,11 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
       setIsDeletingAccount(false);
       if (err?.message === "REAUTH_REQUIRED") {
         setDeleteError(
-          lang === "mr"
-            ? "सुरक्षेच्या कारणास्तव, खाते हटवण्यापूर्वी पुन्हा लॉग इन करणे आवश्यक आहे."
-            : "For security reasons, please re-authenticate before deleting your account."
+          "For security reasons, please re-authenticate before deleting your account."
         );
       } else {
         setDeleteError(
-          lang === "mr"
-            ? "खाते हटवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा."
-            : "Failed to delete account. Please try again."
+          "Failed to delete account. Please try again."
         );
       }
     }
@@ -404,7 +400,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-800">Send Feedback / Report Bug</p>
-                  <p className="text-[10px] text-sky-600 font-semibold underline">shrd.raut@gmail.com</p>
+                  <p className="text-[10px] text-sky-600 font-semibold underline">contact@raoutripo.com</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -463,10 +459,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
 
           {/* Footer Branding Tag */}
           <div className="pt-4 text-center">
-            <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-800 text-[11px] font-bold">
-              <Info className="w-3.5 h-3.5 text-indigo-600" />
-              <span>प्रवास वाटाघाटी (Pravas Wataghati)</span>
-            </span>
+            
             <p className="text-[10px] text-slate-400 font-medium mt-1">Version 2.0 Native Android Edition</p>
           </div>
         </div>
