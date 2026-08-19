@@ -1,0 +1,95 @@
+            ) : completedBooking ? (
+              /* Success Booking Receipt View (Confirmed Ticket) */
+              <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="overflow-auto max-h-[70vh] border-2 border-emerald-500/20 rounded-3xl mb-4 bg-slate-100">
+                  <div id="ticketContainer" className="bg-white mx-auto relative text-slate-800 p-8 w-[800px] shrink-0" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {/* --- PAGE 1: E-TICKET --- */}
+                    <div className="flex justify-between items-start mb-8">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-500">Booking Id:</p>
+                        <p className="text-xl font-black text-slate-900 uppercase">{completedBooking.bookingId || completedBooking.orderId}</p>
+                      </div>
+                      <div className="bg-[#f25c3b] text-white font-black text-3xl px-5 py-2 rounded shadow-md tracking-tight">
+                        RouTripO
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-lg overflow-hidden mb-6">
+                      <div className="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-6">
+                        <div className="bg-slate-800 text-white text-center px-4 py-2 rounded-lg shadow-inner">
+                          <p className="text-[10px] font-bold uppercase tracking-wider mb-1">Travel Date</p>
+                          <p className="font-black text-xl leading-none">{new Date(completedBooking.date || completedBooking.travelDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</p>
+                        </div>
+                        <div>
+                          <p className="text-xl font-black text-slate-900 uppercase">{completedBooking.itemTitle || completedBooking.title} - CONFIRMED</p>
+                          <p className="text-sm font-bold text-slate-500 mt-1">{completedBooking.type?.toUpperCase()} • QTY: {completedBooking.quantity} • SECURE BOOKING</p>
+                        </div>
+                      </div>
+                      
+                      <div className="p-8 grid grid-cols-3 gap-6 items-center">
+                        <div>
+                          <p className="text-3xl font-black text-slate-900">{new Date(completedBooking.date || completedBooking.travelDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                          <p className="text-xs font-bold text-slate-500 mt-2 uppercase tracking-wide">Origin / Check-in</p>
+                          <p className="text-sm font-medium text-slate-700 mt-1">Starting Point</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="w-full border-t-2 border-dashed border-slate-300 relative">
+                            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-white px-4 py-1 text-[10px] text-slate-400 font-black tracking-widest border border-slate-200 rounded-full shadow-sm">
+                              ROUTRIPO SECURE
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-3xl font-black text-slate-900">Confirmed</p>
+                          <p className="text-xs font-bold text-slate-500 mt-2 uppercase tracking-wide">Destination / Check-out</p>
+                          <p className="text-sm font-medium text-slate-700 mt-1">Completion Point</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-50/50 p-5 border-t border-slate-200">
+                        <p className="font-black text-sm text-slate-800 mb-1">Booking Policy & Allowance</p>
+                        <p className="text-xs font-medium text-slate-600">Standard check-in policies apply. Please carry a valid government ID proof. Digital tickets are accepted. Cancellation terms apply as per provider policy.</p>
+                      </div>
+                    </div>
+
+                    <table className="w-full text-left text-sm mb-12 border-collapse border border-slate-200">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="py-3 px-4 font-black text-slate-800 w-[140px]">Barcode</th>
+                          <th className="py-3 px-4 font-black text-slate-800">Travellers</th>
+                          <th className="py-3 px-4 font-black text-slate-800">PNR</th>
+                          <th className="py-3 px-4 font-black text-slate-800 text-right">E-Ticket no.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-slate-100">
+                          <td className="py-4 px-4">
+                            <QrCode className="w-16 h-16 text-slate-800" />
+                          </td>
+                          <td className="py-4 px-4 font-bold text-slate-900">{completedBooking.customer?.name}</td>
+                          <td className="py-4 px-4 font-black tracking-wider text-slate-900">{pnrNumber || completedBooking.PNR_Number || 'PENDING'}</td>
+                          <td className="py-4 px-4 text-right font-medium text-slate-400">-</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div className="mb-12">
+                      <h3 className="font-black text-lg text-slate-900 mb-4 border-b border-slate-200 pb-2">Important Information</h3>
+                      <ul className="text-sm font-medium text-slate-700 space-y-4 list-disc pl-5">
+                        <li>You have paid <span className="font-black">₹{(completedBooking.totalAmount || completedBooking.finalPayableAmount || 0).toLocaleString('en-IN')}</span> for this booking.</li>
+                        <li>For any queries or communication with RouTripO regarding this booking, please use your Booking ID as a reference.</li>
+                        <li>Travellers must present a valid photo ID proof to enter and at the time of check-in. Permissible ID proofs include an Aadhaar Card, Passport or any other government-recognised ID.</li>
+                        <li>Kindly carry either a copy of your e-ticket on a tablet/mobile/laptop or a printed copy of the ticket for check-in.</li>
+                      </ul>
+                    </div>
+
+                    {/* PAGE BREAK FOR PDF */}
+                    <div style={{ pageBreakBefore: 'always' }} className="my-16 border-t-4 border-dashed border-slate-200"></div>
+
+                    {/* --- PAGE 2: TAX INVOICE --- */}
+                    <div className="border-2 border-slate-800">
+                      <div className="border-b-2 border-slate-800 p-4 flex justify-between items-center bg-slate-50">
+                        <div className="bg-[#f25c3b] text-white font-black text-2xl px-4 py-1 inline-block">
+                          RouTripO
+                        </div>
+                        <p className="font-black text-lg text-slate-900">Tax Invoice: {(completedBooking.bookingId || completedBooking.orderId).toUpperCase()}</p>

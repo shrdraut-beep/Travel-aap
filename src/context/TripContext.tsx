@@ -26,6 +26,7 @@ interface TripContextType {
   selectTripById: (id: string) => void;
   updateActiveTrip: (updated: TripGroup) => void;
   addNewTrip: (newTripData: Partial<TripGroup>) => TripGroup;
+  deleteTrip: (id: string) => void;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -103,6 +104,14 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return created;
   };
 
+  const deleteTrip = (id: string) => {
+    setTrips(prev => prev.filter(t => t.id !== id));
+    if (activeTrip && activeTrip.id === id) {
+      const remaining = trips.filter(t => t.id !== id);
+      setActiveTripState(remaining.length > 0 ? remaining[0] : EMPTY_TRIP);
+    }
+  };
+
   return (
     <TripContext.Provider value={{
       activeTrip,
@@ -110,7 +119,8 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setActiveTrip,
       selectTripById,
       updateActiveTrip,
-      addNewTrip
+      addNewTrip,
+      deleteTrip
     }}>
       {children}
     </TripContext.Provider>

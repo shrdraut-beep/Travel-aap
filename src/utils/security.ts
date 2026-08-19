@@ -114,14 +114,41 @@ export const secureStorage = {
 };
 
 /**
+ * Masks sensitive PII for safe display in UI views
+ */
+export function maskSensitiveText(val: string | number | null | undefined, type: "phone" | "email" | "card" | "id" | "text" = "text"): string {
+  if (!val) return '';
+  const str = String(val);
+  if (type === "phone") {
+    return str.length > 4 ? `••••• ••${str.slice(-4)}` : "••••••••••";
+  }
+  if (type === "email") {
+    const atIndex = str.indexOf("@");
+    if (atIndex > 1) {
+      return `${str[0]}•••••${str.slice(atIndex)}`;
+    }
+    return "••••@••••.com";
+  }
+  if (type === "card") {
+    const clean = str.replace(/\D/g, "");
+    return clean.length >= 4 ? `••••-••••-••••-${clean.slice(-4)}` : "••••-••••-••••-••••";
+  }
+  if (type === "id") {
+    return str.length > 4 ? `••••••${str.slice(-4)}` : "••••••••";
+  }
+  return str.length <= 4 ? "••••" : `${str[0]}••••${str.slice(-1)}`;
+}
+
+/**
  * Log production security notice for developers & admins.
  */
 export function initSecurityNotice(): void {
   if (typeof window !== 'undefined') {
     console.info(
-      "%c🔒 PRIVACY & SECURITY HARDENED",
+      "%c🔒 PRIVACY & SECURITY HARDENED (Zero-Trust Envelope Encryption & HMAC Webhooks)",
       "color: #10b981; font-weight: bold; font-size: 13px;",
-      "\n- Input Sanitization & XSS Protections: ACTIVE\n- Local Storage Data Obfuscation: ACTIVE\n- Firebase Security Policy: Ensure Firestore Security Rules require authentication (request.auth != null)."
+      "\n- Input Sanitization & XSS Protections: ACTIVE\n- Local Storage Data Obfuscation: ACTIVE\n- Envelope Encryption & Server Fulfillment: ACTIVE\n- Zero-Trust Admin Legal Vault: ACTIVE"
     );
   }
 }
+

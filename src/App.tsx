@@ -16,7 +16,8 @@ import { SosModal } from './components/modals/SosModal';
 import { CreateTripModal } from './components/modals/CreateTripModal';
 import { useTripContext } from './context/TripContext';
 import { useAuthStore } from './store/useAuthStore';
-import { FloatingAITripManager } from './components/FloatingAITripManager';
+import { useLanguage } from './context/LanguageContext';
+import { FuelCalculatorModal } from './components/modals/FuelCalculatorModal';
 
 import { MusicPlayerProvider } from './components/MusicPlayerContext';
 import { MusicPlayerBar } from './components/MusicPlayerBar';
@@ -25,8 +26,10 @@ import { MusicPlayerBar } from './components/MusicPlayerBar';
 // Real, fully-wired role portals (Firestore + business logic already inside — not mockups)
 import { AgentPortalView } from './components/views/AgentPortalView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
+import { MyTicketsView } from './components/views/MyTicketsView';
 
-import { NAV_USER_ICONS } from './theme/icons';
+import { NAV_USER_ICONS, TripsIcon, PlanningIcon, SocialIcon, BookingIcon, ExpensesIcon, SettingsIcon } from './theme/icons';
+import { Ticket } from 'lucide-react';
 
 export default function App() {
   const [phase, setPhase] = useState("splash");
@@ -36,6 +39,21 @@ export default function App() {
   const currentUser = useAuthStore(state => state.currentUser);
   const initAuthListener = useAuthStore(state => state.initAuthListener);
 
+  const isWorkspace = ['planning', 'expenses', 'social'].includes(active);
+
+  const globalNavItems = [
+    { key: "booking", label: "Booking", icon: BookingIcon },
+    { key: "trips", label: "My Trips", icon: TripsIcon },
+    { key: "settings", label: "Settings", icon: SettingsIcon },
+    { key: "my-tickets", label: "My Tickets", icon: Ticket },
+  ];
+
+  const workspaceNavItems = [
+    { key: "planning", label: "Planning", icon: PlanningIcon },
+    { key: "expenses", label: "Expenses", icon: ExpensesIcon },
+    { key: "social", label: "Social", icon: SocialIcon },
+  ];
+
   React.useEffect(() => {
     const unsubscribe = initAuthListener();
     return () => unsubscribe();
@@ -44,7 +62,46 @@ export default function App() {
   // Modals state
   const [isSosOpen, setIsSosOpen] = useState(false);
   const [isCreateTripOpen, setIsCreateTripOpen] = useState(false);
-  const { addNewTrip, trips } = useTripContext();
+  const { addNewTrip, trips, activeTrip, updateActiveTrip } = useTripContext();
+  const { lang } = useLanguage();
+  const [showFuelCalc, setShowFuelCalc] = useState(false);
+  
+  React.useEffect(() => {
+    const handleOpenKharch = () => {
+      handleSetActive('expenses');
+      setTimeout(() => window.dispatchEvent(new Event('trigger-add-expense')), 100);
+    };
+    const handleOpenFlight = () => handleSetActive('booking', 'Flights');
+    const handleOpenFuel = () => setShowFuelCalc(true);
+    const handleOpenDeposit = () => {
+      handleSetActive('expenses');
+      setTimeout(() => window.dispatchEvent(new Event('trigger-add-deposit')), 100);
+    };
+    const handleOpenPlan = () => {
+      handleSetActive('planning');
+      setTimeout(() => window.dispatchEvent(new Event('trigger-add-plan')), 100);
+    };
+    const handleOpenAddMember = () => {
+      handleSetActive('expenses'); // members are in balances view
+      setTimeout(() => window.dispatchEvent(new Event('trigger-add-member')), 100);
+    };
+    
+    window.addEventListener("open-kharch-modal", handleOpenKharch);
+    window.addEventListener("open-deposit-modal", handleOpenDeposit);
+    window.addEventListener("open-flight-search", handleOpenFlight);
+    window.addEventListener("open-fuel-calculator", handleOpenFuel);
+    window.addEventListener("open-add-plan-modal", handleOpenPlan);
+    window.addEventListener("open-add-member", handleOpenAddMember);
+    
+    return () => {
+      window.removeEventListener("open-kharch-modal", handleOpenKharch);
+      window.removeEventListener("open-deposit-modal", handleOpenDeposit);
+      window.removeEventListener("open-flight-search", handleOpenFlight);
+      window.removeEventListener("open-fuel-calculator", handleOpenFuel);
+      window.removeEventListener("open-add-plan-modal", handleOpenPlan);
+      window.removeEventListener("open-add-member", handleOpenAddMember);
+    };
+  }, []);
 
   const handleSetActive = (tab: string, subCategory?: string) => {
     if (tab === 'new-trip') {
@@ -140,13 +197,15 @@ export default function App() {
                 onOpenCreateTrip={() => setActive('new-trip')}
                 onOpenPlanner={() => setActive('smart-planner')}
                 setActive={handleSetActive}
+                onBack={() => setActive('trips')}
               />
             )}
             {role === 'user' && active === 'social' && (
               <SocialScreen 
                 onLogout={handleLogout} 
                 onSOS={() => setIsSosOpen(true)}
-                onOpenSettings={() => setActive('settings')}
+                onOpenSettings={() => setActive('settings')} onOpenMyTickets={() => setActive('my-tickets')}
+                onBack={() => setActive('trips')}
               />
             )}
             {role === 'user' && active === 'booking' && (
@@ -154,14 +213,16 @@ export default function App() {
                 onLogout={handleLogout} 
                 onSOS={() => setIsSosOpen(true)}
                 initialTab={bookingTab} 
-                onOpenSettings={() => setActive('settings')}
+                onOpenSettings={() => setActive('settings')} onOpenMyTickets={() => setActive('my-tickets')}
+                lang={lang}
               />
             )}
             {role === 'user' && active === 'expenses' && (
               <KharchScreen 
                 onLogout={handleLogout} 
                 onSOS={() => setIsSosOpen(true)}
-                onOpenSettings={() => setActive('settings')}
+                onOpenSettings={() => setActive('settings')} onOpenMyTickets={() => setActive('my-tickets')}
+                onBack={() => setActive('trips')}
               />
             )}
             {role === 'user' && active === 'settings' && (
@@ -169,6 +230,11 @@ export default function App() {
                 onLogout={handleLogout} 
                 onSOS={() => setIsSosOpen(true)}
                 setActive={handleSetActive}
+              />
+            )}
+            {role === 'user' && active === 'my-tickets' && (
+              <MyTicketsView 
+                onBack={() => setActive('trips')}
               />
             )}
 
@@ -187,7 +253,13 @@ export default function App() {
 
             {/* User role keeps the themed tab-strip bottom nav */}
             {role === 'user' && (
-              <BottomNav items={NAV_USER_ICONS} active={active} setActive={(key) => handleSetActive(key)} grad={grad} glow={glow} />
+              <BottomNav 
+                items={isWorkspace ? workspaceNavItems : globalNavItems} 
+                active={active === 'all-trips' ? 'trips' : active} 
+                setActive={(key) => handleSetActive(key)} 
+                grad={grad} 
+                glow={glow} 
+              />
             )}
 
                         {/* Global Modals — user role only; Agent/Admin portals handle their own */}
@@ -205,13 +277,35 @@ export default function App() {
                 trips={trips}
               />
             )}
-
-            {/* Floating AI Assistant / Planner */}
-            {role === 'user' && (
-              <FloatingAITripManager 
-                lang="en" 
-                currencySymbol="₹" 
-              />
+            
+            {/* Global Modals */}
+            {showFuelCalc && (
+               <FuelCalculatorModal 
+                  isOpen={showFuelCalc}
+                  onClose={() => setShowFuelCalc(false)} 
+                  lang={lang} 
+                  currencySymbol="₹"
+                  onAddAsExpense={(calculatedCost) => {
+                     if (activeTrip) {
+                       const payerId = activeTrip.members?.[0]?.id || 'Group';
+                       const newExpense = {
+                         id: Math.random().toString(36).substr(2, 9),
+                         title: lang === 'mr' ? 'इंधन खर्च (कॅल्क्युलेटर)' : 'Fuel Cost (Calculator)',
+                         amount: calculatedCost,
+                         category: 'traveling' as any,
+                         date: new Date().toISOString().split('T')[0],
+                         payer: activeTrip.members?.[0]?.name || 'Group',
+                         paidBy: payerId,
+                         splitWith: activeTrip.members?.map((m: any) => m.id) || []
+                       };
+                       updateActiveTrip({
+                         ...activeTrip,
+                         expenses: [...(activeTrip.expenses || []), newExpense]
+                       });
+                     }
+                     setShowFuelCalc(false);
+                  }}
+               />
             )}
           </>
         )}

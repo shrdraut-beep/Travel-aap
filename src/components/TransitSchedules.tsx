@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { fetchLiveFlights, fetchLiveTrains } from '../services/LiveTravelAPI';
 import { Train, Bus, Plane, Clock, Search, AlertCircle, Info } from 'lucide-react';
+import { UniversalBookingCheckoutModal, BookingItemPayload } from './travel/UniversalBookingCheckoutModal';
 
 interface TransitSchedule {
   trains?: { trainName: string; departureTime: string; arrivalTime: string; duration: string }[];
@@ -18,6 +19,7 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPendingApi, setIsPendingApi] = useState(false);
+  const [checkoutItem, setCheckoutItem] = useState<BookingItemPayload | null>(null);
   const isFetching = useRef(false);
 
   const handleSearch = async (e?: React.FormEvent) => {
@@ -141,13 +143,13 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
       {!isLoading && schedules && (
         <div className="space-y-6">
           {schedules.trains && schedules.trains.length > 0 && (
-            <TransitSection title="Trains" icon={Train} items={schedules.trains.map(t => ({ name: t.trainName, ...t }))} />
+            <TransitSection type="train" source={source} destination={destination} onBookNow={setCheckoutItem} title="Trains" icon={Train} items={schedules.trains.map(t => ({ name: t.trainName, ...t }))} />
           )}
           {schedules.buses && schedules.buses.length > 0 && (
-            <TransitSection title="Buses" icon={Bus} items={schedules.buses.map(b => ({ name: `${b.operatorName} (${b.busType})`, ...b }))} />
+            <TransitSection type="bus" source={source} destination={destination} onBookNow={setCheckoutItem} title="Buses" icon={Bus} items={schedules.buses.map(b => ({ name: `${b.operatorName} (${b.busType})`, ...b }))} />
           )}
           {schedules.flights && schedules.flights.length > 0 && (
-            <TransitSection title="Flights" icon={Plane} items={schedules.flights.map((f: any) => ({
+            <TransitSection type="flight" source={source} destination={destination} onBookNow={setCheckoutItem} title="Flights" icon={Plane} items={schedules.flights.map((f: any) => ({
               name: f.airlineName,
               departureTime: f.departureTime,
               arrivalTime: f.arrivalTime,
@@ -156,11 +158,24 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
           )}
         </div>
       )}
+
+      {checkoutItem && (
+        <UniversalBookingCheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutItem(null)}
+          item={checkoutItem}
+          currencySymbol="₹"
+          lang="en"
+          onBookingSuccess={(receipt) => {
+            alert(`🎉 Booking confirmed! ID: ${receipt.bookingId}`);
+          }}
+        />
+      )}
     </div>
   );
 };
 
-const TransitSection = ({ title, icon: Icon, items }: { title: string, icon: any, items: any[] }) => (
+const TransitSection = ({ title, icon: Icon, items, onBookNow, type, source, destination }: { title: string, icon: any, items: any[], onBookNow: any, type: string, source: string, destination: string }) => (
   <div className="space-y-3">
     <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
       <Icon className="w-4 h-4 text-rose-600" /> {title}
@@ -175,8 +190,19 @@ const TransitSection = ({ title, icon: Icon, items }: { title: string, icon: any
           </div>
         </div>
         <button 
-          onClick={() => window.open('https://bitli.in/1HdfW4l', '_blank', 'noopener,noreferrer')}
-          className="bg-rose-600 text-white text-xs px-3 py-2 rounded-lg font-bold hover:bg-rose-700 transition-colors shadow-sm cursor-pointer"
+          onClick={() => {
+            onBookNow({
+              id: `transit-${type}-${i}`,
+              title: item.name,
+              vertical: type as any,
+              subtitle: `${source} → ${destination}`,
+              location: `${source} - ${destination}`,
+              time: `${item.departureTime} - ${item.arrivalTime}`,
+              amount: type === 'flight' ? 4500 : type === 'train' ? 850 : 650,
+              provider: item.name
+            });
+          }}
+          className="bg-[#3399cc] text-white text-xs px-3 py-2 rounded-lg font-bold hover:bg-sky-600 transition-colors shadow-sm cursor-pointer"
         >
           Book Now
         </button>

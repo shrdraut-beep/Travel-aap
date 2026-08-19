@@ -8,10 +8,10 @@ import {
 } from 'lucide-react';
 import { TripGroup, TripMemory } from '../../types';
 import { getCurrencySymbol } from '../../utils';
-import { LiveFlightSearchCard } from '../LiveFlightSearchCard';
 import { SharedBookingWidget } from '../SharedBookingWidget';
 import { useBookingStore } from '../../store/useBookingStore';
 import { ExplorePackagesView } from './ExplorePackagesView';
+import { UniversalBookingCheckoutModal, BookingItemPayload } from '../travel/UniversalBookingCheckoutModal';
 
 interface TripListViewProps {
   trips: TripGroup[];
@@ -126,6 +126,7 @@ export const TripListView: React.FC<TripListViewProps> = ({
   const [isBookingOpen, setIsBookingOpen] = React.useState(false);
   const [bookingSearchActive, setBookingSearchActive] = React.useState(false);
   const [activeView, setActiveView] = React.useState<'trips' | 'packages' | 'templates'>('trips');
+  const [checkoutModalItem, setCheckoutModalItem] = React.useState<BookingItemPayload | null>(null);
 
   // Synchronized Booking Window State
   const {
@@ -420,7 +421,7 @@ export const TripListView: React.FC<TripListViewProps> = ({
         )}
 
         {activeView === 'packages' && (
-          <ExplorePackagesView lang={lang} />
+          <ExplorePackagesView lang={lang} onBookNow={setCheckoutModalItem} />
         )}
 
         {activeView === 'templates' && (
@@ -443,6 +444,19 @@ export const TripListView: React.FC<TripListViewProps> = ({
           <Plus className="w-8 h-8" />
         </button>
       </div>
+      )}
+
+      {checkoutModalItem && (
+        <UniversalBookingCheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutModalItem(null)}
+          item={checkoutModalItem}
+          currencySymbol={getCurrencySymbol()}
+          lang={lang}
+          onBookingSuccess={(receipt) => {
+            alert(`🎉 Booking confirmed: ${receipt.bookingId}`);
+          }}
+        />
       )}
     </div>
   );

@@ -29,6 +29,7 @@ import {
 } from "firebase/auth";
 import { getStorage, ref, listAll, deleteObject } from "firebase/storage";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as getAppCheckToken } from "firebase/app-check";
 
 // Config parsed from firebase-applet-config.json.
 // NOTE: Firebase web config values (including apiKey) are public identifiers, not
@@ -48,7 +49,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 // Initialize Auth, Firestore & Storage
 export const auth = getAuth(app);
@@ -60,15 +61,13 @@ let dbInstance: any;
 try {
   dbInstance = initializeFirestore(app, {
     localCache: persistentLocalCache(),
-    ignoreUndefinedProperties: true,
-    experimentalAutoDetectLongPolling: true,
+    ignoreUndefinedProperties: true
   }, firebaseConfig.firestoreDatabaseId);
 } catch (e) {
   console.warn("initializeFirestore fallback to getFirestore due to cache/browser lock:", e);
   try {
     dbInstance = initializeFirestore(app, {
-      ignoreUndefinedProperties: true,
-      experimentalAutoDetectLongPolling: true,
+      ignoreUndefinedProperties: true
     }, firebaseConfig.firestoreDatabaseId);
   } catch (e2) {
     dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
@@ -76,6 +75,27 @@ try {
 }
 export const db = dbInstance;
 export const storage = getStorage(app);
+
+// Initialize App Check
+let appCheckInstance: any = null;
+if (typeof window !== "undefined") {
+  try {
+    const isDev = import.meta.env?.DEV;
+    if (isDev) {
+      (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    const siteKey = import.meta.env?.VITE_RECAPTCHA_SITE_KEY || "6Ld_dummy_recaptcha_site_key_123456";
+    appCheckInstance = initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+    console.log("Firebase App Check initialized.");
+  } catch (err) {
+    console.warn("App Check initialization notice:", err);
+  }
+}
+export const appCheck = appCheckInstance;
+export { getAppCheckToken };
 
 // Connection test helper with offline fallback
 async function testConnection() {

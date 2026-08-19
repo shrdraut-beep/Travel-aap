@@ -140,6 +140,20 @@ export async function authedFetch(url: string, options: RequestInit = {}): Promi
   const token = await getIdToken();
   const headers = new Headers(options.headers || {});
   if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  // Fetch and inject App Check validation token
+  try {
+    const { appCheck, getAppCheckToken } = await import('../firebase');
+    if (appCheck) {
+      const appCheckTokenResult = await getAppCheckToken(appCheck, false);
+      if (appCheckTokenResult && appCheckTokenResult.token) {
+        headers.set('X-Firebase-AppCheck', appCheckTokenResult.token);
+      }
+    }
+  } catch (appCheckErr) {
+    console.warn('[apiClient] Could not fetch App Check token:', appCheckErr);
+  }
+
   if (options.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }

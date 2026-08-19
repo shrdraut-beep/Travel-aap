@@ -3,7 +3,7 @@ import { Plane, Bus, Train, Clock, ExternalLink, ShieldCheck, Zap, Loader2 } fro
 import { getFullStationDetails } from '../../services/travelTimeService';
 
 export interface TransportOptionsProps {
-  mode: 'flight' | 'bus' | 'train';
+  mode: 'flight' | 'bus' | 'train' | 'hotel' | 'car';
   data: any;
   isLoading: boolean;
   isCached?: boolean;
@@ -11,6 +11,7 @@ export interface TransportOptionsProps {
   destination?: string;
   lang: string;
   currencySymbol?: string;
+  onBookNow?: (item: any) => void;
 }
 
 const addDurationToTime = (timeStr: string, durationStr: string) => {
@@ -72,6 +73,8 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
   origin,
   destination,
   lang,
+  currencySymbol = '₹',
+  onBookNow
 }) => {
   const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = React.useState<number>(PAGE_SIZE);
@@ -286,11 +289,25 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
                   <span>{lang === 'mr' ? 'पार्टनर असिस्टन्स' : 'Partner Assistance'}</span>
                 </span>
                 <button
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-blue-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
-                  onClick={() => alert(lang === 'mr' ? "ट्रॅव्हल पार्टनरशी संपर्क साधण्यासाठी कृपया ९८७६५४३२१० वर कॉल करा।" : "To contact a travel partner, please call 9876543210.")}
+                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onBookNow) {
+                      onBookNow({
+                        id: flightNo,
+                        title: `${airline} (${flightNo})`,
+                        vertical: 'flight',
+                        subtitle: `${srcCode} → ${dstCode}`,
+                        location: `${srcCode} to ${dstCode}`,
+                        time: `${depTime} - ${arrTime}`,
+                        duration: dur,
+                        amount: 5500, // Dummy fallback price for generic flights
+                        provider: airline
+                      });
+                    }
+                  }}
                 >
-                  <span>{lang === 'mr' ? 'पार्टनरशी संपर्क साधा' : 'Contact Partner / Request Booking'}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
                 </button>
               </div>
             </div>
@@ -355,15 +372,27 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>{lang === 'mr' ? 'सुरक्षित बुकिंग' : 'Secure Checkout'}</span>
                 </span>
-                <a
-                  href="https://bitli.in/1HdfW4l"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-emerald-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onBookNow) {
+                      onBookNow({
+                        id: `BUS-${Math.random().toString(36).substr(2, 9)}`,
+                        title: `${operator} (${busType})`,
+                        vertical: 'bus',
+                        subtitle: `${origin || 'DEP'} → ${destination || 'ARR'}`,
+                        location: `${origin || 'DEP'} to ${destination || 'ARR'}`,
+                        time: `${depTime} - ${arrTime}`,
+                        duration: dur,
+                        amount: 1200, // Dummy fallback price
+                        provider: operator
+                      });
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
                 >
-                  <span>CHECK LIVE PRICE & BOOK</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                  <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
+                </button>
               </div>
             </div>
           );
@@ -476,15 +505,27 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>{lang === 'mr' ? 'सुरक्षित बुकिंग' : 'Secure Checkout'}</span>
                 </span>
-                <a
-                  href="https://bitli.in/1HdfW4l"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-orange-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onBookNow) {
+                      onBookNow({
+                        id: trainNum,
+                        title: `${name} (#${trainNum})`,
+                        vertical: 'train',
+                        subtitle: `${srcCode} → ${dstCode}`,
+                        location: `${srcCode} - ${dstCode}`,
+                        time: `${depTime} - ${arrTime}`,
+                        duration: travelTime,
+                        amount: 850, // Dummy fallback price
+                        provider: 'Indian Railways'
+                      });
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
                 >
-                  <span>CHECK LIVE PRICE & BOOK</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                  <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
+                </button>
               </div>
             </div>
           );

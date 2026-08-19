@@ -36,21 +36,21 @@ export const NewTripScreen: React.FC<{ onBack: () => void; onCreate: (data: any)
       <div className="p-5 space-y-4">
         <Card className="p-5 space-y-4">
           <div>
-            <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Trip Name</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm" placeholder="e.g., Summer Beach Getaway" />
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-700 mb-1.5">Trip Name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 focus:border-red-500 rounded-2xl font-extrabold text-sm text-slate-900 placeholder-slate-400 outline-none" placeholder="e.g., Summer Beach Getaway" />
           </div>
           <div>
-            <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Destination</label>
-            <input type="text" value={destination} onChange={e => setDestination(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm" placeholder="Where are you going?" />
+            <label className="block text-xs font-black uppercase tracking-widest text-slate-700 mb-1.5">Destination</label>
+            <input type="text" value={destination} onChange={e => setDestination(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 focus:border-red-500 rounded-2xl font-extrabold text-sm text-slate-900 placeholder-slate-400 outline-none" placeholder="Where are you going?" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">Start Date</label>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm" />
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-700 mb-1.5">Start Date</label>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 focus:border-red-500 rounded-2xl font-extrabold text-sm text-slate-900 outline-none" />
             </div>
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-400 mb-1">End Date</label>
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm" />
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-700 mb-1.5">End Date</label>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 focus:border-red-500 rounded-2xl font-extrabold text-sm text-slate-900 outline-none" />
             </div>
           </div>
         </Card>

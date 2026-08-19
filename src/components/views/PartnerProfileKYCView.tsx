@@ -1,29 +1,75 @@
-import React, { useState } from 'react';
-import { User, Building2, MapPin, Mail, Phone, FileBadge, Landmark, CheckCircle2, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Building2, MapPin, Mail, Phone, FileBadge, Landmark, CheckCircle2, Save, Loader2 } from 'lucide-react';
+import { apiClient } from '../../utils/apiClient';
 
 export const PartnerProfileKYCView = () => {
   const [formData, setFormData] = useState({
-    agencyName: 'Star Travels & Tours',
-    proprietorName: 'Rahul Sharma',
-    address: 'Shop 42, Metro Plaza, Nashik, MH 422002',
-    email: 'startravels@routripo.com',
-    mobile: '+91 9876543210',
-    panVat: 'ABCDE1234F',
-    bankAccount: 'xxxx-xxxx-xxxx-1234',
-    ifsc: 'HDFC0001234'
+    agencyName: '',
+    proprietorName: '',
+    address: '',
+    email: '',
+    mobile: '',
+    panVat: '',
+    bankAccount: '',
+    ifsc: ''
   });
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await apiClient.authedFetch('/api/user/profile/secure-get');
+        const data = await res.json();
+        if (data.success && data.profile) {
+          setFormData(prev => ({
+            ...prev,
+            ...data.profile
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to load profile", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleUpdate = (field: string, val: string) => {
     setFormData(prev => ({ ...prev, [field]: val }));
     setSaved(false);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setSaving(true);
+    setSaved(false);
+    
+    try {
+      const res = await apiClient.authedFetch('/api/user/profile/secure-update', {
+        method: 'POST',
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert("Failed to save securely: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save securely.");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-slate-400" /></div>;
+  }
 
   return (
     <div className="p-4 space-y-6 max-w-4xl mx-auto pb-24">
@@ -33,8 +79,15 @@ export const PartnerProfileKYCView = () => {
         </div>
         <div>
           <h2 className="text-xl font-black text-slate-900">Partner Profile & KYC</h2>
-          <p className="text-xs font-semibold text-slate-500">Manage your agency details, compliance, and payout bank accounts.</p>
+          <p className="text-xs font-semibold text-slate-500">Manage your agency details, compliance, and payout bank accounts securely.</p>
         </div>
+      </div>
+      
+      <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl mb-4">
+        <p className="text-xs font-bold text-emerald-800 flex items-center gap-2">
+           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+           Zero-Trust Encryption is ACTIVE. Your sensitive KYC and banking details are encrypted before saving.
+        </p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -120,10 +173,11 @@ export const PartnerProfileKYCView = () => {
 
         <button
           type="submit"
-          className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+          disabled={saving}
+          className={`w-full py-4 ${saving ? 'bg-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800'} text-white rounded-2xl font-black text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95`}
         >
-          {saved ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <Save className="w-5 h-5" />}
-          <span>{saved ? 'Profile Updated' : 'Save KYC & Profile'}</span>
+          {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : saved ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <Save className="w-5 h-5" />}
+          <span>{saving ? 'Encrypting & Saving...' : saved ? 'Profile Updated' : 'Save KYC & Profile'}</span>
         </button>
       </form>
     </div>

@@ -281,7 +281,7 @@ export const MemoriesView: React.FC<MemoriesViewProps> = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       if (navigator.share) {
-                        navigator.share({ title: 'Trip Memory', text: mem.caption, url: mem.imageUrl });
+                        navigator.share({ title: 'Trip Memory', text: mem.caption, url: mem.imageUrl }).catch(() => {});
                       }
                     }}
                     className="p-1 rounded-full hover:bg-white/20 text-white transition-colors"
@@ -295,15 +295,7 @@ export const MemoriesView: React.FC<MemoriesViewProps> = ({
         })}
       </div>
 
-      {/* Floating Action Button (FAB) - Upload Memory */}
-      <button
-        onClick={() => setShowUploadModal(true)}
-        className="fixed bottom-24 right-5 sm:right-8 z-40 w-14 h-14 rounded-full text-white shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-white/40"
-        style={{ backgroundColor: themeColor }}
-        title="Upload Memory"
-      >
-        <Plus className="w-7 h-7" />
-      </button>
+
 
       {/* Upload Memory Modal */}
       <AnimatePresence>

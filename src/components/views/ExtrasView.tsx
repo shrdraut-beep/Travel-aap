@@ -7,7 +7,6 @@ import {
   ExternalLink, FileText, Camera, Video, Compass, Wand2, ArrowRight
 } from 'lucide-react';
 import { TripGroup, PlaylistItem } from '../../types';
-import { AIChatAssistant } from '../AIChatAssistant';
 import { QuirkyLanguageSelector } from '../QuirkyLanguageSelector';
 import { useLanguage } from '../../context/LanguageContext';
 import { safeCopyToClipboard } from '../../utils';

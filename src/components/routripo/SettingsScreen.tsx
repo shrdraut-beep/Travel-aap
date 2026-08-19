@@ -41,20 +41,20 @@ interface SettingsScreenProps {
 }
 
 const LANGUAGE_OPTIONS = [
-  { code: "en", label: "English (Nawab Mode 🎩)" },
-  { code: "mr", label: "Marathi (Local Mode 🚩)" },
-  { code: "hi", label: "Hindi (Bhaigiri Mode 💪)" },
-  { code: "gu", label: "ગુજરાતી (Bapu Mode 👓)" },
-  { code: "ta", label: "தமிழ் (Thalaiva Mode 🕶️)" },
-  { code: "te", label: "తెలుగు (Mass Mode ⚡)" },
-  { code: "kn", label: "ಕನ್ನಡ (Boss Mode 👑)" },
-  { code: "bn", label: "বাংলা (Roshogolla Mode 🍯)" },
-  { code: "pa", label: "ਪੰਜਾਬੀ (Swagger Mode 👳)" },
-  { code: "ml", label: "മലയാളം (Mallu Mode 🌴)" },
-  { code: "es", label: "Español (Amigo Mode 🌮)" },
-  { code: "fr", label: "Français (Oui Oui Mode 🥖)" },
-  { code: "de", label: "Deutsch (Pro Mode 🍺)" },
-  { code: "ja", label: "日本語 (Anime Mode 𥥷)" },
+  { code: "en", label: "English" },
+  { code: "mr", label: "मराठी (Marathi)" },
+  { code: "hi", label: "हिन्दी (Hindi)" },
+  { code: "gu", label: "ગુજરાતી (Gujarati)" },
+  { code: "ta", label: "தமிழ் (Tamil)" },
+  { code: "te", label: "తెలుగు (Telugu)" },
+  { code: "kn", label: "ಕನ್ನಡ (Kannada)" },
+  { code: "bn", label: "বাংলা (Bengali)" },
+  { code: "pa", label: "ਪੰਜਾਬੀ (Punjabi)" },
+  { code: "ml", label: "മലയാളം (Malayalam)" },
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "de", label: "Deutsch" },
+  { code: "ja", label: "日本語" },
 ];
 
 const CURRENCY_OPTIONS = [
@@ -250,7 +250,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
               <select
                 value={lang}
                 onChange={(e) => setLang(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 {LANGUAGE_OPTIONS.map((opt) => (
                   <option key={opt.code} value={opt.code}>
@@ -274,7 +274,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
               <select
                 value={currency}
                 onChange={(e) => handleCurrencyChange(e.target.value)}
-                className="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-extrabold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 {CURRENCY_OPTIONS.map((curr) => (
                   <option key={curr.code} value={curr.code}>
@@ -391,7 +391,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
 
             {/* Send Feedback / Report Bug */}
             <div 
-              onClick={() => setShowFeedbackModal(true)}
+              onClick={() => window.location.href = "mailto:support@routripo.com"}
               className="p-3 hover:bg-slate-50 rounded-xl flex items-center justify-between cursor-pointer transition-all"
             >
               <div className="flex items-center gap-3">
@@ -513,7 +513,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
               ) : (
                 <form onSubmit={handleFeedbackSubmit} className="p-6 space-y-5">
                   <div className="space-y-2 text-center">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-400 block">Rating</label>
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">Rating</label>
                     <div className="flex justify-center items-center gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -529,13 +529,13 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-wider text-slate-400 block">Feedback / Suggestions</label>
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-700 block">Feedback / Suggestions</label>
                     <textarea
                       rows={4}
                       value={feedbackText}
                       onChange={(e) => setFeedbackText(e.target.value)}
                       placeholder="Tell us what you loved or how we can improve..."
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-extrabold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 

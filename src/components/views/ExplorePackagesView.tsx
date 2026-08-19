@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { authedFetch } from '../../utils/apiClient';
 import { 
   Search, 
   Filter, 
@@ -30,8 +31,13 @@ import {
   Mail,
   Receipt,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  Tag,
+  Gift,
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
+import { mockCoupons, validateCouponCode, MockCoupon } from '../../data/mockDataStore';
 
 export interface TourPackage {
   id: string;
@@ -52,18 +58,93 @@ export interface TourPackage {
   description: string;
 }
 
-const DEFAULT_PACKAGES: TourPackage[] = [];
+const DEFAULT_PACKAGES: TourPackage[] = [
+  {
+    id: "pkg_ratnagiri_1",
+    title: "Ratnagiri Beach & Mango Tour",
+    destination: "Ratnagiri",
+    origin: "Mumbai",
+    durationDays: 3,
+    durationNights: 2,
+    price: 3800,
+    rating: 4.8,
+    reviewsCount: 124,
+    isVerifiedAgent: true,
+    agentName: "Konkan Safar Tours",
+    agentPhone: "+919876543210",
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=600&q=80",
+    transportType: "bus",
+    inclusions: ["AC Bus Travel", "Beachside Resort Stay", "Alphonso Mango Farm Visit", "All Meals Included"],
+    description: "Experience the magic of Konkan with our exclusive Ratnagiri tour. Visit pristine beaches, historic forts, and relish authentic Konkan cuisine."
+  },
+  {
+    id: "pkg_goa_1",
+    title: "Goa Coastal Escapade",
+    destination: "Goa",
+    origin: "Pune",
+    durationDays: 4,
+    durationNights: 3,
+    price: 8900,
+    rating: 4.9,
+    reviewsCount: 342,
+    isVerifiedAgent: true,
+    agentName: "Goa Vibes Travel",
+    agentPhone: "+919988776655",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
+    transportType: "flight",
+    inclusions: ["Flight Tickets", "4-Star Beach Resort", "Water Sports Package", "Free Breakfast"],
+    description: "Discover Goa like never before. From north to south, explore beautiful beaches, historical churches, and vibrant markets with guided tours."
+  },
+  {
+    id: "pkg_mahabaleshwar_1",
+    title: "Mahabaleshwar Hills & Strawberry Farm Tour",
+    destination: "Mahabaleshwar",
+    origin: "Mumbai",
+    durationDays: 3,
+    durationNights: 2,
+    price: 5500,
+    rating: 4.7,
+    reviewsCount: 88,
+    isVerifiedAgent: true,
+    agentName: "Sahyadri Travels",
+    agentPhone: "+919123456789",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
+    transportType: "car",
+    inclusions: ["Private Sedan Cab", "Hillview Hotel Stay", "Strawberry Picking Activity", "Sightseeing Guide"],
+    description: "Relax in the cool mist of Mahabaleshwar. Enjoy scenic viewpoints, strawberry garden walks, and the serenity of Venna Lake."
+  },
+  {
+    id: "pkg_shirdi_1",
+    title: "Shirdi Devotional Tour",
+    destination: "Shirdi",
+    origin: "Mumbai",
+    durationDays: 2,
+    durationNights: 1,
+    price: 2500,
+    rating: 4.9,
+    reviewsCount: 450,
+    isVerifiedAgent: true,
+    agentName: "Sai Darshan Tours",
+    agentPhone: "+919898989898",
+    image: "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=600&q=80",
+    transportType: "train",
+    inclusions: ["Train Tickets", "Hotel near Temple", "Special VIP Darshan Pass", "All Transfers"],
+    description: "A peaceful pilgrimage to the holy town of Shirdi. Enjoy comfortable stays, hassle-free temple darshans, and complete peace of mind."
+  }
+];
 
 const DESTINATION_OPTIONS = ['All Destinations', 'Ratnagiri', 'New Delhi', 'Shirdi', 'Mumbai', 'Goa', 'Mahabaleshwar'];
 
 interface ExplorePackagesViewProps {
   lang?: string;
   onSelectPackage?: (pkg: TourPackage) => void;
+  onBookNow?: (item: any) => void;
 }
 
 export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
   lang = 'en',
-  onSelectPackage
+  onSelectPackage,
+  onBookNow
 }) => {
   const [selectedDestination, setSelectedDestination] = useState<string>('All Destinations');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -108,6 +189,78 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   const [completedVoucher, setCompletedVoucher] = useState<any | null>(null);
 
+  // Promo Code State in ExplorePackagesView
+  const [promoInput, setPromoInput] = useState<string>('');
+  const [appliedCoupon, setAppliedCoupon] = useState<MockCoupon | null>(null);
+  const [discountAmount, setDiscountAmount] = useState<number>(0);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState<boolean>(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccessMsg, setCouponSuccessMsg] = useState<string | null>(null);
+
+  const grossPackageAmount = (checkoutPkg?.price || 0) * travelersCount;
+  const finalDiscountedTotal = Math.max(1, grossPackageAmount - discountAmount);
+
+  // Auto-recalculate or remove coupon if travelers count changes
+  useEffect(() => {
+    if (appliedCoupon && checkoutPkg) {
+      if (grossPackageAmount < appliedCoupon.minAmount) {
+        setCouponError(`Min booking ₹${appliedCoupon.minAmount.toLocaleString('en-IN')} required. Coupon removed.`);
+        setAppliedCoupon(null);
+        setDiscountAmount(0);
+        setCouponSuccessMsg(null);
+      } else {
+        let disc = 0;
+        if (appliedCoupon.type === 'flat') {
+          disc = appliedCoupon.discount;
+        } else {
+          disc = Math.round((grossPackageAmount * appliedCoupon.discount) / 100);
+          if (appliedCoupon.maxDiscount && disc > appliedCoupon.maxDiscount) {
+            disc = appliedCoupon.maxDiscount;
+          }
+        }
+        setDiscountAmount(Math.min(disc, grossPackageAmount - 1));
+      }
+    }
+  }, [travelersCount, grossPackageAmount]);
+
+  const handleApplyPromo = async (codeToApply?: string) => {
+    const targetCode = (codeToApply || promoInput).trim().toUpperCase();
+    if (!targetCode) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    setIsValidatingCoupon(true);
+    setCouponError(null);
+    setCouponSuccessMsg(null);
+
+    try {
+      const res = await validateCouponCode(targetCode, grossPackageAmount);
+      if (res.valid && res.coupon) {
+        setAppliedCoupon(res.coupon);
+        setDiscountAmount(res.discountAmount);
+        setPromoInput(targetCode);
+        setCouponSuccessMsg(`🎉 Code '${res.coupon.code}' applied! Saved ₹${res.discountAmount.toLocaleString('en-IN')}`);
+      } else {
+        setAppliedCoupon(null);
+        setDiscountAmount(0);
+        setCouponError(res.error || 'Invalid or expired coupon');
+      }
+    } catch (err: any) {
+      setCouponError('Failed to validate coupon');
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setPromoInput('');
+    setCouponError(null);
+    setCouponSuccessMsg(null);
+  };
+
   const handleWhatsAppClick = (pkg: TourPackage) => {
     // Exact requested format: https://wa.me/<number>?text=<encoded_text>
     const templateMessage = `Hi, I'm interested in the [${pkg.title}] package, could you provide more details?`;
@@ -118,22 +271,66 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
   };
 
   const handleStartCheckout = (pkg: TourPackage) => {
+    if (onBookNow) {
+      onBookNow({
+        id: pkg.id,
+        title: pkg.title,
+        vertical: 'package',
+        subtitle: `${pkg.origin} ➔ ${pkg.destination}`,
+        location: `${pkg.origin} to ${pkg.destination}`,
+        time: `${pkg.durationDays} Days / ${pkg.durationNights} Nights`,
+        amount: pkg.price,
+        image: pkg.image,
+        provider: pkg.agentName,
+        meta: { 
+          rating: pkg.rating,
+          transportType: pkg.transportType,
+          inclusions: pkg.inclusions
+        }
+      });
+      return;
+    }
     setCheckoutPkg(pkg);
     setTravelersCount(1);
     setTripStartDate('2026-08-15');
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setPromoInput('');
+    setCouponError(null);
+    setCouponSuccessMsg(null);
     if (selectedModalPackage) setSelectedModalPackage(null);
   };
 
-  const handleCompleteCheckout = (e: React.FormEvent) => {
+  const handleCompleteCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkoutPkg) return;
 
     setIsProcessingPayment(true);
 
-    setTimeout(() => {
-      const totalAmount = checkoutPkg.price * travelersCount;
-      const platformCommission = Math.round(totalAmount * 0.10); // 10% platform commission
-      const vendorAmount = totalAmount - platformCommission; // 90% vendor payout
+    try {
+      const response = await authedFetch('/api/checkout/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          packageId: checkoutPkg.id,
+          travelersCount: travelersCount,
+          couponCode: appliedCoupon?.code || undefined,
+          finalAmount: finalDiscountedTotal
+        })
+      });
+
+      let actualAmount = finalDiscountedTotal;
+      if (response.ok) {
+        const orderData = await response.json().catch(() => ({}));
+        if (orderData.calculatedAmount) {
+          actualAmount = orderData.calculatedAmount;
+        }
+      }
+
+      const platformCommission = Math.round(actualAmount * 0.10); // 10% platform commission
+      const vendorAmount = actualAmount - platformCommission; // 90% vendor payout
       const refId = `BKG-${Math.floor(1000 + Math.random() * 9000)}`;
 
       const newBooking = {
@@ -142,14 +339,17 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
         customerPhone: custPhone || '',
         customerEmail: custEmail || '',
         packageName: checkoutPkg.title,
-        total_amount: totalAmount,
+        total_amount: actualAmount,
+        original_gross: grossPackageAmount,
+        discount_applied: discountAmount,
+        coupon_code: appliedCoupon?.code || null,
         platform_commission: platformCommission,
         vendor_amount: vendorAmount,
-        amount: totalAmount,
+        amount: actualAmount,
         tripStartDate: tripStartDate || new Date().toLocaleDateString(),
         payment_status: 'Held securely' as const,
         paymentStatus: 'Held in Escrow' as const,
-        paymentMethod: paymentMethod === 'upi' ? `UPI (${upiVpa})` : paymentMethod === 'card' ? 'Visa / MasterCard' : 'Net Banking',
+        paymentMethod: paymentMethod === 'upi' ? `UPI (${upiVpa || 'Instant'})` : paymentMethod === 'card' ? 'Visa / MasterCard' : 'Net Banking',
         createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       };
 
@@ -166,7 +366,11 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
       setIsProcessingPayment(false);
       setCompletedVoucher(newBooking);
       setCheckoutPkg(null);
-    }, 1200);
+    } catch (err: any) {
+      console.error("Payment checkout error:", err);
+      alert(err.message || "Failed to initiate payment. Please try again.");
+      setIsProcessingPayment(false);
+    }
   };
 
   const filteredPackages = useMemo(() => {
@@ -761,22 +965,126 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                 </div>
               </div>
 
+              {/* PROMO CODE / COUPON VALIDATION ENGINE */}
+              <div className="p-3.5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-2xs">
+                      <Tag className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="font-extrabold text-xs text-slate-900">Have a Promo Code or Coupon?</span>
+                  </div>
+                  {appliedCoupon && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-[11px] font-bold text-rose-600 hover:text-rose-700 underline cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      placeholder="ENTER PROMO CODE (e.g. WELCOME500)"
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                      disabled={isValidatingCoupon || !!appliedCoupon}
+                      className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-mono font-black text-slate-900 placeholder:font-sans placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase disabled:bg-amber-100/50"
+                    />
+                    {appliedCoupon && (
+                      <span className="absolute right-2.5 top-2 text-emerald-600 font-black text-[11px] flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        APPLIED
+                      </span>
+                    )}
+                  </div>
+                  {!appliedCoupon && (
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPromo()}
+                      disabled={isValidatingCoupon || !promoInput.trim()}
+                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-2xs active:scale-95 flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      {isValidatingCoupon ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-900" />
+                      ) : (
+                        <span>Apply</span>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {couponError && (
+                  <div className="flex items-center gap-1.5 text-rose-600 text-xs font-bold bg-rose-50 border border-rose-200 p-2 rounded-xl">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{couponError}</span>
+                  </div>
+                )}
+
+                {couponSuccessMsg && (
+                  <div className="flex items-center gap-1.5 text-emerald-800 text-xs font-bold bg-emerald-100 border border-emerald-300 p-2 rounded-xl">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{couponSuccessMsg}</span>
+                  </div>
+                )}
+
+                {!appliedCoupon && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Coupons:</span>
+                    {mockCoupons.slice(0, 3).map((c) => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        onClick={() => handleApplyPromo(c.code)}
+                        className="px-2 py-0.5 bg-white hover:bg-amber-100 border border-amber-300/80 rounded-md text-[10px] font-mono font-bold text-amber-900 flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <Gift className="w-2.5 h-2.5 text-amber-600" />
+                        <span>{c.code}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* BASE PRICE & TOTAL PAYABLE */}
               <div className="bg-emerald-50/70 border-2 border-emerald-200 rounded-2xl p-4 space-y-2.5">
-                <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
-                  <span className="text-xs font-extrabold text-slate-700">Base Package Price × {travelersCount}</span>
-                  <span className="font-black text-slate-900 text-sm">
-                    ₹{(checkoutPkg.price * travelersCount).toLocaleString('en-IN')}
+                <div className="flex items-center justify-between border-b border-emerald-100 pb-2 text-xs">
+                  <span className="font-extrabold text-slate-700">Base Package Price × {travelersCount}</span>
+                  <span className="font-black text-slate-900">
+                    ₹{grossPackageAmount.toLocaleString('en-IN')}
                   </span>
                 </div>
 
+                {discountAmount > 0 && (
+                  <div className="flex justify-between items-center text-xs text-emerald-700 font-bold bg-emerald-100/70 -mx-2 px-2 py-1 rounded-lg border border-emerald-200">
+                    <span className="flex items-center gap-1">
+                      <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                      Promo Discount ({appliedCoupon?.code}):
+                    </span>
+                    <span className="font-black">-₹{discountAmount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex items-start justify-between pt-2 font-black text-slate-900 text-sm">
+                  <div className="flex items-start justify-between pt-1 font-black text-slate-900 text-sm">
                     <div className="flex flex-col">
                       <span>Total Amount Payable</span>
-                      <span className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">(Including all taxes)</span>
+                      <span className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">(Including all taxes & discounts)</span>
                     </div>
-                    <span className="text-emerald-700 text-base">₹{(checkoutPkg.price * travelersCount).toLocaleString('en-IN')}</span>
+                    <div className="text-right flex items-baseline gap-2">
+                      {discountAmount > 0 && (
+                        <span className="text-xs font-bold text-slate-400 line-through">
+                          ₹{grossPackageAmount.toLocaleString('en-IN')}
+                        </span>
+                      )}
+                      <span className="text-emerald-700 text-lg font-black">
+                        ₹{finalDiscountedTotal.toLocaleString('en-IN')}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -859,7 +1167,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Pay Securely via UPI/Card (₹{(checkoutPkg.price * travelersCount).toLocaleString('en-IN')})</span>
+                    <span>Pay Securely via UPI/Card (₹{finalDiscountedTotal.toLocaleString('en-IN')})</span>
                   </>
                 )}
               </button>
@@ -902,6 +1210,12 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                 <span className="text-slate-500 font-medium">Customer:</span>
                 <span className="font-extrabold text-slate-900">{completedVoucher.customerName}</span>
               </div>
+              {completedVoucher.discount_applied > 0 && (
+                <div className="flex justify-between text-emerald-700 font-bold bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
+                  <span>Discount Applied ({completedVoucher.coupon_code}):</span>
+                  <span>-₹{completedVoucher.discount_applied.toLocaleString('en-IN')}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Total Amount Paid:</span>
                 <span className="font-black text-slate-900">₹{completedVoucher.total_amount.toLocaleString('en-IN')}</span>

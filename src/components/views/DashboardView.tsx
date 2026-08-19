@@ -11,7 +11,6 @@ import { TripGroup, Expense, TripPlan, Poll, SOSAlert, PlaylistItem, TripMemory,
 import { WeatherWidget } from '../WeatherWidget';
 import { TripMap } from '../map/TripMap';
 import { PollsCard } from '../PollsCard';
-import { LiveFlightSearchCard } from '../LiveFlightSearchCard';
 import { useMusicPlayer } from '../MusicPlayerContext';
 import { notifyEmergencySOS, notifyAIBriefing } from '../../utils/notifications';
 import { safeCopyToClipboard, getUniqueMembers } from '../../utils';
@@ -612,22 +611,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
 
-  // Trip Manager Live Advisory Chat states
-  const [selectedAlert, setSelectedAlert] = useState<ProactiveSuggestion | null>(null);
-  
-  useEffect(() => {
-    if (selectedAlert) {
-      window.dispatchEvent(new CustomEvent('hide-ai-fab'));
-    } else {
-      window.dispatchEvent(new CustomEvent('show-ai-fab'));
-    }
-  }, [selectedAlert]);
-
-  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', text: string}[]>([]);
-  const [chatMessage, setChatMessage] = useState('');
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
-
   // Live Song Search states
   const [songSearchQuery, setSongSearchQuery] = useState('');
   const [songSearchResults, setSongSearchResults] = useState<any[]>([]);
@@ -665,175 +648,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return () => clearTimeout(delayDebounceFn);
   }, [songSearchQuery]);
 
-  useEffect(() => {
-    if (selectedAlert) {
-      setChatHistory([
-        {
-          role: 'model',
-          text: selectedAlert.message
-        }
-      ]);
-    } else {
-      setChatHistory([]);
-    }
-    setChatMessage('');
-  }, [selectedAlert]);
 
-  useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatHistory, isSendingMessage]);
-
-
-  const [morningBriefingText, setMorningBriefingText] = useState('');
-
-  const handleOpenAIManagerDirectly = async () => {
-    let briefingText = morningBriefingText;
-    if (!briefingText) {
-      const bookings = { 
-        flights: trip.itinerary?.filter(i => i.type === 'ticket' && i.title.toLowerCase().includes('flight')) || [], 
-        hotels: trip.itinerary?.filter(i => i.type === 'hotel') || [], 
-        trains: trip.itinerary?.filter(i => i.type === 'ticket' && i.title.toLowerCase().includes('train')) || [], 
-        itinerary: trip.itinerary || [] 
-      };
-      const currentHour = new Date().getHours();
-      let timeOfDay = 'morning';
-      if (currentHour >= 11 && currentHour < 16) timeOfDay = 'afternoon';
-      else if (currentHour >= 16 && currentHour < 20) timeOfDay = 'evening';
-      else if (currentHour >= 20 || currentHour < 6) timeOfDay = 'night';
-
-      const url = '/api/trip-manager-briefing';
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            destination: trip.name,
-            timeOfDay,
-            bookings,
-            weather: trip.weatherForecast || [],
-            lang
-          })
-        });
-        if (res.status === 429) {
-          console.error("API Rate Limit Hit for:", url);
-        }
-        const data = await res.json();
-        if (data.success && data.text) {
-          briefingText = data.text;
-          setMorningBriefingText(data.text);
-        }
-      } catch (e) {
-        console.error("API Rate Limit Hit for:", url, e);
-      }
-    }
-
-    const defaultBriefing: ProactiveSuggestion = {
-      id: 'morning-briefing',
-      title: lang === 'mr' ? '☀️ आजचे मॉर्निंग ब्रीफिंग व ट्रिप मॅनेजर' : lang === 'hi' ? '☀️ आज का मॉर्निंग ब्रीफिंग और मैनेजर' : "☀️ Today's Morning Briefing & Trip Manager",
-      message: briefingText || (lang === 'mr' ? `नमस्कार! मी तुमचा ट्रिप मॅनेजर आहे...` : `Hello! I am your Trip Manager...`),
-      type: 'itinerary'
-    };
-    setSelectedAlert(defaultBriefing);
-  };
-
-  const sendChatMessage = async (overrideMsg?: string) => {
-    const textToSend = (overrideMsg || chatMessage).trim();
-    if (!textToSend || !selectedAlert) return;
-    
-    setChatMessage('');
-    setChatHistory(prev => [...prev, { role: 'user', text: textToSend }]);
-    setIsSendingMessage(true);
-
-    try {
-      const res = await fetch('/api/trip-manager-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          trip: {
-            name: trip.name,
-            totalBudget: trip.totalBudget,
-            expenses: trip.expenses,
-            itinerary: trip.itinerary,
-            aiPlan: trip.aiPlan,
-            members: trip.members,
-            startDate: trip.startDate,
-            endDate: trip.endDate
-          },
-          alert: selectedAlert,
-          history: chatHistory,
-          message: textToSend,
-          lang
-        })
-      });
-      const data = await res.json();
-      if (data.success && data.text) {
-        setChatHistory(prev => [...prev, { role: 'model', text: data.text }]);
-      } else {
-        setChatHistory(prev => [...prev, { role: 'model', text: lang === 'mr' ? 'मला प्रतिसाद देण्यास अडचण येत आहे. कृपया पुन्हा प्रयत्न करा.' : 'Sorry, I ran into an error. Please try again.' }]);
-      }
-    } catch (err) {
-      console.error(err);
-      setChatHistory(prev => [...prev, { role: 'model', text: lang === 'mr' ? 'कनेक्टिव्हिटी त्रुटी. कृपया पुन्हा प्रयत्न करा.' : 'Connection error. Please try again.' }]);
-    } finally {
-      setIsSendingMessage(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSuggestions();
-  }, [trip.id]);
-
-  const fetchSuggestions = async () => {
-    setIsFetchingSuggestions(true);
-    const fallbackList: ProactiveSuggestion[] = [];
-
-    try {
-      const res = await fetch('/api/trip-manager-suggestions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          trip: {
-            name: trip.name,
-            startDate: trip.startDate,
-            endDate: trip.endDate,
-            totalBudget: trip.totalBudget,
-            expenses: trip.expenses,
-            itinerary: trip.itinerary
-          },
-          weather: trip.weatherForecast,
-          lang,
-          currentDateTime: new Date().toISOString()
-        })
-      });
-      if (!res.ok) {
-        setSuggestions(fallbackList);
-        return;
-      }
-      const data = await res.json();
-      if (data.success && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
-        setSuggestions(data.suggestions.map((s: any) => ({
-          ...s,
-          title: typeof s.title === 'string' ? s.title : (s.title ? JSON.stringify(s.title) : 'Suggestion'),
-          message: typeof s.message === 'string' ? s.message : (typeof s.description === 'string' ? s.description : (s.message || s.description ? JSON.stringify(s.message || s.description) : ''))
-        })));
-      } else {
-        setSuggestions(fallbackList);
-      }
-    } catch (err) {
-      setSuggestions(fallbackList);
-    } finally {
-      setIsFetchingSuggestions(false);
-    }
-  };
-
-  const applySuggestion = (suggestion: ProactiveSuggestion) => {
-    if (suggestion.actionData) {
-      const newItinerary = [...(trip.itinerary || []), { ...suggestion.actionData, id: Math.random().toString(36).substr(2, 9) }];
-      onUpdateTrip({ ...trip, itinerary: newItinerary });
-      // Remove the applied suggestion
-      setSuggestions(prev => prev.filter(s => s.id !== suggestion.id));
-    }
-  };
 
   const expenses = trip.expenses || [];
   const plans = trip.itinerary || [];
@@ -881,13 +696,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     <>
       <div className="space-y-5 w-full">
       {trip.destination && (
-        <div className="px-5">
+        <div className="px-2.5">
                   </div>
       )}
       
       
       {countryInfo && (
-        <div className="px-5 flex items-center justify-center gap-2 mt-2 text-sm font-semibold text-slate-600 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
+        <div className="px-2.5 flex items-center justify-center gap-2 mt-2 text-sm font-semibold text-slate-600 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
           <span className="text-lg leading-none">{countryInfo.flag}</span>
           <span>{countryInfo.name}</span>
           {countryInfo.currencies && (
@@ -910,14 +725,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         
 
+                {/* Quick Actions Grid */}
+        <div className="grid grid-cols-4 gap-3 sm:gap-4 px-1">
+           <button onClick={() => window.dispatchEvent(new Event('open-kharch-modal'))} className="flex flex-col items-center gap-2 group">
+             <div className="w-13 h-13 rounded-[20px] bg-rose-50 text-rose-600 flex items-center justify-center shadow-xs border border-rose-100 group-hover:scale-105 group-active:scale-95 transition-all">
+                <Receipt className="w-5 h-5" />
+             </div>
+             <span className="text-[10px] font-extrabold text-slate-700 text-center uppercase tracking-wider">{lang === 'mr' ? 'खर्च नोंदवा' : 'Add Expense'}</span>
+           </button>
+           <button onClick={() => window.dispatchEvent(new Event('open-deposit-modal'))} className="flex flex-col items-center gap-2 group">
+             <div className="w-13 h-13 rounded-[20px] bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs border border-emerald-100 group-hover:scale-105 group-active:scale-95 transition-all">
+                <Wallet className="w-5 h-5" />
+             </div>
+             <span className="text-[10px] font-extrabold text-slate-700 text-center uppercase tracking-wider">{lang === 'mr' ? 'जमा करा' : 'Deposit'}</span>
+           </button>
+           <button onClick={() => window.dispatchEvent(new Event('open-flight-search'))} className="flex flex-col items-center gap-2 group">
+             <div className="w-13 h-13 rounded-[20px] bg-sky-50 text-sky-600 flex items-center justify-center shadow-xs border border-sky-100 group-hover:scale-105 group-active:scale-95 transition-all">
+                <Plane className="w-5 h-5" />
+             </div>
+             <span className="text-[10px] font-extrabold text-slate-700 text-center uppercase tracking-wider">{lang === 'mr' ? 'बुकिंग' : 'Bookings'}</span>
+           </button>
+           <button onClick={() => window.dispatchEvent(new Event('open-fuel-calculator'))} className="flex flex-col items-center gap-2 group">
+             <div className="w-13 h-13 rounded-[20px] bg-amber-50 text-amber-600 flex items-center justify-center shadow-xs border border-amber-100 group-hover:scale-105 group-active:scale-95 transition-all">
+                <Fuel className="w-5 h-5" />
+             </div>
+             <span className="text-[10px] font-extrabold text-slate-700 text-center uppercase tracking-wider">{lang === 'mr' ? 'इंधन' : 'Fuel'}</span>
+           </button>
+        </div>
+
         {/* Weather Forecast - Moved to Bottom */}
         <div className="bg-white rounded-2xl p-1 border border-slate-100 shadow-sm">
-          <WeatherWidget 
+                    <WeatherWidget 
             forecast={trip.weatherForecast || []} 
             lang={lang} 
             location={trip.name}
-            startDate={trip.startDate}
-            endDate={trip.endDate}
+            startDate={trip.startDate || new Date().toISOString().split('T')[0]}
+            endDate={trip.endDate || new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]}
           />
         </div>
 
@@ -1046,155 +889,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             )}
           </div>
         </div>
-
-      {/* Trip Manager Live Advisory Chat Modal */}
-      <AnimatePresence>
-        {selectedAlert && (
-          <div className="fixed inset-0 z-[10000] flex items-end justify-center sm:items-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm">
-            {/* Backdrop click closes modal */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0"
-              onClick={() => setSelectedAlert(null)}
-            />
-
-            <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              className="relative w-full sm:max-w-lg bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden flex flex-col h-[88vh] sm:h-[80vh] shadow-2xl z-10 border border-slate-100"
-            >
-              {/* Header */}
-              <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex justify-between items-center shrink-0 border-b border-indigo-900/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-500/25 rounded-2xl flex items-center justify-center border border-indigo-400/30 shadow-inner">
-                    <Sparkles className="w-5 h-5 text-indigo-300 animate-pulse" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-black uppercase tracking-wider leading-none flex items-center gap-2">
-                      <span>{t('aiTripManager')}</span>
-                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-black rounded-full border border-emerald-400/30">LIVE</span>
-                    </h3>
-                    <p className="text-[11px] font-bold text-slate-300 tracking-wide mt-1">
-                      {lang === 'mr' ? `२४/७ ट्रिप असिस्टंट (${trip.name})` : lang === 'hi' ? `२४/७ ट्रिप असिस्टेंट (${trip.name})` : `24/7 Trip Advisory (${trip.name})`}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSelectedAlert(null)}
-                  className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Context Alert / Daily Briefing Header Banner */}
-              <div className="px-4 py-2.5 bg-indigo-50/70 border-b border-indigo-100 flex items-center gap-2 shrink-0">
-                <Zap className="w-4 h-4 text-indigo-600 shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-wider leading-none">
-                    {lang === 'mr' ? 'आजचे ब्रीफिंग व संदर्भातील माहिती:' : lang === 'hi' ? 'आज का ब्रीफिंग और संदर्भ:' : 'Context Alert / Morning Briefing:'}
-                  </p>
-                  <p className="text-xs font-extrabold text-slate-800 truncate mt-0.5">
-                    {typeof selectedAlert.title === "string" ? selectedAlert.title : JSON.stringify(selectedAlert.title)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Chat Messages Feed */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3.5 bg-slate-50/50 pb-[30px] [&::-webkit-scrollbar]:hidden">
-                {chatHistory.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className="flex items-center gap-3 flex-row">
-                      <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </div>
-                      <div
-                        className={`rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold shadow-xs leading-relaxed whitespace-pre-wrap ${
-                          msg.role === 'user'
-                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-br-none font-bold'
-                            : 'bg-white text-slate-800 rounded-bl-none border border-slate-200/80 shadow-sm'
-                        }`}
-                      >
-                        {typeof msg.text === "string" ? msg.text : JSON.stringify(msg.text)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {isSendingMessage && (
-                  <div className="flex justify-start items-center gap-2">
-                    <div className="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                      <Sparkles className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="bg-white border border-slate-200/80 rounded-2xl rounded-bl-none px-4 py-2.5 text-xs font-bold text-slate-600 shadow-xs flex items-center gap-2">
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
-                      <span>{lang === 'mr' ? 'मॅनेजर उत्तर तयार करत आहे...' : lang === 'hi' ? 'मैनेजर जवाब तैयार कर रहा है...' : 'Manager is processing...'}</span>
-                    </div>
-                  </div>
-                )}
-                <div ref={chatBottomRef} />
-              </div>
-
-              {/* CLICKABLE DYNAMIC SUGGESTION CHIPS */}
-              <div className="px-3 py-2 bg-slate-100/80 border-t border-slate-200/60 overflow-x-auto flex gap-2 scrollbar-hide shrink-0">
-                {(lang === 'mr' ? [
-                  { label: '💎 जवळपासची गुपित ठिकाणे', prompt: `💎 ${trip.name} जवळील प्रसिद्ध गुप्त / अनपेक्षित प्रेक्षणीय स्थळे कोणती आहेत?` },
-                  { label: '🍲 प्रसिद्ध स्थानिक खाद्यपदार्थ', prompt: `🍲 ${trip.name} मध्ये कोणते प्रसिद्ध स्थानिक खाद्यपदार्थ आणि हॉटेल्स आहेत?` },
-                  { label: '⚠️ सुरक्षेच्या टिप्स', prompt: `⚠️ ${trip.name} प्रवासासाठी महत्त्वाच्या सुरक्षेच्या आणि स्थानिक प्रवास टिप्स द्या.` },
-                  { label: '🌦️ आजचे हवामान व नियोजन', prompt: `🌦️ आजचे हवामान कसे आहे आणि आम्ही पुढील काय नियोजन करावे?` }
-                ] : lang === 'hi' ? [
-                  { label: '💎 पास के गुप्त पर्यटन स्थल', prompt: `💎 ${trip.name} के पास कौन से गुप्त/अनोखे पर्यटन स्थल हैं?` },
-                  { label: '🍲 प्रसिद्ध स्थानीय व्यंजन', prompt: `🍲 ${trip.name} में प्रसिद्ध स्थानीय व्यंजन और खाने की जगहें कौन सी हैं?` },
-                  { label: '⚠️ सुरक्षा के उपयोगी सुझाव', prompt: `⚠️ ${trip.name} यात्रा के लिए सुरक्षा और सावधानियों की सूची दें.` },
-                  { label: '🌦️ मौसम और आज का प्लान', prompt: `🌦️ आज का मौसम कैसा है और हमारा अगला प्लान क्या होना चाहिए?` }
-                ] : [
-                  { label: '💎 Show Hidden Gems nearby', prompt: `💎 What are the best off-beat hidden gems near ${trip.name}?` },
-                  { label: '🍲 Best Local Food & Eats', prompt: `🍲 What iconic local delicacies and food spots should we try in ${trip.name}?` },
-                  { label: '⚠️ Safety & Local Tips', prompt: `⚠️ Give me key safety advice and transport tips for ${trip.name}.` },
-                  { label: '🌦️ Weather & Today Schedule', prompt: `🌦️ What is today's weather advisory and schedule guidance?` }
-                ]).map((chip, idx) => (
-                  <button
-                    key={idx}
-                    disabled={isSendingMessage}
-                    onClick={() => sendChatMessage(chip.prompt)}
-                    className="flex-shrink-0 px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-emerald-950 border border-emerald-200 hover:border-emerald-400 rounded-full text-xs font-black transition-all shadow-2xs active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1.5"
-                  >
-                    <span>{chip.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Message Text Input Area */}
-              <div className="p-3 sm:p-4 bg-white border-t border-slate-200 flex gap-2 sm:gap-3 items-center shrink-0">
-                <input
-                  type="text"
-                  value={chatMessage}
-                  onChange={(e) => setChatMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') sendChatMessage();
-                  }}
-                  disabled={isSendingMessage}
-                  placeholder={lang === 'mr' ? 'मॅनेजरला प्रश्न विचारा / चर्चा करा...' : lang === 'hi' ? 'मैनेजर से सवाल पूछें...' : 'Ask Manager anything...'}
-                  className="flex-1 px-4 py-3 bg-slate-100/80 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                />
-                <button
-                  onClick={() => sendChatMessage()}
-                  disabled={isSendingMessage || !chatMessage.trim()}
-                  className="w-11 h-11 sm:w-12 sm:h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl flex items-center justify-center transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none shrink-0"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Emergency Assistance Modal */}
       <AnimatePresence>

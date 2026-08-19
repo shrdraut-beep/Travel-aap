@@ -25,7 +25,7 @@ service cloud.firestore {
 
     function isValidTrip(data) {
       return data.id is string && data.id.size() <= 64
-        && data.name is string && data.name.size() <= 200
+        && data.name is string && data.name.size() <= 50
         && data.startDate is string && data.endDate is string
         && (!('members' in data) || (data.members is list && data.members.size() <= 100))
         && (!('expenses' in data) || (data.expenses is list && data.expenses.size() <= 5000))
@@ -143,5 +143,65 @@ service cloud.firestore {
       allow read: if true; // Public can read ads
       allow create, update, delete: if isAdmin() || (isSignedIn() && existing().agentId == request.auth.uid);
     }
+    // Public Travel Data
+    match /packages/{packageId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    match /hotels/{hotelId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    match /cars/{carId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    match /flights/{flightId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    match /trains/{trainId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    match /buses/{busId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+    match /cabs/{cabId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.role == 'superadmin';
+    }
+
+    // User Bookings & Orders
+    match /orders/{orderId} {
+      allow read, update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow delete: if false; // orders cannot be deleted
+    }
+
+    match /checkout_orders/{orderId} {
+      allow read, write: if true;
+    }
+    match /bookings/{bookingId} {
+      allow read, write: if true;
+    }
+    match /webhook_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    match /webhook_events/{eventId} {
+      allow read, write: if true;
+    }
+
+    match /agents/{agentId} {
+      allow read, write: if true;
+    }
+
+    match /wallet_transactions/{txId} {
+      allow read, write: if true;
+    }
+
+
   }
 }

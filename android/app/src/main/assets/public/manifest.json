@@ -1,0 +1,52 @@
+{
+  "id": "/",
+  "name": "प्रवास वाटाघाटी (Pravas Wataghati)",
+  "short_name": "प्रवास वाटाघाटी",
+  "description": "सहलीचे नियोजन आणि हिशोब व्यवस्थापन ॲप (Pravas Wataghati Trip Planner & Expense Manager).",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "mr-IN",
+  "scope": "/",
+  "orientation": "portrait",
+  "categories": ["travel", "finance", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pravas Wataghati Desktop"
+    },
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pravas Wataghati Mobile"
+    }
+  ]
+}

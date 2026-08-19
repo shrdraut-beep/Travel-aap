@@ -70,11 +70,15 @@ window.addEventListener('error', (event) => {
   }
 });
 
+import { AppLockScreen } from './components/security/AppLockScreen';
+
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
     <LanguageProvider>
       <TripProvider>
-        <App />
+        <AppLockScreen>
+          <App />
+        </AppLockScreen>
       </TripProvider>
     </LanguageProvider>
   </ErrorBoundary>,

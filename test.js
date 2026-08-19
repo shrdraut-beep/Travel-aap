@@ -1,1 +1,1 @@
-console.log("Waiting for build to finish")
+console.log("Checking how to open");

@@ -62,7 +62,7 @@ export const AgentWalletView = () => {
 
       // 2. Initialize Razorpay Checkout
       const options = {
-        key: 'rzp_test_dummykeyid123', // Same as backend
+        key: order.key_id || import.meta.env.VITE_RAZORPAY_KEY_ID || '',
         amount: order.amount,
         currency: order.currency,
         name: 'Routripo B2B Agent Portal',

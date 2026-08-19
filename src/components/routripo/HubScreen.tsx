@@ -63,7 +63,7 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
       )}
 
       {/* Dynamic Swipeable Image Banner Carousel for Major Promotions */}
-      <div className="px-4 mt-2">
+      <div className="px-2 mt-2">
               </div>
 
 
@@ -117,7 +117,7 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
       </div>
 
       {/* Offers For You & Flagship Hotel Stores */}
-      <div className="px-4 border-t border-slate-200 pt-4 bg-slate-50">
+      <div className="px-2 border-t border-slate-200 pt-4 bg-slate-50">
       </div>
 
       {/* Ready Trips Modal */}

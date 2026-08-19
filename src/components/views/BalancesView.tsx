@@ -378,15 +378,7 @@ export const BalancesView: React.FC<BalancesViewProps> = ({
 
 
 
-      <button
-        type="button"
-        onClick={onAddDeposit}
-        title={lang === 'mr' ? 'जमा रक्कम नोंदवा' : 'Add Deposit'}
-        className="fixed bottom-24 right-5 w-12 h-12 text-white rounded-full shadow-lg shadow-emerald-500/30 flex items-center justify-center z-40 active:scale-95 transition-all hover:scale-105 border-none ring-0 cursor-pointer"
-        style={{ backgroundColor: themeColor || '#10b981' }}
-      >
-        <Plus className="w-6 h-6 stroke-[2.5]" />
-      </button>
+
     </div>
   );
 };

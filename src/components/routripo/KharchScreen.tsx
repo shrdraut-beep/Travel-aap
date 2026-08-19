@@ -1,29 +1,57 @@
 import { useAuthStore } from '../../store/useAuthStore';
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import { TopBar, useScrolled, LogoName } from "./SharedUI";
+import { TabDashboardLayout } from "./TabDashboardLayout";
+import { Wallet, PieChart, TrendingUp, Users, Plus, ShieldCheck } from "lucide-react";
 import { ExpensesTabContainer } from "../views/ExpensesTabContainer";
 import { useTripContext } from "../../context/TripContext";
 import { translations } from "../../translations";
 import { calculateSettlements } from "../../utils";
 import { Expense, Deposit, Member, Category } from "../../types";
 import { UpiQrModal } from "../UpiQrModal";
-import { X, Plus, Receipt, IndianRupee } from "lucide-react";
+import { X, Receipt, IndianRupee } from "lucide-react";
 
 interface KharchScreenProps {
   onLogout: () => void;
   onSOS?: () => void;
   onOpenSettings?: () => void;
+  onOpenMyTickets?: () => void;
+  onBack?: () => void;
 }
 
-export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenProps) {
+export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets, onBack }: KharchScreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrolled = useScrolled(scrollRef);
   const { activeTrip, updateActiveTrip } = useTripContext();
   const currentUser = useAuthStore(state => state.currentUser);
+  useEffect(() => {
+    const handleAddExp = () => setIsAddExpenseOpen(true);
+    const handleAddDep = () => setIsAddDepositOpen(true);
+    const handleAddMember = () => setIsAddMemberOpen(true);
+    window.addEventListener("trigger-add-expense", handleAddExp);
+    window.addEventListener("trigger-add-deposit", handleAddDep);
+    window.addEventListener("trigger-add-member", handleAddMember);
+    return () => {
+       window.removeEventListener("trigger-add-expense", handleAddExp);
+       window.removeEventListener("trigger-add-deposit", handleAddDep);
+       window.removeEventListener("trigger-add-member", handleAddMember);
+    };
+  }, []);
 
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isAddDepositOpen, setIsAddDepositOpen] = useState(false);
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [selectedUpiMember, setSelectedUpiMember] = useState<{ member: Member; amount: number } | null>(null);
+
+  const [selectedTab, setSelectedTab] = useState<'expenses' | 'balances' | 'settlement'>('expenses');
+
+  useEffect(() => {
+    const handleSwitchTab = (e: any) => {
+      setSelectedTab(e.detail);
+    };
+    window.addEventListener('switch-expense-tab', handleSwitchTab);
+    return () => window.removeEventListener('switch-expense-tab', handleSwitchTab);
+  }, []);
 
   // New Expense Form State
   const [title, setTitle] = useState("");
@@ -115,6 +143,27 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
     });
   };
 
+  const handleEditExpense = (expense: Expense) => {
+    updateActiveTrip({
+      ...activeTrip,
+      expenses: (activeTrip.expenses || []).map(e => e.id === expense.id ? expense : e)
+    });
+  };
+
+  const handleUpdateMemberAvatar = (memberId: string, avatarUrl: string) => {
+    updateActiveTrip({
+      ...activeTrip,
+      members: activeTrip.members.map(m => m.id === memberId ? { ...m, avatar: avatarUrl } : m)
+    });
+  };
+
+  const handleUpdateMemberUPI = (memberId: string, upiId: string) => {
+    updateActiveTrip({
+      ...activeTrip,
+      members: activeTrip.members.map(m => m.id === memberId ? { ...m, upiId } : m)
+    });
+  };
+
   const handlePayUPI = (memberId: string, amt: number) => {
     const mem = activeTrip.members.find(m => m.id === memberId);
     if (mem) {
@@ -127,13 +176,40 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
 
   return (
     <div ref={scrollRef} className="h-full overflow-y-auto pb-28 bg-slate-50 relative">
-      <TopBar title={<LogoName />} sub="Expenses & Settlement" scrolled={scrolled} onLogout={onLogout} onSOS={onSOS || (() => alert("SOS Triggered!"))} onOpenSettings={onOpenSettings} />
+      <TopBar title={<LogoName />} sub="Expenses & Settlement" scrolled={scrolled} onLogout={onLogout} onSOS={onSOS || (() => alert("SOS Triggered!"))} onOpenSettings={onOpenSettings} onBack={onBack} />
 
-      <div className="px-4 mt-2">
-              </div>
-
-      <div className="mt-1">
-        <ExpensesTabContainer
+      <div className="pt-3 pb-8">
+        <TabDashboardLayout
+          cards={[
+            {
+              title: "NEW EXPENSE",
+              subtitle: "Add group bill",
+              icon: Plus,
+              iconColor: "text-white",
+              gradient: "from-rose-500 via-rose-600 to-pink-600 border border-rose-400/30 shadow-rose-200/60",
+              subtitleColorClass: "text-rose-100",
+              onClick: () => setIsAddExpenseOpen(true)
+            },
+            {
+              title: "ADD DEPOSIT",
+              subtitle: "Collect pool money",
+              icon: Wallet,
+              iconColor: "text-emerald-100",
+              gradient: "from-emerald-500 via-emerald-600 to-teal-600 border border-emerald-400/30 shadow-emerald-200/60",
+              subtitleColorClass: "text-emerald-100",
+              onClick: () => setIsAddDepositOpen(true)
+            }
+          ]}
+          gridTitle="Financials"
+          gridIcon={Wallet}
+          gridItems={[
+            { icon: PieChart, label: "Expenses", color: "from-rose-500 to-pink-600", isActive: selectedTab === 'expenses', onClick: () => { setSelectedTab('expenses'); window.dispatchEvent(new CustomEvent('switch-expense-tab', { detail: 'expenses' })); } },
+            { icon: Users, label: "Balances", color: "from-blue-500 to-indigo-600", isActive: selectedTab === 'balances', onClick: () => { setSelectedTab('balances'); window.dispatchEvent(new CustomEvent('switch-expense-tab', { detail: 'balances' })); } },
+            { icon: ShieldCheck, label: "Settlement", color: "from-emerald-500 to-teal-600", isActive: selectedTab === 'settlement', onClick: () => { setSelectedTab('settlement'); window.dispatchEvent(new CustomEvent('switch-expense-tab', { detail: 'settlement' })); } }
+          ]}
+        >
+          <div className="mt-1">
+            <ExpensesTabContainer
           trip={activeTrip}
           lang="en"
           t={t}
@@ -144,20 +220,36 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
           poolBalance={poolBalance}
           onAddExpense={() => setIsAddExpenseOpen(true)}
           onDeleteExpense={handleDeleteExpense}
-          onEditExpense={() => {}}
           onAddDeposit={() => setIsAddDepositOpen(true)}
-          onAddMember={() => {}}
-          onUpdateMemberAvatar={() => {}}
-          onUpdateMemberUPI={() => {}}
+          onAddMember={() => setIsAddMemberOpen(true)}
+          onUpdateMemberAvatar={handleUpdateMemberAvatar}
+          onUpdateMemberUPI={handleUpdateMemberUPI}
+          onEditExpense={handleEditExpense}
           onPayUPI={handlePayUPI}
           onShareRequest={(id, amt) => alert(`Share request link created for ₹${amt}`)}
           onUpdateTrip={updateActiveTrip}
         />
+          </div>
+        </TabDashboardLayout>
       </div>
 
-      <div className="px-4 my-4">
+            {/* Add Member Modal */}
+      {isAddMemberOpen && (
+        <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <h3 className="font-black text-slate-900 text-base">Coming Soon</h3>
               </div>
-
+              <button onClick={() => setIsAddMemberOpen(false)} className="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">
+                X
+              </button>
+            </div>
+            <p className="text-sm font-semibold text-slate-600">Add member functionality directly via this menu is under development.</p>
+          </div>
+        </div>
+      )}
+      
       {/* Add Expense Modal */}
       {isAddExpenseOpen && (
         <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -174,39 +266,41 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
 
             <form onSubmit={handleAddExpenseSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Expense Title</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Expense Title</label>
                 <input
                   type="text"
                   placeholder="e.g., Hotel Advance, Dinner, Taxi"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Amount (₹)</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Amount (₹)</label>
                 <input
                   type="number"
                   placeholder="0.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Category</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as Category)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
                 >
                   <option value="food">Food & Dining 🍲</option>
                   <option value="transport">Travel & Transport 🚗</option>
                   <option value="hotels">Hotels & Stay 🏨</option>
+                  <option value="fuel">Fuel & Petrol ⛽</option>
+                  <option value="highway">Tolls & Highway 🛣️</option>
                   <option value="tickets">Tickets & Sightseeing 🎫</option>
                   <option value="shopping">Shopping 🛍️</option>
                   <option value="other">Other Expenses 📦</option>
@@ -214,11 +308,11 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Paid By</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Paid By</label>
                 <select
                   value={paidBy}
                   onChange={(e) => setPaidBy(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
                 >
                   {activeTrip.members.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
@@ -285,11 +379,11 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
 
             <form onSubmit={handleAddDepositSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Member</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Member</label>
                 <select
                   value={depMemberId}
                   onChange={(e) => setDepMemberId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 >
                   {activeTrip.members.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
@@ -298,25 +392,25 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings }: KharchScreenPr
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Deposit Amount (₹)</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Deposit Amount (₹)</label>
                 <input
                   type="number"
                   placeholder="e.g. 5000"
                   value={depAmount}
                   onChange={(e) => setDepAmount(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Note</label>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">Note</label>
                 <input
                   type="text"
                   placeholder="e.g., Pool Deposit, Advance contribution"
                   value={depNote}
                   onChange={(e) => setDepNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 

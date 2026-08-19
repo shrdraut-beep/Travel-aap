@@ -24,5 +24,9 @@
     "noEmit": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "exclude": [
+    "android",
+    "dist"
+  ]
 }

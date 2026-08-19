@@ -1,0 +1,211 @@
+            ) : completedBooking ? (
+              /* Success Booking Receipt View (Confirmed Ticket) */
+              <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300">
+                <div className="overflow-auto max-h-[70vh] border-2 border-emerald-500/20 rounded-3xl mb-4 bg-slate-100">
+                  <div id="ticketContainer" className="bg-white mx-auto relative text-slate-800 p-8 w-[800px] shrink-0" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    {/* --- PAGE 1: E-TICKET --- */}
+                    <div className="flex justify-between items-start mb-8">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-500">Booking Id:</p>
+                        <p className="text-xl font-black text-slate-900 uppercase">{completedBooking.bookingId || completedBooking.orderId}</p>
+                      </div>
+                      <div className="bg-[#f25c3b] text-white font-black text-3xl px-5 py-2 rounded shadow-md tracking-tight">
+                        RouTripO
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-lg overflow-hidden mb-6">
+                      <div className="bg-slate-50 px-5 py-4 border-b border-slate-200 flex items-center gap-6">
+                        <div className="bg-slate-800 text-white text-center px-4 py-2 rounded-lg shadow-inner">
+                          <p className="text-[10px] font-bold uppercase tracking-wider mb-1">Travel Date</p>
+                          <p className="font-black text-xl leading-none">{new Date(completedBooking.date || completedBooking.travelDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</p>
+                        </div>
+                        <div>
+                          <p className="text-xl font-black text-slate-900 uppercase">{completedBooking.itemTitle || completedBooking.title} - CONFIRMED</p>
+                          <p className="text-sm font-bold text-slate-500 mt-1">{completedBooking.type?.toUpperCase()} • QTY: {completedBooking.quantity} • SECURE BOOKING</p>
+                        </div>
+                      </div>
+                      
+                      <div className="p-8 grid grid-cols-3 gap-6 items-center">
+                        <div>
+                          <p className="text-3xl font-black text-slate-900">{new Date(completedBooking.date || completedBooking.travelDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                          <p className="text-xs font-bold text-slate-500 mt-2 uppercase tracking-wide">Origin / Check-in</p>
+                          <p className="text-sm font-medium text-slate-700 mt-1">Starting Point</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <div className="w-full border-t-2 border-dashed border-slate-300 relative">
+                            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 bg-white px-4 py-1 text-[10px] text-slate-400 font-black tracking-widest border border-slate-200 rounded-full shadow-sm">
+                              ROUTRIPO SECURE
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-3xl font-black text-slate-900">Confirmed</p>
+                          <p className="text-xs font-bold text-slate-500 mt-2 uppercase tracking-wide">Destination / Check-out</p>
+                          <p className="text-sm font-medium text-slate-700 mt-1">Completion Point</p>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-50/50 p-5 border-t border-slate-200">
+                        <p className="font-black text-sm text-slate-800 mb-1">Booking Policy & Allowance</p>
+                        <p className="text-xs font-medium text-slate-600">Standard check-in policies apply. Please carry a valid government ID proof. Digital tickets are accepted. Cancellation terms apply as per provider policy.</p>
+                      </div>
+                    </div>
+
+                    <table className="w-full text-left text-sm mb-12 border-collapse border border-slate-200">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="py-3 px-4 font-black text-slate-800 w-[140px]">Barcode</th>
+                          <th className="py-3 px-4 font-black text-slate-800">Travellers</th>
+                          <th className="py-3 px-4 font-black text-slate-800">PNR</th>
+                          <th className="py-3 px-4 font-black text-slate-800 text-right">E-Ticket no.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-slate-100">
+                          <td className="py-4 px-4">
+                            <QrCode className="w-16 h-16 text-slate-800" />
+                          </td>
+                          <td className="py-4 px-4 font-bold text-slate-900">{completedBooking.customer?.name}</td>
+                          <td className="py-4 px-4 font-black tracking-wider text-slate-900">{pnrNumber || completedBooking.PNR_Number || 'PENDING'}</td>
+                          <td className="py-4 px-4 text-right font-medium text-slate-400">-</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div className="mb-12">
+                      <h3 className="font-black text-lg text-slate-900 mb-4 border-b border-slate-200 pb-2">Important Information</h3>
+                      <ul className="text-sm font-medium text-slate-700 space-y-4 list-disc pl-5">
+                        <li>You have paid <span className="font-black">₹{(completedBooking.totalAmount || completedBooking.finalPayableAmount || 0).toLocaleString('en-IN')}</span> for this booking.</li>
+                        <li>For any queries or communication with RouTripO regarding this booking, please use your Booking ID as a reference.</li>
+                        <li>Travellers must present a valid photo ID proof to enter and at the time of check-in. Permissible ID proofs include an Aadhaar Card, Passport or any other government-recognised ID.</li>
+                        <li>Kindly carry either a copy of your e-ticket on a tablet/mobile/laptop or a printed copy of the ticket for check-in.</li>
+                      </ul>
+                    </div>
+
+                    {/* PAGE BREAK FOR PDF */}
+                    <div style={{ pageBreakBefore: 'always' }} className="my-16 border-t-4 border-dashed border-slate-200"></div>
+
+                    {/* --- PAGE 2: TAX INVOICE --- */}
+                    <div className="border-2 border-slate-800">
+                      <div className="border-b-2 border-slate-800 p-4 flex justify-between items-center bg-slate-50">
+                        <div className="bg-[#f25c3b] text-white font-black text-2xl px-4 py-1 inline-block">
+                          RouTripO
+                        </div>
+                        <p className="font-black text-lg text-slate-900">Tax Invoice: {(completedBooking.bookingId || completedBooking.orderId).toUpperCase()}</p>
+                        <QrCode className="w-12 h-12 text-slate-800" />
+                      </div>
+
+                      <div className="text-xs font-medium text-center border-b border-slate-800 py-3 bg-white">
+                        <p className="font-black text-sm text-slate-900">LE ROUTRIPO TECHNOLOGY LIMITED</p>
+                        <p className="text-slate-600 mt-1">CIN : L63000HR2006PLC071540</p>
+                        <p className="text-slate-600">Second Floor, Veritas Building, Sector 53, Golf Course Road, Gurgaon, Haryana, 122002</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 text-xs border-b border-slate-800">
+                        <div className="border-r border-slate-800 p-4 space-y-2 bg-white">
+                          <p><span className="font-black text-slate-900">Booking Id :</span> {completedBooking.bookingId || completedBooking.orderId}</p>
+                          <p><span className="font-black text-slate-900">Details Of Service Provider :</span> Le RouTripO Technology Limited</p>
+                          <p><span className="font-black text-slate-900">GSTIN :</span> 06AABCL1932G1ZV</p>
+                          <p><span className="font-black text-slate-900">SAC Code :</span> 998551</p>
+                        </div>
+                        <div className="p-4 space-y-2 bg-white">
+                          <p><span className="font-black text-slate-900">Invoice date and time :</span> {new Date().toLocaleString('en-IN')}</p>
+                          <p><span className="font-black text-slate-900">Place of Supply :</span> Maharashtra</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 text-xs border-b-2 border-slate-800">
+                        <div className="border-r border-slate-800 p-4 bg-white">
+                          <p className="font-black text-slate-900 mb-2">Details Of Receiver (Billed To)</p>
+                          <p className="font-medium">Name : {completedBooking.customer?.name}</p>
+                          <p className="font-medium">Email : {completedBooking.customer?.email}</p>
+                          <p className="font-medium">Contact : {completedBooking.customer?.phone}</p>
+                        </div>
+                        <div className="p-4 bg-white">
+                          <p className="font-black text-slate-900 mb-2">Billing Address</p>
+                          <p className="font-medium">Address : Provided securely during checkout, India</p>
+                        </div>
+                      </div>
+
+                      {/* FARE TABLE */}
+                      <div className="text-sm bg-white">
+                        <div className="flex justify-between border-b border-slate-800 p-3 font-black text-slate-900">
+                          <span>Fare (Incl of All taxes)</span>
+                          <span>{((completedBooking.totalAmount || completedBooking.finalPayableAmount || 0) * 0.85).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-800 p-3 font-medium text-slate-800">
+                          <span>Convenience / Other Service charges & Fees</span>
+                          <span>{((completedBooking.totalAmount || completedBooking.finalPayableAmount || 0) * 0.15).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-300 p-3 text-slate-600 font-medium bg-slate-50">
+                          <span>CGST @9% on charges:</span>
+                          <span>0.00</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-300 p-3 text-slate-600 font-medium bg-slate-50">
+                          <span>SGST @9% on charges:</span>
+                          <span>0.00</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-800 p-3 text-slate-600 font-medium bg-slate-50">
+                          <span>IGST @18% on charges:</span>
+                          <span>0.00</span>
+                        </div>
+                        <div className="flex justify-between border-b-2 border-slate-800 p-3 font-black text-base text-slate-900 bg-slate-100">
+                          <span>Total Payable</span>
+                          <span>{(completedBooking.totalAmount || completedBooking.finalPayableAmount || 0).toFixed(4)}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 text-xs border-b border-slate-800 min-h-[70px] bg-white">
+                        <div className="border-r border-slate-800 p-3">
+                          <p className="font-black text-slate-900 mb-1">Invoice Total (In Words) :</p>
+                          <p className="font-medium">Rupees {(completedBooking.totalAmount || completedBooking.finalPayableAmount || 0).toLocaleString('en-IN')} Only</p>
+                        </div>
+                        <div className="p-3">
+                          <p className="font-black text-slate-900 mb-1">Invoice Total :</p>
+                          <p className="font-medium">{(completedBooking.totalAmount || completedBooking.finalPayableAmount || 0).toFixed(4)}</p>
+                        </div>
+                      </div>
+
+                      <div className="p-3 text-[10px] border-b-2 border-slate-800 leading-relaxed font-medium bg-white">
+                        <p className="font-black text-slate-900 mb-1">Certified that the particulars above are true and correct and the amount indicated :</p>
+                        <p>1) Represents the price actually charged and that there is no additional consideration directly or indirectly.</p>
+                        <p>2) No tax is payable under reverse charge for this invoice.</p>
+                      </div>
+
+                      <div className="grid grid-cols-4 text-[10px] leading-relaxed font-medium bg-white">
+                        <div className="col-span-3 border-r border-slate-800 p-4 space-y-2">
+                          <p className="font-black text-slate-900 uppercase">TERMS OF SALE :</p>
+                          <p>a) Any disputes shall be subject to the exclusive jurisdiction of courts at Gurgaon (Haryana, India).</p>
+                          <p>b) All taxes charged on Actual basis.</p>
+                          <p>c) Total payable is inclusive of Fare & other services collected on behalf of the service providers for which they are responsible for charging GST & issuing respective GST invoices.</p>
+                          <p>d) Convenience Fees, Cancellation/Reschedule Assurance Fees and Price lock Fees are non-refundable.</p>
+                        </div>
+                        <div className="col-span-1 p-4 flex flex-col justify-between items-center text-center">
+                          <p className="font-black text-slate-900 mb-4">For LE ROUTRIPO TECHNOLOGY LIMITED</p>
+                          <div className="font-[cursive] text-3xl text-blue-800 mb-2 font-black -rotate-6">@RoutripO</div>
+                          <p className="font-black text-slate-900 border-t border-slate-400 pt-1 w-full">Authorised Signatory</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={handleDownloadTicket}
+                    disabled={isDownloading}
+                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-md"
+                  >
+                    {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                    {isDownloading ? 'Generating PDF...' : 'Download Ticket'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl font-bold text-xs cursor-pointer transition-colors"
+                  >
+                    Done
+                  </button>
+                </div>

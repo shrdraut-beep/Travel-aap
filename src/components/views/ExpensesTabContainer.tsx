@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExpensesView } from './ExpensesView';
 import { BalancesView } from './BalancesView';
 import { TripGroup, Expense, Member } from '../../types';
 import { Wallet, PieChart, FileText, FileSpreadsheet, Download } from 'lucide-react';
 import { ExpensePieChart } from '../ExpensePieChart';
+import { PDFLayoutWrapper } from '../pdf/PDFLayoutWrapper';
+import { TripRecap } from '../TripRecap';
 import * as XLSX from 'xlsx';
 
 interface ExpensesTabContainerProps {
@@ -46,6 +48,16 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
     }
   }, [initialSubTab]);
 
+  React.useEffect(() => {
+    const handleSwitchTab = (e: any) => {
+      // Map 'balances' to 'settlement' as there is no balances tab
+      if (e.detail === 'balances') setActiveSubTab('settlement');
+      else setActiveSubTab(e.detail);
+    };
+    window.addEventListener('switch-expense-tab', handleSwitchTab);
+    return () => window.removeEventListener('switch-expense-tab', handleSwitchTab);
+  }, []);
+
   const themeColor = trip.themeColor || '#6366f1';
 
   // Calculate Budget usage
@@ -73,6 +85,27 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
 
   const memberCount = Math.max(1, (trip.members || []).length);
   const avgCostPerPerson = Math.round(totalSpent / memberCount);
+
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const pdfRef = useRef<HTMLDivElement>(null);
+
+  const handleExportPDF = async () => {
+    if (!trip.expenses || trip.expenses.length === 0) {
+      alert(lang === 'mr' ? 'डाऊनलोड करण्यासाठी कोणताही खर्च आढळला नाही.' : 'No expenses available to export.');
+      return;
+    }
+    if (!pdfRef.current) return;
+    setIsExportingPDF(true);
+    try {
+      const { exportElementToPdf } = await import('../../utils/exportUtils');
+      await exportElementToPdf(pdfRef.current, `${trip.name.replace(/\s+/g, '_')}_Report.pdf`);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to export PDF');
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
 
   const handleExportExcel = () => {
     if (!trip.expenses || trip.expenses.length === 0) {
@@ -263,6 +296,15 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={handleExportPDF}
+              disabled={isExportingPDF}
+              className="py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs cursor-pointer disabled:opacity-50"
+            >
+              <FileText className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+              <span>{isExportingPDF ? 'Exporting...' : (lang === 'mr' ? 'PDF' : 'Export PDF')}</span>
+            </button>
+            <button
+              type="button"
               onClick={handleExportExcel}
               className="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95 shadow-2xs cursor-pointer"
             >
@@ -343,6 +385,35 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', opacity: 0, pointerEvents: 'none' }}>
+        <div ref={pdfRef} className="w-[800px] bg-slate-50">
+          <PDFLayoutWrapper 
+            tripName={trip.name} 
+            tripDates={`${trip.startDate} to ${trip.endDate}`} 
+            documentType="Expense & Settlement Report"
+          >
+             <div className="p-6 space-y-6">
+                <BalancesView 
+                  members={trip.members}
+                  deposits={trip.deposits}
+                  balances={balances}
+                  transfers={transfers}
+                  adminId={adminId}
+                  calculationMode={trip.calculationMode}
+                  onAddDeposit={() => {}}
+                  onAddMember={() => {}}
+                  onPayUPI={() => {}}
+                  onShareRequest={() => {}}
+                  currencySymbol={currencySymbol}
+                  lang={lang}
+                  t={t}
+                  themeColor={themeColor}
+                />
+             </div>
+          </PDFLayoutWrapper>
+        </div>
       </div>
     </div>
   );

@@ -294,7 +294,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
       {/* Categorized Navigation Tabs Bar moved to bottom */}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto pb-32 px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 overflow-y-auto pb-32 px-2 sm:px-4 lg:px-6 py-6">
         <div className="w-full max-w-7xl mx-auto space-y-6">
 
           {/* TAB 1: OVERVIEW & ANALYTICS */}

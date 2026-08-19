@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Bell, LogOut, Siren, Settings, X, CheckCircle, Info, ChevronDown, ChevronRight } from "lucide-react";
+import { Bell, LogOut, Siren, Settings, X, CheckCircle, Info, ChevronDown, ChevronRight, ArrowLeft, Ticket } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 
 export function BrandLogo({ className = "text-2xl" }) {
@@ -25,7 +25,77 @@ export function LogoName({ className = "" }: { className?: string }) {
 }
 
 export function Card({ children, className = "" }: { children: React.ReactNode, className?: string }) {
-  return <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm ${className}`}>{children}</div>;
+  const hasPadding = className.includes('p-') || className.includes('px-') || className.includes('py-');
+  const hasMargin = className.includes('m-') || className.includes('mx-') || className.includes('my-');
+  return (
+    <div className={`bg-white rounded-3xl border border-slate-200 shadow-sm ${!hasPadding ? 'p-4 sm:p-5' : ''} ${!hasMargin ? 'mx-1 my-3' : ''} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+export function Label({ children, className = "" }: { children: React.ReactNode, className?: string }) {
+  return (
+    <label className={`block text-xs font-black uppercase tracking-widest text-slate-800 mb-1.5 ${className}`}>
+      {children}
+    </label>
+  );
+}
+
+export interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  className?: string;
+  containerClassName?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+export function TextInput({ label, className = "", containerClassName = "", icon: Icon, ...props }: TextInputProps) {
+  return (
+    <div className={`w-full ${containerClassName}`}>
+      {label && <Label>{label}</Label>}
+      <div className="relative bg-slate-50 border border-slate-200 hover:border-indigo-400 focus-within:border-indigo-500 focus-within:bg-white rounded-2xl p-3 transition-all flex items-center gap-2.5 shadow-xs">
+        {Icon && (
+          <div className="text-slate-500 shrink-0">
+            <Icon className="w-4 h-4" />
+          </div>
+        )}
+        <input
+          {...props}
+          className={`w-full bg-transparent font-extrabold text-sm text-slate-900 placeholder-slate-500 outline-none ${className}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+export interface DropdownProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  options: { value: string; label: string }[];
+  className?: string;
+  containerClassName?: string;
+}
+
+export function Dropdown({ label, options, className = "", containerClassName = "", ...props }: DropdownProps) {
+  return (
+    <div className={`w-full relative ${containerClassName}`}>
+      {label && <Label>{label}</Label>}
+      <div className="relative bg-slate-50 border border-slate-200 hover:border-indigo-400 focus-within:border-indigo-500 focus-within:bg-white rounded-2xl p-3 transition-all flex items-center gap-2.5 shadow-xs">
+        <select
+          {...props}
+          className={`w-full bg-transparent font-extrabold text-sm text-slate-900 outline-none cursor-pointer appearance-none ${className}`}
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value} className="text-slate-900 font-bold bg-white">
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+          <ChevronDown className="w-4 h-4" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function SectionTitle({ children, icon: Icon, right, accent = "text-red-500" }: { children: React.ReactNode, icon?: any, right?: React.ReactNode, accent?: string }) {
@@ -60,7 +130,9 @@ export function TopBar({
   initial = "S", 
   onLogout, 
   onSOS,
-  onOpenSettings
+  onOpenSettings,
+  onOpenMyTickets,
+  onBack
 }: { 
   title: React.ReactNode, 
   sub?: string, 
@@ -69,7 +141,9 @@ export function TopBar({
   initial?: string, 
   onLogout: () => void, 
   onSOS?: () => void,
-  onOpenSettings?: () => void
+  onOpenSettings?: () => void,
+  onOpenMyTickets?: () => void,
+  onBack?: () => void
 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const currentUser = useAuthStore(state => state.currentUser);
@@ -97,9 +171,20 @@ export function TopBar({
 
   return (
     <div className="bg-white/90 backdrop-blur-md px-4 pt-4 pb-3 flex justify-between items-center sticky top-0 z-[999] shadow-sm">
-      <div>
-        {sub && <p className="text-[11px] text-slate-500 font-medium tracking-tight">{sub}</p>}
-        <div className="text-lg font-bold text-slate-800 font-[Poppins]">{title}</div>
+      <div className="flex items-center gap-3">
+        {onBack && (
+          <button 
+            type="button" 
+            onClick={onBack} 
+            className="p-1.5 rounded-full bg-slate-100 active:scale-95 transition-all text-slate-700 hover:bg-slate-200 shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        )}
+        <div>
+          {sub && <p className="text-[11px] text-slate-500 font-medium tracking-tight">{sub}</p>}
+          <div className="text-lg font-bold text-slate-800 font-[Poppins]">{title}</div>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 relative" ref={menuRef}>
@@ -217,6 +302,22 @@ export function TopBar({
 
             {/* 3. Account Settings & Logout Actions */}
             <div className="pt-3 space-y-1">
+              {onOpenMyTickets && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    onOpenMyTickets();
+                  }}
+                  className="w-full px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Ticket className="w-4 h-4 text-slate-500" />
+                    <span>My Tickets</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              )}
               {onOpenSettings && (
                 <button
                   type="button"

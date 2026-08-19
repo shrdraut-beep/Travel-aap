@@ -329,15 +329,7 @@ export const ExpensesView: React.FC<ExpensesViewProps> = ({
           <Bot className="w-5 h-5" />
         </button>
 
-        <button
-          type="button"
-          onClick={onAddExpense}
-          title={lang === 'mr' ? 'नवीन खर्च जोडा' : 'Add Expense'}
-          className="w-12 h-12 text-white rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center active:scale-95 transition-all hover:scale-105 border-none ring-0 cursor-pointer"
-          style={{ backgroundColor: themeColor || '#6366f1' }}
-        >
-          <Plus className="w-6 h-6 stroke-[2.5]" />
-        </button>
+
       </div>
 
       {showScanner && (

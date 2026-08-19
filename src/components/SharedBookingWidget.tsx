@@ -5,6 +5,7 @@ import { FlightSearchTab } from './travel/FlightSearchTab';
 import { HotelSearchTab } from './travel/HotelSearchTab';
 import { TrainInfoTab } from './travel/TrainInfoTab';
 import { BusSearchTab } from './travel/BusSearchTab';
+import { UniversalBookingCheckoutModal, BookingItemPayload } from './travel/UniversalBookingCheckoutModal';
 
 interface SharedBookingWidgetProps {
   lang: string;
@@ -16,6 +17,7 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
   currencySymbol,
 }) => {
   const [activeTab, setActiveTab] = useState<'flights' | 'buses' | 'hotels' | 'trains'>('flights');
+  const [checkoutModalItem, setCheckoutModalItem] = useState<BookingItemPayload | null>(null);
 
   const handleTabClick = (id: any) => {
     setActiveTab(id);
@@ -87,19 +89,31 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
         >
           
           {activeTab === 'flights' && (
-            <FlightSearchTab lang={lang} currencySymbol={currencySymbol} />
+            <FlightSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
           )}
           {activeTab === 'buses' && (
-            <BusSearchTab lang={lang} currencySymbol={currencySymbol} />
+            <BusSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
           )}
           {activeTab === 'hotels' && (
-            <HotelSearchTab lang={lang} currencySymbol={currencySymbol} />
+            <HotelSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
           )}
           {activeTab === 'trains' && (
-            <TrainInfoTab lang={lang} />
+            <TrainInfoTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
           )}
         </motion.div>
       </AnimatePresence>
+      {checkoutModalItem && (
+        <UniversalBookingCheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutModalItem(null)}
+          item={checkoutModalItem}
+          currencySymbol={currencySymbol}
+          lang={lang}
+          onBookingSuccess={(receipt) => {
+            alert(`🎉 Booking confirmed: ${receipt.bookingId}`);
+          }}
+        />
+      )}
     </div>
   );
 };

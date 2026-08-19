@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plane, Train, MapPin, Search, X } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 
-export type TransportMode = 'flights' | 'trains';
+export type TransportMode = 'flights' | 'trains' | 'hotels' | 'buses' | 'cars';
 
 export interface LocationItem {
   city: string;
@@ -22,6 +22,7 @@ interface SearchInputProps {
   showModeToggle?: boolean;
   lang?: string;
   className?: string;
+  autoFocus?: boolean;
   iconType?: 'from' | 'to';
 }
 
@@ -120,7 +121,27 @@ function parseDataset(data: any, mode: TransportMode): LocationItem[] {
   return [];
 }
 
+
+const DEFAULT_CITIES: LocationItem[] = [
+  { city: 'Mumbai', code: 'MUM', country: 'India' },
+  { city: 'Delhi', code: 'DEL', country: 'India' },
+  { city: 'Bengaluru', code: 'BLR', country: 'India' },
+  { city: 'Hyderabad', code: 'HYD', country: 'India' },
+  { city: 'Chennai', code: 'MAA', country: 'India' },
+  { city: 'Kolkata', code: 'CCU', country: 'India' },
+  { city: 'Pune', code: 'PNQ', country: 'India' },
+  { city: 'Ahmedabad', code: 'AMD', country: 'India' },
+  { city: 'Jaipur', code: 'JAI', country: 'India' },
+  { city: 'Goa', code: 'GOI', country: 'India' },
+  { city: 'New York', code: 'NYC', country: 'USA' },
+  { city: 'London', code: 'LON', country: 'UK' },
+  { city: 'Dubai', code: 'DXB', country: 'UAE' },
+  { city: 'Singapore', code: 'SIN', country: 'Singapore' },
+  { city: 'Paris', code: 'PAR', country: 'France' }
+];
+
 export const SearchInput: React.FC<SearchInputProps> = ({
+  autoFocus,
   label,
   placeholder = 'Type city or code...',
   value,
@@ -226,7 +247,9 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
         const cityMatch = item.city ? item.city.toLowerCase().includes(cleanQuery) : false;
         const codeMatch = item.code ? item.code.toLowerCase().includes(cleanQuery) : false;
-        const nameMatch = mode === 'flights'
+        const nameMatch = mode === 'flights' ? (item.airport && item.airport.toLowerCase().includes(cleanQuery)) : mode === 'trains' ? (item.station && item.station.toLowerCase().includes(cleanQuery)) : false;
+        // @ts-ignore
+        const __dummy = mode === 'flights'
           ? (item.airport && item.airport.toLowerCase().includes(cleanQuery))
           : (item.station && item.station.toLowerCase().includes(cleanQuery));
         const countryMatch = item.country && item.country.toLowerCase().includes(cleanQuery);
@@ -268,7 +291,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Label and Mode Switcher Header */}
       <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+        <label className="block text-xs font-black uppercase tracking-widest text-slate-700">
           {label}
         </label>
 
@@ -321,6 +344,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           }}
           onFocus={() => { setIsOpen(true); setHasInteracted(true); }}
           placeholder={placeholder}
+          autoFocus={autoFocus}
           className="w-full bg-transparent font-extrabold text-sm text-slate-900 placeholder-slate-400 outline-none"
         />
 
