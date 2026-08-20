@@ -337,32 +337,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </button>
       </div>
 
-      {/* 3. CALENDAR MONTHLY GRID */}
-      <div className="bg-white rounded-3xl p-4 shadow-xl border border-slate-200/80 space-y-3">
-        {/* Weekday Names Header */}
-        <div className="grid grid-cols-7 gap-1 text-center border-b border-slate-100 pb-2">
-          {weekDayLabels.map((day, idx) => (
-            <div
-              key={day}
-              className={`text-xs font-black uppercase tracking-wider py-1 ${
-                idx === 0 || idx === 6 ? 'text-amber-600' : 'text-slate-500'
-              }`}
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Days Grid */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-          {/* Empty padding cells for first week */}
-          {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-            <div key={`empty-${i}`} className="min-h-[60px] sm:min-h-[70px] bg-slate-50/40 rounded-2xl border border-transparent" />
-          ))}
-
-          {/* Actual Month Days */}
+      {/* 3. CALENDAR MONTHLY HORIZONTAL SCROLL */}
+      <div className="bg-white rounded-3xl p-4 shadow-xl border border-slate-200/80">
+        <div className="flex gap-2.5 sm:gap-3 overflow-x-auto no-scrollbar pb-2 snap-x">
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const dayNum = i + 1;
+            const dateObj = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayNum);
+            const dayOfWeek = weekDayLabels[dateObj.getDay()];
             const monthFormatted = (currentMonth.getMonth() + 1).toString().padStart(2, '0');
             const dayFormatted = dayNum.toString().padStart(2, '0');
             const dateStr = `${currentMonth.getFullYear()}-${monthFormatted}-${dayFormatted}`;
@@ -375,62 +356,40 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             return (
               <motion.button
                 key={dateStr}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedDateCell(dateStr)}
-                className={`min-h-[60px] sm:min-h-[70px] p-1.5 rounded-2xl border text-left transition-all flex flex-col justify-between relative overflow-hidden cursor-pointer ${
+                className={`snap-center min-w-[72px] sm:min-w-[80px] p-2.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 cursor-pointer shrink-0 relative overflow-hidden ${
                   isSelected
-                    ? 'ring-2 ring-indigo-600 border-indigo-600 bg-indigo-50/70 shadow-md'
+                    ? 'ring-2 ring-[#FF5A5F] border-[#FF5A5F] bg-rose-50/70 shadow-md'
                     : isTripDay
                     ? 'bg-amber-50/80 border-amber-200/80 hover:bg-amber-100/80'
                     : 'bg-white border-slate-100 hover:border-slate-300'
                 }`}
               >
-                {/* Date Badge */}
-                <div className="flex items-center justify-between w-full">
-                  <span
-                    className={`text-lg sm:text-xl font-black w-8 h-8 rounded-full flex items-center justify-center ${
-                      isToday
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : isTripDay
-                        ? 'text-amber-950 font-black'
-                        : 'text-slate-700'
-                    }`}
-                  >
-                    {dayNum}
-                  </span>
+                <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider ${dateObj.getDay() === 0 || dateObj.getDay() === 6 ? 'text-amber-600' : 'text-slate-500'}`}>
+                  {dayOfWeek}
+                </span>
+                
+                <span
+                  className={`text-xl sm:text-2xl font-black w-10 h-10 rounded-full flex items-center justify-center ${
+                    isToday
+                      ? 'bg-[#FF5A5F] text-white shadow-sm'
+                      : isTripDay
+                      ? 'text-amber-950 font-black'
+                      : 'text-slate-800'
+                  }`}
+                >
+                  {dayNum}
+                </span>
 
-                  {mappedEvent && (
-                    <span className="px-1.5 py-0.5 bg-amber-500 text-slate-950 rounded-md font-black text-[9px] uppercase shadow-2xs shrink-0">
-                      D{mappedEvent.dayNumber}
-                    </span>
-                  )}
-                </div>
-
-                {/* Day Preview Card inside Cell */}
                 {mappedEvent ? (
-                  <div className="mt-1 w-full space-y-0.5">
-                    <p className="text-[10px] sm:text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight">
-                      {mappedEvent.plans.length > 0
-                        ? mappedEvent.plans[0].title
-                        : mappedEvent.title}
-                    </p>
-                    <div className="flex items-center gap-1 text-[9px] font-extrabold text-amber-700">
-                      <Sparkles className="w-2.5 h-2.5 text-amber-500 shrink-0" />
-                      <span className="truncate">
-                        {mappedEvent.plans.length > 0
-                          ? `${mappedEvent.plans.length} ${isMr ? 'आयोजने' : 'Plans'}`
-                          : isMr ? 'स्मार्ट प्लॅन' : 'Smart Itinerary'}
-                      </span>
-                    </div>
-                  </div>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 shadow-sm" title={mappedEvent.title} />
                 ) : isTripDay ? (
-                  <div className="mt-1">
-                    <span className="text-[9px] font-extrabold text-amber-600/70 block uppercase">
-                      {isMr ? 'सहल दिवस' : 'Trip Day'}
-                    </span>
-                  </div>
-                ) : null}
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-300/50 mt-1" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-transparent mt-1" />
+                )}
               </motion.button>
             );
           })}

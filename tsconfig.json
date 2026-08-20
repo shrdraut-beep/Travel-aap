@@ -27,6 +27,7 @@
   },
   "exclude": [
     "android",
-    "dist"
+    "dist",
+    "routtripo-booking"
   ]
 }

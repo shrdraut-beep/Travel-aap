@@ -1,4 +1,5 @@
 import { addToSyncQueue, getSyncQueue, clearSyncQueue, removeFromSyncQueue } from '../offline';
+import { crashlytics } from '../services/crashlytics';
 
 export interface OfflineAction {
   id: string;
@@ -84,9 +85,21 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
 
   try {
     const response = await fetch(url, options);
+    if (!response.ok && response.status >= 500 && !url.includes('/telemetry/')) {
+      crashlytics.recordError(
+        new Error(`HTTP ${response.status} from ${url}`),
+        { url, method, status: response.status },
+        false
+      );
+    }
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.warn(`[apiClient] Network request failed for ${url}:`, error);
+    if (!url.includes('/telemetry/')) {
+      crashlytics.log(`Network request failed: ${method} ${url}`, 'network', {
+        error: error?.message || 'Fetch error',
+      });
+    }
 
     // If fetch failed due to network / offline transition
     if (isMutation) {

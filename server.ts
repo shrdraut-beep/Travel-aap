@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import partnerKycRouter from './server/routes/partnerKyc.ts';
+import searchRouter from './server/routes/search.ts';
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
@@ -29,6 +30,7 @@ import { getOrCreateUserDEK, encryptPII, decryptPII, encryptObjectPII, decryptOb
 import { exportUserDataForLegalHandler } from "./server/security/adminVault.ts";
 import { handleRazorpayWebhook, isTestKeyRejectedInProd } from "./server/security/paymentWebhook.ts";
 import { secureLogger } from "./server/security/logger.ts";
+import { IdempotencyEngine } from "./server/security/idempotency.ts";
 
 
 
@@ -496,6 +498,7 @@ async function safeGeminiGenerate(contents: any, model = "gemini-3.6-flash", ret
 // --- API ROUTES ---
 
 // 1. Gemini Chat Endpoint
+app.use('/api/search', searchRouter);
 
 // --- PARTNER KYC ROUTES ---
 app.use('/api/partner', partnerKycRouter);
@@ -1589,6 +1592,7 @@ app.post("/api/generate-destination-templates", async (req, res) => {
   }
 });
 
+
 // 6. Parse Booking SMS/Text Endpoint
 app.post("/api/parse-booking-text", async (req, res) => {
   try {
@@ -1750,8 +1754,8 @@ app.post("/api/transit-schedules", async (req, res) => {
   res.json({ success: true, data: [] });
 });
 
-// 12. Foursquare Places Hotel Search API
-app.all("/api/foursquare-hotels", async (req, res) => {
+// 12. Foursquare Places Hotel Search API & Alias
+const handleHotelSearch = async (req: express.Request, res: express.Response) => {
   try {
     const city = String(req.query.city || req.body?.city || req.query.destination || req.body?.destination || "").trim();
     const place = String(req.query.place || req.body?.place || req.query.placeName || req.body?.placeName || "").trim();
@@ -1761,6 +1765,7 @@ app.all("/api/foursquare-hotels", async (req, res) => {
     }
 
     const apiKey = process.env.FOURSQUARE_API_KEY || process.env.VITE_FOURSQUARE_API_KEY;
+    const pexelsKey = process.env.PEXELS_API_KEY;
 
     // IMPORTANT: Foursquare search query uses ONLY city and optional place name.
     // Rooms, adults, dates are strictly kept in the UI state and NOT sent to Foursquare API.
@@ -1794,12 +1799,26 @@ app.all("/api/foursquare-hotels", async (req, res) => {
     ];
 
     // Map Foursquare API items into clean structured hotel card objects
-    let hotels = rawResults.map((item: any, idx: number) => {
+    let hotels = await Promise.all(rawResults.map(async (item: any, idx: number) => {
       let photoUrl = "";
       if (item.photos && item.photos.length > 0) {
         const p = item.photos[0];
         photoUrl = `${p.prefix}500x350${p.suffix}`;
-      } else {
+      } else if (pexelsKey) {
+        try {
+          const pexelsRes = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURIComponent(item.name || `${city} hotel`)}&per_page=1`, {
+            headers: { Authorization: pexelsKey },
+            timeout: 2500,
+          });
+          if (pexelsRes.data?.photos && pexelsRes.data.photos.length > 0) {
+            photoUrl = pexelsRes.data.photos[0].src.medium || pexelsRes.data.photos[0].src.large;
+          }
+        } catch {
+          // ignore fallback to photo pool
+        }
+      }
+      
+      if (!photoUrl) {
         photoUrl = photoPool[idx % photoPool.length];
       }
 
@@ -1830,7 +1849,7 @@ app.all("/api/foursquare-hotels", async (req, res) => {
         provider: "Foursquare Places API",
         googleMapsLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + " " + formattedAddress)}`,
       };
-    });
+    }));
 
     // If Foursquare key was missing or returned empty, return verified Foursquare structure for requested city
     if (hotels.length === 0) {
@@ -1876,7 +1895,10 @@ app.all("/api/foursquare-hotels", async (req, res) => {
     console.error("[Foursquare API Endpoint Error]:", error);
     return res.status(500).json({ success: false, error: "Error searching Foursquare hotels" });
   }
-});
+};
+
+app.all("/api/foursquare-hotels", handleHotelSearch);
+app.all("/api/search-hotels-foursquare", handleHotelSearch);
 
 // --- GOOGLE MAPS & PLACES INTEGRATION HELPERS ---
 
@@ -2493,29 +2515,221 @@ app.post("/api/wallet/create-order", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
+// --- PROMO CODE VALIDATION WITH DEVICE FINGERPRINTING & ANTI-FRAUD ---
+app.post("/api/checkout/validate-promo", async (req, res) => {
   try {
-    const { itemType, itemId, packageId, hotelId, carId, flightId, quantity, travelersCount } = req.body;
+    const { promoCode, amount, deviceId, userId } = req.body;
+    if (!promoCode || typeof promoCode !== 'string') {
+      return res.status(400).json({ success: false, valid: false, error: "Promo code is required" });
+    }
+
+    const code = promoCode.trim().toUpperCase();
+    const subtotal = Number(amount) || 0;
+    const cleanDeviceId = (deviceId || '').trim();
+
+    // Known coupons catalog
+    const PROMO_CATALOG: Record<string, { type: 'flat' | 'percentage'; discount: number; minAmount: number; maxDiscount?: number; isNewUserOnly?: boolean; desc: string }> = {
+      'WELCOME500': { type: 'flat', discount: 500, minAmount: 1000, isNewUserOnly: true, desc: 'Flat ₹500 off on your first booking' },
+      'NEWUSER': { type: 'percentage', discount: 25, minAmount: 1200, maxDiscount: 1500, isNewUserOnly: true, desc: '25% off up to ₹1,500 for new users' },
+      'FIRSTFLY': { type: 'flat', discount: 750, minAmount: 3000, isNewUserOnly: true, desc: 'Flat ₹750 off on first flight' },
+      'SAVE20': { type: 'percentage', discount: 20, minAmount: 1500, maxDiscount: 2000, isNewUserOnly: false, desc: '20% off up to ₹2,000' },
+      'ROUTRIPO10': { type: 'percentage', discount: 10, minAmount: 500, maxDiscount: 1500, isNewUserOnly: false, desc: '10% instant discount' },
+      'FLYHIGH1000': { type: 'flat', discount: 1000, minAmount: 4000, isNewUserOnly: false, desc: 'Flat ₹1,000 off' },
+      'SUMMERTRIP': { type: 'percentage', discount: 15, minAmount: 2000, maxDiscount: 3000, isNewUserOnly: false, desc: '15% off special' },
+      'FESTIVE300': { type: 'flat', discount: 300, minAmount: 800, isNewUserOnly: false, desc: 'Flat ₹300 off' }
+    };
+
+    const promo = PROMO_CATALOG[code];
+    if (!promo) {
+      return res.status(400).json({
+        success: false,
+        valid: false,
+        error: `Coupon code '${code}' is invalid or expired.`
+      });
+    }
+
+    if (subtotal < promo.minAmount) {
+      return res.status(400).json({
+        success: false,
+        valid: false,
+        error: `Minimum booking value of ₹${promo.minAmount.toLocaleString('en-IN')} required for coupon '${code}'.`
+      });
+    }
+
+    const db = adminDb();
+
+    // 1. Anti-Promo Fraud Check: Device Fingerprint & Account Validation
+    if (promo.isNewUserOnly && cleanDeviceId && db) {
+      try {
+        // Query device_promos collection to see if this Device ID has already redeemed a new-user discount
+        const devicePromoSnap = await db.collection("device_promos")
+          .where("deviceId", "==", cleanDeviceId)
+          .where("promoCode", "in", Object.keys(PROMO_CATALOG).filter(k => PROMO_CATALOG[k].isNewUserOnly))
+          .limit(1)
+          .get();
+
+        if (!devicePromoSnap.empty) {
+          return res.status(403).json({
+            success: false,
+            valid: false,
+            error: "This promo code is strictly valid for first-time bookings only and has already been redeemed on this device."
+          });
+        }
+
+        // Also check if userId has previous completed bookings
+        if (userId) {
+          const userBookingSnap = await db.collection("bookings")
+            .where("userId", "==", userId)
+            .where("status", "in", ["CONFIRMED", "COMPLETED"])
+            .limit(1)
+            .get();
+
+          if (!userBookingSnap.empty) {
+            return res.status(403).json({
+              success: false,
+              valid: false,
+              error: "This promo code is strictly valid for first-time users. Your account already has completed bookings."
+            });
+          }
+        }
+      } catch (checkErr) {
+        console.warn("[Promo Fraud Check Notice]:", checkErr);
+      }
+    }
+
+    // Calculate discount amount
+    let discountAmount = 0;
+    if (promo.type === 'flat') {
+      discountAmount = promo.discount;
+    } else {
+      discountAmount = Math.round((subtotal * promo.discount) / 100);
+      if (promo.maxDiscount && discountAmount > promo.maxDiscount) {
+        discountAmount = promo.maxDiscount;
+      }
+    }
+
+    discountAmount = Math.min(discountAmount, Math.max(0, subtotal - 1));
+    const finalAmount = Math.max(1, subtotal - discountAmount);
+
+    return res.json({
+      success: true,
+      valid: true,
+      coupon: {
+        code,
+        type: promo.type,
+        discount: promo.discount,
+        minAmount: promo.minAmount,
+        maxDiscount: promo.maxDiscount,
+        description: promo.desc
+      },
+      discountAmount,
+      finalAmount
+    });
+  } catch (error: any) {
+    console.error("Promo validation error:", error);
+    res.status(500).json({ success: false, valid: false, error: "Failed to validate promo code" });
+  }
+});
+
+// --- FIREBASE CRASHLYTICS & ERROR TELEMETRY ENDPOINT ---
+app.post("/api/telemetry/crash-report", async (req, res) => {
+  try {
+    const report = req.body || {};
+
+    // Sanitize and normalize report
+    const sanitizedReport = {
+      message: String(report.message || 'Unknown Error').substring(0, 500),
+      stack: String(report.stack || '').substring(0, 4000),
+      name: String(report.name || 'Error').substring(0, 100),
+      isFatal: Boolean(report.isFatal),
+      userId: report.userId ? String(report.userId).substring(0, 100) : null,
+      deviceId: String(report.deviceId || 'unknown').substring(0, 100),
+      url: String(report.url || '').substring(0, 500),
+      userAgent: String(report.userAgent || '').substring(0, 300),
+      customKeys: report.customKeys && typeof report.customKeys === 'object' ? report.customKeys : {},
+      breadcrumbs: Array.isArray(report.breadcrumbs) ? report.breadcrumbs.slice(-20) : [],
+      appVersion: String(report.appVersion || '2.4.0'),
+      platform: String(report.platform || 'web'),
+      ip: req.ip || req.socket.remoteAddress || 'unknown'
+    };
+
+    console.warn(`[Crashlytics Telemetry] ${sanitizedReport.isFatal ? '🚨 FATAL' : '⚠️ NON-FATAL'}: ${sanitizedReport.name} - ${sanitizedReport.message} (Device: ${sanitizedReport.deviceId})`);
+
+    // Note: We skip writing to Firestore via Admin SDK here because the client 
+    // already writes directly to the `crash_reports` collection if online, 
+    // and the server service account may lack explicit cross-project datastore permissions.
+
+    res.json({ success: true, recorded: true });
+  } catch (err: any) {
+    console.error("Failed to process crash telemetry:", err);
+    res.status(500).json({ success: false, error: "Telemetry ingestion failed" });
+  }
+});
+
+app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
+  const userId = (req as any).user?.uid || 'guest';
+  const idempotencyKey = (req.headers['idempotency-key'] as string) || req.body.idempotencyKey || '';
+  const db = adminDb();
+
+  try {
+    const { 
+      itemType, 
+      itemId, 
+      packageId, 
+      hotelId, 
+      carId, 
+      flightId, 
+      quantity, 
+      travelersCount, 
+      amount: customAmount,
+      promoCode, 
+      deviceId 
+    } = req.body;
+
     const resolvedItemId = itemId || packageId || hotelId || carId || flightId;
     const resolvedItemType = itemType || (packageId ? "package" : hotelId ? "hotel" : carId ? "car" : flightId ? "flight" : "package");
     const resolvedQuantity = quantity || travelersCount || 1;
+    const cleanDeviceId = (deviceId || '').trim();
 
-    if (!resolvedItemId) {
-      return res.status(400).json({ error: "Item ID is required" });
+    // 1. Idempotency Check: Prevent double charges and network drop duplicates
+    if (idempotencyKey) {
+      const existingRecord = await IdempotencyEngine.checkKey(idempotencyKey, userId, db);
+      if (existingRecord) {
+        if (existingRecord.status === 'COMPLETED' && existingRecord.responsePayload) {
+          res.setHeader('X-Idempotent-Replay', 'true');
+          return res.status(existingRecord.httpStatus || 200).json(existingRecord.responsePayload);
+        }
+        if (existingRecord.status === 'PROCESSING') {
+          return res.status(409).json({ 
+            error: "Payment order is already being processed. Please do not submit duplicate requests." 
+          });
+        }
+      }
+
+      // Acquire lock for this key
+      const locked = await IdempotencyEngine.acquireLock(idempotencyKey, userId, db);
+      if (!locked) {
+        return res.status(409).json({ 
+          error: "Concurrent checkout detected for this idempotency key." 
+        });
+      }
+    }
+
+    if (!resolvedItemId && !customAmount) {
+      if (idempotencyKey) await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
+      return res.status(400).json({ error: "Item ID or Amount is required" });
     }
     if (resolvedQuantity <= 0) {
+      if (idempotencyKey) await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
       return res.status(400).json({ error: "Quantity must be strictly greater than 0" });
     }
 
     let unitPrice = 0;
-    const db = adminDb();
 
     try {
-      if (resolvedItemType === "package") {
-        if (!db) throw new Error("Database offline");
+      if (resolvedItemType === "package" && resolvedItemId && db) {
         let pkgDoc = await db.collection("packages").doc(resolvedItemId).get();
         if (!pkgDoc.exists) {
-          // Automatically seed the packages if the document is missing
           const defaultPackagesToSeed = [
             { id: "pkg_ratnagiri_1", title: "Ratnagiri Beach & Mango Tour", price: 3800, destination: "Ratnagiri" },
             { id: "pkg_goa_1", title: "Goa Coastal Escapade", price: 8900, destination: "Goa" },
@@ -2538,17 +2752,17 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
         if (pkgDoc.exists) {
           unitPrice = pkgDoc.data()?.price || 0;
         }
-      } else if (resolvedItemType === "hotel" && db) {
+      } else if (resolvedItemType === "hotel" && resolvedItemId && db) {
         const hotelDoc = await db.collection("hotels").doc(resolvedItemId).get();
         if (hotelDoc.exists) {
           unitPrice = hotelDoc.data()?.price || hotelDoc.data()?.pricePerNight || 0;
         }
-      } else if (resolvedItemType === "car" && db) {
+      } else if (resolvedItemType === "car" && resolvedItemId && db) {
         const carDoc = await db.collection("cars").doc(resolvedItemId).get();
         if (carDoc.exists) {
           unitPrice = carDoc.data()?.price || carDoc.data()?.ratePerDay || 0;
         }
-      } else if (resolvedItemType === "flight" && db) {
+      } else if (resolvedItemType === "flight" && resolvedItemId && db) {
         const flightDoc = await db.collection("flights").doc(resolvedItemId).get();
         if (flightDoc.exists) {
           unitPrice = flightDoc.data()?.price || 0;
@@ -2559,7 +2773,9 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
     }
 
     if (unitPrice === 0) {
-      if (resolvedItemType === "package") {
+      if (customAmount && Number(customAmount) > 0) {
+        unitPrice = Number(customAmount) / resolvedQuantity;
+      } else if (resolvedItemType === "package") {
         unitPrice = 5000;
       } else if (resolvedItemType === "hotel") {
         const fallbackHotels: Record<string, number> = {
@@ -2580,19 +2796,45 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
           "flight_6e_202": 4200
         };
         unitPrice = fallbackFlights[resolvedItemId] || 4800;
+      } else {
+        unitPrice = 2500;
       }
     }
 
-    const totalAmount = unitPrice * resolvedQuantity;
+    let totalAmount = Math.round(unitPrice * resolvedQuantity);
+
+    // 2. Anti-Promo Fraud Check during order creation
+    if (promoCode && cleanDeviceId && db) {
+      const upperPromo = String(promoCode).trim().toUpperCase();
+      if (['WELCOME500', 'NEWUSER', 'FIRSTFLY'].includes(upperPromo)) {
+        try {
+          const deviceUsed = await db.collection("device_promos")
+            .where("deviceId", "==", cleanDeviceId)
+            .where("promoCode", "==", upperPromo)
+            .limit(1)
+            .get();
+
+          if (!deviceUsed.empty) {
+            if (idempotencyKey) await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
+            return res.status(403).json({
+              error: "Promo code has already been redeemed on this device."
+            });
+          }
+        } catch (e) {
+          console.warn("Device promo check notice:", e);
+        }
+      }
+    }
 
     if (totalAmount <= 0) {
+      if (idempotencyKey) await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
       return res.status(400).json({ error: "Calculated payment amount must be strictly greater than 0" });
     }
 
     const options = {
       amount: totalAmount * 100, // paise
       currency: "INR",
-      receipt: `rcpt_checkout_${Date.now()}`
+      receipt: `rcpt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`
     };
 
     const order = await razorpay.orders.create(options);
@@ -2601,34 +2843,60 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
       try {
         await db.collection("checkout_orders").doc(order.id).set({
           orderId: order.id,
-          itemId: resolvedItemId,
+          itemId: resolvedItemId || 'custom_item',
           itemType: resolvedItemType,
           quantity: resolvedQuantity,
           unitPrice,
           totalAmount,
           currency: "INR",
-          userId: (req as any).user.uid,
+          userId,
+          deviceId: cleanDeviceId || 'unknown',
+          promoCode: promoCode || null,
+          idempotencyKey: idempotencyKey || null,
           status: "PENDING",
           createdAt: FieldValue.serverTimestamp()
         });
+
+        // Record device promo usage if promoCode applied
+        if (promoCode && cleanDeviceId) {
+          await db.collection("device_promos").add({
+            deviceId: cleanDeviceId,
+            userId,
+            promoCode: String(promoCode).toUpperCase(),
+            orderId: order.id,
+            timestamp: FieldValue.serverTimestamp()
+          });
+        }
       } catch (dbError) {
         console.warn("Could not save checkout order to database:", dbError);
       }
     }
 
-    res.json({
+    const responsePayload = {
       success: true,
       order,
       calculatedAmount: totalAmount,
       itemId: resolvedItemId,
-      itemType: resolvedItemType
-    });
+      itemType: resolvedItemType,
+      idempotencyKey: idempotencyKey || null
+    };
+
+    // Commit response to Idempotency Engine
+    if (idempotencyKey) {
+      await IdempotencyEngine.commitResponse(idempotencyKey, userId, responsePayload, 200, db);
+    }
+
+    res.json(responsePayload);
   } catch (error: any) {
     console.error("Error creating secure checkout order:", error);
+    if (idempotencyKey) {
+      await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
+    }
     const errorMessage = error?.error?.description || error.message || "Failed to create secure checkout order";
     res.status(500).json({ error: errorMessage });
   }
 });
+
 
 app.post("/api/wallet/verify-payment", requireAuth, async (req, res) => {
   try {

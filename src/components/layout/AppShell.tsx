@@ -98,7 +98,7 @@ export const AppShell: React.FC<AppShellProps> = ({
       <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-white/40 pointer-events-none z-[1]" />
 
       {/* Global Header */}
-      <header className="sticky top-0 left-0 right-0 glass-effect border-b border-slate-200/60 px-3 py-2.5 flex items-center justify-between z-[60] shadow-sm shrink-0 bg-white/90 backdrop-blur-md gap-2">
+      <header className="sticky top-0 left-0 right-0 bg-white border-b border-slate-200 px-3 py-2.5 flex items-center justify-between z-[60] shadow-sm shrink-0 gap-2">
         {/* Extreme Left: Routripo App Logo */}
         <div className="flex items-center gap-2">
         <button
@@ -174,13 +174,13 @@ export const AppShell: React.FC<AppShellProps> = ({
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 text-white rounded-2xl shadow-2xl p-4 z-[200] space-y-3">
-                  <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 text-slate-900 rounded-2xl shadow-2xl p-4 z-[200] space-y-3">
+                  <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
                     <img src={currentUser.avatar} alt={currentUser.name} className="w-10 h-10 rounded-full border border-coral object-cover" />
                     <div className="overflow-hidden">
-                      <p className="font-extrabold text-xs text-white truncate">{currentUser.name}</p>
-                      <p className="text-[10px] font-mono text-slate-400 truncate">{currentUser.email}</p>
-                      <span className="inline-block mt-0.5 px-2 py-0.2 rounded-md bg-emerald/20 text-emerald border border-emerald/30 text-[9px] font-black uppercase">
+                      <p className="font-extrabold text-xs text-slate-900 truncate">{currentUser.name}</p>
+                      <p className="text-[10px] font-mono text-slate-500 truncate">{currentUser.email}</p>
+                      <span className="inline-block mt-0.5 px-2 py-0.2 rounded-md bg-emerald/10 text-emerald-700 border border-emerald/20 text-[9px] font-black uppercase">
                         Google Authenticated
                       </span>
                     </div>
@@ -190,7 +190,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                       setShowUserMenu(false);
                       logout();
                     }}
-                    className="w-full py-2 px-3 bg-coral/20 hover:bg-coral/30 text-coral border border-coral/40 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2 px-3 bg-coral/10 hover:bg-coral/20 text-coral border border-coral/20 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <User className="w-3.5 h-3.5" />
                     <span>{lang === 'mr' ? 'लॉगआउट (Sign Out)' : 'Sign Out'}</span>

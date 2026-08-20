@@ -6,10 +6,10 @@
 
 import { fetchDuffelFlights } from '../../services/duffelFlightService';
 export { fetchDuffelFlights as fetchCachedFlights } from '../../services/duffelFlightService';
-import { fetchCjHotels } from '../../services/cjHotelService';
-export { fetchCjHotels } from '../../services/cjHotelService';
+import { fetchFoursquareHotels } from '../../services/foursquareHotelService';
+export { fetchFoursquareHotels };
 import { searchLocalFlights, searchLocalTrainStatus } from '../../services/localSearchService';
-import { calculateLiveTrainStatus } from '../../services/travelTimeService';
+import { calculateLiveTrainStatus, getCodesForCityOrInput } from '../../services/travelTimeService';
 
 export interface FlightOption {
   id: string;
@@ -181,8 +181,12 @@ export function formatDateToYYYYMMDD(rawDate?: string | Date): string {
 export async function fetchFlightData(params: FetchFlightParams): Promise<FlightOption[]> {
   const { origin, destination, departDate, adults = 1, cabinClass = "economy" } = params;
 
-  const originCode = (origin || "BOM").trim().toUpperCase().slice(0, 3);
-  const destCode = (destination || "DEL").trim().toUpperCase().slice(0, 3);
+  // Resolve City Name to potential airport codes
+  const originCodes = getCodesForCityOrInput(origin || "BOM");
+  const destCodes = getCodesForCityOrInput(destination || "DEL");
+  
+  const originCode = originCodes[0].trim().toUpperCase().slice(0, 3);
+  const destCode = destCodes[0].trim().toUpperCase().slice(0, 3);
   const dateStr = formatDateToYYYYMMDD(departDate);
 
   if (params.onRequestParams) {
@@ -256,7 +260,7 @@ export async function fetchFlightData(params: FetchFlightParams): Promise<Flight
  * Dynamic API Fetching logic for Hotels using CJ Affiliate API
  */
 export async function fetchHotelData(params: FetchHotelParams): Promise<HotelOption[]> {
-  return fetchCjHotels({
+  return fetchFoursquareHotels({
     destination: params.destination,
     checkIn: params.checkIn,
     checkOut: params.checkOut,

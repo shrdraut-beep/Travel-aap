@@ -49,7 +49,7 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
             departureTime: '08:00 AM',
             arrivalTime: '10:30 AM',
             duration: '2h 30m',
-            price: 5400 + Math.floor(Math.random() * 2000),
+            price: 5400,
             cabin: 'Economy'
           }
         ];
@@ -68,22 +68,48 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
       <div className="flex items-center justify-between">
         <div>
           <h4 className="font-bold text-slate-800">Adults</h4>
-          <p className="text-[10px] text-slate-500">12+ years</p>
+          <p className="text-[10px] text-slate-500">12+ years (Max 9 per booking)</p>
         </div>
         <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
-          <button onClick={() => setAdults(Math.max(1, adults - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Minus className="w-4 h-4"/></button>
+          <button 
+            type="button"
+            onClick={() => setAdults(Math.max(1, adults - 1))} 
+            disabled={adults <= 1}
+            className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 disabled:opacity-40 cursor-pointer"
+          >
+            <Minus className="w-4 h-4"/>
+          </button>
           <span className="font-black text-slate-900 w-4 text-center">{adults}</span>
-          <button onClick={() => setAdults(Math.min(9, adults + 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Plus className="w-4 h-4"/></button>
+          <button 
+            type="button"
+            onClick={() => {
+              if (adults < 9) {
+                setAdults(adults + 1);
+              }
+            }} 
+            disabled={adults >= 9}
+            className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 disabled:opacity-40 cursor-pointer"
+          >
+            <Plus className="w-4 h-4"/>
+          </button>
         </div>
       </div>
+
+      {adults >= 9 && (
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 leading-snug">
+          ⚠️ Airline Rule: Maximum 9 passengers allowed per standard booking. For more than 9 passengers, please make a Group Booking.
+        </div>
+      )}
+
       <div>
         <h4 className="font-bold text-slate-800 mb-3">Cabin Class</h4>
         <div className="grid grid-cols-3 gap-2">
           {['economy', 'business', 'first'].map(c => (
             <button
               key={c}
+              type="button"
               onClick={() => setCabinClass(c)}
-              className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${cabinClass === c ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${cabinClass === c ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
             >
               {c}
             </button>

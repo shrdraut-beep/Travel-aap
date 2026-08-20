@@ -2,6 +2,8 @@ import React from 'react';
 import { Plane, Bus, Train, Clock, ExternalLink, ShieldCheck, Zap, Loader2 } from 'lucide-react';
 import { getFullStationDetails } from '../../services/travelTimeService';
 
+import { FunFactsLoader } from '../common/FunFactsLoader';
+
 export interface TransportOptionsProps {
   mode: 'flight' | 'bus' | 'train' | 'hotel' | 'car';
   data: any;
@@ -86,18 +88,8 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center space-y-4">
-        <div className="w-16 h-16 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-sm animate-pulse">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
-        <div className="space-y-1">
-          <h5 className="font-black text-slate-900 text-lg">
-            {lang === 'mr' ? 'लाईव्ह वेळापत्रक आणण्यासाठी सिस्टीम अपडेट होत आहे...' : 'System is updating to fetch live schedules...'}
-          </h5>
-          <p className="text-xs font-semibold text-slate-500">
-            System is updating to fetch live schedules from verified travel APIs.
-          </p>
-        </div>
+      <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm text-center">
+        <FunFactsLoader />
       </div>
     );
   }
@@ -190,7 +182,8 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
             {mode === 'flight' && (lang === 'mr' ? 'उपलब्ध उड्डाणे (Flights)' : 'Available Flights')}
             {mode === 'bus' && (lang === 'mr' ? 'उपलब्ध बसेस (Buses)' : 'Available Buses')}
             {mode === 'train' && (lang === 'mr' ? 'उपलब्ध गाड्या (Trains)' : 'Available Trains')}
-            {origin && destination ? ` (${origin} ➔ ${destination})` : ''}
+            {mode === 'hotel' && (lang === 'mr' ? 'उपलब्ध हॉटेल्स (Hotels)' : 'Available Hotels')}
+            {(mode !== 'hotel' && origin && destination) ? ` (${origin} ➔ ${destination})` : ''}
           </h4>
           <span className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-0.5 rounded-full">
             {items.length} {lang === 'mr' ? 'पर्याय' : 'Options'}
@@ -219,7 +212,6 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
           const rawDepTime = flight.departureTime || flight.departure_time || flight.time || '00:00';
           const dur = flight.duration || (lang === 'mr' ? '२ तास ३० मि' : '2h 30m');
           
-          // Calculate arrival time safely from departure and duration to fix the math bugs
           const rawArrTime = addDurationToTime(rawDepTime, dur);
           
           const depTime = safeFormat12Hour(rawDepTime);
@@ -288,24 +280,73 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>{lang === 'mr' ? 'पार्टनर असिस्टन्स' : 'Partner Assistance'}</span>
                 </span>
+                <div className="flex items-center gap-4">
+                  <span className={`font-black text-lg ${
+                    (flight.price || 5500) < 4000 ? 'text-emerald-600' :
+                    (flight.price || 5500) < 6000 ? 'text-orange-600' : 'text-rose-600'
+                  }`}>
+                    {currencySymbol}{(flight.price || 5500).toLocaleString('en-IN')}
+                  </span>
+                  <button
+                    className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onBookNow) {
+                        onBookNow({
+                          id: flightNo,
+                          title: `${airline} (${flightNo})`,
+                          vertical: 'flight',
+                          subtitle: `${srcCode} → ${dstCode}`,
+                          location: `${srcCode} to ${dstCode}`,
+                          time: `${depTime} - ${arrTime}`,
+                          duration: dur,
+                          amount: flight.price || 5500,
+                          provider: airline
+                        });
+                      }
+                    }}
+                  >
+                    <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {mode === 'hotel' && items.slice(0, visibleCount).map((hotel: any, index: number) => {
+          return (
+            <div
+              key={hotel.id || index}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-md hover:shadow-xl transition-all space-y-4"
+            >
+              <div className="flex items-center gap-4">
+                <img src={hotel.image} alt={hotel.name} className="w-24 h-24 rounded-2xl object-cover" />
+                <div className="flex-1">
+                  <h5 className="font-black text-slate-900 text-base">{hotel.name}</h5>
+                  <p className="text-xs font-bold text-slate-500">{hotel.location}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">⭐ {hotel.rating}</span>
+                    <span className="text-xs font-bold text-slate-500">{hotel.reviewsCount} reviews</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-black text-lg text-slate-900 block">{currencySymbol}{hotel.pricePerNight}</span>
+                  <span className="text-xs font-bold text-slate-500 block">per night</span>
+                </div>
+              </div>
+              <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+                <div className="flex gap-2 flex-wrap">
+                  {hotel.amenities.slice(0, 3).map((amenity: string, idx: number) => (
+                    <span key={idx} className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{amenity}</span>
+                  ))}
+                </div>
                 <button
-                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (onBookNow) {
-                      onBookNow({
-                        id: flightNo,
-                        title: `${airline} (${flightNo})`,
-                        vertical: 'flight',
-                        subtitle: `${srcCode} → ${dstCode}`,
-                        location: `${srcCode} to ${dstCode}`,
-                        time: `${depTime} - ${arrTime}`,
-                        duration: dur,
-                        amount: 5500, // Dummy fallback price for generic flights
-                        provider: airline
-                      });
-                    }
+                    if (onBookNow) onBookNow(hotel);
                   }}
+                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
                 >
                   <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
                 </button>

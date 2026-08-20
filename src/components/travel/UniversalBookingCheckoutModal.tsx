@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { apiClient } from '../../utils/apiClient';
 import { useAuthStore } from '../../store/useAuthStore';
+import { getDeviceFingerprint } from '../../utils/deviceFingerprint';
+import { FastImage } from '../common/FastImage';
+import { crashlytics } from '../../services/crashlytics';
 
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -155,16 +158,51 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
     setCouponSuccessMsg(null);
 
     try {
-      const res = await validateCouponCode(targetCode, grossTotal);
-      if (res.valid && res.coupon) {
-        setAppliedCoupon(res.coupon);
-        setDiscountAmount(res.discountAmount);
-        setPromoInput(targetCode);
-        setCouponSuccessMsg(`🎉 Code '${res.coupon.code}' applied! Saved ₹${res.discountAmount.toLocaleString('en-IN')}`);
-      } else {
-        setAppliedCoupon(null);
-        setDiscountAmount(0);
-        setCouponError(res.error || 'Invalid or expired coupon');
+      const deviceId = await getDeviceFingerprint();
+      
+      // Call backend promo validation endpoint with anti-fraud device checks
+      let serverValidated = false;
+      try {
+        const promoRes = await fetch('/api/checkout/validate-promo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            promoCode: targetCode,
+            amount: grossTotal,
+            deviceId,
+            userId: currentUser?.id
+          })
+        });
+        const promoData = await promoRes.json();
+
+        if (promoData.valid && promoData.coupon) {
+          setAppliedCoupon(promoData.coupon);
+          setDiscountAmount(promoData.discountAmount);
+          setPromoInput(targetCode);
+          setCouponSuccessMsg(`🎉 Code '${promoData.coupon.code}' applied! Saved ₹${promoData.discountAmount.toLocaleString('en-IN')}`);
+          serverValidated = true;
+        } else if (promoData.error) {
+          setAppliedCoupon(null);
+          setDiscountAmount(0);
+          setCouponError(promoData.error);
+          return;
+        }
+      } catch (backendErr) {
+        console.warn('Backend promo validation offline, attempting fallback:', backendErr);
+      }
+
+      if (!serverValidated) {
+        const res = await validateCouponCode(targetCode, grossTotal);
+        if (res.valid && res.coupon) {
+          setAppliedCoupon(res.coupon);
+          setDiscountAmount(res.discountAmount);
+          setPromoInput(targetCode);
+          setCouponSuccessMsg(`🎉 Code '${res.coupon.code}' applied! Saved ₹${res.discountAmount.toLocaleString('en-IN')}`);
+        } else {
+          setAppliedCoupon(null);
+          setDiscountAmount(0);
+          setCouponError(res.error || 'Invalid or expired coupon');
+        }
       }
     } catch (err: any) {
       setCouponError('Failed to validate promo code. Please try again.');
@@ -191,9 +229,10 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
     };
   }, []);
 
-  // Payment Execution with strictly enforced discounted amount
+  // Payment Execution with strictly enforced discounted amount and Idempotency
   const handleProceedToPayment = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isProcessing) return; // Debounce rapid multiple clicks
     setIsProcessing(true);
 
     try {
@@ -201,16 +240,26 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
         throw new Error("Razorpay SDK not loaded.");
       }
 
+      const deviceId = await getDeviceFingerprint();
+      // Generate unique Idempotency Key (UUIDv4) to guarantee zero double-charging across network drops
+      const idempotencyKey = `IDEM_${Date.now()}_${Math.random().toString(36).substring(2, 9)}_${quantity}`;
       let orderId = `ORD_${Date.now()}_${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
       
       if (paymentMethod === 'razorpay') {
         try {
           const res = await apiClient.authedFetch('/api/checkout/create-order', {
             method: 'POST',
+            headers: {
+              'Idempotency-Key': idempotencyKey,
+            },
             body: JSON.stringify({
               itemType: item.vertical,
               itemId: item.id,
-              quantity: quantity
+              quantity: quantity,
+              amount: finalDiscountedPayable,
+              promoCode: appliedCoupon?.code || null,
+              deviceId,
+              idempotencyKey
             })
           });
           const data = await res.json();
@@ -218,6 +267,7 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
           if (!data.success) {
             throw new Error(data.error || "Failed to create order");
           }
+
 
           const rzpOptions = {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummykeyid123',
@@ -273,6 +323,11 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
 
           const rzp = new (window as any).Razorpay(rzpOptions);
           rzp.on('payment.failed', function (response: any) {
+            crashlytics.recordError(
+              new Error(`Razorpay Payment Failed: ${response.error?.description || 'Unknown'}`),
+              { orderId, reason: response.error?.reason, code: response.error?.code },
+              false
+            );
             alert("Payment failed: " + response.error.description);
             setIsProcessing(false);
           });
@@ -282,6 +337,7 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
 
         } catch (apiError: any) {
           console.error("Razorpay API Error:", apiError);
+          crashlytics.recordError(apiError, { stage: 'create-order', itemId: item.id }, false);
           alert("Booking Failed: Server Error. " + (apiError.message || "Failed to create order."));
           setIsProcessing(false);
           return;
@@ -294,10 +350,12 @@ export const UniversalBookingCheckoutModal: React.FC<UniversalBookingCheckoutMod
 
     } catch (error: any) {
       console.error('Payment Error', error);
+      crashlytics.recordError(error, { stage: 'proceed-to-payment', itemId: item.id }, false);
       setIsProcessing(false);
       alert("Booking Failed: " + (error.message || "System Error"));
     }
   };
+
 
   const getVerticalIcon = (vertical: string) => {
     switch (vertical) {

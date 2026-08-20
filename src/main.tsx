@@ -76,9 +76,7 @@ createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
     <LanguageProvider>
       <TripProvider>
-        <AppLockScreen>
-          <App />
-        </AppLockScreen>
+        <App />
       </TripProvider>
     </LanguageProvider>
   </ErrorBoundary>,

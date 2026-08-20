@@ -103,6 +103,7 @@ async function testConnection() {
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Connection check timeout')), 2000)
     );
+    timeoutPromise.catch(() => {}); // prevent unhandled rejection
     await Promise.race([
       getDoc(doc(db, 'test', 'connection')),
       timeoutPromise

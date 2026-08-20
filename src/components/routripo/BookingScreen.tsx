@@ -16,6 +16,8 @@ import { CarSearchTab } from "../travel/CarSearchTab";
 import { ExplorePackagesView } from "../views/ExplorePackagesView";
 
 import { UniversalBookingCheckoutModal, BookingItemPayload } from "../travel/UniversalBookingCheckoutModal";
+import { BookingFlowProvider } from "../../context/BookingFlowContext";
+import { BookingFlowModal } from "../booking/BookingFlowModal";
 
 interface BookingScreenProps {
   onLogout: () => void;
@@ -24,10 +26,11 @@ interface BookingScreenProps {
   onSOS?: () => void;
   onOpenSettings?: () => void;
   onOpenMyTickets?: () => void;
+  onBack?: () => void;
   lang?: string;
 }
 
-export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, onSOS, onOpenSettings, onOpenMyTickets, lang = "en" }: BookingScreenProps) {
+export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, onSOS, onOpenSettings, onOpenMyTickets, onBack, lang = "en" }: BookingScreenProps) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const scrolled = useScrolled(scrollRef);
   const [tab, setTab] = useState(initialTab);
@@ -153,7 +156,9 @@ export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, on
         scrolled={scrolled} 
         onLogout={onLogout} 
         onSOS={onSOS || onOpenSos || (() => {})} 
-        onOpenSettings={onOpenSettings} 
+        onOpenSettings={onOpenSettings}
+        onOpenMyTickets={onOpenMyTickets}
+        onBack={onBack}
       />
 
       {/* Toast Notification */}
@@ -490,11 +495,11 @@ export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, on
                 transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
-                {tab === "Flights" && <FlightSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} />}
-                {tab === "Hotels" && <HotelSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} />}
-                {tab === "Trains" && <TrainInfoTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} />}
-                {tab === "Bus" && <BusSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} />}
-                {tab === "Cars" && <CarSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} />}
+                {tab === "Flights" && <FlightSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} onBack={() => setTab("Packages")} />}
+                {tab === "Hotels" && <HotelSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} onBack={() => setTab("Packages")} />}
+                {tab === "Trains" && <TrainInfoTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} onBack={() => setTab("Packages")} />}
+                {tab === "Bus" && <BusSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} onBack={() => setTab("Packages")} />}
+                {tab === "Cars" && <CarSearchTab lang={lang} currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"} onBookNow={setCheckoutModalItem} onBack={() => setTab("Packages")} />}
                 {tab === "Packages" && (
                   <div className="space-y-4">
                     <ExplorePackagesView 
@@ -522,16 +527,18 @@ export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, on
       </div>
 
       {checkoutModalItem && (
-        <UniversalBookingCheckoutModal
-          isOpen={true}
-          onClose={() => setCheckoutModalItem(null)}
-          item={checkoutModalItem}
-          currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"}
-          lang={lang}
-          onBookingSuccess={(receipt) => {
-            showToast(`🎉 Booking verified: ${receipt.bookingId}`);
-          }}
-        />
+        <BookingFlowProvider>
+          <BookingFlowModal
+            isOpen={true}
+            onClose={() => setCheckoutModalItem(null)}
+            item={checkoutModalItem}
+            currencySymbol={CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹"}
+            lang={lang}
+            onBookingSuccess={(receipt) => {
+              showToast(`🎉 Booking verified: ${receipt.bookingId || receipt.pnr}`);
+            }}
+          />
+        </BookingFlowProvider>
       )}
     </div>
   );

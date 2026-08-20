@@ -48,6 +48,9 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    sourcemap: false,
+    minify: "esbuild",
+    cssMinify: true,
     rollupOptions: {
       input: "index.html",
       output: {
@@ -59,5 +62,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  esbuild: {
+    drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
+    legalComments: "none",
   },
 });

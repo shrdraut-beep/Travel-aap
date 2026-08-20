@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { Splash } from './components/routripo/Splash';
 import { LoginScreen } from './components/routripo/LoginScreen';
 import { HubScreen } from './components/routripo/HubScreen';
@@ -14,6 +13,7 @@ import { NewTripScreen } from './components/routripo/NewTripScreen';
 import { FutureTripScreen } from './components/routripo/FutureTripScreen';
 import { SosModal } from './components/modals/SosModal';
 import { CreateTripModal } from './components/modals/CreateTripModal';
+import { AuthModal } from './components/modals/AuthModal';
 import { useTripContext } from './context/TripContext';
 import { useAuthStore } from './store/useAuthStore';
 import { useLanguage } from './context/LanguageContext';
@@ -21,6 +21,10 @@ import { FuelCalculatorModal } from './components/modals/FuelCalculatorModal';
 
 import { MusicPlayerProvider } from './components/MusicPlayerContext';
 import { MusicPlayerBar } from './components/MusicPlayerBar';
+import { performRaspSecurityCheck } from './security/rasp';
+import { SecurityThreatModal } from './components/security/SecurityThreatModal';
+import { initCrashlytics, crashlytics } from './services/crashlytics';
+import { CrashlyticsErrorBoundary } from './components/common/CrashlyticsErrorBoundary';
 
 
 // Real, fully-wired role portals (Firestore + business logic already inside — not mockups)
@@ -55,10 +59,34 @@ export default function App() {
   ];
 
   React.useEffect(() => {
+    initCrashlytics();
+  }, []);
+
+  React.useEffect(() => {
     const unsubscribe = initAuthListener();
     return () => unsubscribe();
   }, [initAuthListener]);
+
+  React.useEffect(() => {
+    crashlytics.setUserId(currentUser?.id || null);
+    if (currentUser?.email) {
+      crashlytics.setCustomKey('userEmail', currentUser.email);
+    }
+  }, [currentUser]);
   
+  // RASP (Runtime Application Self-Protection) Threat Check
+  const [raspThreats, setRaspThreats] = useState<string[]>([]);
+  const [isRaspModalOpen, setIsRaspModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    performRaspSecurityCheck().then((status) => {
+      if (!status.safeToRun && status.threatDetails.length > 0) {
+        setRaspThreats(status.threatDetails);
+        setIsRaspModalOpen(true);
+      }
+    });
+  }, []);
+
   // Modals state
   const [isSosOpen, setIsSosOpen] = useState(false);
   const [isCreateTripOpen, setIsCreateTripOpen] = useState(false);
@@ -170,7 +198,7 @@ export default function App() {
   const glow = "shadow-rose-500/30";
 
   return (
-    <ErrorBoundary fallback={<div>Error occurred</div>}>
+    <CrashlyticsErrorBoundary>
       <MusicPlayerProvider>
       <div className="w-full h-full min-h-screen relative overflow-hidden font-[Inter]">
         {phase === "splash" && <Splash onDone={() => setPhase("login")} />}
@@ -214,6 +242,7 @@ export default function App() {
                 onSOS={() => setIsSosOpen(true)}
                 initialTab={bookingTab} 
                 onOpenSettings={() => setActive('settings')} onOpenMyTickets={() => setActive('my-tickets')}
+                onBack={() => setActive('trips')}
                 lang={lang}
               />
             )}
@@ -279,6 +308,7 @@ export default function App() {
             )}
             
             {/* Global Modals */}
+            <AuthModal />
             {showFuelCalc && (
                <FuelCalculatorModal 
                   isOpen={showFuelCalc}
@@ -307,11 +337,13 @@ export default function App() {
                   }}
                />
             )}
+            
+            {/* Removed RASP Anti-Tamper Security Modal as per user request */}
           </>
         )}
       </div>
       {role === 'user' && <MusicPlayerBar lang="en" themeColor="#6366f1" />}
       </MusicPlayerProvider>
-    </ErrorBoundary>
+    </CrashlyticsErrorBoundary>
   );
 }

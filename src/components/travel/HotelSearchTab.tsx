@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { TransportOptions } from './TransportOptions';
 import { BookingFunnelLayout } from './BookingFunnelLayout';
 import { Users, Minus, Plus } from 'lucide-react';
+import { fetchHotelData } from './api';
 
 export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
   const isMr = lang === 'mr';
-  const [destination, setDestination] = useState('');
+  const [location, setLocation] = useState('');
   const [checkInDate, setCheckInDate] = useState('');
   const [guests, setGuests] = useState(2);
   const [rooms, setRooms] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [childrenAges, setChildrenAges] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [hotelData, setHotelData] = useState<any[]>([]);
@@ -16,41 +19,43 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
   const handleHotelSearch = async () => {
     setIsLoading(true);
     setHasSearched(true);
-    setTimeout(() => {
-      setHotelData([
-        {
-          id: 'HTL-1',
-          name: 'Taj Exotica Resort & Spa',
-          location: destination || 'Goa',
-          rating: 4.9,
-          reviews: 1284,
-          price: 18500,
-          originalPrice: 22000,
-          image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=800',
-          amenities: ['Pool', 'Spa', 'Beachfront', 'Free Breakfast']
-        },
-        {
-          id: 'HTL-2',
-          name: 'W Hotel',
-          location: destination || 'Goa',
-          rating: 4.7,
-          reviews: 856,
-          price: 15200,
-          originalPrice: 18000,
-          image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
-          amenities: ['Pool', 'Bar', 'Gym', 'Pet Friendly']
-        }
-      ]);
+    try {
+      const results = await fetchHotelData({
+        destination: location,
+        checkIn: checkInDate || new Date().toISOString().split('T')[0],
+        checkOut: checkInDate || new Date().toISOString().split('T')[0],
+        adults: guests
+      });
+      setHotelData(results);
+    } catch (error) {
+      console.error("Hotel search error:", error);
+      setHotelData([]);
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
+  };
+
+  const handleChildrenChange = (newChildrenCount: number) => {
+    setChildren(newChildrenCount);
+    if (newChildrenCount > childrenAges.length) {
+      setChildrenAges([...childrenAges, ...Array(newChildrenCount - childrenAges.length).fill(1)]);
+    } else {
+      setChildrenAges(childrenAges.slice(0, newChildrenCount));
+    }
   };
 
   const renderPassengerSelector = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-bold text-slate-800">Guests</h4>
+        <h4 className="font-bold text-slate-800">Rooms</h4>
+        <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
+          <button onClick={() => setRooms(Math.max(1, rooms - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Minus className="w-4 h-4"/></button>
+          <span className="font-black text-slate-900 w-4 text-center">{rooms}</span>
+          <button onClick={() => setRooms(Math.min(5, rooms + 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Plus className="w-4 h-4"/></button>
         </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <h4 className="font-bold text-slate-800">Adults</h4>
         <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
           <button onClick={() => setGuests(Math.max(1, guests - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Minus className="w-4 h-4"/></button>
           <span className="font-black text-slate-900 w-4 text-center">{guests}</span>
@@ -58,15 +63,36 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-bold text-slate-800">Rooms</h4>
-        </div>
+        <h4 className="font-bold text-slate-800">Children</h4>
         <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
-          <button onClick={() => setRooms(Math.max(1, rooms - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Minus className="w-4 h-4"/></button>
-          <span className="font-black text-slate-900 w-4 text-center">{rooms}</span>
-          <button onClick={() => setRooms(Math.min(5, rooms + 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Plus className="w-4 h-4"/></button>
+          <button onClick={() => handleChildrenChange(Math.max(0, children - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Minus className="w-4 h-4"/></button>
+          <span className="font-black text-slate-900 w-4 text-center">{children}</span>
+          <button onClick={() => handleChildrenChange(Math.min(4, children + 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Plus className="w-4 h-4"/></button>
         </div>
       </div>
+      {children > 0 && (
+        <div className="space-y-4">
+          <h4 className="font-bold text-slate-800">Child's Age</h4>
+          {childrenAges.map((age, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-600">Child {index + 1}</span>
+              <select 
+                value={age} 
+                onChange={(e) => {
+                  const newAges = [...childrenAges];
+                  newAges[index] = parseInt(e.target.value);
+                  setChildrenAges(newAges);
+                }}
+                className="bg-slate-100 rounded-lg p-2 font-bold text-slate-900"
+              >
+                {Array.from({length: 18}, (_, i) => i).map(i => (
+                  <option key={i} value={i}>{i === 0 ? '<1' : i}</option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
@@ -76,15 +102,15 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
       onBack={onBack}
       origin=""
       setOrigin={() => {}}
-      destination={destination}
-      setDestination={setDestination}
+      destination={location}
+      setDestination={setLocation}
       date={checkInDate}
       setDate={setCheckInDate}
       onSearch={handleHotelSearch}
       isLoading={isLoading}
       hasSearched={hasSearched}
       lang={lang}
-      passengerSummary={`${guests} Guest${guests > 1 ? 's' : ''}, ${rooms} Room${rooms > 1 ? 's' : ''}`}
+      passengerSummary={`${guests} Adult${guests > 1 ? 's' : ''}, ${children > 0 ? `${children} Child` : ''} ${rooms} Room${rooms > 1 ? 's' : ''}`}
       renderPassengerSelector={renderPassengerSelector}
       renderResults={() => (
         <TransportOptions
@@ -93,7 +119,7 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
           isLoading={isLoading}
           isCached={false}
           origin=""
-          destination={destination}
+          destination={location}
           lang={lang}
           currencySymbol={currencySymbol}
           onBookNow={onBookNow}
