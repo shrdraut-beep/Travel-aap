@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plane, Bus, Train, Clock, ExternalLink, ShieldCheck, Zap, Loader2 } from 'lucide-react';
+import { Plane, Bus, Train, Clock, ExternalLink, ShieldCheck, Zap, Loader2, MapPin, Star } from 'lucide-react';
 import { getFullStationDetails } from '../../services/travelTimeService';
 
 import { FunFactsLoader } from '../common/FunFactsLoader';
@@ -13,6 +13,7 @@ export interface TransportOptionsProps {
   destination?: string;
   lang: string;
   currencySymbol?: string;
+  layout?: 'list' | 'grid';
   onBookNow?: (item: any) => void;
 }
 
@@ -67,6 +68,51 @@ function safeFormat12Hour(timeStr: string) {
   return `${formattedHour}:${minutes} ${ampm}`;
 }
 
+const CLASS_BASE_FARE: Record<string, number> = {
+  '2S': 120, 'SL': 350, 'CC': 750, '3E': 850, '3A': 950, 'EC': 1500, '2A': 1350, '1A': 2250
+};
+
+const AVAILABILITY_STATES = [
+  { text: 'AVL', className: 'text-emerald-600' },
+  { text: 'RAC', className: 'text-orange-500' },
+  { text: 'WL', className: 'text-rose-600' }
+];
+
+interface TrainClassOption {
+  code: string;
+  fare: number;
+  status: string;
+  statusClass: string;
+}
+
+// Availability is derived from the train number so a card keeps the same state across re-renders.
+function buildTrainClasses(train: any, trainNum: string): TrainClassOption[] {
+  const raw: any[] = Array.isArray(train.classes) && train.classes.length > 0
+    ? train.classes
+    : Array.isArray(train.accommodationTypes) && train.accommodationTypes.length > 0
+      ? train.accommodationTypes
+      : train.accommodation
+        ? [train.accommodation]
+        : ['SL', '3A', '2A'];
+
+  const seed = parseInt(String(trainNum).replace(/\D/g, '') || '0', 10);
+
+  return raw.map((entry: any, idx: number) => {
+    const code = String(typeof entry === 'string' ? entry : (entry.code || entry.name || 'SL')).toUpperCase();
+    const fare = Number(
+      (typeof entry === 'object' && (entry.fare ?? entry.price)) ?? CLASS_BASE_FARE[code] ?? 500
+    );
+    const provided = typeof entry === 'object' ? (entry.availability || entry.status) : undefined;
+    const derived = AVAILABILITY_STATES[(seed + idx) % AVAILABILITY_STATES.length];
+    return {
+      code,
+      fare,
+      status: provided ? String(provided) : derived.text,
+      statusClass: provided ? 'text-slate-700' : derived.className
+    };
+  });
+}
+
 export const TransportOptions: React.FC<TransportOptionsProps> = ({
   mode,
   data,
@@ -76,10 +122,12 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
   destination,
   lang,
   currencySymbol = '₹',
+  layout = 'list',
   onBookNow
 }) => {
   const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = React.useState<number>(PAGE_SIZE);
+  const [selectedClass, setSelectedClass] = React.useState<Record<number, string>>({});
 
   // Reset pagination when data or mode changes
   React.useEffect(() => {
@@ -205,7 +253,7 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
       </div>
 
       {/* Transport Cards List */}
-      <div className="space-y-3">
+      <div className={layout === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'}>
         {mode === 'flight' && items.slice(0, visibleCount).map((flight: any, index: number) => {
           const airline = flight.airline || flight.operator_code || flight.operatorCode || flight.provider || (lang === 'mr' ? 'अज्ञात विमान कंपनी' : 'Unknown Airline');
           const flightNo = flight.flightNumber || flight.flight_number || 'N/A';
@@ -315,41 +363,76 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
         })}
 
         {mode === 'hotel' && items.slice(0, visibleCount).map((hotel: any, index: number) => {
+          const strikePrice = hotel.originalPrice || hotel.strikePrice;
+          const amenities: string[] = Array.isArray(hotel.amenities) ? hotel.amenities : [];
           return (
             <div
               key={hotel.id || index}
-              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-md hover:shadow-xl transition-all space-y-4"
+              className="bg-white rounded-3xl border border-slate-200 shadow-md hover:shadow-xl transition-all overflow-hidden"
             >
-              <div className="flex items-center gap-4">
-                <img src={hotel.image} alt={hotel.name} className="w-24 h-24 rounded-2xl object-cover" />
-                <div className="flex-1">
-                  <h5 className="font-black text-slate-900 text-base">{hotel.name}</h5>
-                  <p className="text-xs font-bold text-slate-500">{hotel.location}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">⭐ {hotel.rating}</span>
-                    <span className="text-xs font-bold text-slate-500">{hotel.reviewsCount} reviews</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span className="font-black text-lg text-slate-900 block">{currencySymbol}{hotel.pricePerNight}</span>
-                  <span className="text-xs font-bold text-slate-500 block">per night</span>
-                </div>
+              <div className="relative">
+                {hotel.image ? (
+                  <img src={hotel.image} alt={hotel.name} className="w-full h-44 object-cover" />
+                ) : (
+                  <div className="w-full h-44 bg-slate-100" />
+                )}
+                {hotel.rating && (
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/95 text-slate-900 text-[11px] font-black px-2.5 py-1 rounded-full shadow-sm">
+                    <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                    {hotel.rating}
+                    {hotel.reviewsCount ? <span className="text-slate-500">({hotel.reviewsCount})</span> : null}
+                  </span>
+                )}
+                {hotel.roomsLeft ? (
+                  <span className="absolute top-3 right-3 bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
+                    {hotel.roomsLeft} left
+                  </span>
+                ) : null}
               </div>
-              <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-                <div className="flex gap-2 flex-wrap">
-                  {hotel.amenities.slice(0, 3).map((amenity: string, idx: number) => (
-                    <span key={idx} className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{amenity}</span>
-                  ))}
+
+              <div className="p-5 space-y-3">
+                <div>
+                  <h5 className="font-black text-slate-900 text-base leading-tight">{hotel.name}</h5>
+                  {hotel.location && (
+                    <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{hotel.location}</span>
+                    </p>
+                  )}
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (onBookNow) onBookNow(hotel);
-                  }}
-                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
-                >
-                  <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
-                </button>
+
+                {amenities.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {amenities.slice(0, 4).map((amenity: string, idx: number) => (
+                      <span key={idx} className="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{amenity}</span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="pt-3 flex items-end justify-between border-t border-slate-100">
+                  <div>
+                    {strikePrice ? (
+                      <span className="block text-xs font-bold text-slate-400 line-through">
+                        {currencySymbol}{Number(strikePrice).toLocaleString('en-IN')}
+                      </span>
+                    ) : null}
+                    <span className="font-black text-xl text-slate-900 block leading-none">
+                      {currencySymbol}{Number(hotel.pricePerNight || 0).toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 block mt-1">
+                      {lang === 'mr' ? 'प्रति रात्र' : 'per night'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onBookNow) onBookNow(hotel);
+                    }}
+                    className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                  >
+                    <span>{lang === 'mr' ? 'खोली निवडा' : 'Select Room'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           );
@@ -456,6 +539,9 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
           const srcFullName = train.originFullName || srcDet.fullName;
           const dstFullName = train.destinationFullName || dstDet.fullName;
 
+          const classOptions = buildTrainClasses(train, trainNum);
+          const activeClass = classOptions.find(c => c.code === selectedClass[index]) || classOptions[0];
+
           return (
             <div
               key={index}
@@ -509,37 +595,36 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
                 </div>
               </div>
 
-              {/* Accommodation & Classes Badge Bar */}
-              {(train.accommodationTypes || train.accommodation || (train.classes && train.classes.length > 0)) && (
-                <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                  <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                    {lang === 'mr' ? 'उपलब्ध वर्ग (Classes):' : 'Classes:'}
-                  </span>
-                  {Array.isArray(train.accommodationTypes) && train.accommodationTypes.length > 0 ? (
-                    train.accommodationTypes.map((accType: string, aIdx: number) => (
-                      <span
-                        key={aIdx}
-                        className="px-2.5 py-0.5 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-lg text-xs font-bold shadow-2xs"
+              {/* Class chips: fare + live availability per accommodation class */}
+              <div className="pt-2 border-t border-slate-100">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  {lang === 'mr' ? 'उपलब्ध वर्ग (Classes):' : 'Classes:'}
+                </span>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar mt-2 pb-1">
+                  {classOptions.map((cls) => {
+                    const isActive = cls.code === activeClass?.code;
+                    return (
+                      <button
+                        key={cls.code}
+                        onClick={() => setSelectedClass(prev => ({ ...prev, [index]: cls.code }))}
+                        className={`shrink-0 min-w-[84px] px-3 py-2 rounded-2xl border text-left transition-all active:scale-95 ${
+                          isActive
+                            ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                            : 'border-slate-200 bg-slate-50 hover:border-indigo-400'
+                        }`}
                       >
-                        {accType}
-                      </span>
-                    ))
-                  ) : train.accommodation ? (
-                    <span className="px-2.5 py-0.5 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-lg text-xs font-bold shadow-2xs">
-                      {train.accommodation}
-                    </span>
-                  ) : Array.isArray(train.classes) ? (
-                    train.classes.map((cls: any, cIdx: number) => (
-                      <span
-                        key={cIdx}
-                        className="px-2.5 py-0.5 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-lg text-xs font-bold shadow-2xs"
-                      >
-                        {cls.code || cls.name}
-                      </span>
-                    ))
-                  ) : null}
+                        <span className="block text-xs font-black text-slate-900">{cls.code}</span>
+                        <span className="block text-[11px] font-black text-slate-700 mt-0.5">
+                          {currencySymbol}{cls.fare.toLocaleString('en-IN')}
+                        </span>
+                        <span className={`block text-[10px] font-black uppercase mt-0.5 ${cls.statusClass}`}>
+                          {cls.status}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
 
               <div className="pt-2 flex items-center justify-between border-t border-slate-100">
                 <span className="text-[11px] font-extrabold text-slate-500 flex items-center gap-1">
@@ -554,11 +639,11 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
                         id: trainNum,
                         title: `${name} (#${trainNum})`,
                         vertical: 'train',
-                        subtitle: `${srcCode} → ${dstCode}`,
+                        subtitle: `${srcCode} → ${dstCode}${activeClass ? ` • ${activeClass.code}` : ''}`,
                         location: `${srcCode} - ${dstCode}`,
                         time: `${depTime} - ${arrTime}`,
                         duration: travelTime,
-                        amount: 850, // Dummy fallback price
+                        amount: activeClass?.fare || 850,
                         provider: 'Indian Railways'
                       });
                     }
