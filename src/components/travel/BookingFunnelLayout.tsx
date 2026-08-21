@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Search, CalendarDays, MapPin, Users, X, Check, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Search, CalendarDays, MapPin, Users, X, Check, Clock, ArrowLeftRight } from 'lucide-react';
 import { LogoName } from '../routripo/SharedUI';
 import { SearchInput } from '../SearchInput';
 import { useCurrencyStore, CURRENCIES } from '../../store/useCurrencyStore';
@@ -17,6 +18,7 @@ interface BookingFunnelLayoutProps {
   isLoading: boolean;
   hasSearched: boolean;
   renderResults: () => React.ReactNode;
+  renderResultsToolbar?: () => React.ReactNode;
   renderPassengerSelector?: () => React.ReactNode;
   passengerSummary?: string;
   lang?: string;
@@ -27,7 +29,7 @@ interface BookingFunnelLayoutProps {
 export function BookingFunnelLayout({
   mode, onBack, origin, setOrigin, destination, setDestination,
   date, setDate, onSearch, isLoading, hasSearched, renderResults,
-  renderPassengerSelector, passengerSummary, lang = 'en',
+  renderResultsToolbar, renderPassengerSelector, passengerSummary, lang = 'en',
   cabType, setCabType
 }: BookingFunnelLayoutProps) {
   const [step, setStep] = useState<'main' | 'origin' | 'destination' | 'date' | 'passenger'>('main');
@@ -66,21 +68,31 @@ export function BookingFunnelLayout({
 
   const currencySymbol = CURRENCIES?.[useCurrencyStore.getState().currency]?.symbol || "₹";
 
-  const calendarData = React.useMemo(() => {
-    const days = [];
+  type CalendarDay = {
+    isEmpty: boolean;
+    dateObj?: Date;
+    dateStr?: string;
+    priceInfo?: { type: 'status' | 'price'; text?: string; price?: number; colorClass: string } | null;
+  };
+
+  const calendarMonths = React.useMemo(() => {
+    const months: { label: string; days: CalendarDay[] }[] = [];
     const today = new Date();
     today.setHours(0,0,0,0);
-    const dayOfWeek = today.getDay();
 
-    for (let i = 0; i < dayOfWeek; i++) {
-      days.push({ isEmpty: true });
-    }
-
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
-      
-      let priceInfo = null;
+      const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      let month = months[months.length - 1];
+      if (!month || month.label !== label) {
+        month = { label, days: [] };
+        for (let offset = 0; offset < d.getDay(); offset++) month.days.push({ isEmpty: true });
+        months.push(month);
+      }
+
+      let priceInfo: CalendarDay['priceInfo'] = null;
       if (mode === 'train') {
         const statuses = ['AVL', 'RAC', 'WL'];
         const colors = ['text-emerald-600', 'text-orange-500', 'text-rose-600'];
@@ -98,57 +110,91 @@ export function BookingFunnelLayout({
         priceInfo = { type: 'price', price, colorClass };
       }
       
-      days.push({
+      month.days.push({
         isEmpty: false,
         dateObj: d,
         dateStr: d.toISOString().split('T')[0],
         priceInfo
       });
     }
-    return days;
+    return months;
   }, [mode, cabType]);
+
+  const calendarLegend = mode === 'train'
+    ? [
+        { label: 'Available', dotClass: 'bg-emerald-500' },
+        { label: 'RAC', dotClass: 'bg-orange-500' },
+        { label: 'Waitlist', dotClass: 'bg-rose-500' },
+      ]
+    : [
+        { label: 'Low fare', dotClass: 'bg-emerald-500' },
+        { label: 'Medium', dotClass: 'bg-orange-500' },
+        { label: 'High', dotClass: 'bg-rose-500' },
+      ];
 
   const getCalendar = () => {
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const showLegend = !(mode === 'car' && cabType === 'rental');
     return (
-      <div className="p-4">
-        <div className="grid grid-cols-7 gap-2 mb-2">
+      <div className="pb-4">
+        {showLegend && (
+          <div className="flex items-center gap-4 px-1 py-3">
+            {calendarLegend.map(item => (
+              <span key={item.label} className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                <span className={`w-2 h-2 rounded-full ${item.dotClass}`} />
+                {item.label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="sticky top-0 z-10 bg-white grid grid-cols-7 gap-2 py-2 border-b border-slate-200">
           {weekdays.map(day => (
             <div key={day} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-wider">
               {day}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-2">
-          {calendarData.map((d, idx) => {
-            if (d.isEmpty) {
-              return <div key={`empty-${idx}`} className="p-2" />;
-            }
-            return (
-              <button
-                key={idx}
-                onClick={() => {
-                  setDate(d.dateStr);
-                  setTimeout(() => {
-                    setStep('main');
-                  }, 10);
-                }}
-                className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 transition-all cursor-pointer min-h-[60px]"
-              >
-                <span className="text-sm font-black text-slate-900 leading-none mb-1">{d.dateObj.getDate()}</span>
-                <span className="text-[8px] text-slate-500 font-bold uppercase leading-none mb-1">{d.dateObj.toLocaleDateString('en-US', { month: 'short' })}</span>
-                <div className="h-3 flex items-center justify-center">
-                  {d.priceInfo?.type === 'status' && (
-                    <span className={`text-[8px] font-black uppercase ${d.priceInfo.colorClass}`}>{d.priceInfo.text}</span>
-                  )}
-                  {d.priceInfo?.type === 'price' && (
-                    <span className={`text-[9px] font-black tracking-tighter ${d.priceInfo.colorClass}`}>{currencySymbol}{d.priceInfo.price}</span>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+
+        {calendarMonths.map(month => (
+          <div key={month.label} className="pt-5">
+            <h3 className="text-sm font-black text-slate-900 mb-3">{month.label}</h3>
+            <div className="grid grid-cols-7 gap-2">
+              {month.days.map((d, idx) => {
+                if (d.isEmpty || !d.dateObj) {
+                  return <div key={`${month.label}-empty-${idx}`} className="p-2" />;
+                }
+                const isSelected = d.dateStr === date;
+                return (
+                  <button
+                    key={d.dateStr}
+                    onClick={() => {
+                      setDate(d.dateStr!);
+                      setTimeout(() => {
+                        setStep('main');
+                      }, 10);
+                    }}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer min-h-[60px] ${
+                      isSelected
+                        ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                        : 'border-slate-200 hover:border-indigo-400 hover:bg-indigo-50'
+                    }`}
+                  >
+                    <span className="text-sm font-black text-slate-900 leading-none mb-1">{d.dateObj.getDate()}</span>
+                    <div className="h-3 flex items-center justify-center">
+                      {d.priceInfo?.type === 'status' && (
+                        <span className={`text-[8px] font-black uppercase ${d.priceInfo.colorClass}`}>{d.priceInfo.text}</span>
+                      )}
+                      {d.priceInfo?.type === 'price' && (
+                        <span className={`text-[9px] font-black tracking-tighter ${d.priceInfo.colorClass}`}>{currencySymbol}{d.priceInfo.price}</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     );
   };
@@ -175,6 +221,35 @@ export function BookingFunnelLayout({
           </div>
         )}
       </div>
+    </div>
+  );
+
+  const activeStepIndex = hasSearched ? 1 : 0;
+  const funnelSteps = ['Search', 'Select', 'Review'];
+
+  const progressStrip = (
+    <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2 shrink-0">
+      {funnelSteps.map((label, idx) => (
+        <React.Fragment key={label}>
+          <div className="flex items-center gap-1.5">
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+              idx < activeStepIndex ? 'bg-emerald-500 text-white'
+                : idx === activeStepIndex ? 'bg-indigo-600 text-white'
+                : 'bg-slate-100 text-slate-400'
+            }`}>
+              {idx < activeStepIndex ? <Check className="w-3 h-3" /> : idx + 1}
+            </span>
+            <span className={`text-[10px] font-black uppercase tracking-wider ${
+              idx === activeStepIndex ? 'text-slate-900' : 'text-slate-400'
+            }`}>
+              {label}
+            </span>
+          </div>
+          {idx < funnelSteps.length - 1 && (
+            <div className={`h-0.5 flex-1 rounded-full ${idx < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 
@@ -232,18 +307,20 @@ export function BookingFunnelLayout({
     return (
       <div key="date-view" className="fixed inset-0 z-50 bg-white flex flex-col">
         {header}
-        <div className="p-6 flex-1 overflow-y-auto">
-          <h2 className="text-xl font-black text-slate-900 mb-2">{isMr ? 'तारीख (Date)' : 'Select Date'}</h2>
-          {mode !== 'hotel' && (
-            <>
-              {mode === 'train' && <p className="text-xs text-slate-500 mb-4 font-bold">Color-Coded Availability Calendar</p>}
-              {(mode === 'flight' || mode === 'hotel' || mode === 'bus') && <p className="text-xs text-slate-500 mb-4 font-bold">Fare Calendar</p>}
-              {mode === 'car' && cabType === 'rental' && <p className="text-xs text-slate-500 mb-4 font-bold">Standard Calendar</p>}
-              {getCalendar()}
-            </>
-          )}
-          {mode === 'hotel' && (
-             <p className="text-sm font-bold text-slate-600">Hotel stay dates are managed at the property level.</p>
+        {mode !== 'hotel' && (
+          <div className="px-6 pt-4 pb-2 border-b border-slate-100 shrink-0">
+            <h2 className="text-xl font-black text-slate-900">{isMr ? 'तारीख (Date)' : 'Select Date'}</h2>
+            <p className="text-xs text-slate-500 mt-1 font-bold truncate">
+              {origin && destination ? `${origin} → ${destination} • ` : ''}
+              {mode === 'train' ? 'Availability Calendar'
+                : (mode === 'car' && cabType === 'rental') ? 'Standard Calendar'
+                : 'Fare Calendar'}
+            </p>
+          </div>
+        )}
+        <div className="px-6 flex-1 overflow-y-auto">
+          {mode !== 'hotel' ? getCalendar() : (
+            <p className="text-sm font-bold text-slate-600 pt-6">Hotel stay dates are managed at the property level.</p>
           )}
         </div>
       </div>
@@ -253,6 +330,7 @@ export function BookingFunnelLayout({
   return (
     <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col overflow-hidden">
       {header}
+      {progressStrip}
       <div className="flex-1 overflow-y-auto pb-28">
         
         {/* Core Booking Form (Top-Heavy) */}
@@ -279,13 +357,26 @@ export function BookingFunnelLayout({
 
             <div className="space-y-4">
               {mode !== 'hotel' && (
-                <button onClick={() => setStep('origin')} className="w-full text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors">
-                  <MapPin className="w-6 h-6 text-indigo-500" />
-                  <div>
-                    <span className="block text-[10px] font-black text-slate-400 uppercase">Origin</span>
-                    <span className="block text-sm font-black text-slate-900">{origin || 'Select Origin'}</span>
-                  </div>
-                </button>
+                <div className="relative">
+                  <button onClick={() => setStep('origin')} className="w-full text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors">
+                    <MapPin className="w-6 h-6 text-indigo-500" />
+                    <div>
+                      <span className="block text-[10px] font-black text-slate-400 uppercase">Origin</span>
+                      <span className="block text-sm font-black text-slate-900">{origin || 'Select Origin'}</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const prevOrigin = origin;
+                      setOrigin(destination);
+                      setDestination(prevOrigin);
+                    }}
+                    aria-label="Swap origin and destination"
+                    className="absolute right-4 -bottom-5 z-10 p-2 rounded-full bg-white border border-slate-200 shadow-md text-slate-700 hover:border-indigo-400 transition-colors active:scale-95"
+                  >
+                    <ArrowLeftRight className="w-4 h-4 rotate-90" />
+                  </button>
+                </div>
               )}
 
               <button onClick={() => setStep('destination')} className="w-full text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors">
@@ -327,25 +418,37 @@ export function BookingFunnelLayout({
             </div>
           </div>
         ) : (
-          <div className="bg-white p-4 shadow-sm border-b border-slate-200 flex items-center justify-between">
-             <div className="min-w-0 flex-1 pr-4">
-               <p className="text-xs font-black text-slate-800 truncate">
-                 {mode !== 'hotel' ? `${origin || 'Any'} → ${destination || 'Any'}` : `${destination || 'Any'}`}
-               </p>
-               <p className="text-[10px] text-slate-500 font-bold mt-0.5">
-                 {!(mode === 'car' && cabType === 'regular') ? (date || 'Any Date') : 'Regular Cab'} • {passengerSummary || '1 Adult'}
-               </p>
-             </div>
-             <button 
-               onClick={() => {
-                 // To edit search, we can just trigger a state change in the parent, but since we don't have a clear Search button state reset,
-                 // we will just open the 'origin' step to restart the funnel.
-                 setStep('origin');
-               }} 
-               className="text-[10px] font-black uppercase bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-200"
-             >
-               Edit
-             </button>
+          <div className="sticky top-0 z-20 bg-white shadow-sm border-b border-slate-200">
+            <div className="p-4 flex items-center gap-3">
+              <div className="min-w-0 flex-1 flex items-center gap-2">
+                <button
+                  onClick={() => setStep(mode === 'hotel' ? 'destination' : 'origin')}
+                  className="min-w-0 flex-1 text-left"
+                >
+                  <p className="text-xs font-black text-slate-800 truncate">
+                    {mode !== 'hotel' ? `${origin || 'Any'} → ${destination || 'Any'}` : `${destination || 'Any'}`}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-bold mt-0.5 truncate">
+                    {!(mode === 'car' && cabType === 'regular') ? (date || 'Any Date') : 'Regular Cab'} • {passengerSummary || '1 Adult'}
+                  </p>
+                </button>
+              </div>
+              <button 
+                onClick={() => {
+                  // To edit search, we can just trigger a state change in the parent, but since we don't have a clear Search button state reset,
+                  // we will just open the 'origin' step to restart the funnel.
+                  setStep(mode === 'hotel' ? 'destination' : 'origin');
+                }} 
+                className="text-[10px] font-black uppercase bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-200 shrink-0"
+              >
+                Edit
+              </button>
+            </div>
+            {renderResultsToolbar && !isLoading && (
+              <div className="border-t border-slate-100">
+                {renderResultsToolbar()}
+              </div>
+            )}
           </div>
         )}
 
@@ -370,20 +473,37 @@ export function BookingFunnelLayout({
         )}
       </div>
 
-      {step === 'passenger' && (
-        <div className="absolute inset-0 z-50 bg-black/50 flex flex-col justify-end">
-          <div className="bg-white rounded-t-3xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-black text-lg text-slate-900">Select Details</h3>
-              <button onClick={() => setStep('main')} className="p-2 bg-slate-100 rounded-full"><X className="w-5 h-5" /></button>
-            </div>
-            {renderPassengerSelector()}
-            <button onClick={() => setStep('main')} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-sm uppercase tracking-wider mt-6">
-              Done
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {step === 'passenger' && renderPassengerSelector && (
+          <motion.div
+            className="absolute inset-0 z-50 bg-black/50 flex flex-col justify-end"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={() => setStep('main')}
+          >
+            <motion.div
+              className="bg-white rounded-t-3xl px-6 pb-6 pt-3 max-h-[85vh] overflow-y-auto"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-10 h-1 rounded-full bg-slate-200 mx-auto mb-4" />
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-black text-lg text-slate-900">Select Details</h3>
+                <button onClick={() => setStep('main')} className="p-2 bg-slate-100 rounded-full"><X className="w-5 h-5" /></button>
+              </div>
+              {renderPassengerSelector()}
+              <button onClick={() => setStep('main')} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-sm uppercase tracking-wider mt-6">
+                Done
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
