@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TransportOptions } from './TransportOptions';
 import { BookingFunnelLayout } from './BookingFunnelLayout';
+import { SearchResultsToolbar } from './SearchResultsToolbar';
 import { Users, Minus, Plus } from 'lucide-react';
 import { fetchHotelData } from './api';
 
@@ -15,6 +16,23 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [hotelData, setHotelData] = useState<any[]>([]);
+  const [sortBy, setSortBy] = useState('recommended');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [topRatedOnly, setTopRatedOnly] = useState(false);
+
+  const visibleHotels = React.useMemo(() => {
+    const list = topRatedOnly
+      ? hotelData.filter(h => Number(h.rating || 0) >= 4)
+      : hotelData;
+
+    if (sortBy === 'recommended') return list;
+    return [...list].sort((a, b) => {
+      if (sortBy === 'rating') return Number(b.rating || 0) - Number(a.rating || 0);
+      const priceA = Number(a.pricePerNight || 0);
+      const priceB = Number(b.pricePerNight || 0);
+      return sortBy === 'priceHigh' ? priceB - priceA : priceA - priceB;
+    });
+  }, [hotelData, sortBy, topRatedOnly]);
 
   const handleHotelSearch = async () => {
     setIsLoading(true);
@@ -47,7 +65,10 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
   const renderPassengerSelector = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h4 className="font-bold text-slate-800">Rooms</h4>
+        <div>
+          <h4 className="font-bold text-slate-800">Rooms</h4>
+          <p className="text-[10px] text-slate-500">Max 5 rooms per booking</p>
+        </div>
         <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
           <button onClick={() => setRooms(Math.max(1, rooms - 1))} className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm text-slate-800 font-bold active:scale-95"><Minus className="w-4 h-4"/></button>
           <span className="font-black text-slate-900 w-4 text-center">{rooms}</span>
@@ -112,10 +133,27 @@ export const HotelSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any)
       lang={lang}
       passengerSummary={`${guests} Adult${guests > 1 ? 's' : ''}, ${children > 0 ? `${children} Child` : ''} ${rooms} Room${rooms > 1 ? 's' : ''}`}
       renderPassengerSelector={renderPassengerSelector}
+      renderResultsToolbar={() => (
+        <SearchResultsToolbar
+          lang={lang}
+          activeSort={sortBy}
+          onSortChange={setSortBy}
+          sortOptions={[
+            { key: 'recommended', label: 'Recommended' },
+            { key: 'priceLow', label: 'Price: Low to High' },
+            { key: 'priceHigh', label: 'Price: High to Low' },
+            { key: 'rating', label: 'Rating' },
+          ]}
+          toggles={[{ key: 'topRated', label: '4+ Rating', active: topRatedOnly, onToggle: () => setTopRatedOnly(v => !v) }]}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      )}
       renderResults={() => (
         <TransportOptions
           mode="hotel"
-          data={hotelData}
+          data={visibleHotels}
+          layout={viewMode}
           isLoading={isLoading}
           isCached={false}
           origin=""

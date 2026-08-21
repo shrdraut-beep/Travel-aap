@@ -1,8 +1,29 @@
 import React, { useState } from 'react';
 import { TransportOptions } from './TransportOptions';
 import { BookingFunnelLayout } from './BookingFunnelLayout';
+import { SearchResultsToolbar } from './SearchResultsToolbar';
 import { IATA_TO_CITY_MAP, CITY_TO_IATA_MAP, CITY_GROUPS } from '../../data/airports';
 import { Users, Minus, Plus } from 'lucide-react';
+
+const CABIN_CLASSES = ['economy', 'premium', 'business', 'first'];
+
+const departureMinutes = (flight: any) => {
+  const raw = String(flight.departureTime || flight.departure_time || flight.time || '');
+  const match = raw.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (!match) return 0;
+  let hours = parseInt(match[1], 10);
+  const meridiem = match[3]?.toUpperCase();
+  if (meridiem === 'PM' && hours < 12) hours += 12;
+  if (meridiem === 'AM' && hours === 12) hours = 0;
+  return hours * 60 + parseInt(match[2], 10);
+};
+
+const durationMinutes = (flight: any) => {
+  const raw = String(flight.duration || '');
+  const h = raw.match(/(\d+)h/);
+  const m = raw.match(/(\d+)m/);
+  return (h ? parseInt(h[1], 10) : 0) * 60 + (m ? parseInt(m[1], 10) : 0);
+};
 
 export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
   const isMr = lang === 'mr';
@@ -10,10 +31,26 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
   const [destination, setDestination] = useState('');
   const [departDate, setDepartDate] = useState('');
   const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
   const [cabinClass, setCabinClass] = useState('economy');
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [flightData, setFlightData] = useState<any[]>([]);
+  const [sortBy, setSortBy] = useState('price');
+  const [nonStopOnly, setNonStopOnly] = useState(false);
+
+  const visibleFlights = React.useMemo(() => {
+    const list = nonStopOnly
+      ? flightData.filter(f => (f.stops ?? 0) === 0)
+      : flightData;
+
+    return [...list].sort((a, b) => {
+      if (sortBy === 'departure') return departureMinutes(a) - departureMinutes(b);
+      if (sortBy === 'duration') return durationMinutes(a) - durationMinutes(b);
+      return (a.price || 0) - (b.price || 0);
+    });
+  }, [flightData, sortBy, nonStopOnly]);
 
   const handleFlightSearch = async () => {
     setIsLoading(true);
@@ -63,37 +100,51 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
     }
   };
 
+  const renderStepper = (
+    label: string,
+    hint: string,
+    value: number,
+    onChange: (next: number) => void,
+    min: number,
+    max: number
+  ) => (
+    <div className="flex items-center justify-between">
+      <div>
+        <h4 className="font-bold text-slate-800">{label}</h4>
+        <p className="text-[10px] text-slate-500">{hint}</p>
+      </div>
+      <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+          className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 disabled:opacity-40 cursor-pointer"
+        >
+          <Minus className="w-4 h-4"/>
+        </button>
+        <span className="font-black text-slate-900 w-4 text-center">{value}</span>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+          className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 disabled:opacity-40 cursor-pointer"
+        >
+          <Plus className="w-4 h-4"/>
+        </button>
+      </div>
+    </div>
+  );
+
   const renderPassengerSelector = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-bold text-slate-800">Adults</h4>
-          <p className="text-[10px] text-slate-500">12+ years (Max 9 per booking)</p>
-        </div>
-        <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
-          <button 
-            type="button"
-            onClick={() => setAdults(Math.max(1, adults - 1))} 
-            disabled={adults <= 1}
-            className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 disabled:opacity-40 cursor-pointer"
-          >
-            <Minus className="w-4 h-4"/>
-          </button>
-          <span className="font-black text-slate-900 w-4 text-center">{adults}</span>
-          <button 
-            type="button"
-            onClick={() => {
-              if (adults < 9) {
-                setAdults(adults + 1);
-              }
-            }} 
-            disabled={adults >= 9}
-            className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 disabled:opacity-40 cursor-pointer"
-          >
-            <Plus className="w-4 h-4"/>
-          </button>
-        </div>
-      </div>
+      {renderStepper('Adults', '12+ years (Max 9 per booking)', adults, (next) => {
+        setAdults(next);
+        if (infants > next) setInfants(next);
+      }, 1, 9)}
+
+      {renderStepper('Children', '2-11 years', children, setChildren, 0, 8)}
+
+      {renderStepper('Infants', 'Under 2 years (one per adult)', infants, setInfants, 0, adults)}
 
       {adults >= 9 && (
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 leading-snug">
@@ -103,8 +154,8 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
 
       <div>
         <h4 className="font-bold text-slate-800 mb-3">Cabin Class</h4>
-        <div className="grid grid-cols-3 gap-2">
-          {['economy', 'business', 'first'].map(c => (
+        <div className="grid grid-cols-4 gap-2">
+          {CABIN_CLASSES.map(c => (
             <button
               key={c}
               type="button"
@@ -133,12 +184,25 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
       isLoading={isLoading}
       hasSearched={hasSearched}
       lang={lang}
-      passengerSummary={`${adults} Adult${adults > 1 ? 's' : ''}, ${cabinClass}`}
+      passengerSummary={`${adults + children + infants} Traveller${adults + children + infants > 1 ? 's' : ''}, ${cabinClass}`}
       renderPassengerSelector={renderPassengerSelector}
+      renderResultsToolbar={() => (
+        <SearchResultsToolbar
+          lang={lang}
+          activeSort={sortBy}
+          onSortChange={setSortBy}
+          sortOptions={[
+            { key: 'price', label: 'Cheapest' },
+            { key: 'duration', label: 'Fastest' },
+            { key: 'departure', label: 'Departure' },
+          ]}
+          toggles={[{ key: 'nonstop', label: 'Non-stop', active: nonStopOnly, onToggle: () => setNonStopOnly(v => !v) }]}
+        />
+      )}
       renderResults={() => (
         <TransportOptions
           mode="flight"
-          data={flightData}
+          data={visibleFlights}
           isLoading={isLoading}
           isCached={false}
           origin={origin}
