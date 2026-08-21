@@ -98,11 +98,10 @@ function buildTrainClasses(train: any, trainNum: string): TrainClassOption[] {
   const seed = parseInt(String(trainNum).replace(/\D/g, '') || '0', 10);
 
   return raw.map((entry: any, idx: number) => {
-    const code = String(typeof entry === 'string' ? entry : (entry.code || entry.name || 'SL')).toUpperCase();
-    const fare = Number(
-      (typeof entry === 'object' && (entry.fare ?? entry.price)) ?? CLASS_BASE_FARE[code] ?? 500
-    );
-    const provided = typeof entry === 'object' ? (entry.availability || entry.status) : undefined;
+    const isObject = typeof entry === 'object' && entry !== null;
+    const code = String(isObject ? (entry.code || entry.name || 'SL') : entry).toUpperCase();
+    const fare = Number((isObject ? (entry.fare ?? entry.price) : undefined) ?? CLASS_BASE_FARE[code] ?? 500);
+    const provided = isObject ? (entry.availability || entry.status) : undefined;
     const derived = AVAILABILITY_STATES[(seed + idx) % AVAILABILITY_STATES.length];
     return {
       code,

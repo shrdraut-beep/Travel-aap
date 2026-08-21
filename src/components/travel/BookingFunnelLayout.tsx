@@ -357,13 +357,26 @@ export function BookingFunnelLayout({
 
             <div className="space-y-4">
               {mode !== 'hotel' && (
-                <button onClick={() => setStep('origin')} className="w-full text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors">
-                  <MapPin className="w-6 h-6 text-indigo-500" />
-                  <div>
-                    <span className="block text-[10px] font-black text-slate-400 uppercase">Origin</span>
-                    <span className="block text-sm font-black text-slate-900">{origin || 'Select Origin'}</span>
-                  </div>
-                </button>
+                <div className="relative">
+                  <button onClick={() => setStep('origin')} className="w-full text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors">
+                    <MapPin className="w-6 h-6 text-indigo-500" />
+                    <div>
+                      <span className="block text-[10px] font-black text-slate-400 uppercase">Origin</span>
+                      <span className="block text-sm font-black text-slate-900">{origin || 'Select Origin'}</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const prevOrigin = origin;
+                      setOrigin(destination);
+                      setDestination(prevOrigin);
+                    }}
+                    aria-label="Swap origin and destination"
+                    className="absolute right-4 -bottom-5 z-10 p-2 rounded-full bg-white border border-slate-200 shadow-md text-slate-700 hover:border-indigo-400 transition-colors active:scale-95"
+                  >
+                    <ArrowLeftRight className="w-4 h-4 rotate-90" />
+                  </button>
+                </div>
               )}
 
               <button onClick={() => setStep('destination')} className="w-full text-left bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors">
@@ -419,19 +432,6 @@ export function BookingFunnelLayout({
                     {!(mode === 'car' && cabType === 'regular') ? (date || 'Any Date') : 'Regular Cab'} • {passengerSummary || '1 Adult'}
                   </p>
                 </button>
-                {mode !== 'hotel' && (
-                  <button
-                    onClick={() => {
-                      const prevOrigin = origin;
-                      setOrigin(destination);
-                      setDestination(prevOrigin);
-                    }}
-                    aria-label="Swap origin and destination"
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95 shrink-0"
-                  >
-                    <ArrowLeftRight className="w-4 h-4" />
-                  </button>
-                )}
               </div>
               <button 
                 onClick={() => {
