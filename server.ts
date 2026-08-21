@@ -310,6 +310,25 @@ const scanReceiptSchema = z.object({
   lang: z.string().max(5).optional(),
 });
 
+// Free-text that ends up inside an AI prompt. The rate limiters cap how many
+// requests a caller may make; these caps bound how expensive a single one can be,
+// so a deeply nested prompt cannot drain the token budget on its own.
+const MAX_AI_PROMPT_CHARS = 500;
+const MAX_AI_PASTED_TEXT_CHARS = 2000;
+function limitAiText(fields: string[], maxLength = MAX_AI_PROMPT_CHARS) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    for (const field of fields) {
+      const value = req.body?.[field];
+      if (typeof value === "string" && value.length > maxLength) {
+        return res.status(400).json({
+          error: `Field "${field}" exceeds the ${maxLength} character limit for AI requests.`
+        });
+      }
+    }
+    next();
+  };
+}
+
 // 6. Firebase App Check Verification Middleware
 async function verifyAppCheck(req: express.Request, res: express.Response, next: express.NextFunction) {
   const appCheckToken = req.headers["x-firebase-appcheck"] as string;
@@ -830,7 +849,7 @@ async function evaluateTripFeasibility(
 }
 
 // 3. Generate Itinerary Endpoint
-app.post("/api/generate-itinerary", async (req, res) => {
+app.post("/api/generate-itinerary", limitAiText(["source", "tripName", "promptInstruction", "transportMode"]), async (req, res) => {
   try {
     const { source, tripName, startDate, endDate, members, lang, promptInstruction, transportMode, totalBudget } = req.body;
     
@@ -1225,7 +1244,7 @@ app.post("/api/trips/join", verifyAppCheck, requireAuth, async (req: AuthedReque
 });
 
 // 4. Generate Future Trip Plan Endpoint
-app.post("/api/generate-future-trip-plan", async (req, res) => {
+app.post("/api/generate-future-trip-plan", limitAiText(["destination", "departure", "transportMode"]), async (req, res) => {
   try {
     const { destination, departure, days, budget, persons, lang, transportMode } = req.body;
     const cleanDest = decodeURIComponent(destination || "Goa");
@@ -1532,7 +1551,7 @@ app.post("/api/generate-future-trip-plan", async (req, res) => {
 });
 
 // 5. Generate Destination Templates Endpoint
-app.post("/api/generate-destination-templates", async (req, res) => {
+app.post("/api/generate-destination-templates", limitAiText(["destination"]), async (req, res) => {
   try {
     const { destination, lang } = req.body;
     const destName = destination || "Maharashtra";
@@ -1594,7 +1613,7 @@ app.post("/api/generate-destination-templates", async (req, res) => {
 
 
 // 6. Parse Booking SMS/Text Endpoint
-app.post("/api/parse-booking-text", async (req, res) => {
+app.post("/api/parse-booking-text", limitAiText(["text"], MAX_AI_PASTED_TEXT_CHARS), async (req, res) => {
   try {
     const { text, lang } = req.body;
     if (!text) return res.status(400).json({ error: "No text provided" });
@@ -2496,15 +2515,25 @@ app.get("/api/wallet/balance", requireAuth, async (req, res) => {
   }
 });
 
+// Top-ups are capped so a single order cannot be used to inflate a wallet beyond
+// what the payment gateway limits allow.
+const MAX_WALLET_TOPUP_INR = 200000;
+
 app.post("/api/wallet/create-order", requireAuth, async (req, res) => {
   try {
-    const { amount } = req.body;
-    if (!amount || amount <= 0) return res.status(400).json({ error: "Invalid amount" });
-    
+    const uid = (req as any).user.uid;
+    const amount = Number(req.body?.amount);
+    if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_WALLET_TOPUP_INR) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
     const options = {
-      amount: amount * 100, // Razorpay works in paise
+      amount: Math.round(amount * 100), // Razorpay works in paise
       currency: "INR",
-      receipt: `rcpt_wallet_${Date.now()}`
+      receipt: `rcpt_wallet_${Date.now()}`,
+      // Binds the order to its buyer so verification can reject a payment that
+      // belongs to somebody else's order.
+      notes: { uid, purpose: "WALLET_TOPUP" }
     };
     const order = await razorpay.orders.create(options);
     res.json(order);
@@ -2666,6 +2695,19 @@ app.post("/api/telemetry/crash-report", async (req, res) => {
   }
 });
 
+// Guard rails for prices the server cannot look up (live flight/hotel/train
+// inventory). Anything below the floor or above the ceiling is treated as tampering.
+const MIN_UNIT_PRICE_INR: Record<string, number> = {
+  package: 500,
+  hotel: 300,
+  car: 300,
+  flight: 1000,
+  train: 100,
+  bus: 100,
+  default: 100
+};
+const MAX_UNIT_PRICE_INR = 1000000;
+
 app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
   const userId = (req as any).user?.uid || 'guest';
   const idempotencyKey = (req.headers['idempotency-key'] as string) || req.body.idempotencyKey || '';
@@ -2772,9 +2814,29 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
       console.warn("Database lookup failed, falling back to default prices:", dbError);
     }
 
+    // A price resolved from the catalogue is authoritative: the client-supplied
+    // `amount` is never allowed to override it.
+    const priceSource = unitPrice > 0 ? "catalogue" : "client";
+
     if (unitPrice === 0) {
+      const requestedUnitPrice = Number(customAmount) / resolvedQuantity;
+      // Inventory sourced from the live travel APIs is not in Firestore, so its
+      // price can only come from the client. Bound it by a per-vertical floor and a
+      // ceiling so a real fare cannot be tampered down to a nominal amount.
+      const minUnitPrice = MIN_UNIT_PRICE_INR[resolvedItemType] ?? MIN_UNIT_PRICE_INR.default;
+      if (customAmount !== undefined && customAmount !== null && !Number.isFinite(requestedUnitPrice)) {
+        if (idempotencyKey) await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
+        return res.status(400).json({ error: "Amount must be a number" });
+      }
+      if (Number(customAmount) > 0 && (requestedUnitPrice < minUnitPrice || requestedUnitPrice > MAX_UNIT_PRICE_INR)) {
+        if (idempotencyKey) await IdempotencyEngine.releaseOrFail(idempotencyKey, userId, db);
+        return res.status(400).json({
+          error: `Submitted price is outside the accepted range for a ${resolvedItemType} booking.`
+        });
+      }
+
       if (customAmount && Number(customAmount) > 0) {
-        unitPrice = Number(customAmount) / resolvedQuantity;
+        unitPrice = requestedUnitPrice;
       } else if (resolvedItemType === "package") {
         unitPrice = 5000;
       } else if (resolvedItemType === "hotel") {
@@ -2853,6 +2915,7 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
           deviceId: cleanDeviceId || 'unknown',
           promoCode: promoCode || null,
           idempotencyKey: idempotencyKey || null,
+          priceSource,
           status: "PENDING",
           createdAt: FieldValue.serverTimestamp()
         });
@@ -2900,7 +2963,7 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
 
 app.post("/api/wallet/verify-payment", requireAuth, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     const uid = (req as any).user.uid;
     
     // Verify signature
@@ -2914,39 +2977,56 @@ app.post("/api/wallet/verify-payment", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Invalid payment signature" });
     }
     
+    // The credited amount comes from the gateway, never from the request body -
+    // otherwise a ₹1 payment could be reported back as a ₹1,00,000 top-up.
+    const order: any = await razorpay.orders.fetch(razorpay_order_id);
+    if (!order || order.status !== "paid") {
+      return res.status(400).json({ error: "Order has not been paid" });
+    }
+    if (order.notes?.uid && order.notes.uid !== uid) {
+      return res.status(403).json({ error: "Order does not belong to the authenticated user" });
+    }
+    const creditedAmount = Number(order.amount_paid ?? order.amount) / 100;
+    if (!Number.isFinite(creditedAmount) || creditedAmount <= 0) {
+      return res.status(400).json({ error: "Order amount could not be verified" });
+    }
+
     const db = adminDb();
     if (!db) return res.status(500).json({ error: "Firebase Admin not initialized" });
-    
-    try {
-      await db.runTransaction(async (transaction) => {
-        const agentRef = db.collection("agents").doc(uid);
-        const agentDoc = await transaction.get(agentRef);
-        
-        const currentBalance = agentDoc.exists ? (agentDoc.data()?.walletBalance || 0) : 0;
-        const newBalance = currentBalance + amount;
-        
-        if (!agentDoc.exists) {
-           transaction.set(agentRef, { walletBalance: newBalance }, { merge: true });
-        } else {
-           transaction.update(agentRef, { walletBalance: newBalance });
-        }
-        
-        const txRef = db.collection("wallet_transactions").doc();
-        transaction.set(txRef, {
-          agentId: uid,
-          amount: amount,
-          type: "CREDIT",
-          purpose: "ADD_MONEY",
-          referenceId: razorpay_payment_id,
-          status: "SUCCESS",
-          timestamp: FieldValue.serverTimestamp()
-        });
+
+    // The payment id keys the ledger entry, so replaying the same successful
+    // payment credits the wallet exactly once.
+    const txRef = db.collection("wallet_transactions").doc(String(razorpay_payment_id));
+
+    await db.runTransaction(async (transaction) => {
+      const existingTx = await transaction.get(txRef);
+      if (existingTx.exists) return;
+
+      const agentRef = db.collection("agents").doc(uid);
+      const agentDoc = await transaction.get(agentRef);
+
+      const currentBalance = agentDoc.exists ? (agentDoc.data()?.walletBalance || 0) : 0;
+      const newBalance = currentBalance + creditedAmount;
+
+      if (!agentDoc.exists) {
+         transaction.set(agentRef, { walletBalance: newBalance }, { merge: true });
+      } else {
+         transaction.update(agentRef, { walletBalance: newBalance });
+      }
+
+      transaction.set(txRef, {
+        agentId: uid,
+        amount: creditedAmount,
+        type: "CREDIT",
+        purpose: "ADD_MONEY",
+        referenceId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        status: "SUCCESS",
+        timestamp: FieldValue.serverTimestamp()
       });
-    } catch (dbError) {
-      console.warn("Could not save wallet transaction to db:", dbError);
-    }
-    
-    res.json({ success: true, message: "Wallet updated successfully" });
+    });
+
+    res.json({ success: true, message: "Wallet updated successfully", credited: creditedAmount });
   } catch (error) {
     console.error("Error verifying payment", error);
     res.status(500).json({ error: "Payment verification failed" });
@@ -3266,6 +3346,8 @@ app.post("/api/bookings/:id/cancel", requireAuth, async (req, res) => {
   const db = adminDb();
   if (!db) return res.status(500).json({ error: "DB offline" });
 
+  const uid = (req as any).user?.uid;
+
   try {
     await db.runTransaction(async (t) => {
       const bookingRef = db.collection("bookings").doc(id);
@@ -3273,6 +3355,11 @@ app.post("/api/bookings/:id/cancel", requireAuth, async (req, res) => {
       if (!bookingDoc.exists) throw new Error("Booking not found");
       
       const data = bookingDoc.data();
+      // Without this check any signed-in caller could cancel and refund a booking
+      // belonging to someone else simply by guessing its id.
+      if (data?.userId && data.userId !== uid) throw new Error("Booking not found");
+      // The status guard runs inside the transaction, so concurrent cancel requests
+      // for the same booking can only produce one credit note.
       if (data?.status === 'CANCELLED') throw new Error("Already cancelled");
 
       // Generate Credit Note for reversed taxes

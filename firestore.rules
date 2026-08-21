@@ -19,7 +19,7 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.get('admin', false) == true ||
-        (authEmail() == 'shrd.raut@gmail.com')
+        (request.auth.token.get('email_verified', false) == true && authEmail() == 'shrd.raut@gmail.com')
       );
     }
 
@@ -180,26 +180,53 @@ service cloud.firestore {
       allow delete: if false; // orders cannot be deleted
     }
 
+    // Orders are created and settled by the backend (Admin SDK), which bypasses
+    // these rules. A buyer may read back only their own order.
     match /checkout_orders/{orderId} {
-      allow read, write: if true;
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow read: if isAdmin();
+      allow write: if false;
     }
+
     match /bookings/{bookingId} {
-      allow read, write: if true;
+      // MyTicketsView queries `where('userId','==',uid)`, which this rule satisfies.
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow read: if isAdmin();
+      // The checkout flow writes the booking from the client once Razorpay confirms,
+      // so a create is allowed - but only against the caller's own uid.
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update: if isSignedIn()
+                   && existing().userId == request.auth.uid
+                   && incoming().userId == existing().userId;
+      allow update: if isAdmin();
+      // Bookings are cancelled via POST /api/bookings/:id/cancel, never deleted.
+      allow delete: if false;
     }
+
+    // Payment webhook bookkeeping. Written only by the backend; never client-readable
+    // because these documents carry raw gateway payloads.
     match /webhook_logs/{logId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
     match /webhook_events/{eventId} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
 
+    // Agent records hold the wallet balance, so no client may write them - balances
+    // change only through the verified-payment and payout endpoints.
     match /agents/{agentId} {
-      allow read, write: if true;
+      allow read: if isSignedIn() && request.auth.uid == agentId;
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
+    // Wallet ledger. Server-written only; an agent may read their own entries.
+    // Documents are keyed by `agentId` (see /api/wallet/verify-payment).
     match /wallet_transactions/{txId} {
-      allow read, write: if true;
+      allow read: if isSignedIn() && existing().agentId == request.auth.uid;
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     match /crash_reports/{reportId} {
