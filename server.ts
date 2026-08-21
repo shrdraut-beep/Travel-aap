@@ -2816,7 +2816,7 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
 
     // A price resolved from the catalogue is authoritative: the client-supplied
     // `amount` is never allowed to override it.
-    const priceSource = unitPrice > 0 ? "catalogue" : "client";
+    let priceSource: "catalogue" | "client" | "server_fallback" = unitPrice > 0 ? "catalogue" : "server_fallback";
 
     if (unitPrice === 0) {
       const requestedUnitPrice = Number(customAmount) / resolvedQuantity;
@@ -2837,6 +2837,7 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
 
       if (customAmount && Number(customAmount) > 0) {
         unitPrice = requestedUnitPrice;
+        priceSource = "client";
       } else if (resolvedItemType === "package") {
         unitPrice = 5000;
       } else if (resolvedItemType === "hotel") {
@@ -2896,7 +2897,8 @@ app.post("/api/checkout/create-order", requireAuth, async (req, res) => {
     const options = {
       amount: totalAmount * 100, // paise
       currency: "INR",
-      receipt: `rcpt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`
+      receipt: `rcpt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      notes: { uid: userId, purpose: "CHECKOUT" }
     };
 
     const order = await razorpay.orders.create(options);
@@ -2983,8 +2985,10 @@ app.post("/api/wallet/verify-payment", requireAuth, async (req, res) => {
     if (!order || order.status !== "paid") {
       return res.status(400).json({ error: "Order has not been paid" });
     }
-    if (order.notes?.uid && order.notes.uid !== uid) {
-      return res.status(403).json({ error: "Order does not belong to the authenticated user" });
+    // Both notes must match: without the purpose check a paid checkout order could
+    // be replayed here and credited to the buyer's wallet as if it were a top-up.
+    if (order.notes?.purpose !== "WALLET_TOPUP" || order.notes?.uid !== uid) {
+      return res.status(403).json({ error: "Order is not a wallet top-up belonging to the authenticated user" });
     }
     const creditedAmount = Number(order.amount_paid ?? order.amount) / 100;
     if (!Number.isFinite(creditedAmount) || creditedAmount <= 0) {
@@ -3356,8 +3360,9 @@ app.post("/api/bookings/:id/cancel", requireAuth, async (req, res) => {
       
       const data = bookingDoc.data();
       // Without this check any signed-in caller could cancel and refund a booking
-      // belonging to someone else simply by guessing its id.
-      if (data?.userId && data.userId !== uid) throw new Error("Booking not found");
+      // belonging to someone else simply by guessing its id. A booking with no owner
+      // recorded cannot be attributed, so it is not cancellable through this route.
+      if (data?.userId !== uid) throw new Error("Booking not found");
       // The status guard runs inside the transaction, so concurrent cancel requests
       // for the same booking can only produce one credit note.
       if (data?.status === 'CANCELLED') throw new Error("Already cancelled");
