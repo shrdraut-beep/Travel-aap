@@ -170,64 +170,6 @@ export function AllTripsScreen({
         }))}
       >
         <div className="space-y-4">
-          {/* Featured Destinations & Travely Deals Showcase */}
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-lg border border-indigo-500/20 relative overflow-hidden">
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400">
-                  <Sparkles className="w-4 h-4" />
-                </span>
-                <div>
-                  <h3 className="font-black text-sm text-white tracking-tight">
-                    {isMr ? "लोकप्रिय सहली व वीकेंड डील्स" : "Trending Holiday Packages"}
-                  </h3>
-                  <p className="text-[10px] font-bold text-indigo-300">
-                    {isMr ? "पडताळलेले टूर्स आणि झटपट तिकीट बुकिंग" : "Verified operators with instant e-passes"}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setActive("booking", "Packages")}
-                className="px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl text-[10px] font-black uppercase tracking-wider text-amber-300 flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
-              >
-                <span>{isMr ? "सर्व पहा" : "View All"}</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Quick Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {[
-                { name: isMr ? "रत्नागिरी बीच" : "Ratnagiri Beach", days: "3D/2N", price: "₹3,800", img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=400&q=80", rating: "4.8" },
-                { name: isMr ? "गोवा कोस्टल" : "Goa Escapade", days: "4D/3N", price: "₹8,900", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80", rating: "4.9" },
-                { name: isMr ? "महाबळेश्वर हिल्स" : "Mahabaleshwar", days: "3D/2N", price: "₹5,500", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80", rating: "4.7" },
-                { name: isMr ? "शिर्डी दर्शन" : "Shirdi Darshan", days: "2D/1N", price: "₹2,500", img: "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=400&q=80", rating: "4.9" }
-              ].map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => setActive("booking", "Packages")}
-                  className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl p-2 flex flex-col justify-between cursor-pointer transition-all hover:scale-[1.02] active:scale-95 group"
-                >
-                  <div className="h-16 rounded-xl overflow-hidden relative mb-1.5">
-                    <img src={item.img} alt={item.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    <span className="absolute top-1 right-1 bg-slate-950/70 backdrop-blur-xs text-amber-300 text-[8px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-                      ★ {item.rating}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-xs text-white truncate">{item.name}</h4>
-                    <div className="flex items-center justify-between mt-1 text-[10px]">
-                      <span className="text-slate-300 font-bold">{item.days}</span>
-                      <span className="text-amber-400 font-black">{item.price}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           <SectionTitle icon={Search}>{isMr ? "शोध सहली" : "Search Trips"}</SectionTitle>
           <div className="bg-white rounded-2xl px-4 py-2.5 flex items-center gap-2 shadow-sm border border-slate-200">

@@ -1,0 +1,58 @@
+.duffel-ngs-view {
+  padding-top: 40px;
+}
+
+.duffel-ngs-view .duffel-components {
+  overflow: unset;
+}
+
+.duffel-ngs-view_heading {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.duffel-ngs-view_subheading {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--GREY-500);
+  margin-bottom: 32px;
+}
+
+.duffel-ngs-view_breadcrumbs {
+  display: flex;
+  align-items: center;
+  color: var(--GREY-500);
+  font-size: 12px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.duffel-ngs-view_breadcrumbs > * + * {
+  margin-left: 4px;
+}
+
+.duffel-ngs-view_breadcrumb {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: none;
+  background: none;
+  cursor: auto;
+  font-family: var(--FONT-FAMILY);
+  color: var(--GREY-500);
+  margin-left: 4px;
+}
+
+.duffel-ngs-view_breadcrumb--selected {
+  color: var(--GREY-900);
+}
+
+.duffel-ngs-view_breadcrumb--clickable {
+  cursor: pointer;
+}
+
+.duffel-ngs-view_breadcrumb--clickable:hover {
+  color: var(--GREY-900);
+}

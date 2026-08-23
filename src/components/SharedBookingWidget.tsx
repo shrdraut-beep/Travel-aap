@@ -5,7 +5,8 @@ import { FlightSearchTab } from './travel/FlightSearchTab';
 import { HotelSearchTab } from './travel/HotelSearchTab';
 import { TrainInfoTab } from './travel/TrainInfoTab';
 import { BusSearchTab } from './travel/BusSearchTab';
-import { UniversalBookingCheckoutModal, BookingItemPayload } from './travel/UniversalBookingCheckoutModal';
+import { BookingItemPayload } from '../pages/CheckoutPage';
+import { useNavigate } from 'react-router-dom';
 
 interface SharedBookingWidgetProps {
   lang: string;
@@ -16,8 +17,12 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
   lang,
   currencySymbol,
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'flights' | 'buses' | 'hotels' | 'trains'>('flights');
-  const [checkoutModalItem, setCheckoutModalItem] = useState<BookingItemPayload | null>(null);
+
+  const handleBookNow = (item: BookingItemPayload) => {
+    navigate('/checkout', { state: { item, currencySymbol, lang } });
+  };
 
   const handleTabClick = (id: any) => {
     setActiveTab(id);
@@ -89,31 +94,19 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
         >
           
           {activeTab === 'flights' && (
-            <FlightSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <FlightSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
           {activeTab === 'buses' && (
-            <BusSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <BusSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
           {activeTab === 'hotels' && (
-            <HotelSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <HotelSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
           {activeTab === 'trains' && (
-            <TrainInfoTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <TrainInfoTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
         </motion.div>
       </AnimatePresence>
-      {checkoutModalItem && (
-        <UniversalBookingCheckoutModal
-          isOpen={true}
-          onClose={() => setCheckoutModalItem(null)}
-          item={checkoutModalItem}
-          currencySymbol={currencySymbol}
-          lang={lang}
-          onBookingSuccess={(receipt) => {
-            alert(`🎉 Booking confirmed: ${receipt.bookingId}`);
-          }}
-        />
-      )}
     </div>
   );
 };

@@ -128,10 +128,16 @@ export interface FetchLiveStationParams {
 /**
  * Helper to guarantee strict YYYY-MM-DD date formatting
  */
+const getTomorrowDateString = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+};
+
 export function formatDateToYYYYMMDD(rawDate?: string | Date): string {
-  if (!rawDate) return new Date().toISOString().split('T')[0];
+  if (!rawDate) return getTomorrowDateString();
   if (rawDate instanceof Date) {
-    if (isNaN(rawDate.getTime())) return new Date().toISOString().split('T')[0];
+    if (isNaN(rawDate.getTime())) return getTomorrowDateString();
     return rawDate.toISOString().split('T')[0];
   }
 
@@ -172,7 +178,7 @@ export function formatDateToYYYYMMDD(rawDate?: string | Date): string {
   if (!isNaN(parsed.getTime())) {
     return parsed.toISOString().split('T')[0];
   }
-  return new Date().toISOString().split('T')[0];
+  return getTomorrowDateString();
 }
 
 /**
@@ -314,7 +320,7 @@ export async function fetchLiveStationData(params: FetchLiveStationParams): Prom
  */
 export async function fetchTrainData(params: FetchTrainParams): Promise<TrainStatusData | null> {
   const tNum = (params.trainNumber || "22223").trim();
-  const sDate = params.startDate ? formatDateToYYYYMMDD(params.startDate) : new Date().toISOString().split('T')[0];
+  const sDate = params.startDate ? formatDateToYYYYMMDD(params.startDate) : getTomorrowDateString();
 
   const requestPayload = {
     trainNumber: tNum,

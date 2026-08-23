@@ -23,6 +23,7 @@ export const ReviewDetailsModal: React.FC<ReviewDetailsModalProps> = ({
   flightSummary,
 }) => {
   const { state, totals } = useBookingFlow();
+  const [termsAccepted, setTermsAccepted] = React.useState(false);
 
   if (!isOpen) return null;
 
@@ -180,33 +181,49 @@ export const ReviewDetailsModal: React.FC<ReviewDetailsModalProps> = ({
           </div>
         </div>
 
-        {/* Sticky Action Footer */}
-        <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Payable</span>
-            <span className="font-black text-xl text-[#0B1E3D]">
-              ₹{totals.grandTotal.toLocaleString('en-IN')}
+          {/* Agreement Checkbox */}
+          <div className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-200 shadow-xs cursor-pointer" onClick={() => setTermsAccepted(!termsAccepted)}>
+            <input 
+              type="checkbox" 
+              checked={termsAccepted} 
+              onChange={() => setTermsAccepted(!termsAccepted)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-[#FF5A5F] focus:ring-[#FF5A5F]"
+            />
+            <span className="text-xs text-slate-600 font-medium">
+              I agree to the <span className="text-[#FF5A5F] underline font-bold">Terms & Conditions</span>, 
+              <span className="text-[#FF5A5F] underline font-bold"> Privacy Policy</span>, and 
+              <span className="text-[#FF5A5F] underline font-bold"> Refund Policy</span>.
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-3 rounded-xl border border-slate-200 text-slate-700 font-black text-xs hover:bg-slate-50 cursor-pointer"
-            >
-              Modify Details
-            </button>
-            <button
-              type="button"
-              onClick={onConfirmPayment}
-              className="px-6 py-3 bg-[#FF5A5F] hover:bg-[#ff4046] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-95"
-            >
-              <span>Proceed to Pay</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+          {/* Sticky Action Footer */}
+          <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between gap-3 shrink-0">
+            <div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Payable</span>
+              <span className="font-black text-xl text-[#0B1E3D]">
+                ₹{totals.grandTotal.toLocaleString('en-IN')}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-3 rounded-xl border border-slate-200 text-slate-700 font-black text-xs hover:bg-slate-50 cursor-pointer"
+              >
+                Modify Details
+              </button>
+              <button
+                type="button"
+                onClick={onConfirmPayment}
+                disabled={!termsAccepted}
+                className={`px-6 py-3 bg-[#FF5A5F] hover:bg-[#ff4046] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-95 ${!termsAccepted ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span>Proceed to Pay</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
       </div>
     </div>
   );

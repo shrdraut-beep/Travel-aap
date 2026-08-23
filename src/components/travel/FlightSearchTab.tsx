@@ -1,39 +1,51 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Minus, Plus } from 'lucide-react';
+import { BookingFunnelLayout, MultiCityLeg } from './BookingFunnelLayout';
 import { TransportOptions } from './TransportOptions';
-import { BookingFunnelLayout } from './BookingFunnelLayout';
 import { SearchResultsToolbar } from './SearchResultsToolbar';
-import { IATA_TO_CITY_MAP, CITY_TO_IATA_MAP, CITY_GROUPS } from '../../data/airports';
-import { Users, Minus, Plus } from 'lucide-react';
+
+const getTomorrowDate = (daysAhead: number = 1) => {
+  const d = new Date();
+  d.setDate(d.getDate() + daysAhead);
+  return d.toISOString().split('T')[0];
+};
 
 const CABIN_CLASSES = ['economy', 'premium', 'business', 'first'];
 
 const departureMinutes = (flight: any) => {
-  const raw = String(flight.departureTime || flight.departure_time || flight.time || '');
-  const match = raw.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  const t = flight?.departureTime || flight?.departure_time || '';
+  const match = t.match(/(\d+):(\d+)/);
   if (!match) return 0;
-  let hours = parseInt(match[1], 10);
-  const meridiem = match[3]?.toUpperCase();
-  if (meridiem === 'PM' && hours < 12) hours += 12;
-  if (meridiem === 'AM' && hours === 12) hours = 0;
-  return hours * 60 + parseInt(match[2], 10);
+  return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
 };
 
 const durationMinutes = (flight: any) => {
-  const raw = String(flight.duration || '');
-  const h = raw.match(/(\d+)h/);
-  const m = raw.match(/(\d+)m/);
+  const d = flight?.duration || '';
+  const h = d.match(/(\d+)h/);
+  const m = d.match(/(\d+)m/);
   return (h ? parseInt(h[1], 10) : 0) * 60 + (m ? parseInt(m[1], 10) : 0);
 };
 
 export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
+  const navigate = useNavigate();
   const isMr = lang === 'mr';
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
-  const [departDate, setDepartDate] = useState('');
+
+  const [origin, setOrigin] = useState('BOM');
+  const [destination, setDestination] = useState('DEL');
+  const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'multicity'>('oneway');
+  const [departDate, setDepartDate] = useState(getTomorrowDate(1));
+  const [returnDate, setReturnDate] = useState(getTomorrowDate(4));
+  const [multiCitySlices, setMultiCitySlices] = useState<MultiCityLeg[]>([
+    { id: '1', origin: 'DEL', destination: 'BOM', date: getTomorrowDate(1) },
+    { id: '2', origin: 'BOM', destination: 'BLR', date: getTomorrowDate(3) }
+  ]);
+
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
   const [cabinClass, setCabinClass] = useState('economy');
+
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [flightData, setFlightData] = useState<any[]>([]);
@@ -53,51 +65,68 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
   }, [flightData, sortBy, nonStopOnly]);
 
   const handleFlightSearch = async () => {
-    setIsLoading(true);
-    setHasSearched(true);
-    try {
-      let flightSchedules;
-      try {
-        const module = await import('../../data/flightSchedules.json');
-        flightSchedules = module.default || module;
-      } catch (e) {
-        flightSchedules = [];
+    if (tripType === 'oneway') {
+      if (origin.toUpperCase() === destination.toUpperCase()) {
+        alert(isMr ? "प्रस्थान आणि गंतव्य शहर एकच असू शकत नाही." : "Origin and destination cannot be the same.");
+        return;
       }
-      
-      const o = origin.toUpperCase();
-      const d = destination.toUpperCase();
-      const originCodes = CITY_GROUPS[o] || [CITY_TO_IATA_MAP[o] || o];
-      const destinationCodes = CITY_GROUPS[d] || [CITY_TO_IATA_MAP[d] || d];
-
-      let results = flightSchedules.filter((f: any) => 
-        originCodes.includes(f.originCode) && destinationCodes.includes(f.destCode)
-      );
-
-      if (results.length === 0) {
-        // Fallback mock
-        results = [
-          {
-            flightNumber: `AI-${Math.floor(Math.random() * 900) + 100}`,
-            airline: 'Air India',
-            origin: origin,
-            destination: destination,
-            originCode: originCodes[0] || origin,
-            destCode: destinationCodes[0] || destination,
-            departureTime: '08:00 AM',
-            arrivalTime: '10:30 AM',
-            duration: '2h 30m',
-            price: 5400,
-            cabin: 'Economy'
-          }
-        ];
+    } else if (tripType === 'roundtrip') {
+      if (origin.toUpperCase() === destination.toUpperCase()) {
+        alert(isMr ? "प्रस्थान आणि गंतव्य शहर एकच असू शकत नाही." : "Origin and destination cannot be the same.");
+        return;
       }
-
-      setFlightData(results);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setTimeout(() => setIsLoading(false), 800);
+      if (returnDate && returnDate < departDate) {
+        alert(isMr ? "परतीची तारीख जाण्याच्या तारखेपेक्षा आधी असू शकत नाही." : "Return date cannot be earlier than departure date.");
+        return;
+      }
+    } else if (tripType === 'multicity') {
+      for (let i = 0; i < multiCitySlices.length; i++) {
+        const leg = multiCitySlices[i];
+        if (!leg.origin || !leg.destination) {
+          alert(isMr ? `कृपया फ्लाईट ${i + 1} साठी शहरे निवडा.` : `Please select cities for Flight ${i + 1}.`);
+          return;
+        }
+        if (leg.origin.toUpperCase() === leg.destination.toUpperCase()) {
+          alert(isMr ? `फ्लाईट ${i + 1} साठी प्रस्थान आणि गंतव्य शहर एकच असू शकत नाही.` : `Origin and destination cannot be identical for Flight ${i + 1}.`);
+          return;
+        }
+      }
     }
+
+    // Prepare slices payload for search
+    let formattedSlices: Array<{ origin: string; destination: string; departure_date: string }> = [];
+    if (tripType === 'oneway') {
+      formattedSlices = [{ origin: origin.trim().toUpperCase(), destination: destination.trim().toUpperCase(), departure_date: departDate }];
+    } else if (tripType === 'roundtrip') {
+      formattedSlices = [
+        { origin: origin.trim().toUpperCase(), destination: destination.trim().toUpperCase(), departure_date: departDate },
+        { origin: destination.trim().toUpperCase(), destination: origin.trim().toUpperCase(), departure_date: returnDate || getTomorrowDate(4) }
+      ];
+    } else {
+      formattedSlices = multiCitySlices.map(s => ({
+        origin: s.origin.trim().toUpperCase(),
+        destination: s.destination.trim().toUpperCase(),
+        departure_date: s.date
+      }));
+    }
+
+    const searchParams = {
+      tripType: tripType === 'oneway' ? 'oneWay' : tripType === 'roundtrip' ? 'roundTrip' : 'multiCity',
+      origin,
+      destination,
+      departDate,
+      returnDate: tripType === 'roundtrip' ? returnDate : undefined,
+      slices: formattedSlices,
+      adults,
+      children,
+      infants,
+      cabinClass
+    };
+
+    // If navigate to results page is preferred
+    navigate('/flights/results', {
+      state: { searchParams }
+    });
   };
 
   const renderStepper = (
@@ -137,23 +166,23 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
 
   const renderPassengerSelector = () => (
     <div className="space-y-6">
-      {renderStepper('Adults', '12+ years (Max 9 per booking)', adults, (next) => {
+      {renderStepper(isMr ? 'प्रौढ (Adults)' : 'Adults', isMr ? '१२+ वर्षे (कमाल ९)' : '12+ years (Max 9 per booking)', adults, (next) => {
         setAdults(next);
         if (infants > next) setInfants(next);
       }, 1, 9)}
 
-      {renderStepper('Children', '2-11 years', children, setChildren, 0, 8)}
+      {renderStepper(isMr ? 'मुले (Children)' : 'Children', isMr ? '२-११ वर्षे' : '2-11 years', children, setChildren, 0, 8)}
 
-      {renderStepper('Infants', 'Under 2 years (one per adult)', infants, setInfants, 0, adults)}
+      {renderStepper(isMr ? 'लहान बाळे (Infants)' : 'Infants', isMr ? '२ वर्षांखालील' : 'Under 2 years (one per adult)', infants, setInfants, 0, adults)}
 
       {adults >= 9 && (
         <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-bold text-amber-900 leading-snug">
-          ⚠️ Airline Rule: Maximum 9 passengers allowed per standard booking. For more than 9 passengers, please make a Group Booking.
+          ⚠️ {isMr ? 'विमान नियम: एका बुकिंगमध्ये कमाल ९ प्रवाशांना परवानगी आहे.' : 'Airline Rule: Maximum 9 passengers allowed per standard booking. For more than 9 passengers, please make a Group Booking.'}
         </div>
       )}
 
       <div>
-        <h4 className="font-bold text-slate-800 mb-3">Cabin Class</h4>
+        <h4 className="font-bold text-slate-800 mb-3">{isMr ? 'केबिन क्लास' : 'Cabin Class'}</h4>
         <div className="grid grid-cols-4 gap-2">
           {CABIN_CLASSES.map(c => (
             <button
@@ -170,6 +199,11 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
     </div>
   );
 
+  const totalTravellers = adults + children + infants;
+  const passengerSummary = isMr
+    ? `${totalTravellers} प्रवासी, ${cabinClass}`
+    : `${totalTravellers} Traveller${totalTravellers > 1 ? 's' : ''}, ${cabinClass}`;
+
   return (
     <BookingFunnelLayout
       mode="flight"
@@ -180,11 +214,17 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
       setDestination={setDestination}
       date={departDate}
       setDate={setDepartDate}
+      returnDate={returnDate}
+      setReturnDate={setReturnDate}
+      multiCitySlices={multiCitySlices}
+      setMultiCitySlices={setMultiCitySlices}
+      tripType={tripType}
+      setTripType={setTripType}
       onSearch={handleFlightSearch}
       isLoading={isLoading}
       hasSearched={hasSearched}
       lang={lang}
-      passengerSummary={`${adults + children + infants} Traveller${adults + children + infants > 1 ? 's' : ''}, ${cabinClass}`}
+      passengerSummary={passengerSummary}
       renderPassengerSelector={renderPassengerSelector}
       renderResultsToolbar={() => (
         <SearchResultsToolbar
@@ -192,11 +232,11 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
           activeSort={sortBy}
           onSortChange={setSortBy}
           sortOptions={[
-            { key: 'price', label: 'Cheapest' },
-            { key: 'duration', label: 'Fastest' },
-            { key: 'departure', label: 'Departure' },
+            { key: 'price', label: isMr ? 'कमी दर' : 'Cheapest' },
+            { key: 'duration', label: isMr ? 'कमी वेळ' : 'Fastest' },
+            { key: 'departure', label: isMr ? 'प्रस्थान वेळ' : 'Departure' },
           ]}
-          toggles={[{ key: 'nonstop', label: 'Non-stop', active: nonStopOnly, onToggle: () => setNonStopOnly(v => !v) }]}
+          toggles={[{ key: 'nonstop', label: isMr ? 'नॉन-स्टॉप' : 'Non-stop', active: nonStopOnly, onToggle: () => setNonStopOnly(v => !v) }]}
         />
       )}
       renderResults={() => (
@@ -215,3 +255,5 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
     />
   );
 };
+
+export default FlightSearchTab;

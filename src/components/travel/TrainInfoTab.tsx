@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+
+const getTomorrowDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+
 import { TransportOptions } from './TransportOptions';
 import { BookingFunnelLayout } from './BookingFunnelLayout';
 import { SearchResultsToolbar } from './SearchResultsToolbar';
@@ -22,7 +29,7 @@ export const TrainInfoTab = ({ lang, currencySymbol, onBookNow, onBack }: any) =
   const isMr = lang === 'mr';
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [departDate, setDepartDate] = useState('');
+  const [departDate, setDepartDate] = useState(getTomorrowDate());
   const [passengers, setPassengers] = useState(1);
   const [classType, setClassType] = useState('SL');
   const [quota, setQuota] = useState('General');
@@ -45,6 +52,10 @@ export const TrainInfoTab = ({ lang, currencySymbol, onBookNow, onBack }: any) =
   }, [trainData, sortBy, acOnly]);
 
   const handleTrainSearch = async () => {
+    if (origin.toUpperCase() === destination.toUpperCase()) {
+        alert("Origin and destination cannot be the same.");
+        return;
+    }
     setIsLoading(true);
     setHasSearched(true);
     setTimeout(() => {

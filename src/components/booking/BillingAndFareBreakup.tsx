@@ -228,22 +228,20 @@ export const BillingAndFareBreakup: React.FC<BillingAndFareBreakupProps> = ({ on
 
           {/* Convenience Fee */}
           <div className="flex items-center justify-between text-slate-700 pt-1">
-            <div className="flex items-center gap-1.5">
-              <span>Convenience Fee</span>
-              <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded-full border border-emerald-200 flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5" /> ZERO CONV FEE
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="line-through text-slate-400 font-medium">₹250</span>
-              <span className="font-bold text-emerald-600">FREE</span>
-            </div>
+            <span>App Convenience Fee</span>
+            <span className="font-bold text-slate-900">₹{totals.convenienceFee.toLocaleString('en-IN')}</span>
+          </div>
+
+          {/* GST on Conv Fee */}
+          <div className="flex items-center justify-between text-slate-700">
+            <span>GST on Convenience Fee (18%)</span>
+            <span className="font-bold text-slate-900">₹{totals.gstOnConvFee.toLocaleString('en-IN')}</span>
           </div>
 
           {/* Total Divider */}
           <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
             <div>
-              <span className="text-xs font-bold text-slate-500 block">Grand Total (All inclusive)</span>
+              <span className="text-xs font-bold text-slate-500 block">Total Amount to Pay</span>
               <span className="text-xl font-black text-[#0B1E3D]">
                 ₹{totals.grandTotal.toLocaleString('en-IN')}
               </span>

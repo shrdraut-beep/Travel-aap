@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { fetchLiveFlights, fetchLiveTrains } from '../services/LiveTravelAPI';
 import { Train, Bus, Plane, Clock, Search, AlertCircle, Info } from 'lucide-react';
-import { UniversalBookingCheckoutModal, BookingItemPayload } from './travel/UniversalBookingCheckoutModal';
+import { BookingItemPayload } from '../pages/CheckoutPage';
+import { useNavigate } from 'react-router-dom';
 
 interface TransitSchedule {
   trains?: { trainName: string; departureTime: string; arrivalTime: string; duration: string }[];
@@ -13,14 +14,18 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
   source: initialSource, 
   destination: initialDestination 
 }) => {
+  const navigate = useNavigate();
   const [source, setSource] = useState(initialSource || 'Mumbai');
   const [destination, setDestination] = useState(initialDestination || 'Pune');
   const [schedules, setSchedules] = useState<TransitSchedule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPendingApi, setIsPendingApi] = useState(false);
-  const [checkoutItem, setCheckoutItem] = useState<BookingItemPayload | null>(null);
   const isFetching = useRef(false);
+
+  const handleBookNow = (item: BookingItemPayload) => {
+    navigate('/checkout', { state: { item, currencySymbol: '₹', lang: 'en' } });
+  };
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -143,13 +148,13 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
       {!isLoading && schedules && (
         <div className="space-y-6">
           {schedules.trains && schedules.trains.length > 0 && (
-            <TransitSection type="train" source={source} destination={destination} onBookNow={setCheckoutItem} title="Trains" icon={Train} items={schedules.trains.map(t => ({ name: t.trainName, ...t }))} />
+            <TransitSection type="train" source={source} destination={destination} onBookNow={handleBookNow} title="Trains" icon={Train} items={schedules.trains.map(t => ({ name: t.trainName, ...t }))} />
           )}
           {schedules.buses && schedules.buses.length > 0 && (
-            <TransitSection type="bus" source={source} destination={destination} onBookNow={setCheckoutItem} title="Buses" icon={Bus} items={schedules.buses.map(b => ({ name: `${b.operatorName} (${b.busType})`, ...b }))} />
+            <TransitSection type="bus" source={source} destination={destination} onBookNow={handleBookNow} title="Buses" icon={Bus} items={schedules.buses.map(b => ({ name: `${b.operatorName} (${b.busType})`, ...b }))} />
           )}
           {schedules.flights && schedules.flights.length > 0 && (
-            <TransitSection type="flight" source={source} destination={destination} onBookNow={setCheckoutItem} title="Flights" icon={Plane} items={schedules.flights.map((f: any) => ({
+            <TransitSection type="flight" source={source} destination={destination} onBookNow={handleBookNow} title="Flights" icon={Plane} items={schedules.flights.map((f: any) => ({
               name: f.airlineName,
               departureTime: f.departureTime,
               arrivalTime: f.arrivalTime,
@@ -157,19 +162,6 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
             }))} />
           )}
         </div>
-      )}
-
-      {checkoutItem && (
-        <UniversalBookingCheckoutModal
-          isOpen={true}
-          onClose={() => setCheckoutItem(null)}
-          item={checkoutItem}
-          currencySymbol="₹"
-          lang="en"
-          onBookingSuccess={(receipt) => {
-            alert(`🎉 Booking confirmed! ID: ${receipt.bookingId}`);
-          }}
-        />
       )}
     </div>
   );

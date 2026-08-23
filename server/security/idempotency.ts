@@ -57,8 +57,8 @@ export class IdempotencyEngine {
             return data;
           }
         }
-      } catch (e) {
-        console.warn('[Idempotency] Firestore read notice:', e);
+      } catch {
+        // Fall back gracefully to memory store
       }
     }
 
@@ -94,8 +94,8 @@ export class IdempotencyEngine {
     if (adminDbInstance) {
       try {
         await adminDbInstance.collection('idempotency_keys').doc(normalizedKey).set(newRecord);
-      } catch (e) {
-        console.warn('[Idempotency] Firestore write lock notice:', e);
+      } catch {
+        // Fall back to memory store
       }
     }
 
@@ -132,8 +132,8 @@ export class IdempotencyEngine {
     if (adminDbInstance) {
       try {
         await adminDbInstance.collection('idempotency_keys').doc(normalizedKey).set(record);
-      } catch (e) {
-        console.warn('[Idempotency] Firestore commit notice:', e);
+      } catch {
+        // Fall back to memory store
       }
     }
   }

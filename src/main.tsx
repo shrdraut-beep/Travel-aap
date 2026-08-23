@@ -71,13 +71,16 @@ window.addEventListener('error', (event) => {
 });
 
 import { AppLockScreen } from './components/security/AppLockScreen';
+import { BrowserRouter } from 'react-router-dom';
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
-    <LanguageProvider>
-      <TripProvider>
-        <App />
-      </TripProvider>
-    </LanguageProvider>
+    <BrowserRouter>
+      <LanguageProvider>
+        <TripProvider>
+          <App />
+        </TripProvider>
+      </LanguageProvider>
+    </BrowserRouter>
   </ErrorBoundary>,
 );

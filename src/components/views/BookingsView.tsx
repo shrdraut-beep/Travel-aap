@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TripGroup } from '../../types';
 import { ExplorePackagesView } from './ExplorePackagesView';
 import { FlightSearchTab } from '../travel/FlightSearchTab';
@@ -26,21 +27,18 @@ import {
   Search,
   Gift
 } from 'lucide-react';
+import { flightService } from '../../services/flights/FlightService';
+import { hotelService } from '../../services/hotels/HotelService';
+import { trainService } from '../../services/trains/TrainService';
+import { carService } from '../../services/cars/CarService';
+import { cabService } from '../../services/cabs/CabService';
+import { busService } from '../../services/buses/BusService';
+import { packageService } from '../../services/packages/PackageService';
+import { mockCoupons } from '../../data/mockDataStore';
+
 import { 
-  mockDataStore, 
-  mockCoupons, 
-  MockFlight, 
-  MockTrain, 
-  MockHotel, 
-  MockCar, 
-  MockCab, 
-  MockBus, 
-  MockPackage 
-} from '../../data/mockDataStore';
-import { 
-  UniversalBookingCheckoutModal, 
   BookingItemPayload 
-} from '../travel/UniversalBookingCheckoutModal';
+} from '../../pages/CheckoutPage';
 
 export const TRAVELPAYOUTS_MARKER = "554147";
 
@@ -69,8 +67,8 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
   // E2E Sandbox & Checkout Modal State
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [checkoutModalItem, setCheckoutModalItem] = useState<BookingItemPayload | null>(null);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState<boolean>(false);
+  const [allInventoryItems, setAllInventoryItems] = useState<BookingItemPayload[]>([]);
+  const navigate = useNavigate();
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -78,100 +76,108 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
   };
 
   const handleOpenCheckout = (itemPayload: BookingItemPayload) => {
-    setCheckoutModalItem(itemPayload);
-    setIsCheckoutOpen(true);
+    navigate('/checkout', { state: { item: itemPayload, currencySymbol, lang } });
   };
 
-  // Build centralized inventory from mockDataStore across all 7 verticals
-  const allInventoryItems: BookingItemPayload[] = [
-    // 1. Packages
-    ...mockDataStore.packages.map((pkg) => ({
-      id: pkg.id,
-      title: pkg.title,
-      vertical: 'package' as const,
-      subtitle: `${pkg.durationDays}D/${pkg.durationNights}N • ${pkg.destination}`,
-      location: pkg.destination,
-      amount: pkg.price || pkg.amount,
-      image: pkg.image,
-      provider: pkg.agentName,
-      meta: { rating: pkg.rating, reviews: pkg.reviewsCount }
-    })),
-    // 2. Flights
-    ...mockDataStore.flights.map((fl) => ({
-      id: fl.id,
-      title: `${fl.airline} (${fl.flightNumber})`,
-      vertical: 'flight' as const,
-      subtitle: `${fl.origin} (${fl.originCode}) → ${fl.destination} (${fl.destinationCode})`,
-      location: `${fl.originCode} to ${fl.destinationCode}`,
-      time: `${fl.departureTime} - ${fl.arrivalTime}`,
-      duration: fl.duration,
-      amount: fl.amount,
-      provider: fl.airline,
-      meta: { stops: fl.stops, cabin: fl.cabinClass }
-    })),
-    // 3. Hotels
-    ...mockDataStore.hotels.map((ht) => ({
-      id: ht.id,
-      title: ht.name,
-      vertical: 'hotel' as const,
-      subtitle: `${ht.city}, ${ht.location}`,
-      location: ht.location,
-      amount: ht.amountPerNight || ht.amount,
-      image: ht.images?.[0] || '',
-      provider: ht.name,
-      meta: { rating: ht.rating, amenities: ht.amenities }
-    })),
-    // 4. Trains
-    ...mockDataStore.trains.map((tr) => ({
-      id: tr.id,
-      title: `${tr.trainName} (#${tr.trainNumber})`,
-      vertical: 'train' as const,
-      subtitle: `${tr.origin} (${tr.originCode}) → ${tr.destination} (${tr.destinationCode})`,
-      location: `${tr.originCode} - ${tr.destinationCode}`,
-      time: `${tr.departureTime} - ${tr.arrivalTime}`,
-      duration: tr.duration,
-      amount: tr.amount,
-      provider: 'Indian Railways (IRCTC)',
-      meta: { days: tr.runsOn?.join(', ') || 'All Days' }
-    })),
-    // 5. Cars (Self Drive)
-    ...mockDataStore.cars.map((cr) => ({
-      id: cr.id,
-      title: `${cr.brand} ${cr.model}`,
-      vertical: 'car' as const,
-      subtitle: `${cr.category} • ${cr.fuelType} • ${cr.transmission}`,
-      location: cr.pickupLocations?.[0] || 'Multiple Hubs',
-      amount: cr.amountPerDay || cr.amount,
-      image: cr.image,
-      provider: 'RouTripO Self-Drive Fleet',
-      meta: { seats: cr.seats, rating: cr.rating }
-    })),
-    // 6. Cabs (With Driver)
-    ...mockDataStore.cabs.map((cb) => ({
-      id: cb.id,
-      title: `${cb.cabType} (${cb.carModel})`,
-      vertical: 'cab' as const,
-      subtitle: `${cb.driverName} • Includes Driver & AC`,
-      location: 'Local & Outstation',
-      amount: cb.amount,
-      image: cb.image,
-      provider: cb.driverName,
-      meta: { rating: cb.driverRating, perKm: `₹${cb.ratePerKm}/km` }
-    })),
-    // 7. Buses
-    ...mockDataStore.buses.map((bs) => ({
-      id: bs.id,
-      title: `${bs.operatorName} (${bs.busType})`,
-      vertical: 'bus' as const,
-      subtitle: `${bs.origin} → ${bs.destination}`,
-      location: `${bs.origin} to ${bs.destination}`,
-      time: `${bs.departureTime} - ${bs.arrivalTime}`,
-      duration: bs.duration,
-      amount: bs.amount,
-      provider: bs.operatorName,
-      meta: { rating: bs.rating, seats: `${bs.availableSeats} seats left` }
-    }))
-  ];
+  useEffect(() => {
+    async function fetchData() {
+      const [pkgs, flights, hotels, trains, cars, cabs, buses] = await Promise.all([
+        packageService.getAll(),
+        flightService.getAllFlights(),
+        hotelService.getAllHotels(),
+        trainService.getAllTrains(),
+        carService.getAll(),
+        cabService.getAll(),
+        busService.getAll(),
+      ]);
+
+      const inventoryItems: BookingItemPayload[] = [
+        ...pkgs.map((pkg: any) => ({
+          id: pkg.id,
+          title: pkg.title,
+          vertical: 'package' as const,
+          subtitle: `${pkg.durationDays}D/${pkg.durationNights}N • ${pkg.destination}`,
+          location: pkg.destination,
+          amount: pkg.price || pkg.amount,
+          image: pkg.image,
+          provider: pkg.agentName,
+          meta: { rating: pkg.rating, reviews: pkg.reviewsCount }
+        })),
+        ...flights.map((fl: any) => ({
+          id: fl.id,
+          title: `${fl.airline} (${fl.flightNumber})`,
+          vertical: 'flight' as const,
+          subtitle: `${fl.origin} (${fl.originCode}) → ${fl.destination} (${fl.destinationCode})`,
+          location: `${fl.originCode} to ${fl.destinationCode}`,
+          time: `${fl.departureTime} - ${fl.arrivalTime}`,
+          duration: fl.duration,
+          amount: fl.amount,
+          provider: fl.airline,
+          meta: { stops: fl.stops, cabin: fl.cabinClass }
+        })),
+        ...hotels.map((ht: any) => ({
+          id: ht.id,
+          title: ht.name,
+          vertical: 'hotel' as const,
+          subtitle: `${ht.city}, ${ht.location}`,
+          location: ht.location,
+          amount: ht.amountPerNight || ht.amount,
+          image: ht.images?.[0] || '',
+          provider: ht.name,
+          meta: { rating: ht.rating, amenities: ht.amenities }
+        })),
+        ...trains.map((tr: any) => ({
+          id: tr.id,
+          title: `${tr.trainName} (#${tr.trainNumber})`,
+          vertical: 'train' as const,
+          subtitle: `${tr.origin} (${tr.originCode}) → ${tr.destination} (${tr.destinationCode})`,
+          location: `${tr.originCode} - ${tr.destinationCode}`,
+          time: `${tr.departureTime} - ${tr.arrivalTime}`,
+          duration: tr.duration,
+          amount: tr.amount,
+          provider: 'Indian Railways (IRCTC)',
+          meta: { days: tr.runsOn?.join(', ') || 'All Days' }
+        })),
+        ...cars.map((cr: any) => ({
+          id: cr.id,
+          title: `${cr.brand} ${cr.model}`,
+          vertical: 'car' as const,
+          subtitle: `${cr.category} • ${cr.fuelType} • ${cr.transmission}`,
+          location: cr.pickupLocations?.[0] || 'Multiple Hubs',
+          amount: cr.amountPerDay || cr.amount,
+          image: cr.image,
+          provider: 'RouTripO Self-Drive Fleet',
+          meta: { seats: cr.seats, rating: cr.rating }
+        })),
+        ...cabs.map((cb: any) => ({
+          id: cb.id,
+          title: `${cb.cabType} (${cb.carModel})`,
+          vertical: 'cab' as const,
+          subtitle: `${cb.driverName} • Includes Driver & AC`,
+          location: 'Local & Outstation',
+          amount: cb.amount,
+          image: cb.image,
+          provider: cb.driverName,
+          meta: { rating: cb.driverRating, perKm: `₹${cb.ratePerKm}/km` }
+        })),
+        ...buses.map((bs: any) => ({
+          id: bs.id,
+          title: `${bs.operatorName} (${bs.busType})`,
+          vertical: 'bus' as const,
+          subtitle: `${bs.origin} → ${bs.destination}`,
+          location: `${bs.origin} to ${bs.destination}`,
+          time: `${bs.departureTime} - ${bs.arrivalTime}`,
+          duration: bs.duration,
+          amount: bs.amount,
+          provider: bs.operatorName,
+          meta: { rating: bs.rating, seats: `${bs.availableSeats} seats left` }
+        }))
+      ];
+      setAllInventoryItems(inventoryItems);
+    }
+    fetchData();
+  }, []);
+
 
   const filteredItems = allInventoryItems.filter((it) => {
     const matchCategory = selectedCategory === 'all' || it.vertical === selectedCategory;
@@ -503,20 +509,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
         </div>
       )}
 
-      {/* UNIVERSAL BOOKING & PROMO CODE CHECKOUT MODAL */}
-      <UniversalBookingCheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => {
-          setIsCheckoutOpen(false);
-          setCheckoutModalItem(null);
-        }}
-        item={checkoutModalItem}
-        currencySymbol={currencySymbol}
-        lang={lang}
-        onBookingSuccess={(receipt) => {
-          showToast(`🎉 Booking verified: ${receipt.bookingId}`);
-        }}
-      />
+      {/* Universal Checkout Modal is now a dedicated page via React Router */}
     </div>
   );
 };

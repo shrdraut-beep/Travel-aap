@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+
+const getTomorrowDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+
 import { TransportOptions } from './TransportOptions';
 import { BookingFunnelLayout } from './BookingFunnelLayout';
 import { Users, Minus, Plus } from 'lucide-react';
@@ -7,7 +14,7 @@ export const BusSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) =
   const isMr = lang === 'mr';
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [departDate, setDepartDate] = useState('');
+  const [departDate, setDepartDate] = useState(getTomorrowDate());
   const [passengers, setPassengers] = useState(1);
   const [busType, setBusType] = useState('AC Sleeper');
   const [isLoading, setIsLoading] = useState(false);

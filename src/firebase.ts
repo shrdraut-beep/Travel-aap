@@ -4,11 +4,11 @@ import { initializeApp } from "firebase/app";
 import { 
   getFirestore,
   initializeFirestore,
-  persistentLocalCache,
   doc, 
   onSnapshot, 
   setDoc, 
   getDoc, 
+  getDocFromServer,
   updateDoc, 
   deleteDoc,
   collection,
@@ -30,23 +30,7 @@ import {
 import { getStorage, ref, listAll, deleteObject } from "firebase/storage";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as getAppCheckToken } from "firebase/app-check";
-
-// Config parsed from firebase-applet-config.json.
-// NOTE: Firebase web config values (including apiKey) are public identifiers, not
-// secrets - they are required in the client bundle for the SDK to work. Access is
-// controlled by Firestore/Storage security rules, Google Cloud API key referrer
-// restrictions, and App Check - never by hiding these values.
-// The env overrides below exist only to point builds at a different Firebase project.
-const env = (import.meta as any).env || {};
-const firebaseConfig = {
-  projectId: env.VITE_FIREBASE_PROJECT_ID || "gen-lang-client-0070042137",
-  appId: env.VITE_FIREBASE_APP_ID || "1:974625843598:web:79a85a1f88ddc5fbe95cdf",
-  apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyAqWmoMOZIflucdFRmqV_WJPMvPMBx9LGI",
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0070042137.firebaseapp.com",
-  firestoreDatabaseId: env.VITE_FIREBASE_DATABASE_ID || "ai-studio-grouptravelplann-f077e851-c9d2-483d-be19-1d2a3b70ff44",
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0070042137.firebasestorage.app",
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "974625843598"
-};
+import firebaseConfig from '../firebase-applet-config.json';
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
@@ -60,58 +44,49 @@ export function getAuthSafe() {
 let dbInstance: any;
 try {
   dbInstance = initializeFirestore(app, {
-    localCache: persistentLocalCache(),
+    experimentalAutoDetectLongPolling: true,
     ignoreUndefinedProperties: true
   }, firebaseConfig.firestoreDatabaseId);
 } catch (e) {
-  console.warn("initializeFirestore fallback to getFirestore due to cache/browser lock:", e);
-  try {
-    dbInstance = initializeFirestore(app, {
-      ignoreUndefinedProperties: true
-    }, firebaseConfig.firestoreDatabaseId);
-  } catch (e2) {
-    dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-  }
+  dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 }
 export const db = dbInstance;
 export const storage = getStorage(app);
 
-// Initialize App Check
+// Initialize App Check only if a valid, non-dummy recaptcha key is provided
 let appCheckInstance: any = null;
 if (typeof window !== "undefined") {
-  try {
-    const isDev = import.meta.env?.DEV;
-    if (isDev) {
-      (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  const envRecaptchaKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY;
+  const configRecaptchaKey = (firebaseConfig as any).recaptchaSiteKey;
+  const siteKey = envRecaptchaKey || configRecaptchaKey;
+
+  if (siteKey && typeof siteKey === 'string' && siteKey.trim() !== '' && !siteKey.includes('dummy')) {
+    try {
+      const isDev = (import.meta as any).env?.DEV;
+      if (isDev) {
+        (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+      }
+      appCheckInstance = initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider(siteKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+      console.log("Firebase App Check initialized.");
+    } catch (err) {
+      console.warn("App Check initialization notice:", err);
     }
-    const siteKey = import.meta.env?.VITE_RECAPTCHA_SITE_KEY || "6Ld_dummy_recaptcha_site_key_123456";
-    appCheckInstance = initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider(siteKey),
-      isTokenAutoRefreshEnabled: true,
-    });
-    console.log("Firebase App Check initialized.");
-  } catch (err) {
-    console.warn("App Check initialization notice:", err);
   }
 }
 export const appCheck = appCheckInstance;
 export { getAppCheckToken };
 
-// Connection test helper with offline fallback
+// Connection test helper
 async function testConnection() {
   try {
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Connection check timeout')), 2000)
-    );
-    timeoutPromise.catch(() => {}); // prevent unhandled rejection
-    await Promise.race([
-      getDoc(doc(db, 'test', 'connection')),
-      timeoutPromise
-    ]).catch(() => {
-      // Offline / cached mode fallback
-    });
+    await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
-    console.warn("Firestore client operating in offline/cached mode.");
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration.");
+    }
   }
 }
 testConnection();
@@ -380,7 +355,7 @@ export async function requestAndSaveFCMToken(userId?: string) {
     // VAPID public key from the Firebase Console (Cloud Messaging > Web Push
     // certificates). Without it getToken() cannot produce a usable token, so skip
     // registration rather than calling with a placeholder that always fails.
-    const vapidKey = env.VITE_FIREBASE_VAPID_KEY;
+    const vapidKey = (import.meta as any).env?.VITE_FIREBASE_VAPID_KEY;
     if (!vapidKey) {
       console.info('Push notifications disabled: VITE_FIREBASE_VAPID_KEY is not configured.');
       return null;

@@ -32,7 +32,7 @@ import { PassengerForm } from './PassengerForm';
 import { PolicyTable } from './PolicyTable';
 import { BillingAndFareBreakup } from './BillingAndFareBreakup';
 import { ReviewDetailsModal } from './ReviewDetailsModal';
-import { BookingItemPayload } from '../travel/UniversalBookingCheckoutModal';
+import { BookingItemPayload } from '../../pages/CheckoutPage';
 import { apiClient } from '../../utils/apiClient';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getDeviceFingerprint } from '../../utils/deviceFingerprint';
@@ -60,10 +60,11 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
   const { state, dispatch, totals, isPassengerFormValid, buildCheckoutPayload } = useBookingFlow();
   const currentUser = useAuthStore((s) => s.currentUser);
 
-  const [step, setStep] = useState<'fare' | 'addons' | 'details'>('details');
+  const [step, setStep] = useState<'fare' | 'passengers' | 'seats' | 'meals' | 'baggage' | 'review' | 'payment'>('fare');
   const [activeAddonTab, setActiveAddonTab] = useState<'seats' | 'meals' | 'baggage'>('seats');
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [isFareSheetOpen, setIsFareSheetOpen] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Razorpay & Confirmation State
   const [isProcessing, setIsProcessing] = useState(false);
@@ -75,7 +76,7 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
   useEffect(() => {
     console.log("BookingFlowModal received item:", item);
     if (item) {
-      const baseFare = item.amount || 4850;
+      const baseFare = item.amount || 0;
       const defaultFare = DEFAULT_FARE_TIERS(baseFare)[0];
       dispatch({ type: 'SELECT_FARE', fare: defaultFare });
       dispatch({
@@ -91,9 +92,9 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
           },
         ],
       });
+      // Start at passengers selection
+      setStep('passengers');
       if (item.vertical === 'flight' || item.vertical === 'train') {
-        // Start at fare selection or details
-        setStep('details');
         setIsFareSheetOpen(true);
       }
     }
@@ -251,7 +252,7 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
             {!completedBooking && (
               <button
                 type="button"
-                onClick={step !== 'details' ? () => setStep('details') : onClose}
+                onClick={step !== 'passengers' ? () => setStep('passengers') : onClose}
                 className="p-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
@@ -285,45 +286,69 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
               {(item.vertical === 'flight' || item.vertical === 'train') && (
                 <button
                   type="button"
-                  onClick={() => setIsFareSheetOpen(true)}
+                  onClick={() => setStep('fare')}
                   className={`px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    state.selectedFare ? 'bg-amber-50 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-600'
+                    step === 'fare' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   <span>Fare: {state.selectedFare?.label.split(' ')[0] || 'Saver'}</span>
-                </button>
-              )}
-
-              {/* Add-ons Tab */}
-              {(item.vertical === 'flight' || item.vertical === 'train') && (
-                <button
-                  type="button"
-                  onClick={() => setStep('addons')}
-                  className={`px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    step === 'addons' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  <Armchair className="w-3.5 h-3.5" />
-                  <span>
-                    Add-ons ({state.seats.length} Seats • {state.meals.length} Meals)
-                  </span>
                 </button>
               )}
 
               {/* Passenger Details Step */}
               <button
                 type="button"
-                onClick={() => setStep('details')}
+                onClick={() => setStep('passengers')}
+                disabled={!state.selectedFare}
                 className={`px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  step === 'details' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                  step === 'passengers' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                } ${!state.selectedFare ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                <span>
-                  Passengers ({state.passengerCount})
-                </span>
+                <span>Passengers ({state.passengerCount})</span>
               </button>
+
+              {/* Seats Step */}
+              {(item.vertical === 'flight' || item.vertical === 'train') && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setStep('seats')}
+                    disabled={!isPassengerFormValid}
+                    className={`px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      step === 'seats' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    } ${!isPassengerFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <Armchair className="w-3.5 h-3.5" />
+                    <span>Seats</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep('meals')}
+                    disabled={!isPassengerFormValid}
+                    className={`px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      step === 'meals' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    } ${!isPassengerFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <Utensils className="w-3.5 h-3.5" />
+                    <span>Meals</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep('baggage')}
+                    disabled={!isPassengerFormValid}
+                    className={`px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      step === 'baggage' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    } ${!isPassengerFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    <Luggage className="w-3.5 h-3.5" />
+                    <span>Baggage</span>
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="text-right shrink-0">
@@ -389,9 +414,6 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center justify-between text-xs font-bold text-slate-700">
                   <div>
                     <span>Selected Seats: {state.seats.length > 0 ? state.seats.map((s) => s.seatCode).join(', ') : 'Free Assigned'}</span>
-                    <span className="block text-slate-500 text-[11px]">
-                      Meals: {state.meals.length} items | Extra Baggage: {state.baggage.reduce((acc, b) => acc + b.kg, 0)} kg
-                    </span>
                   </div>
                   <div className="text-right">
                     <span className="text-[10px] font-black uppercase text-slate-400 block">Paid Amount</span>
@@ -422,81 +444,41 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
                 </button>
               </div>
             </div>
-          ) : step === 'addons' ? (
-            /* Addons Step (Multi-tab: Seat / Meal / Baggage) */
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 bg-slate-200/80 p-1.5 rounded-2xl">
-                <button
-                  type="button"
-                  onClick={() => setActiveAddonTab('seats')}
-                  className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    activeAddonTab === 'seats' ? 'bg-[#FF5A5F] text-white shadow-xs' : 'text-slate-700 hover:text-slate-900'
-                  }`}
-                >
-                  <Armchair className="w-4 h-4" />
-                  <span>Seats ({state.seats.length})</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveAddonTab('meals')}
-                  className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    activeAddonTab === 'meals' ? 'bg-[#FF5A5F] text-white shadow-xs' : 'text-slate-700 hover:text-slate-900'
-                  }`}
-                >
-                  <Utensils className="w-4 h-4" />
-                  <span>Meals ({state.meals.length})</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveAddonTab('baggage')}
-                  className={`flex-1 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    activeAddonTab === 'baggage' ? 'bg-[#FF5A5F] text-white shadow-xs' : 'text-slate-700 hover:text-slate-900'
-                  }`}
-                >
-                  <Luggage className="w-4 h-4" />
-                  <span>Baggage ({state.baggage.length})</span>
-                </button>
-              </div>
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeAddonTab}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {activeAddonTab === 'seats' && (
-                    <SeatSelection
-                      legs={state.legs.map((l) => ({ id: l.id, label: `${l.from} → ${l.to}` }))}
-                      onSkip={() => setActiveAddonTab('meals')}
-                      onNext={() => setActiveAddonTab('meals')}
-                      onBack={() => setStep('details')}
-                    />
-                  )}
-
-                  {activeAddonTab === 'meals' && (
-                    <MealSelection
-                      legs={state.legs.map((l) => ({ id: l.id, label: `${l.from} → ${l.to}` }))}
-                      onSkip={() => setActiveAddonTab('baggage')}
-                      onNext={() => setActiveAddonTab('baggage')}
-                      onBack={() => setActiveAddonTab('seats')}
-                    />
-                  )}
-
-                  {activeAddonTab === 'baggage' && (
-                    <BaggageSelection
-                      legs={state.legs.map((l) => ({ id: l.id, label: `${l.from} → ${l.to}` }))}
-                      onSkip={() => setIsReviewOpen(true)}
-                      onNext={() => setIsReviewOpen(true)}
-                      onBack={() => setActiveAddonTab('meals')}
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+          ) : step === 'seats' ? (
+            <SeatSelection
+              legs={state.legs.map((l) => ({ id: l.id, label: `${l.from} → ${l.to}` }))}
+              onSkip={() => setStep('meals')}
+              onNext={() => setStep('meals')}
+              onBack={() => setStep('passengers')}
+            />
+          ) : step === 'meals' ? (
+            <MealSelection
+              onSkip={() => setStep('baggage')}
+              onNext={() => setStep('baggage')}
+              onBack={() => setStep('seats')}
+            />
+          ) : step === 'baggage' ? (
+            <BaggageSelection
+              onSkip={() => setStep('review')}
+              onNext={() => setStep('review')}
+              onBack={() => setStep('meals')}
+            />
+          ) : step === 'review' ? (
+            <ReviewDetailsModal
+              isOpen={isReviewOpen}
+              onClose={() => {
+                setStep('passengers');
+              }}
+              onConfirmPayment={handleConfirmRazorpayPayment}
+              flightSummary={{
+                airline: item.provider || item.title,
+                route: item.subtitle || item.location || 'Journey Route',
+                date: item.date || 'Scheduled Date',
+                time: item.time || 'Timetable',
+              }}
+            />
           ) : (
-            /* Details Step (Passenger Form with strict N validation + Policy Table + Billing & Breakup) */
+            /* Passengers Step */
             <div className="space-y-6">
               {/* Selected Fare summary banner */}
               {state.selectedFare && (
@@ -508,9 +490,6 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
                     <div>
                       <span className="text-[10px] font-black uppercase text-amber-700 block">Selected Fare Flexibility</span>
                       <h4 className="font-black text-sm text-slate-900">{state.selectedFare.label}</h4>
-                      <p className="text-xs text-slate-500 font-medium">
-                        {state.selectedFare.cabinBaggageKg}kg Cabin + {state.selectedFare.checkinBaggageKg}kg Check-in • {state.selectedFare.seatsIncluded === 'free' ? 'Free Seats' : 'Paid Seats'}
-                      </p>
                     </div>
                   </div>
                   <button
@@ -526,17 +505,12 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
               {/* Dynamic N-Passenger Form */}
               <PassengerForm />
 
-              {/* Fare Policy Rules & Cancellation Slabs Table */}
+              {/* Policy Table */}
               <PolicyTable />
 
               {/* Billing, GST & Fare Breakup Card */}
               <BillingAndFareBreakup onReviewClick={() => {
-                if (item.vertical === 'flight' || item.vertical === 'train') {
-                  setStep('addons');
-                  setActiveAddonTab('seats');
-                } else {
-                  setIsReviewOpen(true);
-                }
+                setStep('seats');
               }} vertical={item.vertical} />
             </div>
           )}
@@ -561,7 +535,7 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
         isOpen={isReviewOpen}
         onClose={() => {
           setIsReviewOpen(false);
-          setStep('details');
+          setStep('passengers');
         }}
         onConfirmPayment={handleConfirmRazorpayPayment}
         flightSummary={{

@@ -18,6 +18,8 @@ import { useTripContext } from './context/TripContext';
 import { useAuthStore } from './store/useAuthStore';
 import { useLanguage } from './context/LanguageContext';
 import { FuelCalculatorModal } from './components/modals/FuelCalculatorModal';
+import { CurrencyProvider } from './components/booking/useCurrency';
+import { BookingFlowProvider } from './context/BookingFlowContext';
 
 import { MusicPlayerProvider } from './components/MusicPlayerContext';
 import { MusicPlayerBar } from './components/MusicPlayerBar';
@@ -35,7 +37,19 @@ import { MyTicketsView } from './components/views/MyTicketsView';
 import { NAV_USER_ICONS, TripsIcon, PlanningIcon, SocialIcon, BookingIcon, ExpensesIcon, SettingsIcon } from './theme/icons';
 import { Ticket } from 'lucide-react';
 
-export default function App() {
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { FlightFareSelectionPage } from './pages/FlightFareSelectionPage';
+import { FlightSeatSelectionPage } from './pages/FlightSeatSelectionPage';
+import { FlightMealsSelectionPage } from './pages/FlightMealsSelectionPage';
+import { FlightBaggageSelectionPage } from './pages/FlightBaggageSelectionPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { StaysDetailsPage } from './pages/StaysDetailsPage';
+import { FlightsResultsPage } from './pages/FlightsResultsPage';
+import { CarsResultsPage } from './pages/CarsResultsPage';
+import { AncillariesFlow } from './pages/AncillariesFlow';
+import { OrderReviewPage } from './pages/OrderReviewPage';
+
+function MainApp() {
   const [phase, setPhase] = useState("splash");
   const [role, setRole] = useState("user"); // 'user', 'agent', 'admin'
   const [active, setActive] = useState("trips");
@@ -191,6 +205,7 @@ export default function App() {
   };
 
   
+  
 
   // Only the user role uses the tab-strip BottomNav — Agent & Admin
   // portals below already ship with their own full internal navigation.
@@ -200,7 +215,7 @@ export default function App() {
   return (
     <CrashlyticsErrorBoundary>
       <MusicPlayerProvider>
-      <div className="w-full h-full min-h-screen relative overflow-hidden font-[Inter]">
+      <div className="w-full min-h-screen relative font-[Inter]">
         {phase === "splash" && <Splash onDone={() => setPhase("login")} />}
         {phase === "login" && <LoginScreen onLogin={handleLogin} />}
         {phase === "app" && (
@@ -216,7 +231,7 @@ export default function App() {
             )}
             
             {role === 'user' && active === 'smart-planner' && (
-              <FutureTripScreen onBack={() => setActive('trips')} />
+              <FutureTripScreen onBack={() => setActive('trips')} lang={lang as 'en' | 'mr'} />
             )}
             {role === 'user' && active === 'planning' && (
               <PlanningScreen 
@@ -267,20 +282,14 @@ export default function App() {
               />
             )}
 
-            {/* Agent role -> full real Agent Portal (CRM, bidding, invoicing, vendors,
-                calendar, tickets, marketing, KYC, wallet, analytics, ads, support —
-                all your existing functions, already wired to Firestore) */}
             {role === 'agent' && (
               <AgentPortalView lang="en" onShowToast={(msg) => console.log(msg)} onLogout={handleLogout} />
             )}
 
-            {/* Admin role -> full real Admin Dashboard (live API health, users,
-                offers, notifications, support, audit log, payouts) */}
             {role === 'admin' && (
               <AdminDashboardView lang="en" onLaunchMainApp={() => { setRole('user'); setActive('trips'); }} />
             )}
 
-            {/* User role keeps the themed tab-strip bottom nav */}
             {role === 'user' && (
               <BottomNav 
                 items={isWorkspace ? workspaceNavItems : globalNavItems} 
@@ -345,5 +354,43 @@ export default function App() {
       {role === 'user' && <MusicPlayerBar lang="en" themeColor="#6366f1" />}
       </MusicPlayerProvider>
     </CrashlyticsErrorBoundary>
+  );
+}
+
+export default function App() {
+  const location = useLocation();
+  const isOverlayRoute = [
+    '/checkout', 
+    '/stays/results', 
+    '/flights/results', 
+    '/flights/fares',
+    '/flights/seats',
+    '/flights/meals',
+    '/flights/baggage',
+    '/cars/results',
+    '/ancillaries',
+    '/order-review'
+  ].includes(location.pathname);
+
+  return (
+    <CurrencyProvider>
+      <BookingFlowProvider>
+        <div style={{ display: isOverlayRoute ? 'none' : 'block' }}>
+          <MainApp />
+        </div>
+        <Routes>
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/stays/results" element={<StaysDetailsPage />} />
+          <Route path="/flights/results" element={<FlightsResultsPage />} />
+          <Route path="/flights/fares" element={<FlightFareSelectionPage />} />
+          <Route path="/flights/seats" element={<FlightSeatSelectionPage />} />
+          <Route path="/flights/meals" element={<FlightMealsSelectionPage />} />
+          <Route path="/flights/baggage" element={<FlightBaggageSelectionPage />} />
+          <Route path="/cars/results" element={<CarsResultsPage />} />
+          <Route path="/ancillaries" element={<AncillariesFlow flightOffer={{}} onComplete={(data) => console.log(data)} />} />
+          <Route path="/order-review" element={<OrderReviewPage />} />
+        </Routes>
+      </BookingFlowProvider>
+    </CurrencyProvider>
   );
 }

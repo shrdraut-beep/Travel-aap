@@ -15,7 +15,7 @@ import { BusSearchTab } from "../travel/BusSearchTab";
 import { CarSearchTab } from "../travel/CarSearchTab";
 import { ExplorePackagesView } from "../views/ExplorePackagesView";
 
-import { UniversalBookingCheckoutModal, BookingItemPayload } from "../travel/UniversalBookingCheckoutModal";
+import { BookingItemPayload } from "../../pages/CheckoutPage";
 import { BookingFlowProvider } from "../../context/BookingFlowContext";
 import { BookingFlowModal } from "../booking/BookingFlowModal";
 
@@ -58,12 +58,12 @@ export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, on
   };
 
   const tabs = [
-    { id: "Packages", label: isMr ? "हॉलिडे पॅकेजेस" : "Packages", icon: Package, color: "text-rose-600", activeBg: "bg-rose-600 text-white shadow-lg shadow-rose-500/30" },
-    { id: "Flights", label: isMr ? "विमान (Flights)" : "Flights", icon: Plane, color: "text-blue-600", activeBg: "bg-blue-600 text-white shadow-lg shadow-blue-500/30" },
-    { id: "Hotels", label: isMr ? "हॉटेल्स (Hotels)" : "Hotels", icon: Hotel, color: "text-purple-600", activeBg: "bg-purple-600 text-white shadow-lg shadow-purple-500/30" },
-    { id: "Trains", label: isMr ? "ट्रेन्स (Trains)" : "Trains", icon: Train, color: "text-amber-600", activeBg: "bg-amber-600 text-white shadow-lg shadow-amber-500/30" },
-    { id: "Bus", label: isMr ? "बस (Bus)" : "Bus", icon: Bus, color: "text-emerald-600", activeBg: "bg-emerald-600 text-white shadow-lg shadow-emerald-500/30" },
-    { id: "Cars", label: isMr ? "टॅक्सी / कार" : "Cars", icon: Car, color: "text-orange-600", activeBg: "bg-orange-600 text-white shadow-lg shadow-orange-500/30" }
+    { id: "Packages", label: isMr ? "हॉलिडे पॅकेजेस" : "Packages", icon: Package, color: "from-purple-500 to-pink-600" },
+    { id: "Flights", label: isMr ? "विमान (Flights)" : "Flights", icon: Plane, color: "from-blue-500 to-indigo-600" },
+    { id: "Hotels", label: isMr ? "हॉटेल्स (Hotels)" : "Hotels", icon: Hotel, color: "from-amber-500 to-orange-600" },
+    { id: "Trains", label: isMr ? "ट्रेन्स (Trains)" : "Trains", icon: Train, color: "from-rose-500 to-red-600" },
+    { id: "Bus", label: isMr ? "बस (Bus)" : "Bus", icon: Bus, color: "from-emerald-500 to-teal-600" },
+    { id: "Cars", label: isMr ? "टॅक्सी / कार" : "Cars", icon: Car, color: "from-orange-500 to-amber-600" }
   ];
 
   // Simulated Booking Records with interactive QR Code boarding passes
@@ -214,12 +214,7 @@ export function BookingScreen({ onLogout, initialTab = "Packages", onOpenSos, on
           gridItems={tabs.map(t => ({
             icon: t.icon,
             label: t.label,
-            color: t.id === "Packages" ? "from-purple-500 to-pink-600" :
-                   t.id === "Flights" ? "from-blue-500 to-indigo-600" :
-                   t.id === "Hotels" ? "from-amber-500 to-orange-600" :
-                   t.id === "Trains" ? "from-rose-500 to-red-600" :
-                   t.id === "Bus" ? "from-emerald-500 to-teal-600" :
-                   "from-orange-500 to-amber-600",
+            color: t.color,
             isActive: tab === t.id,
             onClick: () => {
               setTab(t.id);

@@ -1,0 +1,178 @@
+/**
+ * 1. Change the font styles in all browsers.
+ * 2. Remove the margin in Firefox and Safari.
+ */
+button {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  line-height: 1.15; /* 1 */
+  margin: 0; /* 2 */
+}
+
+/**
+ * Show the overflow in IE.
+ * 1. Show the overflow in Edge.
+ */
+button {
+  /* 1 */
+  overflow: visible;
+}
+
+/**
+ * Remove the inheritance of text transform in Edge, Firefox, and IE.
+ * 1. Remove the inheritance of text transform in Firefox.
+ */
+
+button {
+  /* 1 */
+  text-transform: none;
+}
+
+/**
+ * Correct the inability to style clickable types in iOS and Safari.
+ */
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  appearance: button;
+  -webkit-appearance: button;
+}
+
+/**
+ * Remove the inner border and padding in Firefox.
+ */
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+
+/**
+ * Restore the focus styles unset by the previous rule.
+ */
+button:-moz-focusring,
+[type="button"]:-moz-focusring,
+[type="reset"]:-moz-focusring,
+[type="submit"]:-moz-focusring {
+  outline: 1px dotted ButtonText;
+}
+
+.button {
+  --button-color: var(--SECONDARY, white);
+
+  box-sizing: border-box;
+  border-radius: var(--BUTTON-RADIUS, 6px);
+  cursor: pointer;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  letter-spacing: 0em;
+
+  background-color: rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000));
+  color: var(--button-color);
+  box-shadow:
+    0px 0px 0px rgba(0, 0, 0, 0.25),
+    0px 0px 0px #e9e9eb;
+
+  border: 1px solid rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000));
+  /* Will give the button an outline if the accent color has high luminance */
+  border: 1px solid var(--SECONDARY);
+  transition:
+    background-color 0.3s var(--TRANSITION-CUBIC-BEZIER),
+    box-shadow 0.3s var(--TRANSITION-CUBIC-BEZIER),
+    color 0.3s var(--TRANSITION-CUBIC-BEZIER);
+}
+
+.button--32 {
+  height: 32px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  padding-inline: 16px;
+}
+
+.button--40 {
+  height: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  padding-inline: 24px;
+}
+
+.button--48 {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  padding-inline: 32px;
+}
+
+.button svg {
+  /* Using important to take precedence over inline styles on icon */
+  display: inline !important;
+  height: 20px;
+  margin-right: 4px;
+  margin-left: -4px;
+}
+
+.button:not(:disabled):hover {
+  box-shadow:
+    0px 0px 0px 2px #e9e9eb,
+    0px 2px 4px 1px #00000026;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.button--primary:not(:disabled):hover {
+  background-color: rgba(var(--ACCENT), var(--ACCENT-LIGHT-800));
+  border-color: (
+    var(--SECONDARY),
+    rgba(var(--ACCENT), var(--ACCENT-LIGHT-800))
+  );
+  box-shadow:
+    0px 2px 4px 1px rgba(0, 0, 0, 0.15),
+    0px 0px 0px 2px #e9e9eb;
+}
+
+.button--primary:not(:disabled):active {
+  background-color: rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000));
+  border-color: (
+    var(--SECONDARY),
+    rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000))
+  );
+  box-shadow:
+    0px 1px 2px 1px rgba(0, 0, 0, 0.25),
+    0px 0px 0px 1px #dcdcde;
+}
+
+.button--destructive,
+.button--outlined {
+  border: 1px solid #ccccd4;
+  color: var(--GREY-900);
+  background-color: rgb(var(--WHITE));
+}
+
+.button--outlined:not(:disabled):hover,
+.button--destructive:not(:disabled):hover {
+  border: 1px solid #ababb4;
+  background-color: #fbfbfd;
+}
+
+.button--outlined:not(:disabled):active,
+.button--destructive:not(:disabled):active {
+  background-color: var(--GREY-100);
+}
+
+.button--destructive {
+  color: var(--RED);
+}

@@ -1,0 +1,9 @@
+dist
+*-dist
+__generated__*
+storybook-static/*
+.yarn
+.pnp*
+.next
+
+src/fixtures/offer-requests/*.json

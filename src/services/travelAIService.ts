@@ -137,7 +137,7 @@ export async function fetchTravelDataFromAI(
 ): Promise<TravelAIResponse> {
   const origin = searchParams.origin || 'BOM';
   const destination = searchParams.destination || 'DEL';
-  const date = searchParams.date || new Date().toISOString().split('T')[0];
+  const date = searchParams.date || new Date(new Date().getTime() + 86400000).toISOString().split('T')[0];
   const cacheKey = getTravelCacheKey(mode, origin, destination, date);
 
   try {

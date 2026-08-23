@@ -28,6 +28,7 @@
   "exclude": [
     "android",
     "dist",
-    "routtripo-booking"
+    "routtripo-booking",
+    "duffel-components"
   ]
 }
