@@ -54,7 +54,9 @@ export default defineConfig({
     minify: "esbuild",
     cssMinify: true,
     rollupOptions: {
-      input: "index.html",
+      // `premium.html` is the standalone preview of the redesign; the live app
+      // shell stays on `index.html` until each screen is signed off.
+      input: ["index.html", "premium.html"],
       output: {
         manualChunks: {
           vendor: ["react", "react-dom", "framer-motion", "lucide-react"],
