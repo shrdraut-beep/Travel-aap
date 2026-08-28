@@ -16,6 +16,98 @@ export interface DailyPriceInfo {
   isWeekend?: boolean;
   isToday?: boolean;
   isPast?: boolean;
+  category?: 'low' | 'average' | 'high'; // 🟢 Green, 🟡 Yellow, 🔴 Red
+}
+
+// Client-Side Memory Cache & LocalStorage Cache
+const clientFareCache = new Map<string, { timestamp: number; result: any }>();
+const CLIENT_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+/**
+ * Fetch live fare calendar from server API with multi-tier caching (Memory + LocalStorage + Server)
+ */
+export async function fetchApiFareCalendar(
+  origin: string,
+  destination: string,
+  year: number,
+  month: number
+): Promise<{ averagePrice: number; lowThreshold: number; highThreshold: number; dailyFares: Record<string, DailyPriceInfo>; fromCache?: boolean }> {
+  const cacheKey = `fare_cal_${origin}_${destination}_${year}_${month}`;
+  const now = Date.now();
+
+  // 1. Check In-Memory Cache
+  if (clientFareCache.has(cacheKey)) {
+    const cached = clientFareCache.get(cacheKey)!;
+    if (now - cached.timestamp < CLIENT_CACHE_TTL) {
+      return { ...cached.result, fromCache: true };
+    }
+  }
+
+  // 2. Check LocalStorage Persistent Cache
+  try {
+    const localSaved = localStorage.getItem(`routripo_${cacheKey}`);
+    if (localSaved) {
+      const parsed = JSON.parse(localSaved);
+      if (now - parsed.timestamp < CLIENT_CACHE_TTL && parsed.result) {
+        clientFareCache.set(cacheKey, { timestamp: parsed.timestamp, result: parsed.result });
+        return { ...parsed.result, fromCache: true };
+      }
+    }
+  } catch (e) {
+    // ignore localstorage error
+  }
+
+  try {
+    const res = await fetch('/api/flights/fare-calendar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ origin, destination, year, month })
+    });
+    const data = await res.json();
+    if (data.success && Array.isArray(data.dailyFares)) {
+      const dailyMap: Record<string, DailyPriceInfo> = {};
+      data.dailyFares.forEach((df: any) => {
+        const d = new Date(df.date);
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        dailyMap[df.date] = {
+          dateStr: df.date,
+          dayNum: df.dayNum,
+          dayName: dayNames[d.getDay()],
+          monthName: monthNames[d.getMonth()],
+          fullFormatted: `${dayNames[d.getDay()]}, ${df.dayNum} ${monthNames[d.getMonth()]}`,
+          price: df.price,
+          displayPrice: `₹${(df.price / 1000).toFixed(1)}K`,
+          isWeekend: d.getDay() === 0 || d.getDay() === 6,
+          isToday: df.date === new Date().toISOString().split('T')[0],
+          isPast: df.isPast,
+          category: df.category,
+          isCheapest: df.category === 'low',
+          isExpensive: df.category === 'high'
+        };
+      });
+      const result = {
+        averagePrice: data.averagePrice,
+        lowThreshold: data.lowThreshold,
+        highThreshold: data.highThreshold,
+        dailyFares: dailyMap,
+        fromCache: data.fromCache
+      };
+
+      // Store in memory & localStorage
+      clientFareCache.set(cacheKey, { timestamp: now, result });
+      try {
+        localStorage.setItem(`routripo_${cacheKey}`, JSON.stringify({ timestamp: now, result }));
+      } catch (e) {}
+
+      return result;
+    }
+  } catch (err) {
+    console.warn("Failed to fetch API fare calendar", err);
+  }
+
+  return { averagePrice: 0, lowThreshold: 0, highThreshold: 0, dailyFares: {} };
 }
 
 // Generate base price according to origin-destination pair
@@ -177,11 +269,20 @@ export const getMonthCalendarDays = (year: number, month: number, origin: string
 
   const minP = Math.min(...monthPrices);
   const maxP = Math.max(...monthPrices);
+  const sumP = monthPrices.reduce((a, b) => a + b, 0);
+  const avgP = monthPrices.length > 0 ? sumP / monthPrices.length : baseFare;
 
   days.forEach(day => {
     if (day && !day.isPast) {
-      if (day.price <= minP * 1.05) day.isCheapest = true;
-      if (day.price >= maxP * 0.92) day.isExpensive = true;
+      if (day.price <= avgP * 0.92) {
+        day.category = 'low'; // 🟢 Green
+        day.isCheapest = true;
+      } else if (day.price >= avgP * 1.12) {
+        day.category = 'high'; // 🔴 Red
+        day.isExpensive = true;
+      } else {
+        day.category = 'average'; // 🟡 Yellow
+      }
     }
   });
 

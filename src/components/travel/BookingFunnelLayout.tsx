@@ -14,7 +14,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Compass as Sparkles
 } from 'lucide-react';
 import { LogoName } from '../routripo/SharedUI';
 import { SearchInput } from '../SearchInput';
@@ -29,7 +29,7 @@ export interface MultiCityLeg {
 }
 
 interface BookingFunnelLayoutProps {
-  mode: 'flight' | 'hotel' | 'train' | 'bus' | 'car';
+  mode: 'flight' | 'hotel' | 'train' | 'bus' | 'car' | 'package';
   onBack: () => void;
   origin: string;
   setOrigin: (val: string) => void;
@@ -99,10 +99,12 @@ export function BookingFunnelLayout({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const dynamicTitle = mode === 'hotel' ? 'Book your Hotel' : 
-                       mode === 'flight' ? 'Book your Flight' : 
-                       mode === 'train' ? 'Book your Train' : 
-                       mode === 'bus' ? 'Book your Bus' : 'Book your Cab';
+  const dynamicTitle = mode === 'hotel' ? (isMr ? 'हॉटेल बुकिंग' : 'Book your Hotel') : 
+                       mode === 'flight' ? (isMr ? 'विमान बुकिंग' : 'Book your Flight') : 
+                       mode === 'train' ? (isMr ? 'ट्रेन माहिती व बुकिंग' : 'Book your Train') : 
+                       mode === 'bus' ? (isMr ? 'बस बुकिंग' : 'Book your Bus') : 
+                       mode === 'package' ? (isMr ? 'हॉलिडे टूर पॅकेजेस' : 'Book Holiday Packages') : 
+                       (isMr ? 'कॅब बुकिंग' : 'Book your Cab');
 
   const addMultiCityLeg = () => {
     if (!setMultiCitySlices) return;
@@ -143,8 +145,10 @@ export function BookingFunnelLayout({
     }
   };
 
+  const [activeDateField, setActiveDateField] = useState<'checkIn' | 'checkOut'>('checkIn');
+
   const getCurrentDateValue = () => {
-    if (step === 'returnDate') return returnDate;
+    if (activeDateField === 'checkOut' || step === 'returnDate') return returnDate;
     if (tripType === 'multicity' && multiCitySlices[activeSliceIdx]) {
       return multiCitySlices[activeSliceIdx].date;
     }
@@ -160,7 +164,14 @@ export function BookingFunnelLayout({
       setStep('main');
     } else {
       setDate(newDateStr);
-      if (tripType === 'roundtrip' && !returnDate) {
+      if (mode === 'hotel') {
+        if (setReturnDate && (!returnDate || returnDate <= newDateStr)) {
+          const nextDay = new Date(newDateStr);
+          nextDay.setDate(nextDay.getDate() + 1);
+          setReturnDate(nextDay.toISOString().split('T')[0]);
+        }
+        setStep('main');
+      } else if (tripType === 'roundtrip' && !returnDate) {
         setStep('returnDate');
       } else {
         setStep('main');
@@ -199,11 +210,94 @@ export function BookingFunnelLayout({
   };
 
   const getCalendar = () => {
-    const currentDate = getCurrentDateValue();
-    const minDate = step === 'returnDate' ? date : new Date().toISOString().split('T')[0];
+    const minDate = new Date().toISOString().split('T')[0];
+
+    const handleCalendarCellClick = (dayStr: string) => {
+      if (mode === 'hotel' || tripType === 'roundtrip') {
+        if (activeDateField === 'checkIn') {
+          setDate(dayStr);
+          if (!returnDate || returnDate <= dayStr) {
+            const nextDay = new Date(dayStr);
+            nextDay.setDate(nextDay.getDate() + 1);
+            if (setReturnDate) setReturnDate(nextDay.toISOString().split('T')[0]);
+          }
+          setActiveDateField('checkOut');
+        } else {
+          if (dayStr <= date) {
+            setDate(dayStr);
+            const nextDay = new Date(dayStr);
+            nextDay.setDate(nextDay.getDate() + 1);
+            if (setReturnDate) setReturnDate(nextDay.toISOString().split('T')[0]);
+            setActiveDateField('checkOut');
+          } else {
+            if (setReturnDate) setReturnDate(dayStr);
+          }
+        }
+      } else if (tripType === 'multicity') {
+        updateMultiCityLeg(activeSliceIdx, 'date', dayStr);
+        setStep('main');
+      } else {
+        setDate(dayStr);
+        setStep('main');
+      }
+    };
+
+    let nightCount = 0;
+    if (date && returnDate && returnDate > date) {
+      const d1 = new Date(date).getTime();
+      const d2 = new Date(returnDate).getTime();
+      nightCount = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    }
 
     return (
       <div className="py-2 space-y-4 font-[Inter]">
+        {/* Check-In & Check-Out Dual Selector Bar on the Same Page */}
+        {(mode === 'hotel' || tripType === 'roundtrip') && (
+          <div className="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2">
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveDateField('checkIn')}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                  activeDateField === 'checkIn'
+                    ? 'bg-white border-[#e11d48] shadow-md ring-2 ring-[#e11d48]/20'
+                    : 'bg-white/80 border-slate-200 hover:bg-white'
+                }`}
+              >
+                <span className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                  {mode === 'hotel' ? (isMr ? '१. चेक-इन तारीख' : '1. Check-in Date') : (isMr ? '१. जाण्याची तारीख' : '1. Departure Date')}
+                </span>
+                <span className="block text-xs sm:text-sm font-black text-[#e11d48] mt-0.5 truncate">
+                  {formatDisplayDate(date) || (isMr ? 'तारीख निवडा' : 'Select Date')}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveDateField('checkOut')}
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                  activeDateField === 'checkOut'
+                    ? 'bg-white border-indigo-600 shadow-md ring-2 ring-indigo-600/20'
+                    : 'bg-white/80 border-slate-200 hover:bg-white'
+                }`}
+              >
+                <span className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                  {mode === 'hotel' ? (isMr ? '२. चेक-आउट तारीख' : '2. Check-out Date') : (isMr ? '२. परतीची तारीख' : '2. Return Date')}
+                </span>
+                <span className="block text-xs sm:text-sm font-black text-indigo-600 mt-0.5 truncate">
+                  {formatDisplayDate(returnDate) || (isMr ? 'तारीख निवडा' : 'Select Date')}
+                </span>
+              </button>
+            </div>
+
+            {nightCount > 0 && mode === 'hotel' && (
+              <div className="text-center text-xs font-black text-rose-600 bg-rose-50 py-1.5 rounded-lg border border-rose-100">
+                ✨ {isMr ? `एकूण मुक्काम: ${nightCount} रात्र / ${nightCount + 1} दिवस` : `Total Stay: ${nightCount} Night${nightCount > 1 ? 's' : ''} / ${nightCount + 1} Days`}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Month Selector Bar */}
         <div className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-200">
           <div className="flex items-center gap-2">
@@ -235,7 +329,7 @@ export function BookingFunnelLayout({
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 font-bold text-emerald-700">
               <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-              {isMr ? 'कमी दर (Best)' : 'Lowest'}
+              {isMr ? 'कमी दर' : 'Best Fare'}
             </span>
             <span className="flex items-center gap-1 font-bold text-slate-600">
               <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
@@ -262,32 +356,47 @@ export function BookingFunnelLayout({
           {calDays.map((day, idx) => {
             if (!day) return <div key={`empty-${idx}`} className="h-14 sm:h-16" />;
 
-            const isSelected = day.dateStr === currentDate;
-            const isPast = day.isPast || (minDate && day.dateStr < minDate);
+            const isCheckIn = day.dateStr === date;
+            const isCheckOut = (mode === 'hotel' || tripType === 'roundtrip') && day.dateStr === returnDate;
+            const isInRange = (mode === 'hotel' || tripType === 'roundtrip') && date && returnDate && day.dateStr > date && day.dateStr < returnDate;
+            const isPast = day.isPast || (activeDateField === 'checkOut' ? day.dateStr < date : day.dateStr < minDate);
 
             return (
               <button
                 key={day.dateStr}
                 disabled={isPast}
                 type="button"
-                onClick={() => {
-                  handleDateSelect(day.dateStr);
-                }}
+                onClick={() => handleCalendarCellClick(day.dateStr)}
                 className={`h-14 sm:h-16 rounded-xl flex flex-col items-center justify-center p-1 transition-all relative cursor-pointer ${
                   isPast
                     ? 'opacity-25 cursor-not-allowed bg-slate-50/50'
-                    : isSelected
+                    : isCheckIn
                     ? 'bg-[#e11d48] text-white shadow-md ring-2 ring-[#e11d48]/40 scale-102 font-black'
+                    : isCheckOut
+                    ? 'bg-indigo-600 text-white shadow-md ring-2 ring-indigo-600/40 scale-102 font-black'
+                    : isInRange
+                    ? 'bg-pink-100/90 text-pink-950 font-extrabold border-y border-pink-200'
                     : 'hover:bg-pink-50/60 bg-white border border-slate-100 hover:border-pink-200'
                 }`}
               >
-                <span className={`text-sm sm:text-base font-extrabold ${isSelected ? 'text-white' : 'text-slate-800'}`}>
+                <span className={`text-sm sm:text-base font-extrabold ${isCheckIn || isCheckOut ? 'text-white' : 'text-slate-800'}`}>
                   {day.dayNum}
                 </span>
 
-                {!isPast && mode === 'flight' && (
+                {isCheckIn && (
+                  <span className="text-[9px] font-black uppercase tracking-tight text-white/90">
+                    {mode === 'hotel' ? 'In' : 'Dep'}
+                  </span>
+                )}
+                {isCheckOut && (
+                  <span className="text-[9px] font-black uppercase tracking-tight text-white/90">
+                    {mode === 'hotel' ? 'Out' : 'Ret'}
+                  </span>
+                )}
+
+                {!isPast && !isCheckIn && !isCheckOut && mode === 'flight' && (
                   <span className={`text-[10px] sm:text-[11px] tracking-tight leading-tight ${
-                    isSelected ? 'text-white/90 font-black' : day.isCheapest ? 'text-emerald-700 font-bold' : day.isExpensive ? 'text-rose-600 font-semibold' : 'text-slate-500'
+                    day.isCheapest ? 'text-emerald-700 font-bold' : day.isExpensive ? 'text-rose-600 font-semibold' : 'text-slate-500'
                   }`}>
                     {day.displayPrice}
                   </span>
@@ -297,30 +406,19 @@ export function BookingFunnelLayout({
           })}
         </div>
 
-        {/* Bottom manual fallback date input and confirm */}
-        <div className="pt-4 border-t border-slate-200 flex items-center gap-3">
-          <div className="flex-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              {isMr ? 'निवडलेली तारीख' : 'Selected Date'}
-            </span>
-            <span className="text-sm font-black text-slate-900">
-              {currentDate ? new Date(currentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '--'}
-            </span>
-          </div>
-
+        {/* Bottom Confirm Button on the Same Page */}
+        <div className="pt-4 border-t border-slate-200 flex flex-col gap-3">
           <button
             type="button"
-            onClick={() => {
-              if (step === 'date' && tripType === 'roundtrip' && !returnDate) {
-                setStep('returnDate');
-              } else {
-                setStep('main');
-              }
-            }}
-            className="px-6 py-3 bg-[#e11d48] hover:bg-[#be123c] active:scale-95 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md flex items-center gap-1.5"
+            onClick={() => setStep('main')}
+            className="w-full py-3.5 bg-[#e11d48] hover:bg-[#be123c] active:scale-98 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
           >
-            <Check className="w-4 h-4" />
-            <span>{isMr ? 'निश्चित करा' : 'Done'}</span>
+            <Check className="w-5 h-5" />
+            <span>
+              {mode === 'hotel'
+                ? (isMr ? 'चेक-इन आणि चेक-आउट निश्चित करा' : 'Confirm Stay Dates')
+                : (isMr ? 'तारखा निश्चित करा' : 'Confirm Dates')}
+            </span>
           </button>
         </div>
       </div>
@@ -447,27 +545,24 @@ export function BookingFunnelLayout({
 
   if (step === 'date' || step === 'returnDate') {
     return (
-      <div key="date-view" className="fixed inset-0 z-50 bg-white flex flex-col">
+      <div key="date-view" className="fixed inset-0 z-50 bg-white flex flex-col font-[Inter]">
         {header}
-        {mode !== 'hotel' && (
-          <div className="px-6 pt-4 pb-2 border-b border-slate-100 shrink-0">
-            <h2 className="text-xl font-black text-slate-900">
-              {step === 'returnDate' 
-                ? (isMr ? 'परतीची तारीख (Return Date)' : 'Select Return Date')
-                : (isMr ? 'प्रवासाची तारीख (Departure Date)' : 'Select Departure Date')}
-            </h2>
-            <p className="text-xs text-slate-500 mt-1 font-bold truncate">
-              {origin && destination ? `${origin} → ${destination} • ` : ''}
-              {mode === 'train' ? 'Availability Calendar'
-                : (mode === 'car' && cabType === 'rental') ? 'Standard Calendar'
-                : 'Fare Calendar'}
-            </p>
-          </div>
-        )}
+        <div className="px-6 pt-4 pb-2 border-b border-slate-100 shrink-0">
+          <h2 className="text-xl font-black text-slate-900">
+            {step === 'returnDate' 
+              ? (mode === 'hotel' ? (isMr ? 'चेक-आउट तारीख निवडा (Check-out Date)' : 'Select Check-out Date') : (isMr ? 'परतीची तारीख (Return Date)' : 'Select Return Date'))
+              : (mode === 'hotel' ? (isMr ? 'चेक-इन तारीख निवडा (Check-in Date)' : 'Select Check-in Date') : (isMr ? 'प्रवासाची तारीख (Departure Date)' : 'Select Departure Date'))}
+          </h2>
+          <p className="text-xs text-slate-500 mt-1 font-bold truncate">
+            {destination ? `${destination} • ` : (origin ? `${origin} → ${destination} • ` : '')}
+            {mode === 'hotel' ? (isMr ? 'हॉटेल बुकिंग कॅलेंडर' : 'Hotel Booking Calendar')
+              : mode === 'train' ? 'Availability Calendar'
+              : (mode === 'car' && cabType === 'rental') ? 'Standard Calendar'
+              : 'Fare Calendar'}
+          </p>
+        </div>
         <div className="px-6 flex-1 overflow-y-auto">
-          {mode !== 'hotel' ? getCalendar() : (
-            <p className="text-sm font-bold text-slate-600 pt-6">Hotel stay dates are managed at the property level.</p>
-          )}
+          {getCalendar()}
         </div>
       </div>
     );
@@ -556,27 +651,27 @@ export function BookingFunnelLayout({
                   <button onClick={() => setStep('destination')} className="w-full text-left bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 hover:border-indigo-400 transition-colors shadow-sm cursor-pointer">
                     <MapPin className="w-6 h-6 text-rose-500" />
                     <div>
-                      <span className="block text-[10px] font-black text-slate-400 uppercase">{mode === 'hotel' ? 'Location / City' : (isMr ? 'कुठे (Destination)' : 'Destination')}</span>
-                      <span className="block text-sm font-black text-slate-900">{destination || (isMr ? 'गंतव्य स्थान निवडा' : 'Select Destination')}</span>
+                      <span className="block text-[10px] font-black text-slate-400 uppercase">{mode === 'hotel' ? (isMr ? 'हॉटेल किंवा शहर (City / Hotel)' : 'City or Hotel') : (isMr ? 'कुठे (Destination)' : 'Destination')}</span>
+                      <span className="block text-sm font-black text-slate-900">{destination || (mode === 'hotel' ? (isMr ? 'शहर किंवा हॉटेल निवडा' : 'Select City / Destination') : (isMr ? 'गंतव्य स्थान निवडा' : 'Select Destination'))}</span>
                     </div>
                   </button>
 
-                  {/* Dates: 1 Date for Oneway, 2 Dates for Roundtrip */}
-                  {!(mode === 'car' && cabType === 'regular') && mode !== 'hotel' && (
-                    tripType === 'roundtrip' ? (
+                  {/* Dates: Check-in & Check-out for Hotel, 1 Date for Oneway, 2 Dates for Roundtrip */}
+                  {!(mode === 'car' && cabType === 'regular') && (
+                    (tripType === 'roundtrip' || mode === 'hotel') ? (
                       <div className="grid grid-cols-2 gap-3">
                         <button onClick={() => setStep('date')} className="w-full text-left bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-indigo-400 transition-colors shadow-sm cursor-pointer">
                           <CalendarDays className="w-5 h-5 text-amber-500 shrink-0" />
                           <div className="min-w-0">
-                            <span className="block text-[10px] font-black text-slate-400 uppercase">{isMr ? 'जाण्याची तारीख' : 'Departure'}</span>
-                            <span className="block text-xs sm:text-sm font-black text-slate-900 truncate">{formatDisplayDate(date) || 'Select'}</span>
+                            <span className="block text-[10px] font-black text-slate-400 uppercase">{mode === 'hotel' ? (isMr ? 'चेक-इन (Check-in)' : 'Check-in') : (isMr ? 'जाण्याची तारीख' : 'Departure')}</span>
+                            <span className="block text-xs sm:text-sm font-black text-slate-900 truncate">{formatDisplayDate(date) || (isMr ? 'तारीख निवडा' : 'Select Date')}</span>
                           </div>
                         </button>
                         <button onClick={() => setStep('returnDate')} className="w-full text-left bg-white border border-indigo-200 bg-indigo-50/20 rounded-xl p-4 flex items-center gap-3 hover:border-indigo-500 transition-colors shadow-sm cursor-pointer">
                           <CalendarDays className="w-5 h-5 text-indigo-600 shrink-0" />
                           <div className="min-w-0">
-                            <span className="block text-[10px] font-black text-indigo-600 uppercase">{isMr ? 'परतीची तारीख' : 'Return'}</span>
-                            <span className="block text-xs sm:text-sm font-black text-slate-900 truncate">{formatDisplayDate(returnDate) || (isMr ? '+ तारीख जोडा' : '+ Add Return')}</span>
+                            <span className="block text-[10px] font-black text-indigo-600 uppercase">{mode === 'hotel' ? (isMr ? 'चेक-आउट (Check-out)' : 'Check-out') : (isMr ? 'परतीची तारीख' : 'Return')}</span>
+                            <span className="block text-xs sm:text-sm font-black text-slate-900 truncate">{formatDisplayDate(returnDate) || (isMr ? 'तारीख निवडा' : 'Select Date')}</span>
                           </div>
                         </button>
                       </div>

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Package, Plus, Sparkles, Plane, Hotel, Train, Bus, Car, Search, Share2, Edit3, Trash, Compass, CheckCircle2, X, Calendar, MapPin, Tag, LayoutDashboard, Layers, Users, DollarSign } from "lucide-react";
+import { Package, Plus, Compass as Sparkles, Plane, Hotel, Train, Bus, Car, Search, Share2, Edit3, Trash, Compass, CheckCircle2, X, Calendar, MapPin, Tag, LayoutDashboard, Layers, Users, DollarSign } from "lucide-react";
 import { TopBar, SectionTitle, useScrolled, Card, Stagger, CountUp, LogoName } from "./SharedUI";
 import { MusicPlayerProvider } from "../MusicPlayerContext";
 import { DashboardView } from "../views/DashboardView";
@@ -61,12 +61,6 @@ export function HubScreen({ setActive, onLogout, onOpenCreateTrip, onOpenPlanner
           <span>{toastMessage.msg}</span>
         </div>
       )}
-
-      {/* Dynamic Swipeable Image Banner Carousel for Major Promotions */}
-      <div className="px-2 mt-2">
-              </div>
-
-
 
       {/* ================= FULL ACTIVE TRIP DASHBOARD VIEW ================= */}
       <div className="mt-4">

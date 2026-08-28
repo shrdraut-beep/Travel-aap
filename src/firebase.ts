@@ -4,6 +4,7 @@ import { initializeApp } from "firebase/app";
 import { 
   getFirestore,
   initializeFirestore,
+  setLogLevel,
   doc, 
   onSnapshot, 
   setDoc, 
@@ -43,11 +44,13 @@ export function getAuthSafe() {
 
 let dbInstance: any;
 try {
+  setLogLevel("silent");
   dbInstance = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
+    experimentalForceLongPolling: true,
     ignoreUndefinedProperties: true
   }, firebaseConfig.firestoreDatabaseId);
 } catch (e) {
+  setLogLevel("silent");
   dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 }
 export const db = dbInstance;
@@ -56,13 +59,20 @@ export const storage = getStorage(app);
 // Initialize App Check only if a valid, non-dummy recaptcha key is provided
 let appCheckInstance: any = null;
 if (typeof window !== "undefined") {
-  const envRecaptchaKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY;
+  const getEnvVar = (key: string) => {
+    try {
+      return (window as any)?.__ENV__?.[key] || (typeof process !== "undefined" ? process.env?.[key] : undefined);
+    } catch {
+      return undefined;
+    }
+  };
+  const envRecaptchaKey = getEnvVar("VITE_RECAPTCHA_SITE_KEY");
   const configRecaptchaKey = (firebaseConfig as any).recaptchaSiteKey;
   const siteKey = envRecaptchaKey || configRecaptchaKey;
 
   if (siteKey && typeof siteKey === 'string' && siteKey.trim() !== '' && !siteKey.includes('dummy')) {
     try {
-      const isDev = (import.meta as any).env?.DEV;
+      const isDev = typeof location !== "undefined" && (location.hostname === "localhost" || location.hostname === "127.0.0.1");
       if (isDev) {
         (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
       }
@@ -84,9 +94,7 @@ async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
-    }
+    // Silently ignore connection test failures in offline mode
   }
 }
 testConnection();

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Heart, Play, Plus, Share2, Upload, Video, Image as ImageIcon, Sparkles, X, CheckCircle2, Film } from 'lucide-react';
+import { Camera, Heart, Play, Plus, Share2, Upload, Video, Image as ImageIcon, Compass as Sparkles, X, CheckCircle2, Film } from 'lucide-react';
 import { TripGroup, TripMemory } from '../../types';
 import { TripRecapReelModal, ReelStyle } from '../modals/TripRecapReelModal';
 

@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { searchBuses } from '../../services/busTravelService';
+import { TransportOptions } from './TransportOptions';
+import { BookingFunnelLayout } from './BookingFunnelLayout';
+import { Users, Minus, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const getTomorrowDate = () => {
   const tomorrow = new Date();
@@ -6,14 +11,11 @@ const getTomorrowDate = () => {
   return tomorrow.toISOString().split('T')[0];
 };
 
-import { TransportOptions } from './TransportOptions';
-import { BookingFunnelLayout } from './BookingFunnelLayout';
-import { Users, Minus, Plus } from 'lucide-react';
-
 export const BusSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
+  const navigate = useNavigate();
   const isMr = lang === 'mr';
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
+  const [origin, setOrigin] = useState('Mumbai');
+  const [destination, setDestination] = useState('Goa');
   const [departDate, setDepartDate] = useState(getTomorrowDate());
   const [passengers, setPassengers] = useState(1);
   const [busType, setBusType] = useState('AC Sleeper');
@@ -21,37 +23,21 @@ export const BusSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) =
   const [hasSearched, setHasSearched] = useState(false);
   const [busData, setBusData] = useState<any[]>([]);
 
+  
   const handleBusSearch = async () => {
-    setIsLoading(true);
-    setHasSearched(true);
-    setTimeout(() => {
-      setBusData([
-        {
-          operatorName: 'VRL Travels',
-          busType: 'Volvo Multi-Axle A/C Sleeper',
+    navigate('/buses', {
+      state: {
+        searchParams: {
           origin: origin || 'Mumbai',
           destination: destination || 'Goa',
-          departureTime: '21:00',
-          arrivalTime: '08:00',
-          duration: '11h 00m',
-          price: 1800,
-          seatsAvailable: 12
-        },
-        {
-          operatorName: 'Neeta Tours',
-          busType: 'A/C Seater / Sleeper',
-          origin: origin || 'Mumbai',
-          destination: destination || 'Goa',
-          departureTime: '22:30',
-          arrivalTime: '09:45',
-          duration: '11h 15m',
-          price: 1200,
-          seatsAvailable: 4
+          date: departDate,
+          passengers,
+          busType
         }
-      ]);
-      setIsLoading(false);
-    }, 800);
+      }
+    });
   };
+
 
   const renderPassengerSelector = () => (
     <div className="space-y-6">

@@ -1,9 +1,9 @@
 import { ScrollView } from '../ScrollView';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Users, Calendar, DollarSign, Sparkles, FileText, ArrowRight, Shield, Crown } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { X, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Users, Calendar, DollarSign, Compass as Sparkles, FileText, ArrowRight, Shield, Crown } from 'lucide-react';
 import Papa from 'papaparse';
+import { readExcelGrid } from '../../utils/excelUtils';
 import { Expense, Category } from '../../types';
 
 interface ExtractedTripData {
@@ -183,10 +183,7 @@ export const OldTripImportModal: React.FC<OldTripImportModalProps> = ({
         grid = (parseResult.data as any[][]) || [];
       } else {
         const arrayBuffer = await uploadedFile.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        grid = (XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]) || [];
+        grid = await readExcelGrid(arrayBuffer);
       }
 
       if (!grid || grid.length === 0) {

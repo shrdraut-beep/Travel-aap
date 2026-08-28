@@ -8,7 +8,7 @@ import {
   Edit3, 
   Power, 
   RotateCcw, 
-  Sparkles, 
+  Compass as Sparkles, 
   Calendar, 
   DollarSign, 
   Layers,

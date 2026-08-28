@@ -1,7 +1,7 @@
 // src/components/booking/BillingAndFareBreakup.tsx
 import React, { useState } from 'react';
 import { useBookingFlow } from '../../context/BookingFlowContext';
-import { Phone, Mail, Building2, ShieldCheck, ChevronRight, AlertCircle, Sparkles } from 'lucide-react';
+import { Phone, Mail, Building2, ShieldCheck, ChevronRight, AlertCircle, Compass as Sparkles } from 'lucide-react';
 
 export interface BillingAndFareBreakupProps {
   onReviewClick: () => void;

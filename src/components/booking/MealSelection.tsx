@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useBookingFlow } from '../../context/BookingFlowContext';
 import { HoldTimer } from './HoldTimer';
-import { Plus, Check, Utensils, Sparkles, ArrowLeft } from 'lucide-react';
+import { Plus, Check, Utensils, Compass as Sparkles, ArrowLeft } from 'lucide-react';
 
 export type MealOption = {
   id: string;

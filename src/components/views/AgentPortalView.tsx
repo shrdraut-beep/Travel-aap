@@ -5,11 +5,12 @@ import {
   TrendingUp, Users, Calendar, Package, Plus, 
   Edit2, Check, X, DollarSign, Clock, AlertCircle,
   Phone, Mail, MapPin, Lock, KeyRound, LogIn, 
-  UserPlus, ArrowLeft, ShieldAlert, LogOut, Zap, 
-  Sparkles, Shield, Settings, Plane, MessageCircle, 
-  Tag, Inbox, Banknote, Search, Link2, Copy, RefreshCcw,
-  Gift, Wallet, LifeBuoy
+  UserPlus, ArrowLeft, ArrowRight, ShieldAlert, LogOut, Zap, 
+  Compass as Sparkles, Shield, Settings, Plane, MessageCircle, 
+  Tag, Inbox, Banknote, Search, Link2, Copy, RefreshCcw, Compass,
+  Gift, Wallet, LifeBuoy, Gavel
 } from 'lucide-react';
+import { AgentBiddingScreen } from '../routripo/AgentBiddingScreen';
 import { 
   ResponsiveContainer, 
   AreaChart, 
@@ -29,6 +30,8 @@ import { PartnerInventoryManager } from './PartnerInventoryManager';
 import { MarkupEngineView } from './MarkupEngineView';
 import { AgencyStatementView } from './AgencyStatementView';
 import { PartnerProfileKYCView } from './PartnerProfileKYCView';
+import { FastTrackHotelOnboardingModal } from '../routripo/FastTrackHotelOnboardingModal';
+import { Hotel } from 'lucide-react';
 
 
 interface AgentPortalViewProps {
@@ -62,6 +65,7 @@ export interface AgentBooking {
 }
 
 export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
+  lang = 'en',
   onShowToast,
   onLogout
 }) => {
@@ -73,7 +77,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
   const [resetSent, setResetSent] = useState(false);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'bookings' | 'earnings' | 'marketing' | 'support' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'bidding' | 'inventory' | 'bookings' | 'earnings' | 'markups' | 'marketing' | 'support' | 'settings'>('dashboard');
 
   // Agency & Profile State
   const [agencyName, setAgencyName] = useState<string>('B2B Travel Partner Agency');
@@ -117,6 +121,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
 
   // New Package Modal
   const [showAddPackageModal, setShowAddPackageModal] = useState(false);
+  const [showHotelFastTrackModal, setShowHotelFastTrackModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDest, setNewDest] = useState('Goa');
   const [newPrice, setNewPrice] = useState('9999');
@@ -242,6 +247,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
 
   const tabs = [
     { id: 'dashboard', icon: TrendingUp, label: 'Overview & Analytics' },
+    { id: 'bidding', icon: Tag, label: 'Offers / Leads' },
     { id: 'inventory', icon: Package, label: `Inventory & Packages (${packages.length})` },
     { id: 'bookings', icon: Users, label: `Bookings & Leads (${bookings.length})` },
     { id: 'earnings', icon: Wallet, label: 'Earnings & Statement' },
@@ -259,34 +265,37 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
         title={
           <div className="flex items-center gap-2">
             <LogoName className="text-xl" />
-            <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-sky-500 to-pink-500 text-white font-extrabold text-[10px] uppercase tracking-wider shadow-xs">
-              Partner Hub
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-[10px] uppercase tracking-wider shadow-xs flex items-center gap-1 ml-2">
-              RouTriO Verified 🟢
-            </span>
           </div>
         }
         scrolled={false}
-        avatarGrad="from-sky-500 to-pink-500"
+        avatarGrad="from-slate-700 to-slate-900"
         initial={agencyName ? agencyName.charAt(0).toUpperCase() : "P"}
         onLogout={handleLogout}
         onOpenSettings={() => setActiveTab('settings')}
       />
 
       {/* Partner Theme Header Sub-bar */}
-      <div className="bg-gradient-to-r from-sky-500 to-pink-500 text-white px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between text-xs font-bold shadow-xs shrink-0 gap-2">
+      <div className="bg-[#1A365D] text-white px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between text-xs font-bold shadow-xs shrink-0 gap-2">
         <div className="flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-pink-100" />
-          <span className="text-white font-bold">{agencyName || 'Verified Partner Agency'}</span>
+          <Building2 className="w-4 h-4 text-emerald-400" />
+          <span className="text-white font-extrabold">{agencyName || 'Verified Partner Agency'}</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider">B2B Partner</span>
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ml-1">
+            RouTriO Verified 🟢
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => setShowAddPackageModal(true)}
-            className="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors text-xs font-bold cursor-pointer flex items-center gap-1.5 backdrop-blur-xs"
+            onClick={() => setShowHotelFastTrackModal(true)}
+            className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 hover:bg-amber-300 transition-colors text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Package</span>
+            <Hotel className="w-3.5 h-3.5" /> ⚡ FAST-TRACK HOTEL
+          </button>
+          <button 
+            onClick={() => setShowAddPackageModal(true)}
+            className="px-3 py-1.5 rounded-xl bg-white text-[#1A365D] hover:bg-slate-100 transition-colors text-xs font-extrabold cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5" /> ADD PACKAGE
           </button>
         </div>
       </div>
@@ -300,11 +309,151 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
           {/* TAB 1: OVERVIEW & ANALYTICS */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
+
+              {/* ROUTRIPO HERO ACTION BANNER */}
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-slate-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-sm">
+                    💼
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black text-slate-900">सक्रिय पार्टनर वर्कस्पेस</h2>
+                    <p className="text-xs font-medium text-slate-600">B2B इन्व्हेंटरी, बुकिंग्स आणि कस्टमर पेमेंट्स</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <button 
+                    onClick={() => setShowHotelFastTrackModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    <Hotel className="w-3.5 h-3.5 text-slate-950" />
+                    <span>हॉटेल फास्ट-ट्रॅक आयात</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('inventory')}
+                    className="px-4 py-2 rounded-xl bg-[#1A365D] hover:bg-[#1A365D]/90 text-white font-extrabold text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+                  >
+                    <span>पॅकेज इन्व्हेंटरी वर जा</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* ROUTRIPO HERO TRIPLE ACTION CARDS */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div 
+                  onClick={() => setShowHotelFastTrackModal(true)}
+                  className="bg-gradient-to-br from-[#1A365D] to-indigo-900 rounded-3xl p-5 text-white shadow-md shadow-sm cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-between border border-white/10"
+                >
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-400/25 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-400/30">
+                      ⚡ 1-Click Import
+                    </span>
+                    <h3 className="text-base font-black mt-1">हॉटेल ऑनबोर्डिंग</h3>
+                    <p className="text-xs text-sky-100 font-medium mt-0.5">Airbnb / Booking URL किंवा मॅन्युअल विझार्ड</p>
+                  </div>
+                  <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-amber-300 shrink-0">
+                    <Hotel className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setShowAddPackageModal(true)}
+                  className="bg-[#1A365D] rounded-3xl p-5 text-white shadow-md shadow-sm cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-between"
+                >
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider">त्वरित नोंदणी</span>
+                    <h3 className="text-base font-black mt-1">नवीन पॅकेज बनवा</h3>
+                    <p className="text-xs text-sky-100 font-medium mt-0.5">सहलीचे दर आणि संपूर्ण नियोजन जोडा</p>
+                  </div>
+                  <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab('markups')}
+                  className="bg-[#1A365D] rounded-3xl p-5 text-white shadow-md shadow-indigo-500/10 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-between"
+                >
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider">नफा आणि दर</span>
+                    <h3 className="text-base font-black mt-1">मार्कअप व बुकिंग्स</h3>
+                    <p className="text-xs text-indigo-100 font-medium mt-0.5">स्वयंचलित एजन्सी नफा मार्जिन सेट करा</p>
+                  </div>
+                  <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2x3 MODULE SERVICES GRID (ROUTRIPO STYLE) */}
+              <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-3">
+                <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                  <Compass className="w-4 h-4 text-sky-600" />
+                  <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">पार्टनर व्यवसाय सेवा (Partner Services)</h3>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <button 
+                    onClick={() => setActiveTab('inventory')}
+                    className="p-3 bg-slate-50/80 hover:bg-sky-100 border border-sky-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-slate-500 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">📦</div>
+                    <span className="text-xs font-bold text-slate-800">पॅकेजेस</span>
+                    <span className="text-[10px] text-sky-600 font-medium">{packages.length} Active</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('bookings')}
+                    className="p-3 bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">👥</div>
+                    <span className="text-xs font-bold text-slate-800">बुकिंग्स</span>
+                    <span className="text-[10px] text-indigo-600 font-medium">{bookings.length} Leads</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('earnings')}
+                    className="p-3 bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">💰</div>
+                    <span className="text-xs font-bold text-slate-800">वॉलेट</span>
+                    <span className="text-[10px] text-emerald-600 font-medium">Payment Protected</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('markups')}
+                    className="p-3 bg-cyan-50/80 hover:bg-cyan-100 border border-cyan-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-cyan-500 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">🏷️</div>
+                    <span className="text-xs font-bold text-slate-800">मार्कअप</span>
+                    <span className="text-[10px] text-cyan-600 font-medium">Global Rule</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('support')}
+                    className="p-3 bg-purple-50/80 hover:bg-purple-100 border border-purple-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">📣</div>
+                    <span className="text-xs font-bold text-slate-800">सपोर्ट</span>
+                    <span className="text-[10px] text-purple-600 font-medium">24x7 Help</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('settings')}
+                    className="p-3 bg-amber-50/80 hover:bg-amber-100 border border-amber-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">🛡️</div>
+                    <span className="text-xs font-bold text-slate-800">KYC प्रोफाइल</span>
+                    <span className="text-[10px] text-amber-600 font-medium">Verified</span>
+                  </button>
+                </div>
+              </div>
               {/* Metric Cards Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs flex flex-col justify-between">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2.5 rounded-2xl bg-sky-50 border border-sky-100">
+                    <div className="p-2.5 rounded-2xl bg-slate-50 border border-sky-100">
                       <Inbox className="w-5 h-5 text-sky-600" />
                     </div>
                     <h3 className="font-extrabold text-slate-800 text-sm">Total Inquiries / Leads</h3>
@@ -403,6 +552,18 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
             </div>
           )}
 
+          {/* BIDDING DESK TAB */}
+          {activeTab === 'bidding' && (
+            <AgentBiddingScreen 
+              onBack={() => setActiveTab('dashboard')} 
+              lang={lang}
+              agencyCity="Mumbai"
+              vendorId="vendor-402"
+              vendorName="Verified Partner #402"
+              onLogout={onLogout}
+            />
+          )}
+
           {/* TAB 2: INVENTORY & PACKAGES */}
           {activeTab === 'inventory' && (
             <div className="space-y-6">
@@ -417,7 +578,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
 
                 <button
                   onClick={() => setShowAddPackageModal(true)}
-                  className="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-2xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer flex items-center gap-2 shadow-md shadow-pink-500/20"
+                  className="px-4 py-2.5 bg-[#FF6B6B] text-white rounded-2xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer flex items-center gap-2 shadow-md shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create New Package</span>
@@ -433,7 +594,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                     <p className="text-xs text-slate-400 mt-0.5 mb-4">Add your first custom travel itinerary to start receiving leads.</p>
                     <button
                       onClick={() => setShowAddPackageModal(true)}
-                      className="px-4 py-2 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-xl text-xs font-bold hover:opacity-95"
+                      className="px-4 py-2 bg-[#FF6B6B] text-white rounded-xl text-xs font-bold hover:opacity-95"
                     >
                       + Create Tour Package
                     </button>
@@ -485,7 +646,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                   <Users className="w-5 h-5 text-sky-600" />
                   Customer Inquiries & Confirmed Bookings ({bookings.length})
                 </h3>
-                <p className="text-xs text-slate-500">Track customer trip requests, escrow status, and confirm payments.</p>
+                <p className="text-xs text-slate-500">Track customer trip requests, payment status, and confirm payments.</p>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
@@ -497,15 +658,29 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                         <th className="p-4">Package</th>
                         <th className="p-4">Amount</th>
                         <th className="p-4">Travel Date</th>
-                        <th className="p-4">Escrow Status</th>
+                        <th className="p-4">Payment Status</th>
                         <th className="p-4 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs font-medium">
                       {bookings.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-slate-400">
-                            No customer bookings recorded yet.
+                          <td colSpan={6} className="p-12 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-3 max-w-md mx-auto py-4 bg-slate-50/80 rounded-3xl border border-sky-200 p-6">
+                              <div className="w-16 h-16 bg-[#1A365D] rounded-2xl flex items-center justify-center shadow-lg shadow-sm text-white">
+                                <Wallet className="w-8 h-8" />
+                              </div>
+                              <h4 className="text-base font-black text-slate-800">No Customer Bookings Yet 💼</h4>
+                              <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                                Your client bookings, commissions, and package reservations will appear here. Tap below to create your first client booking.
+                              </p>
+                              <button 
+                                onClick={() => setActiveTab('inventory')}
+                                className="px-5 py-2.5 bg-[#1A365D] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md shadow-sky-600/20 hover:bg-[#1A365D]/90 transition-all cursor-pointer"
+                              >
+                                + Explore & Book Packages
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ) : (
@@ -565,7 +740,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                                   onClick={() => handleToggleEscrowRelease(b.id)}
                                   disabled={b.paymentStatus === 'held_in_escrow'}
                                   className={`px-3 py-1.5 text-white rounded-xl text-xs font-bold transition-opacity cursor-pointer shadow-xs ${
-                                    b.paymentStatus === 'held_in_escrow' ? 'bg-slate-300 cursor-not-allowed' : 'bg-gradient-to-r from-sky-500 to-pink-500 hover:opacity-95'
+                                    b.paymentStatus === 'held_in_escrow' ? 'bg-slate-300 cursor-not-allowed' : 'bg-[#FF6B6B] hover:opacity-95'
                                   }`}
                                 >
                                   {b.paymentStatus === 'Held in Escrow' || b.paymentStatus === 'held_in_escrow' ? 'Release Escrow' : 'Hold Escrow'}
@@ -674,7 +849,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                   <button
                     onClick={handleSaveSettings}
-                    className="px-6 py-3 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-2xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer shadow-md shadow-pink-500/20 flex items-center gap-2"
+                    className="px-6 py-3 bg-[#FF6B6B] text-white rounded-2xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer shadow-md shadow-sm flex items-center gap-2"
                   >
                     <Check className="w-4 h-4" />
                     <span>Save Profile Settings</span>
@@ -693,13 +868,22 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isBidding = tab.id === 'bidding';
+            
+            let activeClass = 'bg-[#008080] text-white shadow-md shadow-sm';
+            if (isBidding) {
+              activeClass = 'bg-[#FF6B6B] text-white shadow-md shadow-sm';
+            } else {
+              activeClass = 'bg-slate-800 text-white shadow-md shadow-sm';
+            }
+
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-4 py-2 sm:py-2.5 rounded-2xl text-[10px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-gradient-to-r from-sky-500 to-pink-500 text-white shadow-md shadow-pink-500/20'
+                    ? activeClass
                     : 'bg-transparent sm:bg-white text-slate-500 hover:bg-slate-50 sm:border sm:border-slate-200'
                 }`}
               >
@@ -780,7 +964,7 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-xl text-xs font-bold hover:opacity-95 shadow-md shadow-pink-500/20"
+                  className="px-5 py-2.5 bg-[#FF6B6B] text-white rounded-xl text-xs font-bold hover:opacity-95 shadow-md shadow-sm"
                 >
                   Publish Package
                 </button>
@@ -789,6 +973,17 @@ export const AgentPortalView: React.FC<AgentPortalViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Fast-Track Hotel & Stay Onboarding Modal */}
+      <FastTrackHotelOnboardingModal
+        isOpen={showHotelFastTrackModal}
+        onClose={() => setShowHotelFastTrackModal(false)}
+        lang={lang}
+        onListingCreated={(listing) => {
+          notify(`Hotel listing "${listing.propertyName}" onboarded successfully!`);
+          setActiveTab('inventory');
+        }}
+      />
 
     </div>
   );

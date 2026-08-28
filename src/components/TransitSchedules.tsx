@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { fetchLiveFlights, fetchLiveTrains } from '../services/LiveTravelAPI';
+import { getTransitSchedules } from '../services/transitService';
 import { Train, Bus, Plane, Clock, Search, AlertCircle, Info } from 'lucide-react';
 import { BookingItemPayload } from '../pages/CheckoutPage';
 import { useNavigate } from 'react-router-dom';
@@ -51,20 +52,42 @@ export const TransitSchedules: React.FC<{ source: string; destination: string }>
         setIsPendingApi(true);
       }
 
+      let flightsList = (flightsRes.data || []).map((f: any) => ({
+        airlineName: `${f.airline || f.provider || 'Flight'} (${f.flightNumber || 'Live'})`,
+        departureTime: f.departure_time || f.departureTime || '06:00 AM',
+        arrivalTime: f.arrival_time || f.arrivalTime || '08:15 AM',
+        duration: f.duration || '2h 15m'
+      }));
+
+      let trainsList = (trainsRes.data || []).map((t: any) => ({
+        trainName: `${t.train_name || t.name || 'Express'} (${t.train_number || t.number || ''})`,
+        departureTime: t.departure_time || t.schDep || '07:00 AM',
+        arrivalTime: t.arrival_time || t.schArr || '02:00 PM',
+        duration: t.travel_time || '7h 00m'
+      }));
+
+      let busesList: any[] = [];
+
+      // If live APIs have no data or are pending integration, fetch from AI Transit Schedules API
+      if (flightsList.length === 0 && trainsList.length === 0) {
+        try {
+          const aiTransit = await getTransitSchedules(source.trim(), destination.trim());
+          const aiContent = aiTransit?.choices?.[0]?.message?.content;
+          if (aiContent) {
+            const parsed = JSON.parse(aiContent);
+            if (Array.isArray(parsed.flights) && parsed.flights.length > 0) flightsList = parsed.flights;
+            if (Array.isArray(parsed.trains) && parsed.trains.length > 0) trainsList = parsed.trains;
+            if (Array.isArray(parsed.buses) && parsed.buses.length > 0) busesList = parsed.buses;
+          }
+        } catch (aiErr) {
+          console.warn("AI transit fallback note:", aiErr);
+        }
+      }
+
       setSchedules({
-        flights: (flightsRes.data || []).map((f: any) => ({
-          airlineName: `${f.airline || f.provider || 'Flight'} (${f.flightNumber || 'Live'})`,
-          departureTime: f.departure_time || f.departureTime || '06:00 AM',
-          arrivalTime: f.arrival_time || f.arrivalTime || '08:15 AM',
-          duration: f.duration || '2h 15m'
-        })),
-        trains: (trainsRes.data || []).map((t: any) => ({
-          trainName: `${t.train_name || t.name || 'Express'} (${t.train_number || t.number || ''})`,
-          departureTime: t.departure_time || t.schDep || '07:00 AM',
-          arrivalTime: t.arrival_time || t.schArr || '02:00 PM',
-          duration: t.travel_time || '7h 00m'
-        })),
-        buses: []
+        flights: flightsList,
+        trains: trainsList,
+        buses: busesList
       });
     } catch (apiError: any) {
       console.error("Transit Search Error:", apiError);

@@ -449,13 +449,16 @@ export async function searchLocalFlights(origin: string, destination: string, jo
       };
     });
   } else {
+    const fallbackList = ['IndiGo', 'Air India', 'Vistara', 'Akasa Air', 'SpiceJet', 'Air India Express'];
     rawResults = matches.map((r: any, idx: number) => {
       const depTime = r.DepTime || '07:00 AM';
       const arrTime = r.ArrTime || '09:20 AM';
       const durationStr = calculateAccurateDuration(depTime, arrTime);
 
+      const chosenAirline = r.Airline || fallbackList[idx % fallbackList.length];
+
       return {
-        airline: r.Airline || 'IndiGo',
+        airline: chosenAirline,
         flightNumber: r.Route_ID || `FL-${100 + idx}`,
         originCode: r.Source_Airport || origUpper,
         destinationCode: r.Destination_Airport || destUpper,
@@ -468,7 +471,7 @@ export async function searchLocalFlights(origin: string, destination: string, jo
         stops: r.Stops === '0' ? 'Non-stop' : `${r.Stops} Stop`,
         direct: r.Stops === '0',
         deepLink: 'https://bitli.in/1HdfW4l',
-        logo: AIRLINE_LOGOS[r.Airline] || AIRLINE_LOGOS['6E']
+        logo: AIRLINE_LOGOS[chosenAirline] || AIRLINE_LOGOS['6E']
       };
     });
   }

@@ -11,6 +11,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      selfDestroying: true,
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "mask-icon.svg"],
       // `public/manifest.json` is the single source of truth for the web app manifest
       // and is linked directly from index.html. Generating a second manifest here put
@@ -48,6 +49,7 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    emptyOutDir: true,
     sourcemap: false,
     minify: "esbuild",
     cssMinify: true,
@@ -58,7 +60,7 @@ export default defineConfig({
           vendor: ["react", "react-dom", "framer-motion", "lucide-react"],
           charts: ["recharts"],
           maps: ["leaflet", "react-leaflet"],
-          utils: ["jspdf", "xlsx", "html2canvas-pro", "papaparse"],
+          utils: ["jspdf", "exceljs", "html2canvas-pro", "papaparse"],
         },
       },
     },

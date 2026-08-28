@@ -17,7 +17,7 @@ import {
   Route as RouteIcon, 
   Clock, 
   CheckCircle2, 
-  Sparkles, 
+  Compass as Sparkles, 
   AlertTriangle 
 } from 'lucide-react';
 

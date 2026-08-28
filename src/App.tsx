@@ -35,7 +35,8 @@ import { AdminDashboardView } from './components/views/AdminDashboardView';
 import { MyTicketsView } from './components/views/MyTicketsView';
 
 import { NAV_USER_ICONS, TripsIcon, PlanningIcon, SocialIcon, BookingIcon, ExpensesIcon, SettingsIcon } from './theme/icons';
-import { Ticket } from 'lucide-react';
+import { Ticket, Download, Tag } from 'lucide-react';
+import { UserBiddingScreen } from './components/routripo/UserBiddingScreen';
 
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { FlightFareSelectionPage } from './pages/FlightFareSelectionPage';
@@ -44,8 +45,15 @@ import { FlightMealsSelectionPage } from './pages/FlightMealsSelectionPage';
 import { FlightBaggageSelectionPage } from './pages/FlightBaggageSelectionPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { StaysDetailsPage } from './pages/StaysDetailsPage';
+import { StaysResultsPage } from './pages/StaysResultsPage';
+import { StaysCheckoutPage } from './pages/StaysCheckoutPage';
 import { FlightsResultsPage } from './pages/FlightsResultsPage';
 import { CarsResultsPage } from './pages/CarsResultsPage';
+
+import { BusResultsPage } from './pages/BusResultsPage';
+import { BusSeatMapPage } from './pages/BusSeatMapPage';
+import { CarResultsPage } from './pages/CarResultsPage';
+
 import { AncillariesFlow } from './pages/AncillariesFlow';
 import { OrderReviewPage } from './pages/OrderReviewPage';
 
@@ -53,13 +61,14 @@ function MainApp() {
   const [phase, setPhase] = useState("splash");
   const [role, setRole] = useState("user"); // 'user', 'agent', 'admin'
   const [active, setActive] = useState("trips");
-  const [bookingTab, setBookingTab] = useState("Packages");
+  const [bookingTab, setBookingTab] = useState("Menu");
   const currentUser = useAuthStore(state => state.currentUser);
   const initAuthListener = useAuthStore(state => state.initAuthListener);
 
   const isWorkspace = ['planning', 'expenses', 'social'].includes(active);
 
   const globalNavItems = [
+    { key: "bidding", label: "Caught Deals", icon: Tag },
     { key: "booking", label: "Booking", icon: BookingIcon },
     { key: "trips", label: "My Trips", icon: TripsIcon },
     { key: "settings", label: "Settings", icon: SettingsIcon },
@@ -146,13 +155,11 @@ function MainApp() {
   }, []);
 
   const handleSetActive = (tab: string, subCategory?: string) => {
-    if (tab === 'new-trip') {
-      setIsCreateTripOpen(true);
-      return;
-    }
     console.log("Setting active to", tab);
     setActive(tab);
-    if (subCategory) {
+    if (tab === 'booking') {
+      setBookingTab(subCategory || 'Menu');
+    } else if (subCategory) {
       setBookingTab(subCategory);
     }
   };
@@ -209,22 +216,34 @@ function MainApp() {
 
   // Only the user role uses the tab-strip BottomNav — Agent & Admin
   // portals below already ship with their own full internal navigation.
-  const grad = "from-red-500 via-rose-500 to-pink-500";
-  const glow = "shadow-rose-500/30";
+  const grad = "from-[#1A365D] to-[#2A4A7F]";
+  const glow = "shadow-sm";
 
   return (
     <CrashlyticsErrorBoundary>
       <MusicPlayerProvider>
       <div className="w-full min-h-screen relative font-[Inter]">
+        
+
         {phase === "splash" && <Splash onDone={() => setPhase("login")} />}
         {phase === "login" && <LoginScreen onLogin={handleLogin} />}
         {phase === "app" && (
           <>
+            {role === 'user' && active === 'bidding' && (
+              <UserBiddingScreen 
+                onBack={() => setActive('trips')} 
+                onLogout={handleLogout}
+                onSOS={() => setIsSosOpen(true)}
+                onOpenSettings={() => setActive('settings')}
+                onOpenMyTickets={() => setActive('my-tickets')}
+                lang={lang as 'en' | 'mr'} 
+              />
+            )}
             
             {role === 'user' && (active === 'trips' || active === 'all-trips') && (
               <AllTripsScreen 
+                setActive={handleSetActive}
                 onBack={() => setActive('trips')} 
-                setActive={handleSetActive} 
                 onLogout={handleLogout}
                 onSOS={() => setIsSosOpen(true)}
               />
@@ -232,6 +251,14 @@ function MainApp() {
             
             {role === 'user' && active === 'smart-planner' && (
               <FutureTripScreen onBack={() => setActive('trips')} lang={lang as 'en' | 'mr'} />
+            )}
+            {role === 'user' && active === 'new-trip' && (
+              <NewTripScreen 
+                onBack={() => setActive('trips')} 
+                onCreate={handleCreateTrip}
+                trips={trips}
+                lang={lang}
+              />
             )}
             {role === 'user' && active === 'planning' && (
               <PlanningScreen 
@@ -274,6 +301,7 @@ function MainApp() {
                 onLogout={handleLogout} 
                 onSOS={() => setIsSosOpen(true)}
                 setActive={handleSetActive}
+                onBack={() => setActive("trips")}
               />
             )}
             {role === 'user' && active === 'my-tickets' && (
@@ -362,12 +390,17 @@ export default function App() {
   const isOverlayRoute = [
     '/checkout', 
     '/stays/results', 
+    '/stays/details',
+    '/stays/checkout',
     '/flights/results', 
     '/flights/fares',
     '/flights/seats',
     '/flights/meals',
     '/flights/baggage',
     '/cars/results',
+    '/cars',
+    '/buses',
+    '/buses/seatmap',
     '/ancillaries',
     '/order-review'
   ].includes(location.pathname);
@@ -380,13 +413,20 @@ export default function App() {
         </div>
         <Routes>
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/stays/results" element={<StaysDetailsPage />} />
+          <Route path="/stays/results" element={<StaysResultsPage />} />
+          <Route path="/stays/details" element={<StaysDetailsPage />} />
+          <Route path="/stays/checkout" element={<StaysCheckoutPage />} />
           <Route path="/flights/results" element={<FlightsResultsPage />} />
           <Route path="/flights/fares" element={<FlightFareSelectionPage />} />
           <Route path="/flights/seats" element={<FlightSeatSelectionPage />} />
           <Route path="/flights/meals" element={<FlightMealsSelectionPage />} />
           <Route path="/flights/baggage" element={<FlightBaggageSelectionPage />} />
           <Route path="/cars/results" element={<CarsResultsPage />} />
+
+          <Route path="/buses" element={<BusResultsPage />} />
+          <Route path="/buses/seatmap" element={<BusSeatMapPage />} />
+          <Route path="/cars" element={<CarResultsPage />} />
+
           <Route path="/ancillaries" element={<AncillariesFlow flightOffer={{}} onComplete={(data) => console.log(data)} />} />
           <Route path="/order-review" element={<OrderReviewPage />} />
         </Routes>

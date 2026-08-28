@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { 
-  Search, Compass, Plane, Hotel, Train, Bus, Car, Package, Plus, Sparkles, 
+  Search, Compass, Plane, Hotel, Train, Bus, Car, Package, Plus, Compass as Sparkles, 
   MapPin, Calendar, Users, Trash2, Share2, ShieldCheck, Copy, Check, 
   AlertTriangle, X, CreditCard, ArrowRight 
 } from "lucide-react";
@@ -153,21 +153,13 @@ export function AllTripsScreen({
           {
             title: isMr ? "स्मार्ट प्लॅनर" : "SMART PLANNER",
             subtitle: isMr ? "AI ट्रिप जनरेटर" : "AI trip generator",
-            icon: Sparkles,
+            icon: Compass,
             iconColor: "text-amber-300",
             gradient: "from-indigo-600 via-indigo-700 to-purple-700 border border-indigo-400/30 shadow-indigo-200/60",
             subtitleColorClass: "text-indigo-100",
             onClick: () => setActive('smart-planner')
           }
         ]}
-        gridTitle={isMr ? "प्रवास सेवा बुक करा" : "Book Travel Services"}
-        gridIcon={Compass}
-        gridItems={bookingServices.map(b => ({
-          label: isMr ? (b.category === "Flights" ? "विमान" : b.category === "Hotels" ? "हॉटेल" : b.category === "Trains" ? "ट्रेन" : b.category === "Bus" ? "बस" : b.category === "Cars" ? "टॅक्सी" : "पॅकेज") : b.label,
-          icon: b.icon,
-          color: b.color,
-          onClick: () => setActive("booking", b.category)
-        }))}
       >
         <div className="space-y-4">
 

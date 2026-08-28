@@ -156,7 +156,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   const tPrivacy = privacyTranslations[currentLang] || privacyTranslations['en'];
 
   // ==========================================
-  // PAGE 1: MAIN LOGIN SCREEN
+  // PAGE 1: MAIN LOGIN SCREEN (ROUTRIPO LAYOUT)
   // ==========================================
   if (step === 'main') {
     return (

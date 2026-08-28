@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Sparkles,
+  Compass as Sparkles,
   Calendar,
   ClipboardList,
   Compass,
@@ -20,7 +20,14 @@ import {
   Search,
   Plus,
   Bell,
-  X
+  X,
+  Wallet,
+  Vote,
+  TrendingDown,
+  Plane,
+  Share2,
+  Zap,
+  ArrowRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { TopBar, useScrolled, LogoName } from "./SharedUI";
@@ -30,6 +37,17 @@ import { useTripContext } from "../../context/TripContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { CalendarView } from '../views/CalendarView';
 import { ItineraryCard } from '../ItineraryCard';
+import { PublicApisTripWidget } from '../PublicApisTripWidget';
+
+// Newly Integrated Features from Repositories
+import { VisualRouteTimeline } from '../planning/VisualRouteTimeline';
+import { GroupDecisionPolls } from '../planning/GroupDecisionPolls';
+import { GroupSplitCalculator } from '../planning/GroupSplitCalculator';
+import { LowFareCalendarWidget } from '../planning/LowFareCalendarWidget';
+import { LiveFlightTrackerWidget } from '../planning/LiveFlightTrackerWidget';
+import { MultiOriginSyncWidget } from '../planning/MultiOriginSyncWidget';
+import { TripShareCardModal } from '../planning/TripShareCardModal';
+import { SmartAiPromptPresets } from '../planning/SmartAiPromptPresets';
 
 interface PlanningScreenProps {
   onLogout: () => void;
@@ -223,7 +241,14 @@ export function PlanningScreen({
   };
 
   const [scheduleMode, setScheduleMode] = useState<'list'|'calendar'>('list');
-  const [activePlanTab, setActivePlanTab] = useState<'overview'|'budget'|'schedule'|'packing'>('overview');
+  const [activePlanTab, setActivePlanTab] = useState<'overview'|'schedule'|'budget'|'split'|'packing'|'polls'|'lowfare'|'tracker'|'multicity'|'optimizer'>('overview');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState<{ text: string; type: 'success' | 'alert' } | null>(null);
+
+  const showToast = (text: string, type: 'success' | 'alert' = 'success') => {
+    setToastMsg({ text, type });
+    setTimeout(() => setToastMsg(null), 3000);
+  };
 
   const filteredCategories = packingCategories.map(c => ({
     ...c,
@@ -233,32 +258,64 @@ export function PlanningScreen({
   return (
     <div ref={scrollRef} className="h-full overflow-y-auto pb-28 bg-slate-50 relative">
       <TopBar 
-        sub={isMr ? "प्लॅनिंग प्रवास" : "Trip Journey Flow"} 
+        sub={isMr ? "प्लॅनिंग व ग्रुप टूल्स" : "Trip Planning & Group Tools"} 
         title={<LogoName />} 
         scrolled={scrolled} 
         onLogout={onLogout} 
         onBack={onBack}
       />
 
+      {/* Floating Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-16 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 rounded-2xl shadow-xl border text-xs font-black uppercase tracking-wider flex items-center gap-2 ${
+              toastMsg.type === 'success' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-rose-600 text-white border-rose-500'
+            }`}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{toastMsg.text}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <div className="pt-3 pb-8">
         <TabDashboardLayout
           cards={[
             {
               title: isMr ? "AI मॅनेजर" : "AI MANAGER",
-              subtitle: isMr ? "ट्रिप अलर्ट्स व रेकमेन्डेशन्स" : "Smart trip alerts & tools",
-              icon: Sparkles,
+              subtitle: isMr ? "स्मार्ट ट्रिप अलर्ट्स व टूल्स" : "Smart trip alerts & tools",
+              icon: Compass,
               iconColor: "text-rose-100",
               gradient: activeSection === 'ai-manager'
                 ? "from-rose-750 via-rose-850 to-red-950 border-2 border-rose-400 shadow-lg scale-[1.02]"
                 : "from-rose-600 via-rose-700 to-red-700 border border-rose-500/30 shadow-rose-200/60",
               subtitleColorClass: "text-rose-100",
               onClick: () => setActiveSection(activeSection === 'ai-manager' ? 'none' : 'ai-manager')
+            },
+            {
+              title: isMr ? "ट्रिप शेअर" : "SHARE TRIP",
+              subtitle: isMr ? "WhatsApp व कार्ड" : "WhatsApp & PDF card",
+              icon: Share2,
+              iconColor: "text-indigo-100",
+              gradient: "from-indigo-600 via-indigo-700 to-violet-800 border border-indigo-500/30 shadow-indigo-200/60",
+              subtitleColorClass: "text-indigo-100",
+              onClick: () => setIsShareModalOpen(true)
             }
           ]}
-          gridTitle={isMr ? "प्लॅनिंग सर्व्हिसेस" : "Planning Services"}
+          gridTitle={isMr ? "३×३ प्लॅनिंग व ट्रॅव्हल सर्व्हिसेस" : "3×3 Planning & Travel Services"}
           gridIcon={Compass}
           gridItems={[
+            { 
+              icon: Calendar, 
+              label: isMr ? "शेड्युल व रूट" : "Timeline", 
+              color: "from-blue-500 to-indigo-600", 
+              isActive: activePlanTab === 'schedule',
+              onClick: () => setActivePlanTab(activePlanTab === 'schedule' ? 'overview' : 'schedule') 
+            },
             { 
               icon: DollarSign, 
               label: isMr ? "बजेट" : "Budget", 
@@ -267,11 +324,11 @@ export function PlanningScreen({
               onClick: () => setActivePlanTab(activePlanTab === 'budget' ? 'overview' : 'budget') 
             },
             { 
-              icon: Calendar, 
-              label: isMr ? "शेड्युल" : "Schedule", 
-              color: "from-blue-500 to-indigo-600", 
-              isActive: activePlanTab === 'schedule',
-              onClick: () => setActivePlanTab(activePlanTab === 'schedule' ? 'overview' : 'schedule') 
+              icon: Wallet, 
+              label: isMr ? "स्प्लिट बिल" : "Split Pay", 
+              color: "from-teal-500 to-emerald-600", 
+              isActive: activePlanTab === 'split',
+              onClick: () => setActivePlanTab(activePlanTab === 'split' ? 'overview' : 'split') 
             },
             { 
               icon: ClipboardList, 
@@ -279,10 +336,45 @@ export function PlanningScreen({
               color: "from-amber-500 to-orange-600", 
               isActive: activePlanTab === 'packing',
               onClick: () => setActivePlanTab(activePlanTab === 'packing' ? 'overview' : 'packing') 
+            },
+            { 
+              icon: Vote, 
+              label: isMr ? "ग्रुप पोल" : "Group Polls", 
+              color: "from-purple-500 to-indigo-600", 
+              isActive: activePlanTab === 'polls',
+              onClick: () => setActivePlanTab(activePlanTab === 'polls' ? 'overview' : 'polls') 
+            },
+            { 
+              icon: TrendingDown, 
+              label: isMr ? "स्वस्त फेअर" : "Low Fare", 
+              color: "from-sky-500 to-blue-600", 
+              isActive: activePlanTab === 'lowfare',
+              onClick: () => setActivePlanTab(activePlanTab === 'lowfare' ? 'overview' : 'lowfare') 
+            },
+            { 
+              icon: Plane, 
+              label: isMr ? "फ्लाइट ट्रॅकर" : "Live Tracker", 
+              color: "from-cyan-500 to-blue-600", 
+              isActive: activePlanTab === 'tracker',
+              onClick: () => setActivePlanTab(activePlanTab === 'tracker' ? 'overview' : 'tracker') 
+            },
+            { 
+              icon: Users, 
+              label: isMr ? "मल्टि-सिटी सिंक" : "Fly Together", 
+              color: "from-orange-500 to-amber-600", 
+              isActive: activePlanTab === 'multicity',
+              onClick: () => setActivePlanTab(activePlanTab === 'multicity' ? 'overview' : 'multicity') 
+            },
+            { 
+              icon: Zap, 
+              label: isMr ? "AI प्रीसेट्स" : "AI Presets", 
+              color: "from-rose-500 to-pink-600", 
+              isActive: activePlanTab === 'optimizer',
+              onClick: () => setActivePlanTab(activePlanTab === 'optimizer' ? 'overview' : 'optimizer') 
             }
           ]}
         >
-          <div className="px-2 max-w-lg mx-auto w-full mt-6">
+          <div className="px-2 max-w-lg mx-auto w-full mt-6 space-y-6">
 
             {/* AI Trip Manager Collapsible Alerts */}
             <AnimatePresence mode="wait">
@@ -304,7 +396,7 @@ export function PlanningScreen({
                     </button>
 
                     <h4 className="font-black text-indigo-900 text-xs uppercase tracking-widest mb-3 flex items-center gap-1.5 pr-6">
-                      <Sparkles className="w-4 h-4 text-indigo-600" /> {isMr ? 'AI ट्रिप मॅनेजर अलर्ट्स' : 'AI Trip Manager Alerts'}
+                      <Zap className="w-4 h-4 text-indigo-600" /> {isMr ? 'AI ट्रिप मॅनेजर अलर्ट्स' : 'AI Trip Manager Alerts'}
                     </h4>
                     <div className="space-y-2">
                       <div className="bg-white/90 p-3 rounded-2xl flex gap-3 shadow-sm items-start">
@@ -345,7 +437,7 @@ export function PlanningScreen({
             </AnimatePresence>
         
             {isOverBudget && (
-              <div className="mb-4 bg-rose-50 border border-rose-200 rounded-2xl p-3 flex items-start gap-2 shadow-sm text-left">
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3 flex items-start gap-2 shadow-sm text-left">
                 <Info className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-sm font-bold text-rose-800">{isMr ? 'बजेट अलर्ट' : 'Budget Alert'}</h4>
@@ -356,169 +448,229 @@ export function PlanningScreen({
               </div>
             )}
 
-        <div className="mb-6 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-slate-800 tracking-widest uppercase text-sm">{isMr ? 'बजेट डॅशबोर्ड' : 'Budget Dashboard'}</h3>
-            {weatherData && (
-              <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-bold border border-blue-100">
-                <Thermometer className="w-3 h-3" />
-                {weatherData.temp} - {weatherData.desc}
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{isMr ? 'एकूण बजेट' : 'TOTAL BUDGET'}</span>
-              <span className="text-xl font-black text-slate-800">₹{totalBudget}</span>
-            </div>
-            <div className="bg-rose-50 p-3 rounded-2xl border border-rose-100 flex flex-col justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">{isMr ? 'एकूण खर्च' : 'TOTAL EXPENSE'}</span>
-              <span className="text-xl font-black text-rose-700">₹{totalExpenses}</span>
-            </div>
-            <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 flex flex-col justify-between col-span-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">{isMr ? 'शिल्लक रक्कम' : 'TOTAL BALANCE'}</span>
-              <span className="text-2xl font-black text-emerald-700">₹{totalBalance}</span>
-            </div>
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-rose-500' : 'bg-emerald-500'}`}
-              style={{ width: `${Math.min(expenseRatio, 100)}%` }}
-            />
-          </div>
-          <div className="text-right text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
-            {Math.round(expenseRatio)}% {isMr ? 'वापरले' : 'USED'}
-          </div>
-        </div>
-
-        <div className="space-y-6 pb-4">
-            {(activePlanTab === 'overview' || activePlanTab === 'budget') && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
-                    <DollarSign className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">{isMr ? 'बजेट' : 'Trip Budget'}</h3>
-                    <p className="text-[10px] font-bold text-slate-500">{isMr ? 'तुमच्या बजेटचा अंदाज लावा.' : 'Estimate and secure your trip budget.'}</p>
-                  </div>
-                </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">{isMr ? 'अंदाजित बजेट' : 'Estimated Budget'}</span>
-                <button 
-                  onClick={handleAutoCalculateAI}
-                  className="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 active:scale-95 transition-all uppercase tracking-widest"
-                >
-                  <Sparkles className="w-3 h-3" /> {isMr ? 'AI द्वारे कॅल्क्युलेट' : 'Auto-Calculate via AI'}
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'प्रवास खर्च' : 'Transport'}</label>
-                  <input type="number" value={estTransport} onChange={e=>setEstTransport(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'हॉटेल / राहणे' : 'Accommodation'}</label>
-                  <input type="number" value={estAccommodation} onChange={e=>setEstAccommodation(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'खाद्यपदार्थ' : 'Food'}</label>
-                  <input type="number" value={estFood} onChange={e=>setEstFood(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'खरेदी व इतर' : 'Shopping & Misc'}</label>
-                  <input type="number" value={estShopping} onChange={e=>setEstShopping(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
-                </div>
-              </div>
-
-              {(!currentTrip.transportMode || currentTrip.transportMode === 'road') && (
-                <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Fuel className="w-4 h-4 text-amber-600" />
-                    <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">{isMr ? 'इंधन आणि टोल कॅल्क्युलेटर' : 'Fuel & Tolls (Round Trip)'}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mb-3">
-                    <input type="text" value={origin} onChange={e=>setOrigin(e.target.value)} placeholder={isMr ? "सुरुवात (Origin)" : "Origin"} className="bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-slate-900 placeholder-amber-600/60 focus:outline-none focus:border-amber-500" />
-                    <input type="text" value={destination} onChange={e=>setDestination(e.target.value)} placeholder={isMr ? "डेस्टिनेशन" : "Destination"} className="bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-slate-900 placeholder-amber-600/60 focus:outline-none focus:border-amber-500" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 mb-3">
-                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-1">{isMr ? 'मायलेज (km/l)' : 'Mileage (km/l)'}</label>
-                      <input type="number" value={mileage} onChange={e=>setMileage(e.target.value)} className="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-amber-500" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-1">{isMr ? 'इंधन दर (₹)' : 'Fuel Price (₹)'}</label>
-                      <input type="number" value={fuelPrice} onChange={e=>setFuelPrice(e.target.value)} className="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-amber-500" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-1">{isMr ? 'टोल (₹)' : 'Tolls (₹)'}</label>
-                      <input type="number" value={toll} onChange={e=>setToll(e.target.value)} className="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-amber-500" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-amber-900">{isMr ? 'एकूण:' : 'Total:'} ₹{Math.round(fuelCost)}</span>
-                    <button 
-                      onClick={() => setEstTransport(Math.round(fuelCost))}
-                      className="bg-amber-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold active:scale-95 transition-all"
-                    >
-                      {isMr ? 'ट्रान्सपोर्टमध्ये जोडा' : 'Apply to Transport'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <button 
-                onClick={handleSaveBudget}
-                className="w-full bg-emerald-600 text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-md"
-              >
-                {isMr ? 'बजेट सेव्ह करा' : 'Save Estimated Budget'}
-              </button>
-            </div>
-            )}
-
+            {/* TAB: SCHEDULE & TIMELINE (FloatTrip) */}
             {(activePlanTab === 'overview' || activePlanTab === 'schedule') && (
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                    <Calendar className="w-4 h-4" />
+              <div className="space-y-4">
+                <VisualRouteTimeline
+                  trip={currentTrip}
+                  onUpdateTrip={setCurrentTrip}
+                />
+
+                {/* Classic Card / Calendar View Toggle */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-black text-slate-800 text-xs uppercase tracking-widest">{isMr ? 'कॅलेंडर व लिस्ट व्ह्यू' : 'Calendar & Card View'}</h4>
+                    <div className="flex bg-slate-100 p-1 rounded-lg">
+                      <button onClick={() => setScheduleMode('list')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${scheduleMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>{isMr ? 'कार्ड्स' : 'Cards'}</button>
+                      <button onClick={() => setScheduleMode('calendar')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${scheduleMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>{isMr ? 'कॅलेंडर' : 'Calendar'}</button>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">{isMr ? 'शेड्युल' : 'Schedule'}</h3>
-                    <p className="text-[10px] font-bold text-slate-500">Manage daily itinerary</p>
-                  </div>
+                  {scheduleMode === 'calendar' ? (
+                    <CalendarView 
+                      trip={currentTrip} 
+                      itinerary={currentTrip.itinerary || []} 
+                      lang={lang} 
+                      currencySymbol="₹" 
+                      onUpdateTrip={setCurrentTrip}
+                    />
+                  ) : (
+                    <div className="space-y-3">
+                      {currentTrip.itinerary && currentTrip.itinerary.length > 0 ? (
+                        currentTrip.itinerary.map((plan) => (
+                          <ItineraryCard key={plan.id} plan={plan} />
+                        ))
+                      ) : (
+                        <div className="text-center text-slate-400 text-xs py-4">{isMr ? 'अद्याप कोणतेही शेड्युल जोडलेले नाही.' : 'No schedule items added yet.'}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="font-black text-slate-800 text-xs uppercase tracking-widest">{isMr ? 'शेड्युल' : 'Schedule'}</h4>
-                  <div className="flex bg-slate-100 p-1 rounded-lg">
-                    <button onClick={() => setScheduleMode('list')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${scheduleMode === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>{isMr ? 'लिस्ट' : 'List'}</button>
-                    <button onClick={() => setScheduleMode('calendar')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${scheduleMode === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>{isMr ? 'कॅलेंडर' : 'Calendar'}</button>
-                  </div>
-                </div>
-                {scheduleMode === 'calendar' ? (
-                  <CalendarView 
-                    trip={currentTrip} 
-                    itinerary={currentTrip.itinerary || []} 
-                    lang={lang} 
-                    currencySymbol="₹" 
-                    onUpdateTrip={setCurrentTrip}
-                  />
-                ) : (
-                  <div className="space-y-3">
-                    {currentTrip.itinerary && currentTrip.itinerary.length > 0 ? (
-                      currentTrip.itinerary.map((plan) => (
-                        <ItineraryCard key={plan.id} plan={plan} />
-                      ))
-                    ) : (
-                      <div className="text-center text-slate-400 text-xs py-4">{isMr ? 'अद्याप कोणतेही शेड्युल जोडलेले नाही.' : 'No schedule items added yet.'}</div>
+              </div>
+            )}
+
+            {/* TAB: GROUP SPLIT & UPI (LetsFG) */}
+            {(activePlanTab === 'overview' || activePlanTab === 'split') && (
+              <GroupSplitCalculator
+                trip={currentTrip}
+                onShowToast={showToast}
+              />
+            )}
+
+            {/* TAB: GROUP POLLS & DECISIONS (LetsFG) */}
+            {(activePlanTab === 'overview' || activePlanTab === 'polls') && (
+              <GroupDecisionPolls
+                trip={currentTrip}
+                onUpdateTrip={setCurrentTrip}
+              />
+            )}
+
+            {/* TAB: LOW FARE CALENDAR (Amadeus) */}
+            {(activePlanTab === 'overview' || activePlanTab === 'lowfare') && (
+              <LowFareCalendarWidget
+                origin={currentTrip.source || 'Mumbai (BOM)'}
+                destination={currentTrip.destination || 'Goa (GOI)'}
+              />
+            )}
+
+            {/* TAB: LIVE FLIGHT TRACKER (Amadeus) */}
+            {(activePlanTab === 'overview' || activePlanTab === 'tracker') && (
+              <LiveFlightTrackerWidget
+                source={currentTrip.source || 'Mumbai (BOM)'}
+                destination={currentTrip.destination || 'Goa (GOI)'}
+              />
+            )}
+
+            {/* TAB: MULTI-ORIGIN FLY TOGETHER (LetsFG) */}
+            {(activePlanTab === 'overview' || activePlanTab === 'multicity') && (
+              <MultiOriginSyncWidget
+                trip={currentTrip}
+                destination={currentTrip.destination || 'Goa (GOI)'}
+              />
+            )}
+
+            {/* TAB: SMART AI THEME PRESETS (Travel Assistant) */}
+            {(activePlanTab === 'overview' || activePlanTab === 'optimizer') && (
+              <SmartAiPromptPresets
+                trip={currentTrip}
+                onOpenAiPlanner={onOpenPlanner}
+                onApplyPreset={(title, suggested) => {
+                  if (suggested && suggested.length > 0) {
+                    const currentItin = currentTrip.itinerary || [];
+                    setCurrentTrip({
+                      ...currentTrip,
+                      itinerary: [...currentItin, ...suggested]
+                    });
+                    showToast(isMr ? `"${title}" ॲक्टिव्हिटी ट्रिपमध्ये जोडल्या!` : `Added "${title}" to your trip!`, 'success');
+                  }
+                }}
+              />
+            )}
+
+            {/* TAB: BUDGET DASHBOARD & ESTIMATOR */}
+            {(activePlanTab === 'overview' || activePlanTab === 'budget') && (
+              <div className="space-y-4">
+                <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-black text-slate-800 tracking-widest uppercase text-sm">{isMr ? 'बजेट डॅशबोर्ड' : 'Budget Dashboard'}</h3>
+                    {weatherData && (
+                      <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-bold border border-blue-100">
+                        <Thermometer className="w-3 h-3" />
+                        {weatherData.temp} - {weatherData.desc}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{isMr ? 'एकूण बजेट' : 'TOTAL BUDGET'}</span>
+                      <span className="text-xl font-black text-slate-800">₹{totalBudget}</span>
+                    </div>
+                    <div className="bg-rose-50 p-3 rounded-2xl border border-rose-100 flex flex-col justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 mb-1">{isMr ? 'एकूण खर्च' : 'TOTAL EXPENSE'}</span>
+                      <span className="text-xl font-black text-rose-700">₹{totalExpenses}</span>
+                    </div>
+                    <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 flex flex-col justify-between col-span-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">{isMr ? 'शिल्लक रक्कम' : 'TOTAL BALANCE'}</span>
+                      <span className="text-2xl font-black text-emerald-700">₹{totalBalance}</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-rose-500' : 'bg-emerald-500'}`}
+                      style={{ width: `${Math.min(expenseRatio, 100)}%` }}
+                    />
+                  </div>
+                  <div className="text-right text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                    {Math.round(expenseRatio)}% {isMr ? 'वापरले' : 'USED'}
+                  </div>
+                </div>
 
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                      <DollarSign className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">{isMr ? 'बजेट अंदाज' : 'Trip Budget'}</h3>
+                      <p className="text-[10px] font-bold text-slate-500">{isMr ? 'तुमच्या बजेटचा अंदाज लावा.' : 'Estimate and secure your trip budget.'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">{isMr ? 'अंदाजित बजेट' : 'Estimated Budget'}</span>
+                    <button 
+                      onClick={handleAutoCalculateAI}
+                      className="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 active:scale-95 transition-all uppercase tracking-widest"
+                    >
+                      <Zap className="w-3 h-3" /> {isMr ? 'AI द्वारे कॅल्क्युलेट' : 'Auto-Calculate via AI'}
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'प्रवास खर्च' : 'Transport'}</label>
+                      <input type="number" value={estTransport} onChange={e=>setEstTransport(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'हॉटेल / राहणे' : 'Accommodation'}</label>
+                      <input type="number" value={estAccommodation} onChange={e=>setEstAccommodation(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'खाद्यपदार्थ' : 'Food'}</label>
+                      <input type="number" value={estFood} onChange={e=>setEstFood(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-wider text-slate-700 block mb-1">{isMr ? 'खरेदी व इतर' : 'Shopping & Misc'}</label>
+                      <input type="number" value={estShopping} onChange={e=>setEstShopping(Number(e.target.value))} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-900 focus:outline-none focus:bg-white focus:border-red-500" />
+                    </div>
+                  </div>
+
+                  {(!currentTrip.transportMode || currentTrip.transportMode === 'road') && (
+                    <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Fuel className="w-4 h-4 text-amber-600" />
+                        <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">{isMr ? 'इंधन आणि टोल कॅल्क्युलेटर' : 'Fuel & Tolls (Round Trip)'}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        <input type="text" value={origin} onChange={e=>setOrigin(e.target.value)} placeholder={isMr ? "सुरुवात (Origin)" : "Origin"} className="bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-slate-900 placeholder-amber-600/60 focus:outline-none focus:border-amber-500" />
+                        <input type="text" value={destination} onChange={e=>setDestination(e.target.value)} placeholder={isMr ? "डेस्टिनेशन" : "Destination"} className="bg-white border border-amber-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-slate-900 placeholder-amber-600/60 focus:outline-none focus:border-amber-500" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div>
+                          <label className="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-1">{isMr ? 'मायलेज (km/l)' : 'Mileage (km/l)'}</label>
+                          <input type="number" value={mileage} onChange={e=>setMileage(e.target.value)} className="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-amber-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-1">{isMr ? 'इंधन दर (₹)' : 'Fuel Price (₹)'}</label>
+                          <input type="number" value={fuelPrice} onChange={e=>setFuelPrice(e.target.value)} className="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-amber-500" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black uppercase tracking-wider text-amber-800 block mb-1">{isMr ? 'टोल (₹)' : 'Tolls (₹)'}</label>
+                          <input type="number" value={toll} onChange={e=>setToll(e.target.value)} className="w-full bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-slate-900 focus:outline-none focus:border-amber-500" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-amber-900">{isMr ? 'एकूण:' : 'Total:'} ₹{Math.round(fuelCost)}</span>
+                        <button 
+                          onClick={() => setEstTransport(Math.round(fuelCost))}
+                          className="bg-amber-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold active:scale-95 transition-all"
+                        >
+                          {isMr ? 'ट्रान्सपोर्टमध्ये जोडा' : 'Apply to Transport'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={handleSaveBudget}
+                    className="w-full bg-emerald-600 text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-md"
+                  >
+                    {isMr ? 'बजेट सेव्ह करा' : 'Save Estimated Budget'}
+                  </button>
+                </div>
+              </div>
             )}
-            
+
+            {/* TAB: PACKING LIST (FloatTrip) */}
             {(activePlanTab === 'overview' || activePlanTab === 'packing') && (
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
@@ -561,12 +713,24 @@ export function PlanningScreen({
                   ))}
                 </div>
               </div>
-              
             )}
+
+            {/* Public APIs Destination Intelligence Widget */}
+            <div className="pt-2">
+              <PublicApisTripWidget destination={currentTrip.destination} lang={lang} />
+            </div>
+
           </div>
-        </div>
         </TabDashboardLayout>
       </div>
+
+      {/* FloatTrip Trip Summary Card Modal */}
+      <TripShareCardModal
+        trip={currentTrip}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        onShowToast={showToast}
+      />
     </div>
   );
 }

@@ -141,6 +141,53 @@ export const TransportOptions: React.FC<TransportOptionsProps> = ({
     );
   }
 
+  // Check if response contains valid schedule/stay items
+  const hasItemsInPayload = data && typeof data === 'object' && (
+    (Array.isArray(data.flights) && data.flights.length > 0) ||
+    (Array.isArray(data.buses) && data.buses.length > 0) ||
+    (Array.isArray(data.trains) && data.trains.length > 0) ||
+    (Array.isArray(data.hotels) && data.hotels.length > 0) ||
+    (Array.isArray(data.stays) && data.stays.length > 0) ||
+    (Array.isArray(data.flight_schedule) && data.flight_schedule.length > 0) ||
+    (Array.isArray(data.bus_schedule) && data.bus_schedule.length > 0) ||
+    (Array.isArray(data.train_schedule) && data.train_schedule.length > 0)
+  );
+
+  // Handle real API errors if live provider API returned an error and no fallback items were returned
+  const hasApiError = !hasItemsInPayload && data && typeof data === 'object' && !Array.isArray(data) && (data.error || data.success === false || data.errorCode || data.status === 'ERROR');
+  if (hasApiError) {
+    const errorText = data.error || data.message || data.details || "Live Provider API error";
+    const errorCode = data.errorCode || (data.status === 401 || String(errorText).includes('401') ? 401 : 'HTTP ERROR');
+    const source = data.source || `${mode.toUpperCase()} Live Provider API Gateway`;
+
+    return (
+      <div className="bg-rose-50/90 rounded-3xl p-6 border-2 border-rose-200 text-left space-y-4 shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 bg-rose-600 border border-rose-700 rounded-2xl flex items-center justify-center shrink-0 text-white font-black text-xl shadow-xs">
+            !
+          </div>
+          <div className="space-y-2 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h5 className="font-black text-rose-950 text-base flex items-center gap-2">
+                <span>{lang === 'mr' ? 'लाइव्ह API क्रेडेंशियल / सर्व्हर त्रुटी (Live API Error)' : 'Live API Provider Error'}</span>
+              </h5>
+              <span className="text-xs font-mono font-black text-rose-800 bg-rose-200/80 border border-rose-300 px-3 py-1 rounded-lg">
+                Status: {errorCode}
+              </span>
+            </div>
+            <div className="p-3.5 bg-white/90 border border-rose-200 rounded-2xl text-rose-900 text-xs font-mono font-bold leading-relaxed shadow-2xs break-words">
+              {errorText}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-rose-700 pt-1">
+              <span>Provider Gateway: {source}</span>
+              <span>{lang === 'mr' ? 'लाइव्ह API कनेक्शन अयशस्वी' : 'Live API Connection Failed'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Extract items array safely
   let items: any[] = [];
   let isPendingApi = false;

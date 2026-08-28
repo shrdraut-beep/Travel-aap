@@ -7,7 +7,7 @@ import { Wallet, PieChart, FileText, FileSpreadsheet, Download } from 'lucide-re
 import { ExpensePieChart } from '../ExpensePieChart';
 import { PDFLayoutWrapper } from '../pdf/PDFLayoutWrapper';
 import { TripRecap } from '../TripRecap';
-import * as XLSX from 'xlsx';
+import { exportToExcel } from '../../utils/excelUtils';
 
 interface ExpensesTabContainerProps {
   trip: TripGroup;
@@ -107,7 +107,7 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!trip.expenses || trip.expenses.length === 0) {
       alert('No expenses available to export.');
       return;
@@ -120,32 +120,28 @@ export const ExpensesTabContainer: React.FC<ExpensesTabContainerProps> = ({
         .join(', ');
 
       return {
-        'Sr. No': index + 1,
-        'Date': exp.date ? exp.date.substring(0, 10) : '',
-        'Title': exp.title,
-        'Category': exp.category,
-        'Amount': exp.amount,
-        'Paid By': payerName,
-        'Split With': splitNames
+        srNo: index + 1,
+        date: exp.date ? exp.date.substring(0, 10) : '',
+        title: exp.title,
+        category: exp.category,
+        amount: exp.amount,
+        paidBy: payerName,
+        splitWith: splitNames
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(reportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Trip Expenses');
-    
-    worksheet['!cols'] = [
-      { wch: 10 },
-      { wch: 14 },
-      { wch: 25 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 18 },
-      { wch: 30 }
+    const columns = [
+      { header: 'Sr. No', key: 'srNo', width: 10 },
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Title', key: 'title', width: 25 },
+      { header: 'Category', key: 'category', width: 15 },
+      { header: 'Amount', key: 'amount', width: 15 },
+      { header: 'Paid By', key: 'paidBy', width: 18 },
+      { header: 'Split With', key: 'splitWith', width: 30 }
     ];
 
     const filename = `${trip.name.replace(/\s+/g, '_')}_Expenses.xlsx`;
-    XLSX.writeFile(workbook, filename);
+    await exportToExcel(filename, 'Trip Expenses', columns, reportRows);
   };
 
 

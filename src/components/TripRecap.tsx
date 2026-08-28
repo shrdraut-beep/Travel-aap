@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Share2, Download, X, Sparkles, MapPin, Wallet, Calendar, Music, Instagram, LayoutGrid, Camera } from 'lucide-react';
+import { Play, Pause, Share2, Download, X, Compass as Sparkles, Compass, MapPin, Wallet, Calendar, Music, Instagram, LayoutGrid, Camera } from 'lucide-react';
 import { TripGroup, Expense, TripPlan, TripMemory } from '../types';
 import { shareAppOnWhatsApp } from '../utils/shareUtils';
 import { safeCopyToClipboard } from '../utils';
@@ -96,7 +96,7 @@ export const TripRecap: React.FC<TripRecapProps> = ({ trip, lang, onClose, curre
             animate={{ scale: 1, opacity: 1 }}
             className="w-32 h-32 bg-white/20 rounded-[40px] backdrop-blur-xl flex items-center justify-center border border-white/30"
           >
-            <Sparkles className="w-16 h-16 text-amber-300" />
+            <Compass className="w-16 h-16 text-amber-300 animate-spin-slow" />
           </motion.div>
           <div className="space-y-2">
             <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">

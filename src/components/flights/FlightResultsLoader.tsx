@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Plane, Sparkles, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Plane, Compass as Sparkles, ShieldCheck } from 'lucide-react';
 
 export interface FlightResultsLoaderProps {
   originCode?: string;

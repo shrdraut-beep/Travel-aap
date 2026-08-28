@@ -2,7 +2,7 @@ import { searchYouTube } from '../../services/api/youtubeService';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Sparkles, Fuel, CheckSquare, Siren, Settings, Share2, Globe, Shield, 
+  Compass as Sparkles, Fuel, CheckSquare, Siren, Settings, Share2, Globe, Shield, 
   HelpCircle, PhoneCall, Copy, Check, Music, Plus, Trash2, Play, 
   ExternalLink, FileText, Camera, Video, Compass, Wand2, ArrowRight
 } from 'lucide-react';

@@ -12,7 +12,9 @@ import {
   Sunrise,
   Sunset,
   X,
-  RotateCcw
+  RotateCcw,
+  RefreshCw,
+  CheckCircle2
 } from 'lucide-react';
 import { FlightResultsLoader } from '../components/flights/FlightResultsLoader';
 import { FlightCard } from '../components/booking/FlightCard';
@@ -20,15 +22,37 @@ import { DateFareStrip } from '../components/flights/DateFareStrip';
 import { FlightPriceCalendarModal } from '../components/flights/FlightPriceCalendarModal';
 import { FlightFilterSortModal, FilterState, SortOption } from '../components/flights/FlightFilterSortModal';
 import { BrandHeader } from '../components/common/BrandHeader';
+import { 
+  getCachedFlightResults, 
+  setCachedFlightResults, 
+  saveLastSearchParams, 
+  getLastSearchParams, 
+  clearFlightSearchCache 
+} from '../services/flightSearchCache';
 
 export const FlightsResultsPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as { searchParams: any };
   
-  const [currentSearchParams, setCurrentSearchParams] = useState<any>(state?.searchParams);
+  // Retrieve search params from location state or fallback to sessionStorage
+  const [currentSearchParams, setCurrentSearchParams] = useState<any>(() => {
+    return state?.searchParams || getLastSearchParams() || {
+      origin: 'BOM',
+      destination: 'DEL',
+      departDate: new Date().toISOString().split('T')[0],
+      adults: 1,
+      children: 0,
+      infants: 0,
+      cabinClass: 'Economy',
+      tripType: 'oneWay',
+      slices: [{ origin: 'BOM', destination: 'DEL', departure_date: new Date().toISOString().split('T')[0] }]
+    };
+  });
+
   const [offers, setOffers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFromCache, setIsFromCache] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -41,28 +65,58 @@ export const FlightsResultsPage: React.FC = () => {
     maxPrice: 1000000
   });
 
-  // Sync state if navigation changes
+  // Sync state if location.state changes
   useEffect(() => {
     if (state?.searchParams) {
       setCurrentSearchParams(state.searchParams);
+      saveLastSearchParams(state.searchParams);
     }
   }, [state]);
 
   const handleRetry = () => {
     setError(null);
     setIsLoading(true);
-    fetchFlights(currentSearchParams);
+    fetchFlights(currentSearchParams, true);
   };
 
-  const fetchFlights = async (paramsToUse?: any) => {
+  const fetchFlights = async (paramsToUse?: any, forceRefresh: boolean = false) => {
     const params = paramsToUse || currentSearchParams;
     if (!params) {
       setError("No search parameters provided.");
       setIsLoading(false);
       return;
     }
+
+    // Save active search params for back navigation recovery
+    saveLastSearchParams(params);
+
+    // 1. Check local cache if not forcing refresh
+    if (!forceRefresh) {
+      const cached = getCachedFlightResults(params);
+      if (cached && Array.isArray(cached.flights) && cached.flights.length > 0) {
+        console.log("⚡ Flight search results loaded instantly from local cache");
+        setOffers(cached.flights);
+        setIsFromCache(true);
+        setIsLoading(false);
+        setError(null);
+
+        // Update slider limit
+        const prices = cached.flights.map((f: any) => getFlightMinPrice(f)).filter((p: number) => p > 0 && isFinite(p));
+        if (prices.length > 0) {
+          const maxP = Math.max(...prices);
+          setFilters(prev => ({
+            ...prev,
+            maxPrice: Math.ceil(maxP / 500) * 500
+          }));
+        }
+        return;
+      }
+    }
+
+    // 2. No cache or force refresh -> Make Live API request
     setIsLoading(true);
     setError(null);
+    setIsFromCache(false);
     try {
       const response = await fetch('/api/flights/search', {
         method: 'POST',
@@ -89,11 +143,11 @@ export const FlightsResultsPage: React.FC = () => {
         const flightList = data.flights || [];
         setOffers(flightList);
 
+        // Save into local cache for 15 minutes
+        setCachedFlightResults(params, flightList);
+
         // Calculate max price limit from incoming offers to initialize slider
-        const prices = flightList.map((f: any) => {
-          const offerPrices = (f.offers || []).map((o: any) => parseFloat(o.total_amount)).filter((p: number) => !isNaN(p));
-          return offerPrices.length > 0 ? Math.min(...offerPrices) : parseFloat(f.total_amount) || 0;
-        }).filter((p: number) => p > 0);
+        const prices = flightList.map((f: any) => getFlightMinPrice(f)).filter((p: number) => p > 0 && isFinite(p));
 
         if (prices.length > 0) {
           const maxP = Math.max(...prices);
@@ -113,10 +167,16 @@ export const FlightsResultsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchFlights(currentSearchParams);
+    fetchFlights(currentSearchParams, false);
   }, [currentSearchParams]);
 
-  const handleGoBack = () => navigate(-1);
+  const handleGoBack = () => {
+    if (window.history.length > 1 && window.history.state?.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
 
   // When user clicks another date on Date Strip or Calendar Modal
   const handleDateChange = (newDate: string) => {
@@ -144,48 +204,83 @@ export const FlightsResultsPage: React.FC = () => {
 
   // Helper extractors
   const getFlightMinPrice = (flight: any): number => {
-    const offerPrices = (flight.offers || [])
+    if (typeof flight?.price === 'number' && !isNaN(flight.price)) return flight.price;
+    if (flight?.price && !isNaN(parseFloat(flight.price))) return parseFloat(flight.price);
+
+    const offerPrices = (flight?.offers || [])
       .map((o: any) => parseFloat(o.total_amount))
       .filter((p: number) => !isNaN(p) && isFinite(p));
     
     if (offerPrices.length > 0) return Math.min(...offerPrices);
     
-    const topLevelPrice = parseFloat(flight.total_amount);
-    return (!isNaN(topLevelPrice) && isFinite(topLevelPrice)) ? topLevelPrice : Infinity;
+    const topLevelPrice = parseFloat(flight?.total_amount);
+    return (!isNaN(topLevelPrice) && isFinite(topLevelPrice)) ? topLevelPrice : 0;
   };
 
   const getFlightDurationMinutes = (flight: any): number => {
+    if (typeof flight?.durationMinutes === 'number') return flight.durationMinutes;
+    if (typeof flight?.duration === 'string') {
+      const hMatch = flight.duration.match(/(\d+)\s*h/i);
+      const mMatch = flight.duration.match(/(\d+)\s*m/i);
+      if (hMatch || mMatch) {
+        const h = hMatch ? parseInt(hMatch[1], 10) : 0;
+        const m = mMatch ? parseInt(mMatch[1], 10) : 0;
+        return h * 60 + m;
+      }
+      const ptMatch = flight.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/i);
+      if (ptMatch) {
+        const h = parseInt(ptMatch[1] || '0', 10);
+        const m = parseInt(ptMatch[2] || '0', 10);
+        return h * 60 + m;
+      }
+    }
     const firstSlice = flight?.slices?.[0];
-    if (!firstSlice?.duration) return 9999;
-    const match = firstSlice.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-    if (!match) return 9999;
-    const hours = parseInt(match[1] || '0', 10);
-    const mins = parseInt(match[2] || '0', 10);
-    return hours * 60 + mins;
+    if (firstSlice?.duration) {
+      const match = firstSlice.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/i);
+      if (match) {
+        const hours = parseInt(match[1] || '0', 10);
+        const mins = parseInt(match[2] || '0', 10);
+        return hours * 60 + mins;
+      }
+    }
+    return 120;
   };
 
   const getFlightDepartTime = (flight: any): number => {
+    if (flight?.departureTime) {
+      const t = new Date(flight.departureTime).getTime();
+      if (!isNaN(t)) return t;
+    }
     const seg = flight?.slices?.[0]?.segments?.[0];
-    if (!seg?.departing_at) return 0;
-    return new Date(seg.departing_at).getTime();
+    if (seg?.departing_at) return new Date(seg.departing_at).getTime();
+    return 0;
   };
 
   const getFlightArriveTime = (flight: any): number => {
+    if (flight?.arrivalTime) {
+      const t = new Date(flight.arrivalTime).getTime();
+      if (!isNaN(t)) return t;
+    }
     const segments = flight?.slices?.[0]?.segments || [];
     const lastSeg = segments[segments.length - 1];
-    if (!lastSeg?.arriving_at) return 0;
-    return new Date(lastSeg.arriving_at).getTime();
+    if (lastSeg?.arriving_at) return new Date(lastSeg.arriving_at).getTime();
+    return 0;
   };
 
   const getFlightStops = (flight: any): number => {
+    if (typeof flight?.stops === 'number') return flight.stops;
     const segments = flight?.slices?.[0]?.segments || [];
     return Math.max(0, segments.length - 1);
   };
 
   const getFlightTimeSlot = (flight: any): string => {
-    const seg = flight?.slices?.[0]?.segments?.[0];
-    if (!seg?.departing_at) return 'morning';
-    const hour = new Date(seg.departing_at).getHours();
+    let timeStr = flight?.departureTime;
+    if (!timeStr) {
+      const seg = flight?.slices?.[0]?.segments?.[0];
+      timeStr = seg?.departing_at;
+    }
+    if (!timeStr) return 'morning';
+    const hour = new Date(timeStr).getHours();
     if (hour < 6) return 'early_morning';
     if (hour < 12) return 'morning';
     if (hour < 18) return 'afternoon';
@@ -193,6 +288,7 @@ export const FlightsResultsPage: React.FC = () => {
   };
 
   const getFlightAirlineName = (flight: any): string => {
+    if (flight?.airline) return flight.airline;
     return flight?.slices?.[0]?.segments?.[0]?.marketing_carrier?.name || flight?.owner?.name || 'Airline';
   };
 
@@ -208,8 +304,8 @@ export const FlightsResultsPage: React.FC = () => {
       if (price > maxP && price < 1000000) maxP = price;
 
       const carrier = flight?.slices?.[0]?.segments?.[0]?.marketing_carrier || flight?.owner || {};
-      const name = carrier.name || 'Airline';
-      const code = carrier.iata_code || '';
+      const name = flight.airline || carrier.name || 'Airline';
+      const code = flight.airlineCode || carrier.iata_code || '';
       const logo = carrier.logo_symbol_url;
 
       if (!airlineMap[name]) {
@@ -350,6 +446,27 @@ export const FlightsResultsPage: React.FC = () => {
         destCode={destCode}
         onOpenCalendarModal={() => setIsCalendarModalOpen(true)}
       />
+
+      {/* Local Cache Status Banner */}
+      {isFromCache && !isLoading && (
+        <div className="bg-emerald-50/90 border-b border-emerald-200/80 px-3 py-1.5 font-[Inter]">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-2 text-xs text-emerald-900 font-medium">
+            <div className="flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
+              <span><strong>Local Cache Active:</strong> Displaying saved search results for {originCode} ➔ {destCode} ({departDate}).</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleRetry()}
+              className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-700 hover:text-emerald-900 bg-emerald-100/80 hover:bg-emerald-200 px-2.5 py-0.5 rounded-lg border border-emerald-300/60 transition-all cursor-pointer shrink-0"
+              title="Fetch fresh live prices from Travelport GDS"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span>Refresh Live</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 3. Quick Filter & Sort Toolbar */}
       {!isLoading && offers.length > 0 && (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLanguage } from '../../context/LanguageContext';
-import { Plane, Sparkles, User, Briefcase, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Plane, Compass, User, Briefcase, ShieldCheck, ArrowRight } from 'lucide-react';
 
 interface LoginScreenProps {
   isAdminLogin?: boolean;
@@ -53,7 +53,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <div>
             <p className="text-white/70 text-xs tracking-[0.2em] font-bold uppercase font-[Poppins]">RouTripO</p>
             <h1 className="text-white text-3xl font-bold font-[Poppins] mt-2 flex items-center gap-2">
-              Welcome back <Sparkles className="w-6 h-6 text-white/80" />
+              Welcome back <Compass className="w-6 h-6 text-white/80" />
             </h1>
           </div>
           <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center ring-1 ring-white/30 shadow-xl">

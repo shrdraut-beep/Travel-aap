@@ -8,10 +8,27 @@ export const loadRazorpayScript = () => {
   });
 };
 
+export const initiateContactUnlockPayment = async (
+  amount: number,
+  tripRequestId: string,
+  onSuccess: (response: any) => void,
+  onFailure: (error: any) => void
+) => {
+  // SIMULATION for AI Studio environment since we might not have a real Razorpay key
+  // In a real app, this would use Razorpay like initiateRazorpayPayment
+  setTimeout(() => {
+    onSuccess({
+      razorpay_payment_id: 'pay_' + Date.now(),
+      razorpay_order_id: 'order_' + Date.now(),
+      tripRequestId
+    });
+  }, 1500);
+};
+
 export const initiateRazorpayPayment = async (
   amount: number,
   bookingId: string,
-  createBookingData: any, // Pass booking data here
+  createBookingData: any,
   onSuccess: (response: any) => void,
   onFailure: (error: any) => void
 ) => {

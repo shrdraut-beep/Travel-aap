@@ -8,7 +8,7 @@ import {
   Plane, 
   Clock, 
   Luggage, 
-  Sparkles, 
+  Compass as Sparkles, 
   ChevronRight, 
   Info,
   Users,

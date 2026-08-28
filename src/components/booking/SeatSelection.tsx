@@ -6,7 +6,7 @@ import {
   Check, 
   Users, 
   Plane, 
-  Sparkles, 
+  Compass as Sparkles, 
   CheckCircle2,
   ChevronRight,
   AlertCircle

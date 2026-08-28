@@ -2,7 +2,7 @@ import { ScrollView } from '../ScrollView';
 import { safeStorage } from '../../utils/storage';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Check, Sparkles, Navigation } from 'lucide-react';
+import { Globe, Check, Compass as Sparkles, Compass, Navigation } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const LANGUAGE_LIST = [
@@ -59,7 +59,7 @@ export const LanguageOnboardingModal: React.FC<LanguageOnboardingModalProps> = (
             
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 shadow-inner">
-                <Sparkles className="w-8 h-8 text-amber-100 animate-pulse" />
+                <Compass className="w-8 h-8 text-amber-100 animate-pulse" />
               </div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-[10px] font-extrabold uppercase tracking-widest text-amber-100 mb-2">
                 <span>🤖 Per-App Language Preferences</span>

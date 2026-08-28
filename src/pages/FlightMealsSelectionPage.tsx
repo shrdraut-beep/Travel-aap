@@ -5,7 +5,7 @@ import {
   Check, 
   Utensils, 
   ChevronRight, 
-  Sparkles, 
+  Compass as Sparkles, 
   Info, 
   Plus, 
   Minus,
@@ -249,7 +249,7 @@ export const FlightMealsSelectionPage: React.FC = () => {
         {/* Complimentary Notice or Info Banner */}
         {isComplimentaryMeals ? (
           <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 flex items-center gap-3 text-emerald-900">
-            <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" />
+            <Utensils className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
               <h4 className="font-extrabold text-sm">Complimentary Hot Meals Included</h4>
               <p className="text-xs text-emerald-700">

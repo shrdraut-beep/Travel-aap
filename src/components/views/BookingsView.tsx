@@ -18,7 +18,7 @@ import {
   Car, 
   X, 
   Tag, 
-  Sparkles, 
+  Compass as Sparkles, 
   Star, 
   Clock, 
   ShieldCheck, 
@@ -93,7 +93,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
 
       const inventoryItems: BookingItemPayload[] = [
         ...pkgs.map((pkg: any) => ({
-          id: pkg.id,
+          id: `pkg-${pkg.id}`,
           title: pkg.title,
           vertical: 'package' as const,
           subtitle: `${pkg.durationDays}D/${pkg.durationNights}N • ${pkg.destination}`,
@@ -104,7 +104,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           meta: { rating: pkg.rating, reviews: pkg.reviewsCount }
         })),
         ...flights.map((fl: any) => ({
-          id: fl.id,
+          id: `fl-${fl.id}`,
           title: `${fl.airline} (${fl.flightNumber})`,
           vertical: 'flight' as const,
           subtitle: `${fl.origin} (${fl.originCode}) → ${fl.destination} (${fl.destinationCode})`,
@@ -116,7 +116,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           meta: { stops: fl.stops, cabin: fl.cabinClass }
         })),
         ...hotels.map((ht: any) => ({
-          id: ht.id,
+          id: `ht-${ht.id}`,
           title: ht.name,
           vertical: 'hotel' as const,
           subtitle: `${ht.city}, ${ht.location}`,
@@ -127,7 +127,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           meta: { rating: ht.rating, amenities: ht.amenities }
         })),
         ...trains.map((tr: any) => ({
-          id: tr.id,
+          id: `tr-${tr.id}`,
           title: `${tr.trainName} (#${tr.trainNumber})`,
           vertical: 'train' as const,
           subtitle: `${tr.origin} (${tr.originCode}) → ${tr.destination} (${tr.destinationCode})`,
@@ -139,7 +139,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           meta: { days: tr.runsOn?.join(', ') || 'All Days' }
         })),
         ...cars.map((cr: any) => ({
-          id: cr.id,
+          id: `cr-${cr.id}`,
           title: `${cr.brand} ${cr.model}`,
           vertical: 'car' as const,
           subtitle: `${cr.category} • ${cr.fuelType} • ${cr.transmission}`,
@@ -150,7 +150,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           meta: { seats: cr.seats, rating: cr.rating }
         })),
         ...cabs.map((cb: any) => ({
-          id: cb.id,
+          id: `cb-${cb.id}`,
           title: `${cb.cabType} (${cb.carModel})`,
           vertical: 'cab' as const,
           subtitle: `${cb.driverName} • Includes Driver & AC`,
@@ -161,7 +161,7 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           meta: { rating: cb.driverRating, perKm: `₹${cb.ratePerKm}/km` }
         })),
         ...buses.map((bs: any) => ({
-          id: bs.id,
+          id: `bs-${bs.id}`,
           title: `${bs.operatorName} (${bs.busType})`,
           vertical: 'bus' as const,
           subtitle: `${bs.origin} → ${bs.destination}`,
@@ -198,12 +198,12 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
         </div>
       )}
 
-      {/* 7 Verticals Navigation Bar */}
+      {/* 4 Core Travel Verticals Navigation Bar */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] font-mono tracking-widest text-indigo-600 uppercase font-black">
-              {isMr ? 'सर्वसमावेशक ट्रॅव्हल सेवा' : '7 Core Travel Verticals'}
+              {isMr ? 'ऑरिजिनल ट्रॅव्हल सेवा' : 'Original Live Travel Verticals'}
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900">
               {isMr ? 'राऊट्रिपो ट्रॅव्हल हब' : 'RouTriO Travel Services'}
@@ -211,12 +211,12 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           </div>
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 rounded-full border border-emerald-200 text-xs font-bold">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Zero-Trust Escrow Payments</span>
+            <span>Secure Protected Payments</span>
           </div>
         </div>
 
-        {/* 7 Vertical Cards Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        {/* 4 Core Vertical Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* 1. Tour Packages */}
           <button
             type="button"
@@ -237,23 +237,11 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
           >
             <span className="text-3xl group-hover:scale-110 transition-transform">✈️</span>
             <span className="font-extrabold text-[11px] uppercase tracking-wider text-center line-clamp-1">
-              {isMr ? 'विमान' : 'Flights'}
+              {isMr ? 'विमान (Duffel Live)' : 'Flights (Live)'}
             </span>
           </button>
 
-          {/* 3. Hotels */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('hotels')}
-            className="p-4 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all shadow-xs hover:shadow-md bg-gradient-to-br from-orange-50 to-amber-50/50 border border-orange-200 hover:border-orange-300 active:scale-95 text-slate-800 cursor-pointer group"
-          >
-            <span className="text-3xl group-hover:scale-110 transition-transform">🏨</span>
-            <span className="font-extrabold text-[11px] uppercase tracking-wider text-center line-clamp-1">
-              {isMr ? 'हॉटेल्स' : 'Hotels'}
-            </span>
-          </button>
-
-          {/* 4. Trains */}
+          {/* 3. Trains */}
           <button
             type="button"
             onClick={() => setActiveModal('trains')}
@@ -265,35 +253,11 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
             </span>
           </button>
 
-          {/* 5. Self-Drive Cars */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('cars')}
-            className="p-4 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all shadow-xs hover:shadow-md bg-gradient-to-br from-teal-50 to-cyan-50/50 border border-teal-200 hover:border-teal-300 active:scale-95 text-slate-800 cursor-pointer group"
-          >
-            <span className="text-3xl group-hover:scale-110 transition-transform">🚗</span>
-            <span className="font-extrabold text-[11px] uppercase tracking-wider text-center line-clamp-1">
-              {isMr ? 'कार रेंटल्स' : 'Self-Drive'}
-            </span>
-          </button>
-
-          {/* 6. Cabs & Taxis */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('cabs')}
-            className="p-4 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all shadow-xs hover:shadow-md bg-gradient-to-br from-yellow-50 to-amber-50/50 border border-yellow-200 hover:border-yellow-300 active:scale-95 text-slate-800 cursor-pointer group"
-          >
-            <span className="text-3xl group-hover:scale-110 transition-transform">🚕</span>
-            <span className="font-extrabold text-[11px] uppercase tracking-wider text-center line-clamp-1">
-              {isMr ? 'कॅब्स / टॅक्सी' : 'Cabs & Taxi'}
-            </span>
-          </button>
-
-          {/* 7. Buses */}
+          {/* 4. Buses */}
           <button
             type="button"
             onClick={() => setActiveModal('buses')}
-            className="col-span-2 sm:col-span-1 p-4 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all shadow-xs hover:shadow-md bg-gradient-to-br from-rose-50 to-pink-50/50 border border-rose-200 hover:border-rose-300 active:scale-95 text-slate-800 cursor-pointer group"
+            className="p-4 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all shadow-xs hover:shadow-md bg-gradient-to-br from-rose-50 to-pink-50/50 border border-rose-200 hover:border-rose-300 active:scale-95 text-slate-800 cursor-pointer group"
           >
             <span className="text-3xl group-hover:scale-110 transition-transform">🚌</span>
             <span className="font-extrabold text-[11px] uppercase tracking-wider text-center line-clamp-1">
@@ -388,9 +352,9 @@ export const BookingsView: React.FC<BookingsViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredItems.map((item) => (
+          {filteredItems.map((item, idx) => (
             <div
-              key={item.id}
+              key={`${item.vertical}-${item.id}-${idx}`}
               className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col justify-between group"
             >
               {/* Optional Photo or Top Icon Bar */}

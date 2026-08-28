@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Building, Car, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Building, Car, Edit2, Trash2, CheckCircle, XCircle, Sparkles, Link2, Hotel, ShieldCheck } from 'lucide-react';
+import { FastTrackHotelOnboardingModal } from '../routripo/FastTrackHotelOnboardingModal';
 
 export type InventoryType = 'Hotel Room' | 'Cab';
 
@@ -12,6 +13,8 @@ export interface InventoryItem {
   availability: string;
   status: 'Active' | 'Sold Out' | 'pending_approval' | 'suspended';
   photo?: string;
+  policyType?: 'REFUNDABLE' | 'NON_REFUNDABLE';
+  importSource?: string;
   // Cab compliance fields
   driverAadhar?: string;
   drivingLicense?: string;
@@ -25,15 +28,18 @@ export interface InventoryItem {
 }
 
 export const PartnerInventoryManager: React.FC = () => {
+  const [isFastTrackOpen, setIsFastTrackOpen] = useState(false);
   const [inventoryList, setInventoryList] = useState<InventoryItem[]>([
     {
       id: 'inv-1',
       type: 'Hotel Room',
-      title: 'Deluxe AC Room',
-      price: 2500,
-      location: 'Goa',
+      title: 'Deluxe AC King Room (Grand Heritage Stay)',
+      price: 2800,
+      location: 'Lonavala',
       availability: 'Available All Year',
-      status: 'pending_approval',
+      status: 'Active',
+      policyType: 'REFUNDABLE',
+      importSource: 'Booking.com Fast-Track'
     },
     {
       id: 'inv-2',
@@ -120,8 +126,59 @@ export const PartnerInventoryManager: React.FC = () => {
     setInventoryList((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const handleListingCreated = (newListing: any) => {
+    if (!newListing) return;
+    const firstRoom = newListing.roomCategories?.[0];
+    const item: InventoryItem = {
+      id: newListing.id || `inv-${Date.now()}`,
+      type: 'Hotel Room',
+      title: `${firstRoom?.name || 'Deluxe Room'} (${newListing.propertyName})`,
+      price: firstRoom?.basePricePerNight || 2800,
+      location: newListing.city || 'India',
+      availability: 'Available All Year',
+      status: 'Active',
+      policyType: newListing.refundType || 'REFUNDABLE',
+      importSource: newListing.platformDetected || 'Fast-Track Import'
+    };
+    setInventoryList([item, ...inventoryList]);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 overflow-y-auto pb-32 max-h-[80vh] [&::-webkit-scrollbar]:hidden">
+      {/* FAST-TRACK HOTEL ONBOARDING HERO BANNER */}
+      <div className="bg-gradient-to-r from-[#1A365D] via-slate-900 to-indigo-950 rounded-3xl p-5 text-white shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-slate-700/50">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-sky-300 shrink-0 border border-white/20">
+            <Hotel className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                White-Hat Compliant
+              </span>
+              <span className="text-[10px] font-extrabold text-slate-300">
+                Airbnb / Booking.com / MMT
+              </span>
+            </div>
+            <h3 className="text-base font-black text-white">
+              Fast-Track Hotel & Stay Onboarding
+            </h3>
+            <p className="text-xs text-slate-300 font-medium max-w-xl">
+              1-Click public URL factual parser with verified legal owner consent or structured manual setup wizard.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsFastTrackOpen(true)}
+          className="px-4 py-2.5 bg-gradient-to-r from-sky-400 to-indigo-400 hover:from-sky-300 hover:to-indigo-300 text-slate-950 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 shadow-md shrink-0 active:scale-95"
+        >
+          <Sparkles className="w-4 h-4 text-amber-950" />
+          <span>Launch Fast-Track Import</span>
+        </button>
+      </div>
+
       {/* Header & Add Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-xs">
         <div>
@@ -132,13 +189,23 @@ export const PartnerInventoryManager: React.FC = () => {
           <p className="text-xs text-slate-500 mt-0.5">Manage your individual rooms and transport vehicles.</p>
         </div>
 
-        <button
-          onClick={() => setIsFormOpen(!isFormOpen)}
-          className="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-2xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer flex items-center gap-2 shadow-md shadow-pink-500/20"
-        >
-          {isFormOpen ? <XCircle className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          <span>{isFormOpen ? 'Cancel' : 'Add New Inventory'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsFastTrackOpen(true)}
+            className="px-3.5 py-2.5 bg-[#1A365D] text-white rounded-2xl text-xs font-bold hover:bg-[#2A4A7F] transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+          >
+            <Link2 className="w-3.5 h-3.5 text-sky-300" />
+            <span>URL Import</span>
+          </button>
+
+          <button
+            onClick={() => setIsFormOpen(!isFormOpen)}
+            className="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-pink-500 text-white rounded-2xl text-xs font-bold hover:opacity-95 transition-opacity cursor-pointer flex items-center gap-2 shadow-md shadow-pink-500/20"
+          >
+            {isFormOpen ? <XCircle className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            <span>{isFormOpen ? 'Cancel' : 'Add Inventory'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Add New Inventory Form */}
@@ -360,6 +427,13 @@ export const PartnerInventoryManager: React.FC = () => {
           })
         )}
       </div>
+
+      {/* Fast Track Hotel Onboarding Modal */}
+      <FastTrackHotelOnboardingModal
+        isOpen={isFastTrackOpen}
+        onClose={() => setIsFastTrackOpen(false)}
+        onListingCreated={handleListingCreated}
+      />
     </div>
   );
 };

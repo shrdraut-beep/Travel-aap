@@ -8,7 +8,8 @@ import {
   Plane, 
   Clock, 
   Luggage, 
-  Sparkles, 
+  Compass as Sparkles, 
+  CheckCircle2,
   ChevronRight,
   Info,
   Users,
@@ -209,7 +210,7 @@ export const FlightSeatSelectionPage: React.FC = () => {
         rightElement={
           seatsIncludedFree ? (
             <span className="text-[10px] font-black bg-emerald-500/25 text-white border border-emerald-300/40 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-emerald-200" /> Free Seats Included
+              <CheckCircle2 className="w-3 h-3 text-emerald-200" /> Free Seats Included
             </span>
           ) : undefined
         }

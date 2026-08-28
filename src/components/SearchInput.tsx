@@ -238,6 +238,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     return matched.slice(0, 10);
   }, [debouncedQuery, baseDataset]);
 
+  const displayResults = useMemo<LocationItem[]>(() => {
+    return filteredResults.slice(0, 15);
+  }, [filteredResults]);
+
   // Click outside listener to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -393,7 +397,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
                'Railway Stations & Cities'}
             </span>
             <span className="text-amber-600 font-mono font-bold">
-              {filteredResults.length} options
+              {displayResults.length} options
             </span>
           </div>
 
@@ -416,8 +420,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
             </button>
           )}
 
-          {filteredResults.length > 0 ? (
-            filteredResults.map((item, index) => (
+          {displayResults.length > 0 ? (
+            displayResults.map((item, index) => (
               <button
                 key={`${item.code}-${item.city}-${index}`}
                 type="button"

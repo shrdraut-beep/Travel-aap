@@ -4,7 +4,7 @@ import {
   ArrowLeft, 
   Luggage, 
   ChevronRight, 
-  Sparkles, 
+  Compass as Sparkles, 
   Info, 
   Plus, 
   Minus,

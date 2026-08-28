@@ -3,7 +3,7 @@ import {
   Calendar as CalendarIcon, 
   ChevronLeft, 
   ChevronRight, 
-  Sparkles,
+  Compass as Sparkles,
   TrendingDown
 } from 'lucide-react';
 import { getDailyFlightPrices, DailyPriceInfo } from '../../utils/fareCalendarUtils';

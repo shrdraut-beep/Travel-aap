@@ -1,4 +1,4 @@
-import { fetchLiveFlights, fetchLiveTrains, getTravelCacheKey } from './LiveTravelAPI';
+import { fetchLiveFlights, fetchLiveTrains, fetchLiveBuses, getTravelCacheKey } from './LiveTravelAPI';
 import flightSchedules from '../data/flightSchedules.json';
 import trainNames from '../data/trainname.json';
 import airports from '../data/airports.json';
@@ -168,12 +168,17 @@ export async function fetchTravelDataFromAI(
         message: liveRes.message
       };
     } else {
+      const liveRes = await fetchLiveBuses(origin, destination, date);
       return {
-        data: { buses: [], status: "NO_DATA", message: "Bus API integration required." },
-        isCached: false,
+        data: {
+          buses: liveRes.data || [],
+          status: liveRes.status,
+          message: liveRes.message
+        },
+        isCached: !!liveRes.isCached,
         cacheKey,
-        status: "NO_DATA",
-        message: "Bus API integration required."
+        status: liveRes.status,
+        message: liveRes.message
       };
     }
   } catch (error) {

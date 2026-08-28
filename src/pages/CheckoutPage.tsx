@@ -13,7 +13,7 @@ import {
   Calendar,
   Lock,
   Luggage,
-  Sparkles,
+  Compass as Sparkles,
   Share2,
   Clock,
   UserCheck

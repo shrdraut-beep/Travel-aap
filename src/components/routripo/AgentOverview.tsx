@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Inbox, Ticket, Banknote, PackagePlus, MessageSquare, LayoutDashboard, Sparkles } from "lucide-react";
+import { Inbox, Ticket, Banknote, PackagePlus, MessageSquare, LayoutDashboard, Compass as Sparkles } from "lucide-react";
 import { Card, RippleButton, SectionTitle, TopBar, useScrolled, Stagger } from "./SharedUI"; // Reusing components
 
 export function AgentOverview({ setActive, onLogout, onSOS }: { setActive: (tab: string) => void, onLogout: () => void, onSOS: () => void }) {

@@ -5,11 +5,11 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Calendar as CalendarIcon, 
-  Sparkles,
+  Compass as Sparkles,
   Check,
   Plane
 } from 'lucide-react';
-import { getMonthCalendarDays, DailyPriceInfo } from '../../utils/fareCalendarUtils';
+import { getMonthCalendarDays, DailyPriceInfo, fetchApiFareCalendar } from '../../utils/fareCalendarUtils';
 
 export interface FlightPriceCalendarModalProps {
   isOpen: boolean;
@@ -96,8 +96,30 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
     return getMonthCalendarDays(nextMonthYear, nextMonthIdx, originCode, destCode);
   }, [nextMonthYear, nextMonthIdx, originCode, destCode]);
 
+  // Live API Fares State
+  const [apiFaresMap, setApiFaresMap] = useState<Record<string, DailyPriceInfo>>({});
+  const [avgPriceInfo, setAvgPriceInfo] = useState<number>(0);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      // Fetch current month live fare data
+      fetchApiFareCalendar(originCode, destCode, currentYear, currentMonth).then(res => {
+        if (res.dailyFares && Object.keys(res.dailyFares).length > 0) {
+          setApiFaresMap(prev => ({ ...prev, ...res.dailyFares }));
+          if (res.averagePrice) setAvgPriceInfo(res.averagePrice);
+        }
+      });
+      // Fetch next month live fare data
+      fetchApiFareCalendar(originCode, destCode, nextMonthYear, nextMonthIdx).then(res => {
+        if (res.dailyFares && Object.keys(res.dailyFares).length > 0) {
+          setApiFaresMap(prev => ({ ...prev, ...res.dailyFares }));
+        }
+      });
+    }
+  }, [isOpen, currentYear, currentMonth, originCode, destCode, nextMonthYear, nextMonthIdx]);
+
   const handleConfirm = () => {
-    const matchedDay = [...days, ...nextMonthDays].find(d => d?.dateStr === tempSelected);
+    const matchedDay = apiFaresMap[tempSelected] || [...days, ...nextMonthDays].find(d => d?.dateStr === tempSelected);
     onSelectDate(tempSelected, matchedDay?.price);
     onClose();
   };
@@ -107,8 +129,6 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
     month: number,
     monthDays: Array<DailyPriceInfo | null>
   ) => {
-    const todayStr = new Date().toISOString().split('T')[0];
-
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -133,18 +153,31 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
 
         {/* Date cells grid */}
         <div className="grid grid-cols-7 gap-1.5">
-          {monthDays.map((day, idx) => {
-            if (!day) {
+          {monthDays.map((baseDay, idx) => {
+            if (!baseDay) {
               return <div key={`empty-${idx}`} className="h-14 sm:h-16" />;
             }
 
+            const day = apiFaresMap[baseDay.dateStr] || baseDay;
             const isSelected = day.dateStr === tempSelected;
             const isMinDisabled = minDate ? day.dateStr < minDate : false;
             const isDisabled = day.isPast || isMinDisabled;
 
-            let priceColor = 'text-slate-500';
-            if (day.isCheapest) priceColor = 'text-emerald-700 font-bold';
-            if (day.isExpensive) priceColor = 'text-rose-600 font-semibold';
+            const category = day.category || (day.isCheapest ? 'low' : day.isExpensive ? 'high' : 'average');
+
+            let priceColor = 'text-amber-700 font-semibold';
+            let bgStyle = 'bg-amber-50/50 border-amber-200/60 hover:bg-amber-100/60';
+            let dotBadge = 'bg-amber-500';
+
+            if (category === 'low') {
+              priceColor = 'text-emerald-700 font-bold';
+              bgStyle = 'bg-emerald-50/80 border-emerald-200 hover:bg-emerald-100/80';
+              dotBadge = 'bg-emerald-500';
+            } else if (category === 'high') {
+              priceColor = 'text-rose-700 font-semibold';
+              bgStyle = 'bg-rose-50/50 border-rose-200/60 hover:bg-rose-100/60';
+              dotBadge = 'bg-rose-500';
+            }
 
             return (
               <button
@@ -154,12 +187,12 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
                 onClick={() => {
                   setTempSelected(day.dateStr);
                 }}
-                className={`h-14 sm:h-16 rounded-xl flex flex-col items-center justify-center p-1 transition-all relative cursor-pointer ${
+                className={`h-14 sm:h-16 rounded-xl flex flex-col items-center justify-center p-1 transition-all relative cursor-pointer border ${
                   isDisabled
-                    ? 'opacity-25 cursor-not-allowed bg-slate-50/50'
+                    ? 'opacity-25 cursor-not-allowed bg-slate-50/50 border-transparent'
                     : isSelected
-                    ? 'bg-[#e11d48] text-white shadow-md scale-102 ring-2 ring-[#e11d48]/40'
-                    : 'hover:bg-pink-50/60 bg-white border border-slate-100 hover:border-pink-200'
+                    ? 'bg-[#e11d48] text-white shadow-md scale-102 ring-2 ring-[#e11d48]/40 border-transparent'
+                    : bgStyle
                 }`}
               >
                 <span
@@ -168,7 +201,7 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
                       ? 'text-white'
                       : day.isToday
                       ? 'text-[#e11d48] font-black'
-                      : 'text-slate-800'
+                      : 'text-slate-900'
                   }`}
                 >
                   {day.dayNum}
@@ -184,8 +217,8 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
                   </span>
                 )}
 
-                {day.isCheapest && !isSelected && !isDisabled && (
-                  <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                {!isDisabled && !isSelected && (
+                  <span className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${dotBadge}`} />
                 )}
               </button>
             );

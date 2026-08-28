@@ -9,7 +9,7 @@ import {
   Bus, 
   Car, 
   Building, 
-  Sparkles, 
+  Compass as Sparkles, 
   Armchair, 
   Utensils, 
   Luggage, 
@@ -291,7 +291,7 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
                     step === 'fare' ? 'bg-[#FF5A5F] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Fare: {state.selectedFare?.label.split(' ')[0] || 'Saver'}</span>
                 </button>
               )}
@@ -485,7 +485,7 @@ export const BookingFlowModal: React.FC<BookingFlowModalProps> = ({
                 <div className="bg-white rounded-3xl p-4 border border-amber-300 shadow-xs flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-900 flex items-center justify-center font-bold">
-                      <Sparkles className="w-5 h-5 text-amber-600" />
+                      <ShieldCheck className="w-5 h-5 text-amber-600" />
                     </div>
                     <div>
                       <span className="text-[10px] font-black uppercase text-amber-700 block">Selected Fare Flexibility</span>

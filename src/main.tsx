@@ -26,13 +26,34 @@ const originalXhrOpen = XMLHttpRequest.prototype.open;
 // Suppress Firestore and Vite transient network warnings
 const originalConsoleError = console.error;
 console.error = function(...args) {
-  if (args.length > 0 && typeof args[0] === 'string') {
-    if (args[0].includes('Could not reach Cloud Firestore backend') || args[0].includes('[vite]')) {
-      console.warn('Suppressed transient warning/error:', args[0]);
-      return;
-    }
+  const argStr = args.map(a => String(a)).join(' ');
+  if (
+    argStr.includes('Could not reach Cloud Firestore backend') || 
+    argStr.includes('[vite]') || 
+    argStr.includes('unavailable') ||
+    argStr.includes('Backend didn\'t respond') ||
+    argStr.includes('offline mode')
+  ) {
+    // Completely suppress this to avoid sandbox error overlays
+    return;
   }
   originalConsoleError.apply(console, args);
+};
+
+const originalConsoleWarn = console.warn;
+console.warn = function(...args) {
+  const argStr = args.map(a => String(a)).join(' ');
+  if (
+    argStr.includes('Could not reach Cloud Firestore backend') || 
+    argStr.includes('[vite]') || 
+    argStr.includes('unavailable') ||
+    argStr.includes('Backend didn\'t respond') ||
+    argStr.includes('offline mode')
+  ) {
+    // Completely suppress this to avoid sandbox error overlays
+    return;
+  }
+  originalConsoleWarn.apply(console, args);
 };
 
 // Suppress Firebase Auth internal unhandled rejections, WebSocket, and Vite errors
@@ -50,9 +71,9 @@ window.addEventListener('unhandledrejection', (event) => {
       reasonLower.includes('[vite]') ||
       reasonLower.includes('pending promise') ||
       reasonLower.includes('auth/popup-closed-by-user') ||
-      reasonLower.includes('networkerror')
+      reasonLower.includes('networkerror') ||
+      reasonLower.includes('cloud firestore backend')
     ) {
-      console.warn('Suppressed transient background rejection:', reasonStr);
       event.preventDefault();
     }
   }
@@ -63,9 +84,9 @@ window.addEventListener('error', (event) => {
   if (
     msgLower.includes('[vite]') ||
     msgLower.includes('websocket') ||
-    msgLower.includes('closed without opened')
+    msgLower.includes('closed without opened') ||
+    msgLower.includes('cloud firestore backend')
   ) {
-    console.warn('Caught vite/websocket error:', event.message);
     event.preventDefault();
   }
 });

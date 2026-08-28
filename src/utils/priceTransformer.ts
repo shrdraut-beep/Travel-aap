@@ -1,10 +1,14 @@
 export const getCachedExchangeRate = async (db: any): Promise<number> => {
-  const doc = await db.collection('system_config').doc('currency_rates').get();
-  
-  if (doc.exists) {
-    return doc.data()?.bufferedRate || 85.0; // Fallback
+  try {
+    if (!db) return 85.0;
+    const doc = await db.collection('system_config').doc('currency_rates').get();
+    if (doc && doc.exists) {
+      return doc.data()?.bufferedRate || 85.0;
+    }
+  } catch (err) {
+    // Graceful fallback if missing permissions or db offline
   }
-  return 85.0; // Hard fallback
+  return 85.0; // Fallback rate USD to INR
 };
 
 export const transformPrice = (amount: string | number, currency: string, rate: number): { amount: number, currency: 'INR' } => {

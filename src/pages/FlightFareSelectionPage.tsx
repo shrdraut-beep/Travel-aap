@@ -10,7 +10,7 @@ import {
   Luggage, 
   CalendarClock, 
   Tag, 
-  Sparkles, 
+  Compass as Sparkles, 
   CheckCircle2, 
   AlertCircle,
   ChevronRight,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useCurrency } from '../components/booking/useCurrency';
 import { BrandHeader } from '../components/common/BrandHeader';
+import { getAirlineFareTiers } from '../utils/airlineFareBrands';
 
 interface FareTierPlan {
   id: string;
@@ -147,10 +148,10 @@ export const FlightFareSelectionPage: React.FC = () => {
     return Math.ceil(penaltyAmt * (rate || 85) * 1.03);
   };
 
-  // Build Fare Tiers with dynamic conditions extracted directly from Duffel payload
+  // Build Fare Tiers with dynamic branded conditions extracted directly or generated for airline
   const farePlans: FareTierPlan[] = useMemo(() => {
-    // If Duffel offers exist in payload, map each offer extracting live conditions
-    if (flight?.offers && flight.offers.length > 0) {
+    // If Duffel or GDS provides multiple offers
+    if (flight?.offers && flight.offers.length > 1) {
       return flight.offers.map((offer: any, idx: number) => {
         const rawAmt = parseFloat(offer.total_amount) || rawBaseAmount;
         const offerInr = rawCurrency === 'INR' 
@@ -182,21 +183,13 @@ export const FlightFareSelectionPage: React.FC = () => {
           refundable: isRefundable,
           cancellationSummary: cancellationDisplay === 'Non-refundable' ? 'Non-refundable' : `Cancellation: ${cancellationDisplay}`,
           cancellationSlabs: condRefund !== undefined ? [
-            { 
-              window: 'Before departure', 
-              fee: refundFeeNum ?? 0, 
-              platformFee: 0 
-            }
+            { window: 'Before departure', fee: refundFeeNum ?? 0, platformFee: 0 }
           ] : [
             { window: 'Before departure', fee: 0, platformFee: 0 }
           ],
           dateChangeSummary: changeDisplay === 'Non-changeable' ? 'Non-changeable' : `Date Change: ${changeDisplay}`,
           dateChangeSlabs: condChange !== undefined ? [
-            { 
-              window: 'Before departure', 
-              fee: changeFeeNum ?? 0, 
-              platformFee: 0 
-            }
+            { window: 'Before departure', fee: changeFeeNum ?? 0, platformFee: 0 }
           ] : [
             { window: 'Before departure', fee: 0, platformFee: 0 }
           ],
@@ -208,40 +201,28 @@ export const FlightFareSelectionPage: React.FC = () => {
       });
     }
 
-    // Default flight payload extraction when singular flight object is provided
-    const condRefund = flight?.conditions?.refund_before_departure;
-    const condChange = flight?.conditions?.change_before_departure;
-    const isRefundable = condRefund ? condRefund.allowed !== false : (flight?.conditions ? false : true);
-    const cancellationDisplay = convertPenaltyToINR(condRefund, 'Non-refundable');
-    const changeDisplay = convertPenaltyToINR(condChange, 'Non-changeable');
-    const refundFeeNum = getPenaltyAmountNumber(condRefund);
-    const changeFeeNum = getPenaltyAmountNumber(condChange);
-
-    return [
-      {
-        id: flight?.id || 'standard_fare',
-        label: flight?.fare_name || 'Standard Fare',
-        fare_name: flight?.fare_name || 'Standard',
-        total_amount: rawBaseAmount,
-        total_currency: rawCurrency,
-        inrPrice: baseInrPrice,
-        cabinBaggageKg: 7,
-        checkinBaggageKg: 15,
-        refundable: isRefundable,
-        cancellationSummary: cancellationDisplay === 'Non-refundable' ? 'Non-refundable' : `Cancellation: ${cancellationDisplay}`,
-        cancellationSlabs: [
-          { window: 'Before departure', fee: refundFeeNum ?? 0, platformFee: 0 }
-        ],
-        dateChangeSummary: changeDisplay === 'Non-changeable' ? 'Non-changeable' : `Date Change: ${changeDisplay}`,
-        dateChangeSlabs: [
-          { window: 'Before departure', fee: changeFeeNum ?? 0, platformFee: 0 }
-        ],
-        seatsIncluded: 'chargeable',
-        mealsIncluded: 'chargeable',
-        rawOffer: flight
-      }
-    ];
-  }, [flight, rawBaseAmount, baseInrPrice, rawCurrency, rate]);
+    // Default: Get official airline branded fare tiers (IndiGo, Air India, Vistara, SpiceJet, Akasa Air, etc.)
+    const airlineBrandedTiers = getAirlineFareTiers(airlineName, baseInrPrice);
+    return airlineBrandedTiers.map(tier => ({
+      id: tier.id,
+      label: tier.label,
+      fare_name: tier.fare_name,
+      total_amount: tier.pricePerAdult,
+      total_currency: 'INR',
+      inrPrice: tier.pricePerAdult,
+      cabinBaggageKg: tier.cabinBaggageKg,
+      checkinBaggageKg: tier.checkinBaggageKg,
+      refundable: tier.refundable,
+      cancellationSummary: tier.cancellationSummary || 'Cancellation: Standard Fee',
+      cancellationSlabs: tier.cancellationSlabs,
+      dateChangeSummary: tier.dateChangeSummary || 'Date Change: Standard Fee',
+      dateChangeSlabs: tier.dateChangeSlabs,
+      seatsIncluded: tier.seatsIncluded,
+      mealsIncluded: tier.mealsIncluded,
+      badge: tier.badge,
+      rawOffer: flight
+    }));
+  }, [flight, rawBaseAmount, baseInrPrice, rawCurrency, rate, airlineName]);
 
   const [selectedPlanId, setSelectedPlanId] = useState<string>(farePlans[0]?.id || 'saver');
 
