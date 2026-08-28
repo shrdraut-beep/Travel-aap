@@ -21,7 +21,7 @@ export const AppBar: React.FC<AppBarProps> = ({
   userInitial = "G",
   notificationCount = 0
 }) => (
-  <header className="sticky top-0 z-40 bg-[var(--color-coral)] pt-[env(safe-area-inset-top)]">
+  <header className="premium-gradient sticky top-0 z-40 pt-[env(safe-area-inset-top)]">
     <div className="flex items-center gap-3 px-4 py-3">
       <button
         type="button"
@@ -52,7 +52,7 @@ export const AppBar: React.FC<AppBarProps> = ({
       >
         <Bell className="h-5 w-5" />
         {notificationCount > 0 ? (
-          <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[var(--color-coral)]">
+          <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-[var(--premium-accent)]">
             {notificationCount > 9 ? "9+" : notificationCount}
           </span>
         ) : null}

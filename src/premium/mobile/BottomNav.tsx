@@ -28,11 +28,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ active, onChange }) => (
               onClick={() => onChange(id)}
               aria-current={selected ? "page" : undefined}
               className={`flex w-full flex-col items-center gap-1 py-2.5 ${
-                selected ? "text-[var(--color-coral)]" : "text-slate-400"
+                selected ? "text-[var(--premium-accent)]" : "text-slate-400"
               }`}
             >
               <Icon
-                className={`h-5 w-5 ${selected ? "fill-[var(--color-coral)]/10" : ""}`}
+                className={`h-5 w-5 ${selected ? "fill-[var(--premium-accent)]/10" : ""}`}
               />
               <span className="text-[10.5px] font-semibold">{label}</span>
             </button>

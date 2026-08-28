@@ -108,7 +108,7 @@ export const DestinationRail: React.FC<DestinationRailProps> = ({
         <button
           type="button"
           onClick={onViewAll}
-          className="text-[13px] font-semibold text-[var(--color-coral)]"
+          className="text-[13px] font-semibold text-[var(--premium-accent)]"
         >
           View all
         </button>
@@ -155,7 +155,7 @@ export const DestinationRail: React.FC<DestinationRailProps> = ({
                 <Heart
                   className={`h-4 w-4 ${
                     wishlist[destination.id]
-                      ? "fill-[var(--color-coral)] text-[var(--color-coral)]"
+                      ? "fill-[var(--premium-accent)] text-[var(--premium-accent)]"
                       : ""
                   }`}
                 />

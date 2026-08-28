@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { AccountSheet } from "./mobile/AccountSheet";
+import type { AccountItemId } from "./mobile/AccountSheet";
 import { AppBar } from "./mobile/AppBar";
 import { BottomNav } from "./mobile/BottomNav";
 import { DestinationRail } from "./mobile/DestinationRail";
@@ -13,9 +15,8 @@ import type { NavTab, SearchMode, SearchPayload } from "./mobile/types";
 
 export interface UserLandingPageProps {
   onSearch?: (payload: SearchPayload) => void;
-  onMenu?: () => void;
   onNotifications?: () => void;
-  onProfile?: () => void;
+  onAccountItem?: (item: AccountItemId) => void;
   onQuickAction?: (action: QuickActionId) => void;
   onSelectOffer?: (offer: Offer) => void;
   onSelectDestination?: (destination: Destination) => void;
@@ -31,9 +32,8 @@ export interface UserLandingPageProps {
  */
 export const UserLandingPage: React.FC<UserLandingPageProps> = ({
   onSearch,
-  onMenu,
   onNotifications,
-  onProfile,
+  onAccountItem,
   onQuickAction,
   onSelectOffer,
   onSelectDestination,
@@ -43,17 +43,18 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
 }) => {
   const [mode, setMode] = useState<SearchMode>("flights");
   const [tab, setTab] = useState<NavTab>("home");
+  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[520px] bg-slate-50 pb-24">
       <AppBar
-        onMenu={onMenu}
+        onMenu={() => setAccountOpen(true)}
         onNotifications={onNotifications}
-        onProfile={onProfile}
+        onProfile={() => setAccountOpen(true)}
         notificationCount={2}
       />
 
-      <div className="bg-[var(--color-coral)] px-4 pb-16 pt-1">
+      <div className="premium-gradient px-4 pb-16 pt-1">
         <p className="text-[20px] font-bold leading-tight tracking-tight text-white">
           Where to next?
         </p>
@@ -90,7 +91,21 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
         active={tab}
         onChange={(next) => {
           setTab(next);
+          if (next === "account") setAccountOpen(true);
           onNavigate?.(next);
+        }}
+      />
+
+      <AccountSheet
+        open={accountOpen}
+        onSelect={(item) => {
+          setAccountOpen(false);
+          setTab("home");
+          onAccountItem?.(item);
+        }}
+        onClose={() => {
+          setAccountOpen(false);
+          setTab("home");
         }}
       />
     </div>

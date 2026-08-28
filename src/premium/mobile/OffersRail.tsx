@@ -63,7 +63,7 @@ export const OffersRail: React.FC<OffersRailProps> = ({
           <p className="mt-0.5 text-[12px] font-medium text-slate-500">
             {offer.detail}
           </p>
-          <span className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[var(--color-coral)]/40 bg-[var(--color-coral)]/5 px-2.5 py-1 text-[12px] font-bold tracking-wide text-[var(--color-coral)]">
+          <span className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[var(--premium-accent)]/40 bg-[var(--premium-accent)]/5 px-2.5 py-1 text-[12px] font-bold tracking-wide text-[var(--premium-accent)]">
             <Copy className="h-3.5 w-3.5" />
             {offer.code}
           </span>

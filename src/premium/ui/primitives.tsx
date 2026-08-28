@@ -11,7 +11,7 @@ type ButtonSize = "sm" | "md" | "lg";
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--color-coral)] text-white shadow-lg shadow-[var(--color-coral)]/25",
+    "premium-gradient text-white shadow-lg shadow-[var(--premium-accent)]/25",
   secondary: "bg-white text-slate-900 ring-1 ring-slate-200",
   ghost: "text-slate-700"
 };

@@ -34,7 +34,7 @@ export const ModeStrip: React.FC<ModeStripProps> = ({ mode, onChange }) => (
           <span
             className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-colors ${
               active
-                ? "bg-[var(--color-coral)] text-white"
+                ? "bg-[var(--premium-accent)] text-white"
                 : "bg-slate-100 text-slate-500"
             }`}
           >

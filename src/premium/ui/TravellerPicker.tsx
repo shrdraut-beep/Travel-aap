@@ -104,7 +104,7 @@ export const TravellerPicker: React.FC<TravellerPickerProps> = ({
                 onClick={() => onCabinChange(option)}
                 className={`rounded-full px-3.5 py-2 text-[12px] font-semibold transition-all ${
                   option === cabin
-                    ? "bg-[var(--color-coral)] text-white"
+                    ? "bg-[var(--premium-accent)] text-white"
                     : "bg-slate-100 text-slate-600"
                 }`}
               >

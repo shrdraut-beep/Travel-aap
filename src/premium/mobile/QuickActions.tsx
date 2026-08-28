@@ -28,7 +28,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onSelect }) => (
         onClick={() => onSelect?.(id)}
         className="flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 shadow-[0_8px_24px_-20px_rgba(15,23,42,0.8)] active:bg-slate-50"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-emerald)]/10 text-[var(--color-emerald)]">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--premium-accent-soft)] text-[var(--premium-accent)]">
           <Icon className="h-4.5 w-4.5" />
         </span>
         <span className="text-[11px] font-semibold text-slate-600">{label}</span>

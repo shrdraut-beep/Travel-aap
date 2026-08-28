@@ -119,7 +119,7 @@ export const SearchCard: React.FC<SearchCardProps> = ({ mode, onSearch }) => {
                 }}
                 className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
                   tripType === type
-                    ? "bg-[var(--color-coral)]/10 text-[var(--color-coral)]"
+                    ? "bg-[var(--premium-accent)]/10 text-[var(--premium-accent)]"
                     : "text-slate-500"
                 }`}
               >

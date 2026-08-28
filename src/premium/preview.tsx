@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "../index.css";
+import "./premium.css";
 import { UserLandingPage } from "./UserLandingPage";
 
 /**
@@ -14,9 +15,8 @@ if (container) {
     <React.StrictMode>
       <UserLandingPage
         onSearch={(payload) => console.log("search", payload)}
-        onMenu={() => console.log("menu")}
         onNotifications={() => console.log("notifications")}
-        onProfile={() => console.log("profile")}
+        onAccountItem={(item) => console.log("account", item)}
         onQuickAction={(action) => console.log("quick action", action)}
         onSelectOffer={(offer) => console.log("offer", offer.code)}
         onSelectDestination={(destination) =>

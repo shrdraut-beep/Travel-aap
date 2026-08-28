@@ -95,9 +95,9 @@ const MonthGrid: React.FC<MonthGridProps> = ({
                 disabled
                   ? "cursor-not-allowed text-slate-300"
                   : isStart || isEnd
-                    ? "bg-[var(--color-coral)] text-white"
+                    ? "bg-[var(--premium-accent)] text-white"
                     : inRange
-                      ? "bg-[var(--color-coral)]/10 text-slate-900"
+                      ? "bg-[var(--premium-accent)]/10 text-slate-900"
                       : "text-slate-700 active:bg-slate-100"
               }`}
             >
