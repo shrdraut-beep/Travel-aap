@@ -1,50 +1,98 @@
-import React from "react";
-import { Header } from "./sections/Header";
-import { Hero } from "./sections/Hero";
-import { TrustStrip } from "./sections/TrustStrip";
-import {
-  FeaturedDestinations,
-  type Destination
-} from "./sections/FeaturedDestinations";
-import { Footer } from "./sections/Footer";
-import type { SearchPayload } from "./sections/SearchWidget";
+import React, { useState } from "react";
+import { AppBar } from "./mobile/AppBar";
+import { BottomNav } from "./mobile/BottomNav";
+import { DestinationRail } from "./mobile/DestinationRail";
+import type { Destination } from "./mobile/DestinationRail";
+import { ModeStrip } from "./mobile/ModeStrip";
+import { OffersRail } from "./mobile/OffersRail";
+import type { Offer } from "./mobile/OffersRail";
+import { QuickActions } from "./mobile/QuickActions";
+import type { QuickActionId } from "./mobile/QuickActions";
+import { SearchCard } from "./mobile/SearchCard";
+import type { NavTab, SearchMode, SearchPayload } from "./mobile/types";
 
 export interface UserLandingPageProps {
-  /** Fired with the fully-formed query when the user hits Search. */
   onSearch?: (payload: SearchPayload) => void;
-  onSignIn?: () => void;
-  onSignUp?: () => void;
+  onMenu?: () => void;
+  onNotifications?: () => void;
+  onProfile?: () => void;
+  onQuickAction?: (action: QuickActionId) => void;
+  onSelectOffer?: (offer: Offer) => void;
   onSelectDestination?: (destination: Destination) => void;
   onToggleWishlist?: (destination: Destination, wishlisted: boolean) => void;
   onViewAllDestinations?: () => void;
+  onNavigate?: (tab: NavTab) => void;
 }
 
 /**
- * Premium user portal landing page. Purely presentational: every interactive
- * element is exposed as a callback prop so existing services can be attached
- * without touching the markup.
+ * User portal home screen. Phone-only by design: one column, sheet-based
+ * pickers, and a fixed bottom tab bar - the layout native travel apps use.
+ * Every action is a typed prop so the existing backend wires straight in.
  */
 export const UserLandingPage: React.FC<UserLandingPageProps> = ({
   onSearch,
-  onSignIn,
-  onSignUp,
+  onMenu,
+  onNotifications,
+  onProfile,
+  onQuickAction,
+  onSelectOffer,
   onSelectDestination,
   onToggleWishlist,
-  onViewAllDestinations
-}) => (
-  <div className="min-h-screen w-full bg-slate-50">
-    <Header onSignIn={onSignIn} onSignUp={onSignUp} />
-    <main>
-      <Hero onSearch={onSearch} />
-      <TrustStrip />
-      <FeaturedDestinations
-        onSelect={onSelectDestination}
-        onToggleWishlist={onToggleWishlist}
-        onViewAll={onViewAllDestinations}
-      />
-    </main>
-    <Footer />
-  </div>
-);
+  onViewAllDestinations,
+  onNavigate
+}) => {
+  const [mode, setMode] = useState<SearchMode>("flights");
+  const [tab, setTab] = useState<NavTab>("home");
 
-export default UserLandingPage;
+  return (
+    <div className="mx-auto min-h-screen w-full max-w-[520px] bg-slate-50 pb-24">
+      <AppBar
+        onMenu={onMenu}
+        onNotifications={onNotifications}
+        onProfile={onProfile}
+        notificationCount={2}
+      />
+
+      <div className="bg-[var(--color-coral)] px-4 pb-16 pt-1">
+        <p className="text-[20px] font-bold leading-tight tracking-tight text-white">
+          Where to next?
+        </p>
+        <p className="mt-0.5 text-[13px] font-medium text-white/85">
+          Flights, hotels, trains, buses and cabs in one app.
+        </p>
+      </div>
+
+      <main className="relative -mt-12">
+        <div className="px-4">
+          <div className="rounded-3xl bg-white px-2 pb-1 pt-2 shadow-[0_18px_45px_-30px_rgba(15,23,42,0.6)]">
+            <ModeStrip mode={mode} onChange={setMode} />
+          </div>
+        </div>
+
+        <div className="px-4 pt-3">
+          <SearchCard mode={mode} onSearch={onSearch} />
+        </div>
+
+        <QuickActions onSelect={onQuickAction} />
+        <OffersRail onSelect={onSelectOffer} />
+        <DestinationRail
+          onSelect={onSelectDestination}
+          onToggleWishlist={onToggleWishlist}
+          onViewAll={onViewAllDestinations}
+        />
+
+        <p className="px-4 pb-6 pt-8 text-center text-[11px] font-medium text-slate-400">
+          © 2026 RouTripO · Made for travellers, in India.
+        </p>
+      </main>
+
+      <BottomNav
+        active={tab}
+        onChange={(next) => {
+          setTab(next);
+          onNavigate?.(next);
+        }}
+      />
+    </div>
+  );
+};

@@ -1,8 +1,6 @@
-import React, { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PremiumButton } from "./primitives";
+import React from "react";
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -35,13 +33,21 @@ export const formatDate = (date: Date | null) =>
       })
     : "";
 
+export const formatDay = (date: Date | null) => (date ? String(date.getDate()) : "");
+
+export const formatMonthYear = (date: Date | null) =>
+  date
+    ? date.toLocaleDateString("en-IN", { month: "short", year: "numeric" })
+    : "";
+
+export const formatWeekday = (date: Date | null) =>
+  date ? date.toLocaleDateString("en-IN", { weekday: "long" }) : "";
+
 interface MonthGridProps {
   year: number;
   month: number;
   range: DateRange;
   rangeMode: boolean;
-  hovered: Date | null;
-  onHover: (date: Date | null) => void;
   onSelect: (date: Date) => void;
 }
 
@@ -50,36 +56,19 @@ const MonthGrid: React.FC<MonthGridProps> = ({
   month,
   range,
   rangeMode,
-  hovered,
-  onHover,
   onSelect
 }) => {
   const today = startOfDay(new Date());
   const total = daysInMonth(year, month);
   const blanks = leadingBlanks(year, month);
 
-  // While picking the return leg, preview the span under the cursor.
-  const provisionalEnd =
-    range.end ?? (rangeMode && range.start && hovered ? hovered : null);
-
   return (
-    <div className="w-full">
-      <p className="mb-4 text-center text-[15px] font-bold tracking-tight text-slate-900">
+    <div className="px-4 py-5">
+      <p className="mb-4 text-[15px] font-bold tracking-tight text-slate-900">
         {MONTHS[month]} {year}
       </p>
 
-      <div className="mb-2 grid grid-cols-7">
-        {WEEKDAYS.map((day) => (
-          <span
-            key={day}
-            className="text-center text-[11px] font-semibold uppercase tracking-wide text-slate-400"
-          >
-            {day.charAt(0)}
-          </span>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-y-1">
+      <div className="grid grid-cols-7 gap-y-1.5">
         {Array.from({ length: blanks }).map((_, index) => (
           <span key={`blank-${index}`} />
         ))}
@@ -88,30 +77,28 @@ const MonthGrid: React.FC<MonthGridProps> = ({
           const date = new Date(year, month, index + 1);
           const disabled = date < today;
           const isStart = isSameDay(date, range.start);
-          const isEnd = isSameDay(date, provisionalEnd);
+          const isEnd = isSameDay(date, range.end);
           const inRange =
             rangeMode &&
             range.start &&
-            provisionalEnd &&
+            range.end &&
             date > startOfDay(range.start) &&
-            date < startOfDay(provisionalEnd);
+            date < startOfDay(range.end);
 
           return (
             <button
               key={date.toISOString()}
               type="button"
               disabled={disabled}
-              onMouseEnter={() => onHover(date)}
-              onMouseLeave={() => onHover(null)}
               onClick={() => onSelect(date)}
-              className={`relative mx-auto flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-semibold transition-all duration-150 ${
+              className={`relative mx-auto flex h-11 w-11 items-center justify-center rounded-full text-[14px] font-semibold transition-colors ${
                 disabled
                   ? "cursor-not-allowed text-slate-300"
                   : isStart || isEnd
-                    ? "bg-[var(--color-coral)] text-white shadow-md shadow-[var(--color-coral)]/30"
+                    ? "bg-[var(--color-coral)] text-white"
                     : inRange
                       ? "bg-[var(--color-coral)]/10 text-slate-900"
-                      : "text-slate-700 hover:bg-slate-100"
+                      : "text-slate-700 active:bg-slate-100"
               }`}
             >
               {index + 1}
@@ -126,33 +113,24 @@ const MonthGrid: React.FC<MonthGridProps> = ({
 export interface DateRangePickerProps {
   value: DateRange;
   rangeMode: boolean;
+  /** How many months to render below the current one. */
+  monthsAhead?: number;
   onChange: (range: DateRange) => void;
   onClose: () => void;
 }
 
 /**
- * Two-month calendar panel. Selecting a start date in range mode keeps the
- * panel open so the return leg can be chosen in the same gesture.
+ * Scrolling month list, the pattern every mobile travel app uses: months stack
+ * vertically and the sticky weekday header stays put while you scroll.
  */
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   value,
   rangeMode,
+  monthsAhead = 11,
   onChange,
   onClose
 }) => {
-  const initial = value.start ?? new Date();
-  const [cursor, setCursor] = useState(
-    new Date(initial.getFullYear(), initial.getMonth(), 1)
-  );
-  const [hovered, setHovered] = useState<Date | null>(null);
-
-  const nextMonth = useMemo(
-    () => new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1),
-    [cursor]
-  );
-
-  const shift = (months: number) =>
-    setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + months, 1));
+  const base = new Date();
 
   const handleSelect = (date: Date) => {
     if (!rangeMode) {
@@ -161,81 +139,41 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       return;
     }
 
-    // No start yet, or the click lands before it: restart the range.
+    // No start yet, or the tap lands before it: restart the range.
     if (!value.start || value.end || date < startOfDay(value.start)) {
       onChange({ start: date, end: null });
       return;
     }
 
     onChange({ start: value.start, end: date });
-    onClose();
   };
 
   return (
-    <div className="w-[min(640px,calc(100vw-3rem))] rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_30px_80px_-25px_rgba(15,23,42,0.4)]">
-      <div className="mb-2 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => shift(-1)}
-          aria-label="Previous month"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => shift(1)}
-          aria-label="Next month"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-slate-100"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
+    <div>
+      <div className="sticky top-0 z-10 grid grid-cols-7 border-b border-slate-100 bg-white px-4 py-2.5">
+        {WEEKDAYS.map((day, index) => (
+          <span
+            key={`${day}-${index}`}
+            className="text-center text-[11px] font-bold uppercase tracking-wide text-slate-400"
+          >
+            {day}
+          </span>
+        ))}
       </div>
 
-      <div className="grid gap-8 sm:grid-cols-2">
-        <MonthGrid
-          year={cursor.getFullYear()}
-          month={cursor.getMonth()}
-          range={value}
-          rangeMode={rangeMode}
-          hovered={hovered}
-          onHover={setHovered}
-          onSelect={handleSelect}
-        />
-        <div className="hidden sm:block">
+      {Array.from({ length: monthsAhead + 1 }).map((_, offset) => {
+        const cursor = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+        return (
           <MonthGrid
-            year={nextMonth.getFullYear()}
-            month={nextMonth.getMonth()}
+            key={`${cursor.getFullYear()}-${cursor.getMonth()}`}
+            year={cursor.getFullYear()}
+            month={cursor.getMonth()}
             range={value}
             rangeMode={rangeMode}
-            hovered={hovered}
-            onHover={setHovered}
             onSelect={handleSelect}
           />
-        </div>
-      </div>
-
-      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-        <p className="text-[13px] font-medium text-slate-500">
-          {rangeMode
-            ? value.start && !value.end
-              ? "Now pick your return date"
-              : "Select your travel dates"
-            : "Select your travel date"}
-        </p>
-        <div className="flex gap-2">
-          <PremiumButton
-            variant="ghost"
-            size="sm"
-            onClick={() => onChange({ start: null, end: null })}
-          >
-            Clear
-          </PremiumButton>
-          <PremiumButton size="sm" onClick={onClose}>
-            Done
-          </PremiumButton>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 };

@@ -14,11 +14,15 @@ if (container) {
     <React.StrictMode>
       <UserLandingPage
         onSearch={(payload) => console.log("search", payload)}
-        onSignIn={() => console.log("sign in")}
-        onSignUp={() => console.log("sign up")}
+        onMenu={() => console.log("menu")}
+        onNotifications={() => console.log("notifications")}
+        onProfile={() => console.log("profile")}
+        onQuickAction={(action) => console.log("quick action", action)}
+        onSelectOffer={(offer) => console.log("offer", offer.code)}
         onSelectDestination={(destination) =>
           console.log("destination", destination.id)
         }
+        onNavigate={(tab) => console.log("navigate", tab)}
       />
     </React.StrictMode>
   );
