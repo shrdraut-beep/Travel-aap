@@ -152,3 +152,33 @@ export function initSecurityNotice(): void {
   }
 }
 
+/**
+ * Unpredictable Secure Reference ID Generation (Anti-IDOR / Anti-Guessing)
+ * Generates non-sequential IDs like TRP-9xK2mP7qL
+ */
+export function generateSecureId(prefix: string = 'REF'): string {
+  // Use Node.js crypto if in server environment
+  if (typeof process !== 'undefined' && process.release && process.release.name === 'node') {
+    const crypto = require('crypto');
+    return `${prefix}-${crypto.randomBytes(6).toString('hex')}`;
+  }
+  let randomPart = '';
+  
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    const array = new Uint8Array(6); // 12 hex chars
+    window.crypto.getRandomValues(array);
+    randomPart = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  } else {
+    // Fallback for environments without crypto
+    randomPart = 
+      Math.random().toString(36).substring(2, 8) + 
+      Math.random().toString(36).substring(2, 8);
+  }
+
+  // Format: PREFIX-XXXX-XXXX
+  const p1 = randomPart.substring(0, 4);
+  const p2 = randomPart.substring(4, 8);
+  
+  return `${prefix}-${p1}-${p2}`.toUpperCase();
+}
+

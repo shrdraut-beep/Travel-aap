@@ -302,3 +302,154 @@ export interface Offer {
   createdAt: string;
 }
 
+// ==========================================
+// Reverse Bidding & Secure Ecosystem Schemas
+// ==========================================
+
+export type TripBidStatus = 'OPEN' | 'IN_REVIEW' | 'CONFIRMED' | 'EXPIRED' | 'PENDING_VENDOR_CONFIRMATION' | 'CANCELLED';
+export type EscrowStatus = 'PENDING' | 'HELD' | 'STAGE1_STARTED' | 'STAGE_1_RELEASED' | 'COMPLETED_RELEASED' | 'FULLY_RELEASED' | 'REFUNDED';
+export type BiddingCategory = 'Hotels' | 'Cabs' | 'Packages';
+export type BidOfferStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'REVISION_REQUESTED' | 'EXPIRED';
+
+export interface TripBidRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhone?: string;
+  origin: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  paxCount: number;
+  tripCategory: BiddingCategory;
+  requestedInclusions?: string[];
+  vehicleClass?: string;
+  propertyType?: string;
+  mealPlan?: string;
+  tripTheme?: string;
+  stayQuality?: string;
+  customBudget: number;
+  minEstimatedThreshold: number;
+  notes?: string;
+  status: TripBidStatus;
+  escrowStatus: EscrowStatus;
+  tokenPaid: boolean;
+  tokenAmount: number; // e.g. 99
+  expiresAt: string;
+  createdAt: string;
+  acceptedBidId?: string;
+  contractId?: string;
+  bidsCount?: number;
+  offlineDealStatus?: 'Connected Offline' | 'Deal Finalized Offline' | 'Deal Cancelled' | 'Report Issue';
+  purgeConsentUser?: boolean;
+  purgeConsentVendor?: boolean;
+  isPurged?: boolean;
+}
+
+export interface BidOffer {
+  id: string;
+  tripRequestId: string;
+  vendorId: string;
+  vendorName: string; // e.g. "Mahabaleshwar Partner #402"
+  vendorRating: number;
+  basePrice: number;
+  taxes: number;
+  totalPrice: number;
+  inclusions: string[]; // e.g. ['Toll & Parking', 'Driver Allowance', 'Ac Room', 'Breakfast']
+  exclusions?: string[];
+  vehicleSpecs?: string;
+  roomSpecs?: string;
+  packageDetails?: string;
+  revisionCount: number;
+  status: BidOfferStatus;
+  validUntil: string;
+  validUntilMs?: number;
+  createdAt: string;
+
+  // Vendor-Controlled Cancellation / Refund Policy
+  refundType?: 'NON_REFUNDABLE' | 'REFUNDABLE';
+  refundDeadlineHours?: 24 | 48 | 72;
+  cancellationPolicy?: string;
+}
+
+export interface BiddingContract {
+  contractId: string;
+  tripRequestId: string;
+  bidOfferId: string;
+  userId: string;
+  vendorId: string;
+  vendorName: string;
+  tripCategory?: 'Hotels' | 'Cabs' | 'Packages';
+  startDate?: string;
+  endDate?: string;
+  lockedPrice: number;
+  inclusions: string[];
+  exclusions: string[];
+  cancellationPolicy: string;
+  legalClause: string;
+  timestamp: string;
+  userSignatureIp: string;
+  userDeviceFingerprint: string;
+  vendorSignatureIp: string;
+  vendorDeviceFingerprint: string;
+
+  // Vendor-Controlled Cancellation / Refund Policy
+  refundType?: 'NON_REFUNDABLE' | 'REFUNDABLE';
+  refundDeadlineHours?: 24 | 48 | 72;
+  refundProcessedAt?: string;
+  refundAmount?: number;
+  refundDisbursedToVendor?: boolean;
+  cancellationReason?: string;
+  razorpayRefundId?: string;
+
+  // Category-Specific Escrow Release Mechanism
+  escrowModel?: 'SINGLE_STAGE_HOTEL' | 'TWO_STAGE_CAB_TRIP';
+  escrowStatus?: 'HELD' | 'STAGE_1_RELEASED' | 'FULLY_RELEASED' | 'REFUNDED';
+  advanceAmount?: number; // 100% for Hotels, 40% for Cabs/Trips
+  balanceAmount?: number; // 0 for Hotels, 60% for Cabs/Trips
+  advanceReleased?: boolean;
+  balanceReleased?: boolean;
+
+  // 4+4 Mutual Handshake PINs (Hotels: Check-in single stage)
+  userCheckInPin?: string;
+  vendorCheckInPin?: string;
+  isCheckedIn?: boolean;
+  checkedInAt?: string;
+
+  // 4+4 Mutual Handshake PINs (Cabs/Trips: Stage 1 Pickup & Stage 2 Drop-off)
+  userStartPin?: string;
+  vendorStartPin?: string;
+  isStarted: boolean;
+  startedAt?: string;
+
+  userEndPin?: string;
+  vendorEndPin?: string;
+  isCompleted: boolean;
+  completedAt?: string;
+
+  // Backwards-compatible aliases
+  startOtp: string; // 4-digit pickup/check-in PIN
+  endOtp: string;   // 4/6-digit completion PIN
+  legalPdfUrl?: string;
+}
+
+export interface BiddingChatMessage {
+  id: string;
+  tripRequestId: string;
+  senderId: string;
+  senderRole: 'user' | 'vendor';
+  senderMaskedName: string;
+  text: string;
+  imageUrl?: string;
+  timestamp: string;
+}
+
+export interface SanitizationResult {
+  isSanitized: boolean;
+  sanitizedText: string;
+  violationsDetected: string[];
+  action: 'ALLOW' | 'BLOCK';
+  warningMessage?: string;
+}
+
+

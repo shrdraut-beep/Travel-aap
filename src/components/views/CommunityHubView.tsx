@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, Share2, Copy, Sparkles, User, Calendar, MapPin, Globe, ArrowRight, Heart, MessageSquare, Download, CloudDownload, X, Eye, Clock, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, Share2, Copy, Compass as Sparkles, User, Calendar, MapPin, Globe, ArrowRight, Heart, MessageSquare, Download, CloudDownload, X, Eye, Clock, CheckCircle2 } from 'lucide-react';
 import { PublicTripTemplate, TransportMode, TripPlan } from '../../types';
 
 interface CommunityHubViewProps {

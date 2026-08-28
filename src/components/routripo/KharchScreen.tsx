@@ -57,27 +57,27 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<Category>("food");
-  const [paidBy, setPaidBy] = useState(activeTrip.members[0]?.id || currentUser?.id || "");
-  const [splitWith, setSplitWith] = useState<string[]>(activeTrip.members.map(m => m.id));
+  const [paidBy, setPaidBy] = useState(activeTrip?.members[0]?.id || currentUser?.id || "");
+  const [splitWith, setSplitWith] = useState<string[]>(activeTrip?.members.map(m => m.id));
 
   // New Deposit Form State
-  const [depMemberId, setDepMemberId] = useState(activeTrip.members[0]?.id || currentUser?.id || "");
+  const [depMemberId, setDepMemberId] = useState(activeTrip?.members[0]?.id || currentUser?.id || "");
   const [depAmount, setDepAmount] = useState("");
   const [depNote, setDepNote] = useState("Pool Deposit");
 
   const settlements = useMemo(() => {
     return calculateSettlements(
-      activeTrip.members || [],
-      activeTrip.expenses || [],
-      activeTrip.deposits || [],
-      activeTrip.adminId,
-      activeTrip.calculationMode || "admin_pooled"
+      activeTrip?.members || [],
+      activeTrip?.expenses || [],
+      activeTrip?.deposits || [],
+      activeTrip?.adminId,
+      activeTrip?.calculationMode || "admin_pooled"
     );
   }, [activeTrip]);
 
   const poolBalance = useMemo(() => {
-    const totalDeposits = (activeTrip.deposits || []).reduce((acc, d) => acc + d.amount, 0);
-    const totalExpenses = (activeTrip.expenses || []).reduce((acc, e) => acc + e.amount, 0);
+    const totalDeposits = (activeTrip?.deposits || []).reduce((acc, d) => acc + d.amount, 0);
+    const totalExpenses = (activeTrip?.expenses || []).reduce((acc, e) => acc + e.amount, 0);
     return Math.max(0, totalDeposits - totalExpenses);
   }, [activeTrip]);
 
@@ -96,14 +96,14 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
       title,
       amount: parsedAmount,
       category,
-      paidBy: paidBy || activeTrip.members[0]?.id || currentUser?.id || "",
-      splitWith: splitWith.length > 0 ? splitWith : activeTrip.members.map(m => m.id),
+      paidBy: paidBy || activeTrip?.members[0]?.id || currentUser?.id || "",
+      splitWith: splitWith.length > 0 ? splitWith : activeTrip?.members.map(m => m.id),
       date: new Date().toISOString().substring(0, 10)
     };
 
     updateActiveTrip({
       ...activeTrip,
-      expenses: [newExpense, ...(activeTrip.expenses || [])]
+      expenses: [newExpense, ...(activeTrip?.expenses || [])]
     });
 
     setTitle("");
@@ -129,7 +129,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
 
     updateActiveTrip({
       ...activeTrip,
-      deposits: [...(activeTrip.deposits || []), newDeposit]
+      deposits: [...(activeTrip?.deposits || []), newDeposit]
     });
 
     setDepAmount("");
@@ -139,33 +139,33 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
   const handleDeleteExpense = (id: string) => {
     updateActiveTrip({
       ...activeTrip,
-      expenses: (activeTrip.expenses || []).filter(e => e.id !== id)
+      expenses: (activeTrip?.expenses || []).filter(e => e.id !== id)
     });
   };
 
   const handleEditExpense = (expense: Expense) => {
     updateActiveTrip({
       ...activeTrip,
-      expenses: (activeTrip.expenses || []).map(e => e.id === expense.id ? expense : e)
+      expenses: (activeTrip?.expenses || []).map(e => e.id === expense.id ? expense : e)
     });
   };
 
   const handleUpdateMemberAvatar = (memberId: string, avatarUrl: string) => {
     updateActiveTrip({
       ...activeTrip,
-      members: activeTrip.members.map(m => m.id === memberId ? { ...m, avatar: avatarUrl } : m)
+      members: activeTrip?.members.map(m => m.id === memberId ? { ...m, avatar: avatarUrl } : m)
     });
   };
 
   const handleUpdateMemberUPI = (memberId: string, upiId: string) => {
     updateActiveTrip({
       ...activeTrip,
-      members: activeTrip.members.map(m => m.id === memberId ? { ...m, upiId } : m)
+      members: activeTrip?.members.map(m => m.id === memberId ? { ...m, upiId } : m)
     });
   };
 
   const handlePayUPI = (memberId: string, amt: number) => {
-    const mem = activeTrip.members.find(m => m.id === memberId);
+    const mem = activeTrip?.members.find(m => m.id === memberId);
     if (mem) {
       setSelectedUpiMember({
         member: mem,
@@ -214,7 +214,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
           lang="en"
           t={t}
           currencySymbol="₹"
-          adminId={activeTrip.adminId || currentUser?.id || ""}
+          adminId={activeTrip?.adminId || currentUser?.id || ""}
           balances={settlements.balances}
           transfers={settlements.transfers}
           poolBalance={poolBalance}
@@ -314,7 +314,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
                   onChange={(e) => setPaidBy(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
                 >
-                  {activeTrip.members.map(m => (
+                  {activeTrip?.members.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>
@@ -323,7 +323,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">Split With</label>
                 <div className="space-y-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200">
-                  {activeTrip.members.map(m => {
+                  {activeTrip?.members.map(m => {
                     const isChecked = splitWith.includes(m.id);
                     return (
                       <label key={m.id} className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
@@ -385,7 +385,7 @@ export function KharchScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
                   onChange={(e) => setDepMemberId(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-extrabold text-slate-900 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                 >
-                  {activeTrip.members.map(m => (
+                  {activeTrip?.members.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>

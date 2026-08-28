@@ -1,0 +1,16 @@
+.slice-carriers-title {
+  color: var(--GREY-900, #09090a);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 150%; /* 21px */
+  text-align: left;
+}
+
+.slice-carriers-title__operating-carrier {
+  color: var(--GREY-600, #71717a);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%;
+}

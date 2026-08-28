@@ -35,7 +35,7 @@ export function SocialScreen({ onLogout, onSOS, onOpenSettings, onOpenMyTickets,
         title={<LogoName />} 
         scrolled={scrolled} 
         onLogout={onLogout} 
-        onSOS={onSOS || (() => alert("SOS Triggered!"))} 
+        onSOS={onSOS || (() => alert("SOS Triggered!"))}
         onOpenSettings={onOpenSettings}
         onBack={onBack}
       />

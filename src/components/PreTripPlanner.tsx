@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Calendar, MapPin, Compass, RefreshCw, CheckCircle2, ArrowRight, Crown } from 'lucide-react';
+import { Compass, Calendar, MapPin, RefreshCw, CheckCircle2, ArrowRight, Crown } from 'lucide-react';
 import { TripGroup } from '../types';
 
 interface PreTripPlannerProps {
@@ -74,7 +74,7 @@ export const PreTripPlanner: React.FC<PreTripPlannerProps> = ({
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <Compass className="w-3.5 h-3.5 text-amber-300" />
                     <span>{isMr ? 'एआय आराखडा' : 'AI Plan'}</span>
                   </>
                 )}

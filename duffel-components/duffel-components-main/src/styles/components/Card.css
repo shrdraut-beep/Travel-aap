@@ -1,0 +1,55 @@
+.ancillary-card:disabled {
+  /* important needed to take precedence over default button styles */
+  color: inherit !important;
+  cursor: not-allowed !important;
+  background-color: var(--GREY-100) !important;
+}
+
+.ancillary-card--loading:disabled {
+  cursor: progress;
+}
+
+.ancillary-card__expand-icon {
+  color: var(--GREY-400);
+  transition:
+    color 0.3s var(--TRANSITION-CUBIC-BEZIER),
+    transform 0.5s var(--TRANSITION-CUBIC-BEZIER);
+  transform: scale(1);
+}
+
+.ancillary-card__children {
+  text-align: start;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--GREY-600);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ancillary-card:not(:disabled):not(.ancillary-card--loading):focus {
+  outline: none;
+}
+
+.ancillary-card:not(:disabled):not(.ancillary-card--loading):hover,
+.ancillary-card:not(:disabled):not(.ancillary-card--loading):focus-visible {
+  /* important is needed here to override the inline border style from Card.tsx */
+  border-color: var(--SECONDARY, rgb(var(--ACCENT))) !important;
+}
+
+.ancillary-card:not(:disabled):not(.ancillary-card--loading):hover
+  .ancillary-card__expand-icon,
+.ancillary-card:not(:disabled):not(.ancillary-card--loading):focus-visible
+  .ancillary-card__expand-icon {
+  color: var(--SECONDARY, rgb(var(--ACCENT)));
+}
+
+.ancillary-card__selected-icon {
+  background-color: var(--SECONDARY, rgb(var(--ACCENT)));
+  border-radius: 20px;
+  color: rgb(var(--WHITE));
+  fill: rgb(var(--WHITE));
+  height: 24px;
+  width: 24px;
+}

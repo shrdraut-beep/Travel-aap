@@ -65,9 +65,9 @@ export const PDFLayoutWrapper: React.FC<PDFLayoutWrapperProps> = ({
       `}</style>
 
       <div className="pdf-content-wrapper space-y-6">
-        {/* BRANDED LETTERHEAD HEADER */}
-        <header className="brochure-header break-inside-avoid page-break-avoid bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800">
-          <div className="flex items-center justify-between gap-4 border-b border-white/15 pb-4 mb-4">
+        {/* BRANDED LETTERHEAD HEADER - APP SIGNATURE THEME */}
+        <header className="brochure-header break-inside-avoid page-break-avoid bg-gradient-to-r from-rose-600 via-rose-700 to-red-800 text-white rounded-2xl p-6 shadow-md border border-rose-500/40">
+          <div className="flex items-center justify-between gap-4 border-b border-white/20 pb-4 mb-4">
             <div className="flex items-center gap-3.5">
               <img
                 src="/AppIcons/playstore.png"
@@ -75,35 +75,35 @@ export const PDFLayoutWrapper: React.FC<PDFLayoutWrapperProps> = ({
                 crossOrigin="anonymous"
                 loading="eager"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                className="w-12 h-12 rounded-xl object-cover shadow-md border border-white/20 shrink-0"
+                className="w-12 h-12 rounded-xl object-cover shadow-md border border-white/30 shrink-0 bg-white"
               />
               <div>
                 <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
                   <span>राऊट्रिपो</span>
-                  <span className="text-[10px] font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <span className="text-[10px] font-bold bg-amber-300 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
                     Official PDF
                   </span>
                 </h1>
-                <p className="text-xs font-semibold text-amber-300 tracking-wide mt-0.5">
+                <p className="text-xs font-semibold text-amber-200 tracking-wide mt-0.5">
                   दोस्तांची सफर, हिशोब विसर! 🚩
                 </p>
               </div>
             </div>
 
             <div className="text-right">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-300 bg-white/10 px-3 py-1 rounded-full border border-white/15 inline-block mb-1">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-white bg-white/20 px-3 py-1 rounded-full border border-white/30 inline-block mb-1 shadow-xs">
                 {documentType}
               </span>
-              <p className="text-[11px] font-medium text-slate-300">
+              <p className="text-[11px] font-semibold text-rose-100">
                 दिनांक: {currentDate}
               </p>
             </div>
           </div>
 
           {/* DYNAMIC TRIP DETAILS SUBHEADER */}
-          <div className="flex items-center justify-between gap-4 bg-white/5 rounded-xl p-3 border border-white/10">
+          <div className="flex items-center justify-between gap-4 bg-black/15 rounded-xl p-3 border border-white/15 backdrop-blur-xs">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+              <span className="text-[10px] font-bold text-rose-100 uppercase tracking-widest block">
                 सहलीचे नाव / Trip Title
               </span>
               <span className="text-base font-black text-white tracking-tight">
@@ -112,7 +112,7 @@ export const PDFLayoutWrapper: React.FC<PDFLayoutWrapperProps> = ({
             </div>
             {tripDates && (
               <div className="text-right">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                <span className="text-[10px] font-bold text-rose-100 uppercase tracking-widest block">
                   कालावधी / Trip Dates
                 </span>
                 <span className="text-xs font-extrabold text-amber-300">

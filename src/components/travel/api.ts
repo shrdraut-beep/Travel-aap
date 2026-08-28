@@ -128,10 +128,16 @@ export interface FetchLiveStationParams {
 /**
  * Helper to guarantee strict YYYY-MM-DD date formatting
  */
+const getTomorrowDateString = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+};
+
 export function formatDateToYYYYMMDD(rawDate?: string | Date): string {
-  if (!rawDate) return new Date().toISOString().split('T')[0];
+  if (!rawDate) return getTomorrowDateString();
   if (rawDate instanceof Date) {
-    if (isNaN(rawDate.getTime())) return new Date().toISOString().split('T')[0];
+    if (isNaN(rawDate.getTime())) return getTomorrowDateString();
     return rawDate.toISOString().split('T')[0];
   }
 
@@ -172,7 +178,7 @@ export function formatDateToYYYYMMDD(rawDate?: string | Date): string {
   if (!isNaN(parsed.getTime())) {
     return parsed.toISOString().split('T')[0];
   }
-  return new Date().toISOString().split('T')[0];
+  return getTomorrowDateString();
 }
 
 /**
@@ -199,25 +205,29 @@ export async function fetchFlightData(params: FetchFlightParams): Promise<Flight
     });
   }
 
-  // 1. Fetch live flight offers using Duffel API
+  // 1. Fetch live flight offers using Travelport TripServices GDS / Air API
   try {
-    const duffelResults = await fetchDuffelFlights({
-      origin: originCode,
-      destination: destCode,
-      departDate: dateStr,
-      adults: adults,
-      cabinClass: cabinClass,
+    const tpRes = await fetch("/api/travelport/flights/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        origin: originCode,
+        destination: destCode,
+        departDate: dateStr,
+        adults: adults,
+        cabinClass: cabinClass
+      })
     });
-
-    if (duffelResults && duffelResults.length > 0) {
-      if (params.onRawData) params.onRawData({ source: 'Duffel Live Flight API', flights: duffelResults });
-      return duffelResults;
+    const tpData = await tpRes.json().catch(() => ({}));
+    if (tpData?.success && Array.isArray(tpData.flights) && tpData.flights.length > 0) {
+      if (params.onRawData) params.onRawData({ source: 'Travelport TripServices (GDS/NDC)', ...tpData });
+      return tpData.flights;
     }
-  } catch (dErr) {
-    console.warn('Duffel API direct fetch notice, trying backend proxy:', dErr);
+  } catch (tpErr) {
+    console.warn('Travelport API direct fetch notice, trying universal flights backend:', tpErr);
   }
 
-  // 2. Backend proxy call /api/search-flights
+  // 2. Backend proxy call /api/flights/search
   const payload = {
     origin: originCode,
     destination: destCode,
@@ -229,7 +239,7 @@ export async function fetchFlightData(params: FetchFlightParams): Promise<Flight
   };
 
   try {
-    const res = await fetch("/api/search-flights", {
+    const res = await fetch("/api/flights/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -257,17 +267,30 @@ export async function fetchFlightData(params: FetchFlightParams): Promise<Flight
 }
 
 /**
- * Dynamic API Fetching logic for Hotels using CJ Affiliate API
+ * Dynamic API Fetching logic for Hotels using Travelport Stays API
  */
 export async function fetchHotelData(params: FetchHotelParams): Promise<HotelOption[]> {
-  return fetchFoursquareHotels({
-    destination: params.destination,
-    checkIn: params.checkIn,
-    checkOut: params.checkOut,
-    adults: params.adults,
-    onRawData: params.onRawData,
-    onRequestParams: params.onRequestParams,
-  });
+  try {
+    const res = await fetch("/api/travelport/hotels/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        destination: params.destination,
+        checkInDate: params.checkIn,
+        checkOutDate: params.checkOut,
+        adults: params.adults || 2
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data?.success && Array.isArray(data.hotels) && data.hotels.length > 0) {
+      if (params.onRawData) params.onRawData({ source: 'Travelport Stays (Expedia/Booking.com/GDS)', ...data });
+      return data.hotels;
+    }
+  } catch (err) {
+    console.warn("[Travelport Hotel Client Fetch Error]", err);
+  }
+
+  return [];
 }
 
 /**
@@ -314,7 +337,7 @@ export async function fetchLiveStationData(params: FetchLiveStationParams): Prom
  */
 export async function fetchTrainData(params: FetchTrainParams): Promise<TrainStatusData | null> {
   const tNum = (params.trainNumber || "22223").trim();
-  const sDate = params.startDate ? formatDateToYYYYMMDD(params.startDate) : new Date().toISOString().split('T')[0];
+  const sDate = params.startDate ? formatDateToYYYYMMDD(params.startDate) : getTomorrowDateString();
 
   const requestPayload = {
     trainNumber: tNum,

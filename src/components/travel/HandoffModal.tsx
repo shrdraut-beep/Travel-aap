@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, ShieldCheck, ExternalLink, Sparkles, X } from 'lucide-react';
+import { Loader2, ShieldCheck, ExternalLink, Compass as Sparkles, X } from 'lucide-react';
 import { generateEarnKaroLink } from './config';
 
 interface HandoffModalProps {

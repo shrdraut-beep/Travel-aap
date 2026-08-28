@@ -203,6 +203,7 @@ type BookingFlowContextValue = {
     taxesAndFees: number;
     convenienceFee: number;
     convenienceFeeWaived: boolean;
+    gstOnConvFee: number;
     grandTotal: number;
   };
   isPassengerFormValid: boolean;
@@ -237,9 +238,9 @@ export function BookingFlowProvider({ children }: { children: React.ReactNode })
     const farePerAdult = state.selectedFare?.pricePerAdult ?? 0;
     const baseFare = farePerAdult * state.passengerCount;
     const taxesAndFees = Math.round(baseFare * 0.05); // 5% GST & Platform
-    const convenienceFee = 250;
-    const convenienceFeeWaived = true; // ₹0 Conv Fee Offer active
-    const grandTotal = baseFare + taxesAndFees + seats + meals + baggage + insurance + (convenienceFeeWaived ? 0 : convenienceFee);
+    const convenienceFee = Math.max(200, baseFare * 0.02);
+    const gstOnConvFee = Math.ceil(convenienceFee * 0.18);
+    const grandTotal = Math.ceil(baseFare + taxesAndFees + seats + meals + baggage + insurance + convenienceFee + gstOnConvFee);
 
     return {
       seats,
@@ -250,7 +251,8 @@ export function BookingFlowProvider({ children }: { children: React.ReactNode })
       baseFare,
       taxesAndFees,
       convenienceFee,
-      convenienceFeeWaived,
+      convenienceFeeWaived: false,
+      gstOnConvFee,
       grandTotal
     };
   }, [state.seats, state.meals, state.baggage, state.selectedFare, state.passengerCount]);

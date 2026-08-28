@@ -5,7 +5,8 @@ import { FlightSearchTab } from './travel/FlightSearchTab';
 import { HotelSearchTab } from './travel/HotelSearchTab';
 import { TrainInfoTab } from './travel/TrainInfoTab';
 import { BusSearchTab } from './travel/BusSearchTab';
-import { UniversalBookingCheckoutModal, BookingItemPayload } from './travel/UniversalBookingCheckoutModal';
+import { BookingItemPayload } from '../pages/CheckoutPage';
+import { useNavigate } from 'react-router-dom';
 
 interface SharedBookingWidgetProps {
   lang: string;
@@ -16,8 +17,12 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
   lang,
   currencySymbol,
 }) => {
-  const [activeTab, setActiveTab] = useState<'flights' | 'buses' | 'hotels' | 'trains'>('flights');
-  const [checkoutModalItem, setCheckoutModalItem] = useState<BookingItemPayload | null>(null);
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'flights' | 'buses' | 'trains'>('flights');
+
+  const handleBookNow = (item: BookingItemPayload) => {
+    navigate('/checkout', { state: { item, currencySymbol, lang } });
+  };
 
   const handleTabClick = (id: any) => {
     setActiveTab(id);
@@ -39,15 +44,8 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
       activeBg: 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
     },
     {
-      id: 'hotels',
-      label: lang === 'mr' ? 'हॉटेल्स (Hotels)' : 'Hotels',
-      icon: Building2,
-      color: 'text-purple-600',
-      activeBg: 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-    },
-    {
       id: 'trains',
-      label: lang === 'mr' ? 'ट्रेन (Trains Info)' : 'Trains',
+      label: lang === 'mr' ? 'ट्रेन (Trains)' : 'Trains',
       icon: Train,
       color: 'text-amber-600',
       activeBg: 'bg-amber-600 text-white shadow-lg shadow-amber-500/30'
@@ -56,8 +54,8 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
 
   return (
     <div className="w-full space-y-6">
-      {/* Modern 4-Tab Segmented Controller */}
-      <div className="bg-slate-100 p-1.5 rounded-2xl grid grid-cols-4 gap-1.5 shadow-inner border border-slate-200">
+      {/* Modern 3-Tab Segmented Controller */}
+      <div className="bg-slate-100 p-1.5 rounded-2xl grid grid-cols-3 gap-1.5 shadow-inner border border-slate-200">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -87,33 +85,17 @@ export const SharedBookingWidget: React.FC<SharedBookingWidgetProps> = ({
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
         >
-          
           {activeTab === 'flights' && (
-            <FlightSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <FlightSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
           {activeTab === 'buses' && (
-            <BusSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
-          )}
-          {activeTab === 'hotels' && (
-            <HotelSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <BusSearchTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
           {activeTab === 'trains' && (
-            <TrainInfoTab lang={lang} currencySymbol={currencySymbol} onBookNow={setCheckoutModalItem} />
+            <TrainInfoTab lang={lang} currencySymbol={currencySymbol} onBookNow={handleBookNow} />
           )}
         </motion.div>
       </AnimatePresence>
-      {checkoutModalItem && (
-        <UniversalBookingCheckoutModal
-          isOpen={true}
-          onClose={() => setCheckoutModalItem(null)}
-          item={checkoutModalItem}
-          currencySymbol={currencySymbol}
-          lang={lang}
-          onBookingSuccess={(receipt) => {
-            alert(`🎉 Booking confirmed: ${receipt.bookingId}`);
-          }}
-        />
-      )}
     </div>
   );
 };

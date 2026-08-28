@@ -4,13 +4,142 @@ export interface TouristSpot {
   keywords: string[];
   location?: string;
   subtitle?: string;
+  category?: string;
 }
 
-// Destination-aware image resolver for Indian & Global travel
-const resolveDestinationImage = (destName: string, category: 'hero' | 'beach' | 'fort' | 'temple' | 'market' | 'hill'): string => {
-  const query = `${destName} ${category}`.replace(/\s+/g, '+');
-  // Use a more stable placeholder service
-  return `https://picsum.photos/seed/${query}/600/400`;
+// Curated high-resolution, reliable travel & historical photography catalogue
+const CURATED_DESTINATION_PHOTOS: Record<string, { hero: string; fort?: string; beach?: string; temple?: string; market?: string; nature?: string; food?: string }> = {
+  ganpatipule: {
+    hero: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
+    beach: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80'
+  },
+  ratnagiri: {
+    hero: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+    beach: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80'
+  },
+  goa: {
+    hero: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1000&q=80',
+    beach: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1000&q=80',
+    market: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=1000&q=80'
+  },
+  manali: {
+    hero: 'https://images.unsplash.com/photo-1568454537842-d933259bb258?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=1000&q=80'
+  },
+  mahabaleshwar: {
+    hero: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80'
+  },
+  lonavala: {
+    hero: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80'
+  },
+  alibaug: {
+    hero: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
+    beach: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=1000&q=80'
+  },
+  shirdi: {
+    hero: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80'
+  },
+  udaipur: {
+    hero: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80'
+  },
+  jaipur: {
+    hero: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1000&q=80',
+    market: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'
+  },
+  kerala: {
+    hero: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1000&q=80',
+    beach: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
+    food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80'
+  },
+  kashmir: {
+    hero: 'https://images.unsplash.com/photo-1568454537842-d933259bb258?auto=format&fit=crop&w=1000&q=80',
+    nature: 'https://images.unsplash.com/photo-1568454537842-d933259bb258?auto=format&fit=crop&w=1000&q=80',
+    temple: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1000&q=80'
+  }
+};
+
+// Fallback category images
+const CATEGORY_FALLBACKS: Record<string, string> = {
+  fort: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+  heritage: 'https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1000&q=80',
+  temple: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+  mandir: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80',
+  beach: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
+  sea: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1000&q=80',
+  market: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80',
+  food: 'https://images.unsplash.com/photo-1610057099431-d73a1c9d2f2f?auto=format&fit=crop&w=1000&q=80',
+  nature: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80',
+  mountain: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+  hero: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80'
+};
+
+export const resolveDestinationImage = (destName: string = '', category: 'hero' | 'beach' | 'fort' | 'temple' | 'market' | 'nature' | 'food' = 'hero'): string => {
+  const norm = (destName || '').toLowerCase().trim();
+  
+  for (const [key, mapping] of Object.entries(CURATED_DESTINATION_PHOTOS)) {
+    if (norm.includes(key) || key.includes(norm)) {
+      if (category === 'hero' && mapping.hero) return mapping.hero;
+      if (category === 'fort' && (mapping.fort || mapping.hero)) return mapping.fort || mapping.hero;
+      if (category === 'beach' && (mapping.beach || mapping.hero)) return mapping.beach || mapping.hero;
+      if (category === 'temple' && (mapping.temple || mapping.hero)) return mapping.temple || mapping.hero;
+      if (category === 'nature' && (mapping.nature || mapping.hero)) return mapping.nature || mapping.hero;
+      if (category === 'food' && (mapping.food || mapping.hero)) return mapping.food || mapping.hero;
+      if (category === 'market' && (mapping.market || mapping.hero)) return mapping.market || mapping.hero;
+      return mapping.hero || CATEGORY_FALLBACKS[category] || CATEGORY_FALLBACKS.hero;
+    }
+  }
+
+  // Check text content keywords
+  if (norm.includes('fort') || norm.includes('किल्ला') || norm.includes('दुर्ग') || norm.includes('mahal') || norm.includes('palace')) {
+    return CATEGORY_FALLBACKS.fort;
+  }
+  if (norm.includes('temple') || norm.includes('मंदिर') || norm.includes('देवस्थान') || norm.includes('shirdi') || norm.includes('ganpati')) {
+    return CATEGORY_FALLBACKS.temple;
+  }
+  if (norm.includes('beach') || norm.includes('समुद्र') || norm.includes('किनारा') || norm.includes('sea') || norm.includes('water')) {
+    return CATEGORY_FALLBACKS.beach;
+  }
+  if (norm.includes('food') || norm.includes('जेवण') || norm.includes('थाळी') || norm.includes('मोदक') || norm.includes('dish') || norm.includes('lunch') || norm.includes('dinner')) {
+    return CATEGORY_FALLBACKS.food;
+  }
+  if (norm.includes('mountain') || norm.includes('पर्वत') || norm.includes('घाट') || norm.includes('point') || norm.includes('hill')) {
+    return CATEGORY_FALLBACKS.mountain;
+  }
+
+  return CATEGORY_FALLBACKS[category] || CATEGORY_FALLBACKS.hero;
 };
 
 export const getFeaturedSpotsForTrip = (
@@ -43,9 +172,9 @@ export const getFeaturedSpotsForTrip = (
         location: `${capDest}`
       },
       {
-        title: `${capDest} स्थानिक बाजारपेठ व खरेदी`,
-        url: resolveDestinationImage(destClean, 'market'),
-        keywords: ['market', 'bazaar'],
+        title: `${capDest} स्थानिक खाद्य व संस्कृती`,
+        url: resolveDestinationImage(destClean, 'food'),
+        keywords: ['food', 'cuisine'],
         location: `${capDest}`
       }
     ];
@@ -71,51 +200,50 @@ export const getFeaturedSpotsForTrip = (
       location: `${capDest} Heritage Zone`
     },
     {
-      title: `${capDest} Local Cultural Bazaar`,
-      url: resolveDestinationImage(destClean, 'market'),
-      keywords: ['market', 'shopping', 'bazaar'],
-      location: `${capDest} Main Market`
+      title: `${capDest} Authentic Food & Culture`,
+      url: resolveDestinationImage(destClean, 'food'),
+      keywords: ['food', 'dining', 'bazaar'],
+      location: `${capDest} Food Hub`
     }
   ];
 };
 
 export const getSpotsForDay = (
   dayNum: number,
-  dayText: string,
+  dayText: string = '',
   destinationName: string = '',
   tripTitle: string = '',
   isMr: boolean = false
 ): TouristSpot[] => {
   const cleanD = destinationName || tripTitle.split(' ')[0] || 'Destination';
   const capD = cleanD.charAt(0).toUpperCase() + cleanD.slice(1);
+  const textLower = (dayText || '').toLowerCase();
 
-  if (isMr) {
-    return [
-      {
-        title: `${capD} मुख्य पर्यटन केंद्र (दिवस ${dayNum})`,
-        url: resolveDestinationImage(`${cleanD} ${dayText}`, 'beach'),
-        keywords: ['spot', 'sightseeing'],
-        location: `${capD}`
-      },
-      {
-        title: `${capD} ऐतिहासिक वास्तू (दिवस ${dayNum})`,
-        url: resolveDestinationImage(`${cleanD} ${dayText}`, 'fort'),
-        keywords: ['heritage', 'culture'],
-        location: `${capD}`
-      }
-    ];
+  // Smart detection from the day text
+  let cat1: 'fort' | 'beach' | 'temple' | 'nature' | 'food' = 'nature';
+  let cat2: 'fort' | 'beach' | 'temple' | 'nature' | 'food' = 'fort';
+
+  if (textLower.includes('fort') || textLower.includes('किल्ला') || textLower.includes('दुर्ग') || textLower.includes('mahal')) {
+    cat1 = 'fort';
+    cat2 = textLower.includes('temple') || textLower.includes('मंदिर') ? 'temple' : 'nature';
+  } else if (textLower.includes('temple') || textLower.includes('मंदिर') || textLower.includes('दर्शन') || textLower.includes('देवस्थान')) {
+    cat1 = 'temple';
+    cat2 = textLower.includes('beach') || textLower.includes('समुद्र') ? 'beach' : 'fort';
+  } else if (textLower.includes('beach') || textLower.includes('समुद्र') || textLower.includes('किनारा')) {
+    cat1 = 'beach';
+    cat2 = 'fort';
   }
 
   return [
     {
-      title: `${capD} Key Attraction - Day ${dayNum}`,
-      url: resolveDestinationImage(`${cleanD} ${dayText}`, 'beach'),
+      title: isMr ? `${capD} मुख्य प्रेक्षणीय स्थळ (दिवस ${dayNum})` : `${capD} Key Sightseeing (Day ${dayNum})`,
+      url: resolveDestinationImage(`${cleanD} ${dayText}`, cat1),
       keywords: ['spot', 'sightseeing'],
       location: `${capD}`
     },
     {
-      title: `${capD} Heritage Site - Day ${dayNum}`,
-      url: resolveDestinationImage(`${cleanD} ${dayText}`, 'fort'),
+      title: isMr ? `${capD} ऐतिहासिक/नैसर्गिक केंद्र (दिवस ${dayNum})` : `${capD} Heritage & Nature (Day ${dayNum})`,
+      url: resolveDestinationImage(`${cleanD} ${dayText}`, cat2),
       keywords: ['heritage', 'culture'],
       location: `${capD}`
     }
@@ -147,4 +275,3 @@ export const getBrochureHeroContent = (
 };
 
 export const getBannerImageForTrip = getBrochureHeroContent;
-

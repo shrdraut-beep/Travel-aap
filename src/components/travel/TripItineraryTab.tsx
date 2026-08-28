@@ -1,6 +1,6 @@
 import { safeStorage } from '../../utils/storage';
 import React, { useState, useEffect } from 'react';
-import { Compass, Plane, Building2, Calendar, MapPin, ExternalLink, Plus, Sparkles, ArrowRight, BookmarkCheck, Trash2 } from 'lucide-react';
+import { Compass, Plane, Building2, Calendar, MapPin, ExternalLink, Plus, Compass as Sparkles, ArrowRight, BookmarkCheck, Trash2 } from 'lucide-react';
 import { getFlightDeepLink, getHotelDeepLink, TRAVELPAYOUTS_MARKER } from './config';
 
 interface TripItineraryTabProps {
@@ -124,7 +124,7 @@ export const TripItineraryTab: React.FC<TripItineraryTabProps> = ({ lang, curren
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Sparkles className="w-4 h-4 text-emerald-600" />
+          <BookmarkCheck className="w-4 h-4 text-emerald-600" />
           <span>{lang === 'mr' ? `जतन केलेल्या सहली (${savedTrips.length})` : `Saved Trips (${savedTrips.length})`}</span>
         </button>
 

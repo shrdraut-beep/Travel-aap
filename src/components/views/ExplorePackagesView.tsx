@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authedFetch } from '../../utils/apiClient';
 import { 
   Search, 
@@ -12,7 +13,7 @@ import {
   Train, 
   MessageCircle, 
   ChevronDown, 
-  Sparkles, 
+  Compass as Sparkles, 
   Check, 
   RotateCcw,
   SlidersHorizontal,
@@ -35,9 +36,16 @@ import {
   Tag,
   Gift,
   AlertCircle,
-  Loader2
+  Loader2,
+  ArrowLeft,
+  Users,
+  Minus,
+  Plus,
+  ArrowRight
 } from 'lucide-react';
 import { mockCoupons, validateCouponCode, MockCoupon } from '../../data/mockDataStore';
+import { BookingFunnelLayout } from '../travel/BookingFunnelLayout';
+import { SearchResultsToolbar } from '../travel/SearchResultsToolbar';
 
 export interface TourPackage {
   id: string;
@@ -60,76 +68,94 @@ export interface TourPackage {
 
 const DEFAULT_PACKAGES: TourPackage[] = [
   {
-    id: "pkg_ratnagiri_1",
-    title: "Ratnagiri Beach & Mango Tour",
-    destination: "Ratnagiri",
-    origin: "Mumbai",
-    durationDays: 3,
-    durationNights: 2,
-    price: 3800,
-    rating: 4.8,
-    reviewsCount: 124,
-    isVerifiedAgent: true,
-    agentName: "Konkan Safar Tours",
-    agentPhone: "+919876543210",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=600&q=80",
-    transportType: "bus",
-    inclusions: ["AC Bus Travel", "Beachside Resort Stay", "Alphonso Mango Farm Visit", "All Meals Included"],
-    description: "Experience the magic of Konkan with our exclusive Ratnagiri tour. Visit pristine beaches, historic forts, and relish authentic Konkan cuisine."
-  },
-  {
-    id: "pkg_goa_1",
-    title: "Goa Coastal Escapade",
-    destination: "Goa",
-    origin: "Pune",
+    id: 'pkg-konkan-1',
+    title: 'Konkan Coastal Paradise & Forts Safari',
+    destination: 'Ratnagiri',
+    origin: 'Mumbai',
     durationDays: 4,
     durationNights: 3,
-    price: 8900,
+    price: 12500,
     rating: 4.9,
-    reviewsCount: 342,
+    reviewsCount: 148,
     isVerifiedAgent: true,
-    agentName: "Goa Vibes Travel",
-    agentPhone: "+919988776655",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
-    transportType: "flight",
-    inclusions: ["Flight Tickets", "4-Star Beach Resort", "Water Sports Package", "Free Breakfast"],
-    description: "Discover Goa like never before. From north to south, explore beautiful beaches, historical churches, and vibrant markets with guided tours."
+    agentName: 'Konkan Magic Travels',
+    agentPhone: '+919876543210',
+    image: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&w=800&q=80',
+    transportType: 'bus',
+    inclusions: ['AC Transport', '3-Star Resort Stay', 'Alphonso Mango Farm Tour', 'Breakfast & Dinner'],
+    description: 'Experience pristine beaches, historic coastal forts of Ratnagiri, Ganpatipule temple visit, and traditional Konkani seafood delicacies.'
   },
   {
-    id: "pkg_mahabaleshwar_1",
-    title: "Mahabaleshwar Hills & Strawberry Farm Tour",
-    destination: "Mahabaleshwar",
-    origin: "Mumbai",
-    durationDays: 3,
-    durationNights: 2,
-    price: 5500,
-    rating: 4.7,
-    reviewsCount: 88,
+    id: 'pkg-goa-1',
+    title: 'Magical Goa Beach Resort & Sunset Cruise',
+    destination: 'Goa',
+    origin: 'Mumbai',
+    durationDays: 5,
+    durationNights: 4,
+    price: 18999,
+    rating: 4.8,
+    reviewsCount: 312,
     isVerifiedAgent: true,
-    agentName: "Sahyadri Travels",
-    agentPhone: "+919123456789",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-    transportType: "car",
-    inclusions: ["Private Sedan Cab", "Hillview Hotel Stay", "Strawberry Picking Activity", "Sightseeing Guide"],
-    description: "Relax in the cool mist of Mahabaleshwar. Enjoy scenic viewpoints, strawberry garden walks, and the serenity of Venna Lake."
+    agentName: 'Goa Horizon Tours',
+    agentPhone: '+919822114455',
+    image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80',
+    transportType: 'flight',
+    inclusions: ['Return Flight', '4-Star Beachfront Hotel', 'Mandovi Sunset Cruise', 'Water Sports Package'],
+    description: 'Unwind on North and South Goa beaches, enjoy luxury catamaran sunset cruise, nightlife tours, and heritage churches of Old Goa.'
   },
   {
-    id: "pkg_shirdi_1",
-    title: "Shirdi Devotional Tour",
-    destination: "Shirdi",
-    origin: "Mumbai",
+    id: 'pkg-shirdi-1',
+    title: 'Divine Shirdi Sai Baba & Shanishingnapur Yatra',
+    destination: 'Shirdi',
+    origin: 'Mumbai',
     durationDays: 2,
     durationNights: 1,
-    price: 2500,
+    price: 4999,
     rating: 4.9,
-    reviewsCount: 450,
+    reviewsCount: 420,
     isVerifiedAgent: true,
-    agentName: "Sai Darshan Tours",
-    agentPhone: "+919898989898",
-    image: "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=600&q=80",
-    transportType: "train",
-    inclusions: ["Train Tickets", "Hotel near Temple", "Special VIP Darshan Pass", "All Transfers"],
-    description: "A peaceful pilgrimage to the holy town of Shirdi. Enjoy comfortable stays, hassle-free temple darshans, and complete peace of mind."
+    agentName: 'Sai Shradha Yatra',
+    agentPhone: '+919422335577',
+    image: 'https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=800&q=80',
+    transportType: 'bus',
+    inclusions: ['VIP Darshan Pass', 'Deluxe Hotel Stay', 'AC Bus Transport', 'Mahaprasad Lunch'],
+    description: 'Hassle-free spiritual journey with guaranteed VIP temple entrance pass, comfortable AC Volvo bus transport, and peaceful stay.'
+  },
+  {
+    id: 'pkg-mahabaleshwar-1',
+    title: 'Serene Mahabaleshwar & Panchgani Hill Retreat',
+    destination: 'Mahabaleshwar',
+    origin: 'Mumbai',
+    durationDays: 3,
+    durationNights: 2,
+    price: 8499,
+    rating: 4.7,
+    reviewsCount: 95,
+    isVerifiedAgent: true,
+    agentName: 'Sahyadri Travels',
+    agentPhone: '+919833667788',
+    image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
+    transportType: 'car',
+    inclusions: ['Private Car Sightseeing', 'Strawberry Farm Visit', 'Valley View Villa', 'Breakfast included'],
+    description: 'Explore Venna Lake, Arthur seat point, Mapro garden strawberry tasting, and lush green mountain panoramas of Mahabaleshwar.'
+  },
+  {
+    id: 'pkg-delhi-1',
+    title: 'Golden Triangle & Delhi Heritage Experience',
+    destination: 'New Delhi',
+    origin: 'Mumbai',
+    durationDays: 6,
+    durationNights: 5,
+    price: 24999,
+    rating: 4.9,
+    reviewsCount: 180,
+    isVerifiedAgent: true,
+    agentName: 'Royal India Expeditions',
+    agentPhone: '+919811002233',
+    image: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80',
+    transportType: 'flight',
+    inclusions: ['Flight Tickets', 'Taj Mahal Day Trip', '5-Star Hotel Stay', 'English/Hindi Tour Guide'],
+    description: 'Comprehensive Golden Triangle tour covering Red Fort, Qutub Minar, India Gate, and a day excursion to Agra Taj Mahal.'
   }
 ];
 
@@ -139,16 +165,38 @@ interface ExplorePackagesViewProps {
   lang?: string;
   onSelectPackage?: (pkg: TourPackage) => void;
   onBookNow?: (item: any) => void;
+  onBack?: () => void;
 }
 
 export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
   lang = 'en',
   onSelectPackage,
-  onBookNow
+  onBookNow,
+  onBack
 }) => {
-  const [selectedDestination, setSelectedDestination] = useState<string>('All Destinations');
+  const navigate = useNavigate();
+  const isMr = lang === 'mr';
+
+  const [origin, setOrigin] = useState<string>('Mumbai');
+  const [selectedDestination, setSelectedDestination] = useState<string>('');
+  const [tripStartDate, setTripStartDate] = useState<string>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  });
+  const [travelersCount, setTravelersCount] = useState<number>(1);
   const [searchQuery, setSearchQuery] = useState<string>('');
   
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState<boolean>(true);
+
+  const [maxPrice, setMaxPrice] = useState<number>(50000);
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<'rating' | 'price_low' | 'price_high' | 'recommended'>('recommended');
+  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>('grid');
+  
+  const [selectedModalPackage, setSelectedModalPackage] = useState<TourPackage | null>(null);
+
   // Bargain Feature State
   const [bargainModalOpen, setBargainModalOpen] = useState(false);
   const [selectedBargainPkg, setSelectedBargainPkg] = useState<TourPackage | null>(null);
@@ -169,100 +217,18 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
     setBargainSuccess(true);
     setTimeout(() => {
       setBargainModalOpen(false);
-    }, 3000);
+    }, 2500);
   };
 
-  const [maxPrice, setMaxPrice] = useState<number>(30000);
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<'rating' | 'price_low' | 'price_high' | 'recommended'>('recommended');
-  const [selectedModalPackage, setSelectedModalPackage] = useState<TourPackage | null>(null);
-
-  // CHECKOUT & PAYMENT FLOW STATE (COMMISSION SPLIT ARCHITECTURE)
-  const [checkoutPkg, setCheckoutPkg] = useState<TourPackage | null>(null);
-  const [travelersCount, setTravelersCount] = useState<number>(1);
-  const [tripStartDate, setTripStartDate] = useState<string>(() => new Date().toISOString().substring(0, 10));
-  const [custName, setCustName] = useState<string>('');
-  const [custPhone, setCustPhone] = useState<string>('');
-  const [custEmail, setCustEmail] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
-  const [upiVpa, setUpiVpa] = useState<string>('');
-  const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
-  const [completedVoucher, setCompletedVoucher] = useState<any | null>(null);
-
-  // Promo Code State in ExplorePackagesView
-  const [promoInput, setPromoInput] = useState<string>('');
-  const [appliedCoupon, setAppliedCoupon] = useState<MockCoupon | null>(null);
-  const [discountAmount, setDiscountAmount] = useState<number>(0);
-  const [isValidatingCoupon, setIsValidatingCoupon] = useState<boolean>(false);
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [couponSuccessMsg, setCouponSuccessMsg] = useState<string | null>(null);
-
-  const grossPackageAmount = (checkoutPkg?.price || 0) * travelersCount;
-  const finalDiscountedTotal = Math.max(1, grossPackageAmount - discountAmount);
-
-  // Auto-recalculate or remove coupon if travelers count changes
-  useEffect(() => {
-    if (appliedCoupon && checkoutPkg) {
-      if (grossPackageAmount < appliedCoupon.minAmount) {
-        setCouponError(`Min booking ₹${appliedCoupon.minAmount.toLocaleString('en-IN')} required. Coupon removed.`);
-        setAppliedCoupon(null);
-        setDiscountAmount(0);
-        setCouponSuccessMsg(null);
-      } else {
-        let disc = 0;
-        if (appliedCoupon.type === 'flat') {
-          disc = appliedCoupon.discount;
-        } else {
-          disc = Math.round((grossPackageAmount * appliedCoupon.discount) / 100);
-          if (appliedCoupon.maxDiscount && disc > appliedCoupon.maxDiscount) {
-            disc = appliedCoupon.maxDiscount;
-          }
-        }
-        setDiscountAmount(Math.min(disc, grossPackageAmount - 1));
-      }
-    }
-  }, [travelersCount, grossPackageAmount]);
-
-  const handleApplyPromo = async (codeToApply?: string) => {
-    const targetCode = (codeToApply || promoInput).trim().toUpperCase();
-    if (!targetCode) {
-      setCouponError('Please enter a coupon code');
-      return;
-    }
-
-    setIsValidatingCoupon(true);
-    setCouponError(null);
-    setCouponSuccessMsg(null);
-
-    try {
-      const res = await validateCouponCode(targetCode, grossPackageAmount);
-      if (res.valid && res.coupon) {
-        setAppliedCoupon(res.coupon);
-        setDiscountAmount(res.discountAmount);
-        setPromoInput(targetCode);
-        setCouponSuccessMsg(`🎉 Code '${res.coupon.code}' applied! Saved ₹${res.discountAmount.toLocaleString('en-IN')}`);
-      } else {
-        setAppliedCoupon(null);
-        setDiscountAmount(0);
-        setCouponError(res.error || 'Invalid or expired coupon');
-      }
-    } catch (err: any) {
-      setCouponError('Failed to validate coupon');
-    } finally {
-      setIsValidatingCoupon(false);
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    setDiscountAmount(0);
-    setPromoInput('');
-    setCouponError(null);
-    setCouponSuccessMsg(null);
+  const handlePackageSearch = () => {
+    setIsLoading(true);
+    setHasSearched(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 400);
   };
 
   const handleWhatsAppClick = (pkg: TourPackage) => {
-    // Exact requested format: https://wa.me/<number>?text=<encoded_text>
     const templateMessage = `Hi, I'm interested in the [${pkg.title}] package, could you provide more details?`;
     const encodedText = encodeURIComponent(templateMessage);
     const cleanNumber = pkg.agentPhone.replace(/[^0-9]/g, '');
@@ -279,108 +245,48 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
         subtitle: `${pkg.origin} ➔ ${pkg.destination}`,
         location: `${pkg.origin} to ${pkg.destination}`,
         time: `${pkg.durationDays} Days / ${pkg.durationNights} Nights`,
-        amount: pkg.price,
+        amount: pkg.price * travelersCount,
         image: pkg.image,
         provider: pkg.agentName,
         meta: { 
           rating: pkg.rating,
           transportType: pkg.transportType,
-          inclusions: pkg.inclusions
+          inclusions: pkg.inclusions,
+          travelers: travelersCount
         }
       });
       return;
     }
-    setCheckoutPkg(pkg);
-    setTravelersCount(1);
-    setTripStartDate('2026-08-15');
-    setAppliedCoupon(null);
-    setDiscountAmount(0);
-    setPromoInput('');
-    setCouponError(null);
-    setCouponSuccessMsg(null);
-    if (selectedModalPackage) setSelectedModalPackage(null);
-  };
-
-  const handleCompleteCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkoutPkg) return;
-
-    setIsProcessingPayment(true);
-
-    try {
-      const response = await authedFetch('/api/checkout/create-order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+    navigate('/checkout', {
+      state: {
+        item: {
+          id: pkg.id,
+          title: pkg.title,
+          vertical: 'package',
+          subtitle: `${pkg.origin} ➔ ${pkg.destination}`,
+          location: `${pkg.origin} to ${pkg.destination}`,
+          time: `${pkg.durationDays} Days / ${pkg.durationNights} Nights`,
+          amount: pkg.price * travelersCount,
+          image: pkg.image,
+          provider: pkg.agentName,
+          meta: { 
+            rating: pkg.rating,
+            transportType: pkg.transportType,
+            inclusions: pkg.inclusions,
+            travelers: travelersCount
+          }
         },
-        body: JSON.stringify({
-          packageId: checkoutPkg.id,
-          travelersCount: travelersCount,
-          couponCode: appliedCoupon?.code || undefined,
-          finalAmount: finalDiscountedTotal
-        })
-      });
-
-      let actualAmount = finalDiscountedTotal;
-      if (response.ok) {
-        const orderData = await response.json().catch(() => ({}));
-        if (orderData.calculatedAmount) {
-          actualAmount = orderData.calculatedAmount;
-        }
+        currencySymbol: '₹',
+        lang
       }
-
-      const platformCommission = Math.round(actualAmount * 0.10); // 10% platform commission
-      const vendorAmount = actualAmount - platformCommission; // 90% vendor payout
-      const refId = `BKG-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      const newBooking = {
-        id: refId,
-        customerName: custName || 'Valued Traveler',
-        customerPhone: custPhone || '',
-        customerEmail: custEmail || '',
-        packageName: checkoutPkg.title,
-        total_amount: actualAmount,
-        original_gross: grossPackageAmount,
-        discount_applied: discountAmount,
-        coupon_code: appliedCoupon?.code || null,
-        platform_commission: platformCommission,
-        vendor_amount: vendorAmount,
-        amount: actualAmount,
-        tripStartDate: tripStartDate || new Date().toLocaleDateString(),
-        payment_status: 'Held securely' as const,
-        paymentStatus: 'Held in Escrow' as const,
-        paymentMethod: paymentMethod === 'upi' ? `UPI (${upiVpa || 'Instant'})` : paymentMethod === 'card' ? 'Visa / MasterCard' : 'Net Banking',
-        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      };
-
-      try {
-        const existing = localStorage.getItem('mahakonkan_marketplace_bookings');
-        const parsed = existing ? JSON.parse(existing) : [];
-        const updated = [newBooking, ...parsed];
-        localStorage.setItem('mahakonkan_marketplace_bookings', JSON.stringify(updated));
-        window.dispatchEvent(new Event('mahakonkan_booking_created'));
-      } catch (err) {
-        console.warn("Local storage write warning:", err);
-      }
-
-      setIsProcessingPayment(false);
-      setCompletedVoucher(newBooking);
-      setCheckoutPkg(null);
-    } catch (err: any) {
-      console.error("Payment checkout error:", err);
-      alert(err.message || "Failed to initiate payment. Please try again.");
-      setIsProcessingPayment(false);
-    }
+    });
   };
 
   const filteredPackages = useMemo(() => {
     return DEFAULT_PACKAGES.filter(pkg => {
-      // 1. Destination check
-      if (selectedDestination !== 'All Destinations' && pkg.destination.toLowerCase() !== selectedDestination.toLowerCase()) {
+      if (selectedDestination && selectedDestination !== 'All Destinations' && pkg.destination.toLowerCase() !== selectedDestination.toLowerCase()) {
         return false;
       }
-
-      // 2. Search query check
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = pkg.title.toLowerCase().includes(query);
@@ -388,190 +294,143 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
         const matchesAgent = pkg.agentName.toLowerCase().includes(query);
         if (!matchesTitle && !matchesDest && !matchesAgent) return false;
       }
-
-      // 3. Price slider check
       if (pkg.price > maxPrice) return false;
-
-      // 4. Verified Agent check
       if (verifiedOnly && !pkg.isVerifiedAgent) return false;
-
       return true;
     }).sort((a, b) => {
       if (sortBy === 'rating') return b.rating - a.rating;
       if (sortBy === 'price_low') return a.price - b.price;
       if (sortBy === 'price_high') return b.price - a.price;
-      return 0; // recommended
+      return 0;
     });
   }, [selectedDestination, searchQuery, maxPrice, verifiedOnly, sortBy]);
 
   const resetFilters = () => {
-    setSelectedDestination('All Destinations');
+    setSelectedDestination('');
     setSearchQuery('');
-    setMaxPrice(30000);
+    setMaxPrice(50000);
     setVerifiedOnly(false);
     setSortBy('recommended');
   };
 
-  return (
-    <div className="w-full space-y-6">
-      {/* Header Title */}
-      <div className="bg-emerald-50 rounded-3xl p-6 sm:p-8 text-slate-800 shadow-sm relative overflow-hidden border border-emerald-100">
-        <div className="relative z-10 max-w-2xl space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
-            {lang === 'mr' ? 'विशेष टूर पॅकेजेस शोधा' : 'Explore Curated Tour Packages'}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-            {lang === 'mr' ? 'तुमच्या पुढील सहलीसाठी सर्वोत्तम पर्याय निवडा.' : 'Discover and connect with top-rated travel packages for your next trip.'}
-          </p>
+  const renderPassengerSelector = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="font-bold text-slate-800">{isMr ? 'प्रवाशांची संख्या' : 'Travelers'}</h4>
+          <p className="text-xs text-slate-500">{isMr ? 'या टूरसाठी प्रवासी निवडा' : 'Select total guests for this package'}</p>
+        </div>
+        <div className="flex items-center gap-4 bg-slate-100 rounded-xl p-1">
+          <button 
+            type="button"
+            onClick={() => setTravelersCount(Math.max(1, travelersCount - 1))} 
+            className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 cursor-pointer"
+          >
+            <Minus className="w-4 h-4"/>
+          </button>
+          <span className="font-black text-slate-900 w-4 text-center">{travelersCount}</span>
+          <button 
+            type="button"
+            onClick={() => setTravelersCount(Math.min(10, travelersCount + 1))} 
+            className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-xs text-slate-800 font-bold active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4"/>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderResultsToolbar = () => (
+    <SearchResultsToolbar
+      sortOptions={[
+        { key: 'recommended', label: isMr ? 'शिफारस केलेले' : 'Recommended' },
+        { key: 'rating', label: isMr ? 'सर्वोत्तम रेटिंग' : 'Highest Rating' },
+        { key: 'price_low', label: isMr ? 'किंमत: कमी ते जास्त' : 'Price: Low to High' },
+        { key: 'price_high', label: isMr ? 'किंमत: जास्त ते कमी' : 'Price: High to Low' }
+      ]}
+      activeSort={sortBy}
+      onSortChange={(val) => setSortBy(val as any)}
+      toggles={[
+        {
+          key: 'verified',
+          label: isMr ? 'फक्त सत्यापित' : 'Verified Partners',
+          active: verifiedOnly,
+          onToggle: () => setVerifiedOnly(!verifiedOnly)
+        }
+      ]}
+      viewMode={layoutMode}
+      onViewModeChange={(m) => setLayoutMode(m)}
+      lang={lang}
+    />
+  );
+
+  const renderResults = () => (
+    <div className="space-y-6">
+      {/* Quick Keywords & Filter Pills */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder={isMr ? 'शहर किंवा टायटल शोधा...' : 'Filter by title, city or agent...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedDestination || 'All Destinations'}
+            onChange={(e) => setSelectedDestination(e.target.value === 'All Destinations' ? '' : e.target.value)}
+            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-extrabold text-slate-800 focus:outline-none"
+          >
+            {DESTINATION_OPTIONS.map(d => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+          
+          {(searchQuery || selectedDestination || verifiedOnly) && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* ADVANCED FILTERING & SORTING INTERFACE */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-2 text-slate-900 font-extrabold text-sm sm:text-base">
-            <SlidersHorizontal className="w-4 h-4 text-emerald-600" />
-            <span>{lang === 'mr' ? 'फिल्टर्स आणि शोध' : 'Search & Filter Packages'}</span>
-          </div>
-          <button
-            onClick={resetFilters}
-            className="text-xs font-extrabold text-slate-500 hover:text-emerald-600 flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Filters</span>
-          </button>
-        </div>
-
-        {/* Filters Controls Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Destination Dropdown / Search */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-black uppercase tracking-wider text-slate-500">
-              Destination
-            </label>
-            <div className="relative">
-              <MapPin className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
-              <select
-                value={selectedDestination}
-                onChange={(e) => setSelectedDestination(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs font-extrabold text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all appearance-none cursor-pointer"
-              >
-                {DESTINATION_OPTIONS.map(dest => (
-                  <option key={dest} value={dest}>{dest}</option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-3 top-3 text-slate-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Title / Keywords Search Input */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-black uppercase tracking-wider text-slate-500">
-              Keywords
-            </label>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search tour title or city..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs font-extrabold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Price Range Slider Component */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-slate-500">
-              <span>Max Price</span>
-              <span className="text-emerald-600 font-extrabold text-xs">₹{maxPrice.toLocaleString('en-IN')}</span>
-            </div>
-            <div className="pt-2">
-              <input
-                type="range"
-                min={2000}
-                max={50000}
-                step={1000}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-emerald-600 cursor-pointer h-2 bg-slate-200 rounded-lg appearance-none"
-              />
-              <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
-                <span>₹2,000</span>
-                <span>₹50,000+</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sorting & Verified Agent Toggle */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-black uppercase tracking-wider text-slate-500">
-              Sort By
-            </label>
-            <div className="relative">
-              <ArrowUpDown className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs font-extrabold text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition-all appearance-none cursor-pointer"
-              >
-                <option value="recommended">Recommended</option>
-                <option value="rating">Highest Rating</option>
-                <option value="price_low">Price: Low to High</option>
-                <option value="price_high">Price: High to Low</option>
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-3 top-3 text-slate-400 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-
-        {/* Toggles Row */}
-        <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
-          <button
-            onClick={() => setVerifiedOnly(!verifiedOnly)}
-            className={`px-4 py-2 rounded-2xl text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer border ${
-              verifiedOnly
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs'
-                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            <ShieldCheck className={`w-4 h-4 ${verifiedOnly ? 'text-emerald-600' : 'text-slate-400'}`} />
-            <span>Verified Partners Only</span>
-            {verifiedOnly && <Check className="w-3.5 h-3.5 text-emerald-600 ml-1" />}
-          </button>
-
-          <p className="text-xs font-extrabold text-slate-500">
-            Showing <span className="text-emerald-600 font-black">{filteredPackages.length}</span> Tour Packages
-          </p>
-        </div>
-      </div>
-
-      {/* PACKAGE GRID */}
       {filteredPackages.length === 0 ? (
-        <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-4">
+        <div className="bg-white rounded-3xl p-10 border border-slate-200 text-center space-y-4 shadow-sm">
           <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
             <Search className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h3 className="font-extrabold text-slate-900 text-base">No matching packages found</h3>
+            <h3 className="font-extrabold text-slate-900 text-base">
+              {isMr ? 'पॅकेजेस सापडले नाहीत' : 'No matching tour packages found'}
+            </h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Try adjusting your price range, clearing filters, or searching for a different destination like Ratnagiri or New Delhi.
+              {isMr ? 'कृपया फिल्टर किंवा शोध शब्द बदलून पहा.' : 'Try adjusting your filters or search keywords.'}
             </p>
           </div>
           <button
+            type="button"
             onClick={resetFilters}
             className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-extrabold shadow-md hover:bg-emerald-700 transition-all cursor-pointer"
           >
-            Clear All Filters
+            {isMr ? 'सर्व फिल्टर्स रिसेट करा' : 'Clear All Filters'}
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={layoutMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
           {filteredPackages.map((pkg) => (
             <div
               key={pkg.id}
-              className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group"
+              className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col justify-between group"
             >
               {/* Image & Badges */}
               <div className="relative h-48 overflow-hidden bg-slate-100">
@@ -583,21 +442,18 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
 
-                {/* Destination Badge */}
                 <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-full border border-white/20 flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-amber-400" />
                   <span>{pkg.destination}</span>
                 </div>
 
-                {/* Transport Type Badge */}
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-slate-900 text-[10px] font-black px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-slate-900 text-[10px] font-black px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
                   {pkg.transportType === 'bus' && <Bus className="w-3 h-3 text-emerald-600" />}
                   {pkg.transportType === 'flight' && <Plane className="w-3 h-3 text-sky-600" />}
                   {pkg.transportType === 'train' && <Train className="w-3 h-3 text-emerald-600" />}
                   <span className="uppercase">{pkg.transportType}</span>
                 </div>
 
-                {/* Title overlay at bottom of image */}
                 <div className="absolute bottom-3 left-3 right-3 space-y-1">
                   <span className="text-[10px] font-extrabold text-amber-300 uppercase tracking-widest block">
                     {pkg.durationDays} Days / {pkg.durationNights} Nights • Ex-{pkg.origin}
@@ -610,20 +466,17 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
 
               {/* Card Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                {/* Agent Header & Rating */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-extrabold text-xs text-slate-900 truncate max-w-[150px]">
-                        {pkg.agentName}
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-extrabold text-xs text-slate-900 truncate max-w-[150px]">
+                      {pkg.agentName}
+                    </span>
+                    {pkg.isVerifiedAgent && (
+                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 border border-emerald-200">
+                        <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                        Verified
                       </span>
-                      {pkg.isVerifiedAgent && (
-                        <span className="bg-emerald-100 text-emerald-800 text-[9px] font-black px-1.5 py-0.5 rounded-md flex items-center gap-0.5 border border-emerald-200">
-                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                          Verified
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-1 rounded-lg border border-amber-200 text-xs font-black">
@@ -633,15 +486,15 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                   </div>
                 </div>
 
-                {/* Inclusions Chips */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Key Highlights</p>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Highlights</p>
                     <button
+                      type="button"
                       onClick={() => setSelectedModalPackage(pkg)}
                       className="text-[10px] font-extrabold text-emerald-600 hover:underline cursor-pointer"
                     >
-                      View Full Itinerary →
+                      View Details →
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -656,8 +509,7 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                   </div>
                 </div>
 
-                {/* TRUST & SAFETY BADGES (Prominently displayed near Book/WhatsApp button) */}
-                <div className="bg-emerald-50/80 border border-emerald-200/70 rounded-2xl p-2.5 space-y-1.5">
+                <div className="bg-emerald-50/80 border border-emerald-200/70 rounded-2xl p-2.5 space-y-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
                       <ShieldCheck className="w-3 h-3" />
@@ -665,52 +517,39 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
                     </span>
                     <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs">
                       <Lock className="w-3 h-3" />
-                      Verified Safe Booking
+                      Verified Safe Escrow
                     </span>
                   </div>
-
-                  {/* Escrow text snippet below booking button */}
-                  <p className="text-[10px] font-bold text-slate-600 leading-tight flex items-start gap-1">
-                    <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>Your money is safe. Payments are held securely and released to the partner only after your trip starts.</span>
-                  </p>
                 </div>
 
-                {/* Pricing & Booking / WhatsApp Action Buttons */}
+                {/* Pricing & Actions */}
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase">Total Per Person</span>
-                    <span className="text-xl font-black text-slate-900">
-                      ₹{pkg.price.toLocaleString('en-IN')}
-                    </span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Package Price</span>
+                    <div className="text-xl font-black text-slate-900 flex items-baseline gap-1">
+                      <span>₹{pkg.price.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] font-normal text-slate-500">/person</span>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {/* ONLINE CHECKOUT BOOK NOW BUTTON */}
                     <button
-                      onClick={() => handleStartCheckout(pkg)}
-                      className="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl font-black text-xs transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer shrink-0"
-                      title={`Book ${pkg.title} online securely`}
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      <span>Book Now</span>
-                    </button>
-                    <button
+                      type="button"
                       onClick={(e) => handleOpenBargain(pkg, e)}
-                      className="px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-xl font-black text-xs transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl font-black text-xs border border-amber-300 transition-all flex items-center gap-1 cursor-pointer"
+                      title="Make an Offer"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>वाटाघाटी करा</span>
+                      <Tag className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Bargain</span>
                     </button>
 
-                    {/* DYNAMIC WHATSAPP CLICK-TO-CHAT BUTTON */}
                     <button
-                      onClick={() => handleWhatsAppClick(pkg)}
-                      className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl font-black text-xs transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer shrink-0"
-                      title={`Contact ${pkg.agentName} on WhatsApp for ${pkg.title}`}
+                      type="button"
+                      onClick={() => handleStartCheckout(pkg)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-emerald-600/20 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
                     >
-                      <MessageCircle className="w-4 h-4 fill-white" />
-                      <span>WhatsApp</span>
+                      <span>{isMr ? 'बुक करा' : 'Book Now'}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -720,609 +559,176 @@ export const ExplorePackagesView: React.FC<ExplorePackagesViewProps> = ({
         </div>
       )}
 
-      {/* PACKAGE DETAILS & TRUST & SAFETY MODAL */}
-      {selectedModalPackage && (
-        <div className="fixed inset-0 z-[300] bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 relative my-8 max-h-[90vh] overflow-y-auto flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
-            <button
-              onClick={() => setSelectedModalPackage(null)}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Modal Header */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="bg-slate-900 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {selectedModalPackage.destination}
-                </span>
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {selectedModalPackage.durationDays} Days / {selectedModalPackage.durationNights} Nights
-                </span>
-                {selectedModalPackage.isVerifiedAgent && (
-                  <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    Verified Partner
-                  </span>
-                )}
-              </div>
-
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-snug">
-                {selectedModalPackage.title}
-              </h2>
-
-              <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                {selectedModalPackage.description}
-              </p>
-            </div>
-
-            {/* Agent Info Box */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-black uppercase text-slate-400 block">Organized By</span>
-                <span className="font-extrabold text-slate-900 text-sm">{selectedModalPackage.agentName}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-amber-50 text-amber-900 px-2.5 py-1 rounded-xl border border-amber-200 font-black text-xs">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <span>{selectedModalPackage.rating} ({selectedModalPackage.reviewsCount} reviews)</span>
-              </div>
-            </div>
-
-            {/* Inclusions List */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500">
-                Package Inclusions & Amenities
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {selectedModalPackage.inclusions.map((inc, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>{inc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* PROMINENT TRUST & SAFETY BADGES & ESCROW NOTICE */}
-            <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50 border-2 border-emerald-300 rounded-3xl p-5 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-6 h-6 text-emerald-600" />
-                  <span className="font-black text-sm text-slate-900">Platform Escrow Protection Guarantee</span>
-                </div>
-              </div>
-
-              {/* Badges Row */}
-              <div className="flex items-center gap-2 flex-wrap pt-1">
-                <div className="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>100% Money-Back Guarantee</span>
-                </div>
-                <div className="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-sm flex items-center gap-1.5">
-                  <Lock className="w-4 h-4" />
-                  <span>Verified Safe Booking</span>
-                </div>
-              </div>
-
-              {/* Exact snippet below booking button */}
-              <p className="text-xs font-bold text-slate-700 leading-relaxed bg-white/80 p-3 rounded-2xl border border-emerald-200/60">
-                "Your money is safe. Payments are held securely and released to the partner only after your trip starts."
-              </p>
-            </div>
-
-            {/* Footer Action */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 block uppercase">Price Per Person</span>
-                <span className="text-2xl font-black text-slate-900">
-                  ₹{selectedModalPackage.price.toLocaleString('en-IN')}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleStartCheckout(selectedModalPackage)}
-                  className="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-2xl font-black text-xs transition-all shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer"
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Book Now (Pay Online)</span>
-                </button>
-                <button
-                  onClick={() => handleOpenBargain(selectedModalPackage)}
-                  className="px-5 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white rounded-2xl font-black text-xs transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2 cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>वाटाघाटी करा (Make an Offer)</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    handleWhatsAppClick(selectedModalPackage);
-                    setSelectedModalPackage(null);
-                  }}
-                  className="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-2xl font-black text-xs transition-all shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4 fill-white" />
-                  <span>Book & Chat on WhatsApp</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* CHECKOUT SCREEN & ESCROW PAYMENT FLOW (CUSTOMER SIDE)                     */}
-      {/* ========================================================================= */}
-      {checkoutPkg && (
-        <div className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 pt-24 overflow-y-auto flex-1 pb-[30px] [&::-webkit-scrollbar]:hidden">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-6 shadow-2xl border border-slate-200 relative my-6">
+      {/* BARGAIN OFFER MODAL */}
+      {bargainModalOpen && selectedBargainPkg && (
+        <div className="fixed inset-0 z-[120] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl space-y-5 animate-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
-                  <CreditCard className="w-5 h-5" />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                  <Tag className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">Checkout & Secure Booking</h3>
-                  <p className="text-xs text-slate-500 font-semibold">Payment Routing & Escrow Protection</p>
+                  <h3 className="font-black text-base text-slate-900">Bargain & Custom Offer</h3>
+                  <p className="text-[11px] font-bold text-slate-500 line-clamp-1">{selectedBargainPkg.title}</p>
                 </div>
               </div>
-
               <button
-                onClick={() => setCheckoutPkg(null)}
-                className="p-2 bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-all cursor-pointer shadow-sm"
+                type="button"
+                onClick={() => setBargainModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Package Details Summary Card */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  {checkoutPkg.destination} • {checkoutPkg.durationDays} Days
-                </span>
-                <span className="text-xs font-bold text-slate-500">
-                  By {checkoutPkg.agentName}
-                </span>
-              </div>
-              <h4 className="font-black text-slate-900 text-sm">{checkoutPkg.title}</h4>
-              <p className="text-xs font-semibold text-slate-600 flex flex-col">
-                <span>₹{checkoutPkg.price.toLocaleString('en-IN')} per person</span>
-                <span className="text-[10px] text-slate-500">(Including all taxes)</span>
-              </p>
-            </div>
-
-            <form onSubmit={handleCompleteCheckout} className="space-y-4">
-              {/* Traveler Count & Departure Date */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-700">Number of Travelers *</label>
-                  <select
-                    value={travelersCount}
-                    onChange={(e) => setTravelersCount(Number(e.target.value))}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 8, 10].map(n => (
-                      <option key={n} value={n}>{n} {n === 1 ? 'Traveler' : 'Travelers'}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold text-slate-700">Trip Departure Date *</label>
-                  <input
-                    type="date"
-                    value={tripStartDate}
-                    onChange={(e) => setTripStartDate(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-600"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Customer Contact Details */}
-              <div className="space-y-2 pt-1">
-                <h5 className="text-xs font-black uppercase text-slate-400 tracking-wider">Customer Contact Info</h5>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <User className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={custName}
-                      onChange={(e) => setCustName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="relative">
-                      <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      <input
-                        type="tel"
-                        placeholder="Mobile / WhatsApp"
-                        value={custPhone}
-                        onChange={(e) => setCustPhone(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
-                        required
-                      />
-                    </div>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                      <input
-                        type="email"
-                        placeholder="Email Address"
-                        value={custEmail}
-                        onChange={(e) => setCustEmail(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PROMO CODE / COUPON VALIDATION ENGINE */}
-              <div className="p-3.5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-2xs">
-                      <Tag className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-extrabold text-xs text-slate-900">Have a Promo Code or Coupon?</span>
-                  </div>
-                  {appliedCoupon && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      className="text-[11px] font-bold text-rose-600 hover:text-rose-700 underline cursor-pointer"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      placeholder="ENTER PROMO CODE (e.g. WELCOME500)"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                      disabled={isValidatingCoupon || !!appliedCoupon}
-                      className="w-full px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-mono font-black text-slate-900 placeholder:font-sans placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 uppercase disabled:bg-amber-100/50"
-                    />
-                    {appliedCoupon && (
-                      <span className="absolute right-2.5 top-2 text-emerald-600 font-black text-[11px] flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        APPLIED
-                      </span>
-                    )}
-                  </div>
-                  {!appliedCoupon && (
-                    <button
-                      type="button"
-                      onClick={() => handleApplyPromo()}
-                      disabled={isValidatingCoupon || !promoInput.trim()}
-                      className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-2xs active:scale-95 flex items-center gap-1 cursor-pointer shrink-0"
-                    >
-                      {isValidatingCoupon ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-900" />
-                      ) : (
-                        <span>Apply</span>
-                      )}
-                    </button>
-                  )}
-                </div>
-
-                {couponError && (
-                  <div className="flex items-center gap-1.5 text-rose-600 text-xs font-bold bg-rose-50 border border-rose-200 p-2 rounded-xl">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{couponError}</span>
-                  </div>
-                )}
-
-                {couponSuccessMsg && (
-                  <div className="flex items-center gap-1.5 text-emerald-800 text-xs font-bold bg-emerald-100 border border-emerald-300 p-2 rounded-xl">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>{couponSuccessMsg}</span>
-                  </div>
-                )}
-
-                {!appliedCoupon && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Coupons:</span>
-                    {mockCoupons.slice(0, 3).map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        onClick={() => handleApplyPromo(c.code)}
-                        className="px-2 py-0.5 bg-white hover:bg-amber-100 border border-amber-300/80 rounded-md text-[10px] font-mono font-bold text-amber-900 flex items-center gap-1 transition-colors cursor-pointer"
-                      >
-                        <Gift className="w-2.5 h-2.5 text-amber-600" />
-                        <span>{c.code}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* BASE PRICE & TOTAL PAYABLE */}
-              <div className="bg-emerald-50/70 border-2 border-emerald-200 rounded-2xl p-4 space-y-2.5">
-                <div className="flex items-center justify-between border-b border-emerald-100 pb-2 text-xs">
-                  <span className="font-extrabold text-slate-700">Base Package Price × {travelersCount}</span>
-                  <span className="font-black text-slate-900">
-                    ₹{grossPackageAmount.toLocaleString('en-IN')}
-                  </span>
-                </div>
-
-                {discountAmount > 0 && (
-                  <div className="flex justify-between items-center text-xs text-emerald-700 font-bold bg-emerald-100/70 -mx-2 px-2 py-1 rounded-lg border border-emerald-200">
-                    <span className="flex items-center gap-1">
-                      <Tag className="w-3.5 h-3.5 text-emerald-600" />
-                      Promo Discount ({appliedCoupon?.code}):
-                    </span>
-                    <span className="font-black">-₹{discountAmount.toLocaleString('en-IN')}</span>
-                  </div>
-                )}
-
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex items-start justify-between pt-1 font-black text-slate-900 text-sm">
-                    <div className="flex flex-col">
-                      <span>Total Amount Payable</span>
-                      <span className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">(Including all taxes & discounts)</span>
-                    </div>
-                    <div className="text-right flex items-baseline gap-2">
-                      {discountAmount > 0 && (
-                        <span className="text-xs font-bold text-slate-400 line-through">
-                          ₹{grossPackageAmount.toLocaleString('en-IN')}
-                        </span>
-                      )}
-                      <span className="text-emerald-700 text-lg font-black">
-                        ₹{finalDiscountedTotal.toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* MANDATORY TRUST & ESCROW MESSAGE */}
-              <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 flex items-start gap-3">
-                <Shield className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-                <p className="text-xs font-bold text-amber-950 leading-snug">
-                  "Your payment is secured and held in escrow until your trip completes."
-                </p>
-              </div>
-
-              {/* Payment Gateway Options */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700">Select Payment Method</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('upi')}
-                    className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                      paymentMethod === 'upi'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    <QrCode className="w-5 h-5" />
-                    <span className="text-[11px] font-black uppercase">UPI / GPay</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                      paymentMethod === 'card'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    <CreditCard className="w-5 h-5" />
-                    <span className="text-[11px] font-black uppercase">Card</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('netbanking')}
-                    className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                      paymentMethod === 'netbanking'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Building className="w-5 h-5" />
-                    <span className="text-[11px] font-black uppercase">NetBanking</span>
-                  </button>
-                </div>
-
-                {paymentMethod === 'upi' && (
-                  <div className="pt-1">
-                    <input
-                      type="text"
-                      value={upiVpa}
-                      onChange={(e) => setUpiVpa(e.target.value)}
-                      placeholder="Enter VPA (e.g. mobile@upi)"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isProcessingPayment}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isProcessingPayment ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Processing Escrow Route Payment...</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    <span>Pay Securely via UPI/Card (₹{finalDiscountedTotal.toLocaleString('en-IN')})</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* COMPLETED BOOKING VOUCHER MODAL */}
-      {completedVoucher && (
-        <div className="fixed inset-0 z-[400] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl border border-slate-200 text-center relative animate-in fade-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto shadow-md">
-              <CheckCircle className="w-9 h-9" />
-            </div>
-
-            <div className="space-y-1">
-              <span className="font-mono text-xs font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 inline-block">
-                REF: {completedVoucher.id}
-              </span>
-              <h3 className="text-xl font-black text-slate-900">Payment Secured in Escrow!</h3>
-              <p className="text-xs text-slate-500 font-semibold">Your tour booking has been confirmed.</p>
-            </div>
-
-            {/* Escrow Notice */}
-            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-3 text-left flex items-start gap-2.5">
-              <Shield className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-              <p className="text-xs font-bold text-amber-950 leading-snug">
-                "Your payment is secured and held in escrow until your trip completes."
-              </p>
-            </div>
-
-            {/* Financial Ledger Split Summary */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-left text-xs space-y-2">
-              <div className="flex justify-between">
-                <span className="text-slate-500 font-medium">Tour Package:</span>
-                <span className="font-extrabold text-slate-900 text-right max-w-[200px] truncate">{completedVoucher.packageName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 font-medium">Customer:</span>
-                <span className="font-extrabold text-slate-900">{completedVoucher.customerName}</span>
-              </div>
-              {completedVoucher.discount_applied > 0 && (
-                <div className="flex justify-between text-emerald-700 font-bold bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
-                  <span>Discount Applied ({completedVoucher.coupon_code}):</span>
-                  <span>-₹{completedVoucher.discount_applied.toLocaleString('en-IN')}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-slate-500 font-medium">Total Amount Paid:</span>
-                <span className="font-black text-slate-900">₹{completedVoucher.total_amount.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between text-indigo-700 font-bold border-t border-slate-200 pt-1.5">
-                <span>Platform Fee (10%):</span>
-                <span>₹{completedVoucher.platform_commission.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between text-emerald-700 font-bold">
-                <span>Vendor Net Escrow Share (90%):</span>
-                <span>₹{completedVoucher.vendor_amount.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between pt-1 font-bold">
-                <span className="text-slate-500">Payment Status:</span>
-                <span className="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md text-[10px] font-black">
-                  Held securely
-                </span>
-              </div>
-            </div>
-
-            <div className="pt-2 space-y-2">
-              <button
-                onClick={() => setCompletedVoucher(null)}
-                className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer"
-              >
-                Close Booking Receipt
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {/* Bargain Modal */}
-      {bargainModalOpen && selectedBargainPkg && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => !bargainSuccess && setBargainModalOpen(false)} />
-          <div className="relative bg-slate-950 border border-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-300">
             {bargainSuccess ? (
-              <div className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+              <div className="text-center py-6 space-y-3">
+                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-black text-white">Offer Sent!</h3>
-                <p className="text-sm text-slate-400">
-                  Your offer of ₹{offerPrice} for {selectedBargainPkg.title} has been sent to top-rated partners. They will contact you shortly if accepted.
+                <h4 className="font-black text-lg text-slate-900">Offer Sent to Agent!</h4>
+                <p className="text-xs text-slate-600 max-w-xs mx-auto">
+                  {selectedBargainPkg.agentName} will review your offer of ₹{Number(offerPrice || 0).toLocaleString('en-IN')} and respond shortly.
                 </p>
               </div>
             ) : (
-              <>
-                <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                  <div>
-                    <h3 className="text-lg font-black text-white flex items-center gap-2">
-                      <MessageCircle className="w-5 h-5 text-indigo-400" />
-                      वाटाघाटी करा (Negotiate)
-                    </h3>
-                    <p className="text-xs text-slate-400 mt-1">Submit your counter-offer directly to the partner.</p>
-                  </div>
-                  <button onClick={() => setBargainModalOpen(false)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 transition-colors cursor-pointer">
-                    <X className="w-4 h-4" />
-                  </button>
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-500">Listed Price:</span>
+                  <span className="font-black text-slate-900 text-sm">₹{selectedBargainPkg.price.toLocaleString('en-IN')} /person</span>
                 </div>
-                <div className="p-6 space-y-6">
-                  <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-                    <p className="text-xs text-slate-400 font-semibold mb-1">Original Price</p>
-                    <p className="text-xl font-black text-white flex items-center gap-2">
-                      ₹{selectedBargainPkg.price.toLocaleString('en-IN')}
-                    </p>
-                  </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-2">My Offer Price (₹)</label>
-                      <input 
-                        type="number" 
-                        value={offerPrice}
-                        onChange={(e) => setOfferPrice(e.target.value)}
-                        placeholder={`e.g. ${selectedBargainPkg.price - 2000}`}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 font-bold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-2">Short Message (Optional)</label>
-                      <textarea 
-                        value={offerMsg}
-                        onChange={(e) => setOfferMsg(e.target.value)}
-                        placeholder="I'm looking to book immediately if we can agree on this price..."
-                        rows={3}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 text-sm resize-none"
-                      />
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={handleSubmitBargain}
-                    disabled={!offerPrice}
-                    className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm transition-colors shadow-lg shadow-indigo-600/20 cursor-pointer"
-                  >
-                    Submit Offer
-                  </button>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black uppercase text-slate-600">Your Offer Price (Per Person)</label>
+                  <input
+                    type="number"
+                    placeholder={`e.g. ${Math.round(selectedBargainPkg.price * 0.9)}`}
+                    value={offerPrice}
+                    onChange={(e) => setOfferPrice(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-black text-slate-900 focus:outline-none focus:border-amber-500"
+                  />
                 </div>
-              </>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black uppercase text-slate-600">Note for Agent (Optional)</label>
+                  <textarea
+                    rows={2}
+                    placeholder="We are a group of travelers..."
+                    value={offerMsg}
+                    onChange={(e) => setOfferMsg(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-800 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSubmitBargain}
+                  disabled={!offerPrice || Number(offerPrice) <= 0}
+                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer"
+                >
+                  Send Price Offer
+                </button>
+              </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* FULL PACKAGE DETAIL ITINERARY MODAL */}
+      {selectedModalPackage && (
+        <div className="fixed inset-0 z-[120] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full border border-slate-200 shadow-2xl space-y-5 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-black text-base text-slate-900">{selectedModalPackage.title}</h3>
+              <button
+                type="button"
+                onClick={() => setSelectedModalPackage(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <img
+              src={selectedModalPackage.image}
+              alt={selectedModalPackage.title}
+              className="w-full h-44 object-cover rounded-2xl"
+            />
+
+            <div className="space-y-3">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                {selectedModalPackage.description}
+              </p>
+
+              <div>
+                <h4 className="text-xs font-black uppercase text-slate-500 mb-2">Package Inclusions</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700">
+                  {selectedModalPackage.inclusions.map((inc, idx) => (
+                    <div key={idx} className="bg-slate-50 p-2 rounded-xl border border-slate-200/60 flex items-center gap-2">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>{inc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-black text-emerald-700 uppercase block">Verified Tour Partner</span>
+                  <span className="text-xs font-bold text-slate-900">{selectedModalPackage.agentName}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleWhatsAppClick(selectedModalPackage)}
+                  className="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-black flex items-center gap-1"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+              <div className="text-lg font-black text-slate-900">
+                ₹{selectedModalPackage.price.toLocaleString('en-IN')} <span className="text-xs font-normal text-slate-500">/person</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const pkg = selectedModalPackage;
+                  setSelectedModalPackage(null);
+                  handleStartCheckout(pkg);
+                }}
+                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase rounded-xl shadow-md cursor-pointer"
+              >
+                Book Package
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
-};
 
+  return (
+    <BookingFunnelLayout
+      mode="package"
+      onBack={onBack || (() => navigate(-1))}
+      origin={origin}
+      setOrigin={setOrigin}
+      destination={selectedDestination}
+      setDestination={setSelectedDestination}
+      date={tripStartDate}
+      setDate={setTripStartDate}
+      onSearch={handlePackageSearch}
+      isLoading={isLoading}
+      hasSearched={hasSearched}
+      lang={lang}
+      passengerSummary={`${travelersCount} ${isMr ? 'प्रवासी' : 'Travelers'}`}
+      renderPassengerSelector={renderPassengerSelector}
+      renderResultsToolbar={renderResultsToolbar}
+      renderResults={renderResults}
+    />
+  );
+};

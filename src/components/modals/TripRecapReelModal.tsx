@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, CheckCircle2, Zap, Film, Video, Play, Music, Flame } from 'lucide-react';
+import { Compass as Sparkles, X, CheckCircle2, Zap, Film, Video, Play, Music, Flame } from 'lucide-react';
 
 export type ReelStyle = 'atrangee' | 'aesthetic';
 

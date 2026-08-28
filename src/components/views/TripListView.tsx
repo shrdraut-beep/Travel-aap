@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AnimatePresence } from 'framer-motion';
 import { 
   Plus, Users, Globe, Calendar, Search, MapPin, Map, MoreVertical, 
-  Trash2, Filter, Edit2, Camera, Milestone, Train, Share2, Sparkles, 
-  X, Plane, Building2, Ticket, TicketCheck, ExternalLink, Check, Calculator, ChevronLeft
+  Trash2, Filter, Edit2, Camera, Milestone, Train, Share2, Compass as Sparkles, Compass, 
+  X, Plane, Building2, Ticket, TicketCheck, ExternalLink, Check, Calculator, ChevronLeft, Luggage
 } from 'lucide-react';
 import { TripGroup, TripMemory } from '../../types';
 import { getCurrencySymbol } from '../../utils';
 import { SharedBookingWidget } from '../SharedBookingWidget';
 import { useBookingStore } from '../../store/useBookingStore';
 import { ExplorePackagesView } from './ExplorePackagesView';
-import { UniversalBookingCheckoutModal, BookingItemPayload } from '../travel/UniversalBookingCheckoutModal';
+import { BookingItemPayload } from '../../pages/CheckoutPage';
 
 interface TripListViewProps {
   trips: TripGroup[];
@@ -126,7 +127,11 @@ export const TripListView: React.FC<TripListViewProps> = ({
   const [isBookingOpen, setIsBookingOpen] = React.useState(false);
   const [bookingSearchActive, setBookingSearchActive] = React.useState(false);
   const [activeView, setActiveView] = React.useState<'trips' | 'packages' | 'templates'>('trips');
-  const [checkoutModalItem, setCheckoutModalItem] = React.useState<BookingItemPayload | null>(null);
+  const navigate = useNavigate();
+
+  const handleBookNow = (item: BookingItemPayload) => {
+    navigate('/checkout', { state: { item, currencySymbol: getCurrencySymbol(), lang } });
+  };
 
   // Synchronized Booking Window State
   const {
@@ -227,7 +232,7 @@ export const TripListView: React.FC<TripListViewProps> = ({
           <div>
             <p className="text-[11px] text-slate-400 font-medium">{t('welcome') || 'Namaste,'}</p>
             <p className="text-lg font-bold text-slate-800 font-[Poppins] flex items-center gap-2">
-              RouTripO <Sparkles className="w-4 h-4 text-orange-500" />
+              RouTripO <Compass className="w-4 h-4 text-orange-500" />
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -256,7 +261,7 @@ export const TripListView: React.FC<TripListViewProps> = ({
         <div className="px-5 mt-5 bg-slate-50">
           <div className="flex items-center justify-between px-1 mb-2.5">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-orange-500" />
+              <Compass className="w-4 h-4 text-orange-500" />
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Quick actions</p>
             </div>
           </div>
@@ -281,7 +286,7 @@ export const TripListView: React.FC<TripListViewProps> = ({
             </button>
             <button onClick={() => { if (onFutureTripPlan) onFutureTripPlan(); else onCreateTrip(); }} className="flex flex-col items-center gap-1.5 cursor-pointer hover:scale-105 transition-transform">
               <div className="w-full aspect-square rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-md">
-                <Sparkles className="w-5 h-5 text-white" />
+                <Compass className="w-5 h-5 text-white" />
               </div>
               <span className="text-[10px] text-slate-500 font-medium text-center leading-tight">Smart Planner</span>
             </button>
@@ -405,23 +410,40 @@ export const TripListView: React.FC<TripListViewProps> = ({
         </div>
 
         {filteredTrips.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-             <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center">
-                <MapPin className="w-10 h-10 text-emerald-200" />
-             </div>
-             <p className="text-emerald-300 font-medium px-12">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center my-8 p-8 text-center bg-gradient-to-br from-rose-50 via-pink-50 to-rose-100/60 rounded-[36px] border-2 border-dashed border-pink-300 shadow-sm relative overflow-hidden"
+          >
+            <div className="w-24 h-24 bg-gradient-to-tr from-pink-500 to-rose-500 rounded-3xl flex items-center justify-center shadow-lg shadow-pink-500/25 mb-4 relative group">
+              <Luggage className="w-12 h-12 text-white animate-bounce" />
+              <span className="absolute -top-1 -right-1 text-xl">✨</span>
+            </div>
+            
+            <h3 className="text-xl font-black text-slate-800 mb-1">
+              {lang === 'mr' ? 'तुमची पहिली सहल प्लॅन करा! 🧳' : 'Plan your first trip! 🧳'}
+            </h3>
+            
+            <p className="text-xs font-semibold text-slate-600 max-w-sm mb-6 leading-relaxed">
+              {trips.length === 0 
+                ? (lang === 'mr' ? 'नवीन ठिकाण जोडा, मित्रांना आमंत्रित करा आणि खर्चाचे विभाजन सहजपणे करा!' : 'Add destinations, invite your group, and split travel expenses effortlessly!')
+                : (lang === 'mr' ? 'तुम्ही शोधलेला कोणताही ट्रिप प्लॅन सापडला नाही.' : 'No matching trips found for your search filter.')}
+            </p>
 
-               {trips.length === 0 
-                 ? t('noTripsYet') 
-                 : (lang === 'mr' ? 'कोणतीही सहल सापडली नाही' : 'No matching trips found')}
-             </p>
-          </div>
+            <button
+              onClick={onCreateTrip}
+              className="px-6 py-3.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-rose-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>{lang === 'mr' ? 'नवीन सहल तयार करा' : 'Create New Trip'}</span>
+            </button>
+          </motion.div>
         )}
         </>
         )}
 
         {activeView === 'packages' && (
-          <ExplorePackagesView lang={lang} onBookNow={setCheckoutModalItem} />
+          <ExplorePackagesView lang={lang} onBookNow={handleBookNow} />
         )}
 
         {activeView === 'templates' && (
@@ -444,19 +466,6 @@ export const TripListView: React.FC<TripListViewProps> = ({
           <Plus className="w-8 h-8" />
         </button>
       </div>
-      )}
-
-      {checkoutModalItem && (
-        <UniversalBookingCheckoutModal
-          isOpen={true}
-          onClose={() => setCheckoutModalItem(null)}
-          item={checkoutModalItem}
-          currencySymbol={getCurrencySymbol()}
-          lang={lang}
-          onBookingSuccess={(receipt) => {
-            alert(`🎉 Booking confirmed: ${receipt.bookingId}`);
-          }}
-        />
       )}
     </div>
   );

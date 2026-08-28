@@ -1,52 +1,44 @@
 import React, { useState } from 'react';
+
+const getTomorrowDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+
+import { useNavigate } from 'react-router-dom';
 import { TransportOptions } from './TransportOptions';
 import { BookingFunnelLayout } from './BookingFunnelLayout';
 import { Users, Minus, Plus } from 'lucide-react';
 
 export const CarSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
+  const navigate = useNavigate();
   const isMr = lang === 'mr';
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [departDate, setDepartDate] = useState('');
+  const [departDate, setDepartDate] = useState(getTomorrowDate());
   const [passengers, setPassengers] = useState(2);
   const [cabType, setCabType] = useState<'regular' | 'rental'>('regular');
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [carData, setCarData] = useState<any[]>([]);
-
-  const handleCarSearch = async () => {
-    setIsLoading(true);
-    setHasSearched(true);
-    setTimeout(() => {
-      setCarData([
-        {
-          vehicleName: 'Toyota Innova Crysta',
-          category: 'SUV',
-          capacity: '6 Seats',
-          bags: '4 Bags',
-          price: cabType === 'regular' ? 2400 : 3500,
-          originalPrice: cabType === 'regular' ? 2800 : 4000,
-          provider: 'RouTripo Assured',
-          rating: 4.8,
-          features: ['AC', 'Free Cancellation', 'Expert Driver']
-        },
-        {
-          vehicleName: 'Honda City / Hyundai Verna',
-          category: 'Sedan',
-          capacity: '4 Seats',
-          bags: '2 Bags',
-          price: cabType === 'regular' ? 1200 : 2000,
-          originalPrice: cabType === 'regular' ? 1500 : 2400,
-          provider: 'Local Partners',
-          rating: 4.6,
-          features: ['AC', 'Free Cancellation']
-        }
-      ]);
-      setIsLoading(false);
-    }, 800);
-  };
-
   const [vehicleCategory, setVehicleCategory] = useState<'sedan' | 'suv' | 'traveller'>('suv');
+
+  const handleCarSearch = () => {
+    navigate('/cars/results', {
+      state: {
+        searchParams: {
+          pickUpLocation: origin,
+          dropOffLocation: destination,
+          pickUpDate: departDate,
+          dropOffDate: departDate, // using same date for basic one-way UI for now
+          passengers,
+          cabType,
+          vehicleCategory
+        }
+      }
+    });
+  };
 
   const maxPassengers = vehicleCategory === 'sedan' ? 4 : vehicleCategory === 'suv' ? 6 : 12;
 

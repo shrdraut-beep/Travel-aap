@@ -5,7 +5,7 @@ import { CurrencyWidget } from "../CurrencyWidget";
 import { useAuthStore } from '../../store/useAuthStore';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, Gamepad2, Receipt, TrendingDown, Clock, ChevronRight, PieChart as PieChartIcon, BarChart as BarChartIcon, ShieldCheck, AlertTriangle, Users, Share2, Siren, Music, Camera, Plus, ExternalLink, Play, Pause, Trash2, Car, Plane, MapPin, Ticket, FileText, Globe, Languages, Mic, Sparkles, Zap, CheckCircle2, AlertCircle, X, AlertOctagon, RefreshCw, Copy, Check, Hotel, Bus, Calendar, Navigation, Fuel, Calculator, Loader2 } from 'lucide-react';
+import { Wallet, Gamepad2, Receipt, TrendingDown, Clock, ChevronRight, PieChart as PieChartIcon, BarChart as BarChartIcon, BarChart3, Luggage, ShieldCheck, AlertTriangle, Users, Share2, Siren, Music, Camera, Plus, ExternalLink, Play, Pause, Trash2, Car, Plane, MapPin, Ticket, FileText, Globe, Languages, Mic, Compass as Sparkles, Zap, CheckCircle2, AlertCircle, X, AlertOctagon, RefreshCw, Copy, Check, Hotel, Bus, Calendar, Navigation, Fuel, Calculator, Loader2 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { TripGroup, Expense, TripPlan, Poll, SOSAlert, PlaylistItem, TripMemory, TransportMode, ProactiveSuggestion, SavedTicket } from '../../types';
 import { WeatherWidget } from '../WeatherWidget';
@@ -317,6 +317,165 @@ const VoiceTranslator = ({ lang }: { lang: string }) => {
         </div>
       )}
     </div>
+  );
+};
+
+/* Smart Dashboard Personalization Header */
+const SmartDashboardHeader = ({ userName, destination, lang }: { userName: string; destination: string; lang: string }) => {
+  const [greeting, setGreeting] = useState('');
+  const [greetingEmoji, setGreetingEmoji] = useState('☀️');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting(lang === 'mr' ? 'शुभ प्रभात' : 'Good Morning');
+      setGreetingEmoji('☀️');
+    } else if (hour >= 12 && hour < 17) {
+      setGreeting(lang === 'mr' ? 'शुभ दुपार' : 'Good Afternoon');
+      setGreetingEmoji('🌤️');
+    } else if (hour >= 17 && hour < 22) {
+      setGreeting(lang === 'mr' ? 'शुभ संध्याकाळ' : 'Good Evening');
+      setGreetingEmoji('🌆');
+    } else {
+      setGreeting(lang === 'mr' ? 'शुभ रात्री' : 'Good Night');
+      setGreetingEmoji('🌙');
+    }
+  }, [lang]);
+
+  const draftSearch = localStorage.getItem('recent_draft_search') || (destination ? `${destination} Plan` : null);
+
+  return (
+    <div className="space-y-3.5 w-full">
+      {/* Live Weather & Time Greeting Banner */}
+      <div className="p-5 rounded-[28px] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl relative overflow-hidden border border-white/10">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="flex items-center justify-between relative z-10">
+          <div>
+            <div className="flex items-center gap-1.5 text-indigo-300 text-[11px] font-black uppercase tracking-wider mb-1">
+              <span>{greetingEmoji}</span>
+              <span>{greeting}</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              {userName || 'Traveler'} 👋
+            </h2>
+            <p className="text-xs font-semibold text-slate-300 mt-1 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-rose-400 inline shrink-0" />
+              <span className="truncate max-w-[200px] sm:max-w-xs">{destination || 'Explore New Destinations'}</span>
+            </p>
+          </div>
+
+          {/* Live Weather Badge */}
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-2.5 rounded-2xl flex flex-col items-center shrink-0 min-w-[70px] shadow-sm">
+            <span className="text-lg leading-none">🌤️</span>
+            <span className="text-sm font-black text-white mt-0.5">27°C</span>
+            <span className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">{lang === 'mr' ? 'हवामान' : 'Live'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Continue Planning Card */}
+      {draftSearch && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg shadow-pink-500/20 flex items-center justify-between cursor-pointer group active:scale-[0.99] transition-all border border-white/20"
+          onClick={() => window.dispatchEvent(new Event('open-flight-search'))}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+              <Sparkles className="w-5 h-5 text-amber-200" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-widest text-pink-200">
+                {lang === 'mr' ? 'अपूर्ण प्लॅनिंग' : 'Continue Planning'}
+              </p>
+              <p className="text-xs sm:text-sm font-black text-white truncate">
+                {draftSearch}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-xl border border-white/30 transition-all shrink-0 ml-2">
+            <span>{lang === 'mr' ? 'चालू ठेवा' : 'Resume'}</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
+/* Animated Trip Countdown Clock (Gamification) */
+const TripCountdownClock = ({ startDate, destinationName, lang }: { startDate?: string; destinationName: string; lang: string }) => {
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+
+  useEffect(() => {
+    // If startDate provided, parse it; otherwise default to 7 days countdown for gamification
+    let target: number;
+    if (startDate) {
+      target = new Date(startDate).getTime();
+      if (isNaN(target) || target <= Date.now()) {
+        target = Date.now() + (7 * 24 * 60 * 60 * 1000);
+      }
+    } else {
+      target = Date.now() + (7 * 24 * 60 * 60 * 1000);
+    }
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = Math.max(0, target - now);
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft({ days, hours, minutes, seconds });
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [startDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="p-5 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 rounded-[28px] text-white shadow-xl shadow-pink-500/20 border border-white/20 relative overflow-hidden"
+    >
+      <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
+      <div className="flex items-center justify-between mb-3 relative z-10">
+        <div className="flex items-center gap-2">
+          <span className="text-xl animate-bounce">⏳</span>
+          <h4 className="text-sm sm:text-base font-black tracking-tight">
+            {timeLeft.days} {lang === 'mr' ? 'दिवस बाकी' : 'Days to'} {destinationName || 'Goa'}! 🚀
+          </h4>
+        </div>
+        <span className="px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[9px] font-extrabold uppercase tracking-widest border border-white/30">
+          {lang === 'mr' ? 'काउंटडाऊन' : 'Trip Countdown'}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 text-center relative z-10">
+        {[
+          { label: lang === 'mr' ? 'दिवस' : 'DAYS', val: timeLeft.days },
+          { label: lang === 'mr' ? 'तास' : 'HOURS', val: timeLeft.hours },
+          { label: lang === 'mr' ? 'मिरा' : 'MINS', val: timeLeft.minutes },
+          { label: lang === 'mr' ? 'सेकंद' : 'SECS', val: timeLeft.seconds },
+        ].map((item, i) => (
+          <div key={i} className="bg-black/20 backdrop-blur-md rounded-2xl py-2 px-1 border border-white/15">
+            <span className="block text-xl sm:text-2xl font-black font-mono leading-none drop-shadow-sm">
+              {String(item.val).padStart(2, '0')}
+            </span>
+            <span className="text-[8px] sm:text-[9px] font-bold text-pink-100 uppercase tracking-wider mt-1 block">
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
   );
 };
 
@@ -695,13 +854,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   return (
     <>
       <div className="space-y-5 w-full">
-      {trip.destination && (
-        <div className="px-2.5">
-                  </div>
-      )}
-      
-      
-      {countryInfo && (
+        {/* Smart Personalization Header (Greeting + Live Weather + Continue Planning) */}
+        <SmartDashboardHeader 
+          userName={currentUser?.name || (trip.members && trip.members[0]?.name) || 'Traveler'} 
+          destination={trip.destination || trip.name} 
+          lang={lang} 
+        />
+
+        {/* Gamified Trip Countdown Clock */}
+        <TripCountdownClock 
+          startDate={trip.startDate} 
+          destinationName={trip.destination || trip.name} 
+          lang={lang} 
+        />
+
+        {countryInfo && (
         <div className="px-2.5 flex items-center justify-center gap-2 mt-2 text-sm font-semibold text-slate-600 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
           <span className="text-lg leading-none">{countryInfo.flag}</span>
           <span>{countryInfo.name}</span>

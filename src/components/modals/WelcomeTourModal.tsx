@@ -10,7 +10,7 @@ import {
   ChevronRight, 
   ChevronLeft, 
   CheckCircle2, 
-  Sparkles, 
+  Compass as Sparkles, 
   ShieldCheck, 
   Users 
 } from 'lucide-react';
@@ -194,7 +194,7 @@ export const WelcomeTourModal: React.FC<WelcomeTourModalProps> = ({ isOpen, onCl
                 onClick={handleCompleteOrSkip}
                 className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-emerald-200 transition-all active:scale-95 cursor-pointer ml-auto"
               >
-                <Sparkles className="w-4 h-4" />
+                <Compass className="w-4 h-4" />
                 <span>{isMr ? 'सुरू करा (Start Using App)' : 'Start Using App'}</span>
               </button>
             )}

@@ -37,10 +37,6 @@ export const POPULAR_CITIES_AND_DESTINATIONS: LocationItem[] = [
   { city: 'Goa (Mopa Airport)', airport: 'Manohar International Airport', code: 'GOX', country: 'Goa, India', cityMr: 'गोवा (मोपा)', type: 'airport' },
   { city: 'Goa (Madgaon Junction)', station: 'Madgaon Junction', code: 'MAO', country: 'Goa, India', cityMr: 'गोवा (मडगाव)', type: 'station' },
   { city: 'Goa (Vasco da Gama)', station: 'Vasco-da-Gama', code: 'VSG', country: 'Goa, India', cityMr: 'वास्को द गामा', type: 'station' },
-  { city: 'Goa (Panaji)', code: 'PAN', country: 'North Goa, India', cityMr: 'पणजी (गोवा)', type: 'city' },
-  { city: 'Goa (Calangute / Baga)', code: 'CLG', country: 'North Goa, India', cityMr: 'कलंगूट / बागा (गोवा)', type: 'city' },
-  { city: 'Goa (Candolim)', code: 'CND', country: 'North Goa, India', cityMr: 'कँडोलिम (गोवा)', type: 'city' },
-  { city: 'Goa (Palolem)', code: 'PLM', country: 'South Goa, India', cityMr: 'पालोलेम (गोवा)', type: 'city' },
 
   // Maharashtra Hubs & Tourist Spots
   { city: 'Mumbai', airport: 'Chhatrapati Shivaji Maharaj Intl Airport', code: 'BOM', country: 'Maharashtra, India', cityMr: 'मुंबई', type: 'airport' },
@@ -151,7 +147,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         (c) => c.code.toLowerCase() === value.toLowerCase() || c.city.toLowerCase() === value.toLowerCase()
       );
       if (item) {
-        setQuery(mode === 'hotels' || mode === 'buses' || mode === 'cars' ? item.city : `${item.city} (${item.code})`);
+        setQuery(mode === 'hotels' || mode === 'buses' || mode === 'cars' ? item.city : item.code);
       } else {
         setQuery(value);
       }
@@ -160,7 +156,11 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
   // Build unified dataset for current mode
   const baseDataset = useMemo<LocationItem[]>(() => {
-    const list: LocationItem[] = [...POPULAR_CITIES_AND_DESTINATIONS];
+    const list: LocationItem[] = POPULAR_CITIES_AND_DESTINATIONS.filter(item => {
+      if (mode === 'flights') return item.type !== 'station';
+      if (mode === 'trains') return item.type !== 'airport';
+      return true;
+    });
 
     if (mode === 'flights') {
       ALL_AIRPORTS.forEach((a) => {
@@ -195,9 +195,9 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   // Filter items based on user input
   const filteredResults = useMemo<LocationItem[]>(() => {
     const cleanQuery = debouncedQuery.trim().toLowerCase();
-    if (!cleanQuery) {
-      // Return top popular recommendations when empty or on focus
-      return baseDataset.slice(0, 8);
+    
+    if (cleanQuery.length < 3) {
+      return [];
     }
 
     const matched = baseDataset.filter((item) => {
@@ -238,6 +238,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     return matched.slice(0, 10);
   }, [debouncedQuery, baseDataset]);
 
+  const displayResults = useMemo<LocationItem[]>(() => {
+    return filteredResults.slice(0, 15);
+  }, [filteredResults]);
+
   // Click outside listener to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -256,7 +260,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
     const displayText = (mode === 'hotels' || mode === 'buses' || mode === 'cars')
       ? item.city
-      : `${item.city} (${item.code})`;
+      : item.code;
 
     setQuery(displayText);
     onChange(selectedText, item);
@@ -381,7 +385,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       </div>
 
       {/* Autocomplete Dropdown List */}
-      {isOpen && (
+      {isOpen && query.trim().length >= 3 && (
         <div className="absolute left-0 right-0 top-full mt-2 bg-white/98 backdrop-blur-md border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 max-h-80 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
           {/* Header indicator */}
           <div className="px-3.5 py-2 bg-slate-50/90 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
@@ -393,12 +397,12 @@ export const SearchInput: React.FC<SearchInputProps> = ({
                'Railway Stations & Cities'}
             </span>
             <span className="text-amber-600 font-mono font-bold">
-              {filteredResults.length} options
+              {displayResults.length} options
             </span>
           </div>
 
           {/* Quick select custom query if typed */}
-          {query.trim().length > 0 && (
+          {query.trim().length >= 3 && (
             <button
               type="button"
               onClick={() => handleSelectCustom(query.trim())}
@@ -416,8 +420,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
             </button>
           )}
 
-          {filteredResults.length > 0 ? (
-            filteredResults.map((item, index) => (
+          {displayResults.length > 0 ? (
+            displayResults.map((item, index) => (
               <button
                 key={`${item.code}-${item.city}-${index}`}
                 type="button"

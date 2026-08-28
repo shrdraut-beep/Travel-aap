@@ -1,6 +1,6 @@
 import { ScrollView } from '../ScrollView';
 import React, { useState, useEffect } from 'react';
-import { X, Fuel, Calculator, ArrowRight, DollarSign, Navigation, Sparkles, MapPin, Loader2 } from 'lucide-react';
+import { X, Fuel, Calculator, ArrowRight, DollarSign, Navigation, Compass as Sparkles, MapPin, Loader2 } from 'lucide-react';
 import { motion } from "motion/react";
 
 import { geocodePlace, fetchOptimizedRoute } from '../../services/api/routing';
@@ -247,7 +247,7 @@ export const FuelCalculatorModal: React.FC<FuelCalculatorModalProps> = ({
           {/* Realtime Breakdown Card */}
           <div className="bg-gradient-to-br from-slate-50 to-cyan-50/50 rounded-2xl p-4 border border-slate-200/80 space-y-3">
             <div className="text-xs font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+              <Calculator className="w-3.5 h-3.5 text-cyan-600" />
               {isMr ? 'हिशोब तपशील' : 'Calculation Breakdown'}
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">

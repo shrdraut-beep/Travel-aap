@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Sparkles, MapPin, Clock, Plus, X, Sun, Sunrise, Sunset, AlertCircle, Info, CalendarDays, Edit3, ArrowRight } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Compass as Sparkles, MapPin, Clock, Plus, X, Sun, Sunrise, Sunset, AlertCircle, Info, CalendarDays, Edit3, ArrowRight } from 'lucide-react';
 import { TripPlan, TripGroup } from '../../types';
 import * as freeUtils from '../../services/api/freeUtils';
 import Markdown from 'react-markdown';

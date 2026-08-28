@@ -1,7 +1,8 @@
 // src/components/booking/FarePlansSheet.tsx
 import React from 'react';
-import { X, Luggage, ShieldCheck, CalendarClock, XCircle, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Luggage, ShieldCheck, CalendarClock, XCircle, Check, ArrowRight, Compass as Sparkles } from 'lucide-react';
 import { useBookingFlow, FareTier } from '../../context/BookingFlowContext';
+import { getAirlineFareTiers } from '../../utils/airlineFareBrands';
 
 export interface FarePlansSheetProps {
   isOpen: boolean;
@@ -16,78 +17,9 @@ export interface FarePlansSheetProps {
   onSelectFare?: (fare: FareTier) => void;
 }
 
-export const DEFAULT_FARE_TIERS = (basePrice: number = 4850): FareTier[] => [
-  {
-    id: 'saver',
-    label: 'Saver (Regular)',
-    pricePerAdult: basePrice,
-    cabinBaggageKg: 7,
-    checkinBaggageKg: 15,
-    refundable: true,
-    cancellationSlabs: [
-      { window: '4 hrs to 4 days', fee: 3500, platformFee: 300 },
-      { window: '4 days to 365 days', fee: 3000, platformFee: 300 }
-    ],
-    dateChangeSlabs: [
-      { window: '4 hrs to 4 days', fee: 3250, platformFee: 300 },
-      { window: '4 days to 365 days', fee: 2750, platformFee: 300 }
-    ],
-    seatsIncluded: 'chargeable',
-    mealsIncluded: 'chargeable',
-  },
-  {
-    id: 'flexi',
-    label: 'Flexi Plus',
-    pricePerAdult: basePrice + 750,
-    cabinBaggageKg: 7,
-    checkinBaggageKg: 15,
-    refundable: true,
-    cancellationSlabs: [
-      { window: '4 hrs to 4 days', fee: 500, platformFee: 300 },
-      { window: '4 days to 365 days', fee: 0, platformFee: 300 }
-    ],
-    dateChangeSlabs: [
-      { window: '4 hrs to 4 days', fee: 0, platformFee: 300 },
-      { window: '4 days to 365 days', fee: 0, platformFee: 300 }
-    ],
-    seatsIncluded: 'free',
-    mealsIncluded: 'complimentary',
-  },
-  {
-    id: 'corporate',
-    label: 'Corporate Fare',
-    pricePerAdult: basePrice + 1200,
-    cabinBaggageKg: 7,
-    checkinBaggageKg: 20,
-    refundable: true,
-    cancellationSlabs: [
-      { window: '4 hrs to 4 days', fee: 0, platformFee: 300 },
-      { window: '4 days to 365 days', fee: 0, platformFee: 300 }
-    ],
-    dateChangeSlabs: [
-      { window: 'Up to 2 hrs before', fee: 0, platformFee: 0 }
-    ],
-    seatsIncluded: 'free',
-    mealsIncluded: 'complimentary',
-  },
-  {
-    id: 'upfront',
-    label: 'UpFront (Premium)',
-    pricePerAdult: basePrice + 1850,
-    cabinBaggageKg: 10,
-    checkinBaggageKg: 25,
-    refundable: true,
-    cancellationSlabs: [
-      { window: '4 hrs to 4 days', fee: 0, platformFee: 0 },
-      { window: '4 days to 365 days', fee: 0, platformFee: 0 }
-    ],
-    dateChangeSlabs: [
-      { window: 'Unlimited free changes', fee: 0, platformFee: 0 }
-    ],
-    seatsIncluded: 'free',
-    mealsIncluded: 'complimentary',
-  }
-];
+export const DEFAULT_FARE_TIERS = (basePrice: number = 4850, airlineName: string = ''): FareTier[] => {
+  return getAirlineFareTiers(airlineName, basePrice);
+};
 
 export const FarePlansSheet: React.FC<FarePlansSheetProps> = ({
   isOpen,
@@ -102,7 +34,7 @@ export const FarePlansSheet: React.FC<FarePlansSheetProps> = ({
   onSelectFare,
 }) => {
   const { state, dispatch } = useBookingFlow();
-  const fareTiers = DEFAULT_FARE_TIERS(basePrice);
+  const fareTiers = DEFAULT_FARE_TIERS(basePrice, airline);
 
   if (!isOpen) return null;
 
@@ -194,7 +126,7 @@ export const FarePlansSheet: React.FC<FarePlansSheetProps> = ({
                 >
                   {fare.id === 'flexi' && (
                     <span className="absolute -top-2.5 right-4 bg-amber-500 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-xs flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> Most Popular
+                      <ShieldCheck className="w-3 h-3" /> Most Popular
                     </span>
                   )}
                   {fare.id === 'corporate' && (

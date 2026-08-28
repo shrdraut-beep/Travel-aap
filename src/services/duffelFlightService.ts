@@ -91,96 +91,26 @@ export async function fetchDuffelFlights(
   const destCode = destination.trim().toUpperCase().slice(0, 3);
   const cleanDate = (date || '').split('T')[0].trim() || new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
-  // Retrieve Duffel API Key from env
-  const duffelApiKey =
-    (import.meta as any).env?.VITE_DUFFEL_API_KEY ||
-    (import.meta as any).env?.DUFFEL_ACCESS_TOKEN ||
-    (import.meta as any).env?.VITE_DUFFEL_ACCESS_TOKEN ||
-    '';
-
-  // Official EarnKaro Profit Link for flight bookings
-  const earnkaroProfitLink = 'https://bitli.in/bzzMIEZ';
-
-  // Payload for Duffel Air Offer Request
-  const duffelPayload = {
-    data: {
-      slices: [
-        {
-          origin: originCode,
-          destination: destCode,
-          departure_date: cleanDate,
-        },
-      ],
-      passengers: Array.from({ length: adults }, () => ({ type: 'adult' })),
-      cabin_class: cabinClass.toLowerCase().includes('business')
-        ? 'business'
-        : cabinClass.toLowerCase().includes('first')
-        ? 'first'
-        : cabinClass.toLowerCase().includes('premium')
-        ? 'premium_economy'
-        : 'economy',
-    },
-  };
-
-  if (duffelApiKey && !duffelApiKey.includes('MY_DUFFEL')) {
-    try {
-      const duffelRes = await fetch('/api/duffel/air/offer_requests?return_offers=true', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${duffelApiKey.trim()}`,
-          'Duffel-Version': 'v1',
-          'Content-Type': 'application/json',
-          'Accept-Encoding': 'gzip',
-        },
-        body: JSON.stringify(duffelPayload),
-      });
-
-      if (duffelRes.ok) {
-        const duffelJson = await duffelRes.json();
-        const offers = duffelJson?.data?.offers || [];
-        if (Array.isArray(offers) && offers.length > 0) {
-          return mapDuffelOffersToFlightOptions(offers, originCode, destCode, cleanDate, earnkaroProfitLink);
-        }
-      } else {
-        const errJson = await duffelRes.json().catch(() => ({}));
-        console.error("Duffel API Error:", duffelRes.status, errJson);
-      }
-    } catch (err) {
-      console.error("Duffel API Error:", err);
-    }
-  }
-
-  // 2. Fallback to /api/search-flights server proxy endpoint
   try {
-    const serverRes = await fetch('/api/search-flights', {
+    const serverRes = await fetch('/api/flights/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         origin: originCode,
         destination: destCode,
         departDate: cleanDate,
-        date: cleanDate,
-        adults,
-        cabinClass,
-      }),
+        adults: adults,
+        cabinClass: cabinClass
+      })
     });
-
-    if (serverRes.ok) {
-      const serverJson = await serverRes.json();
-      console.log("Duffel API Response:", serverJson);
-      const flightList = serverJson.flights || serverJson.data;
-      if (Array.isArray(flightList) && flightList.length > 0) {
-        return flightList;
-      }
-    } else {
-      const errJson = await serverRes.json().catch(() => ({}));
-      console.error("Duffel API Error:", serverRes.status, errJson);
+    const data = await serverRes.json();
+    if (data.success && Array.isArray(data.flights)) {
+      return data.flights;
     }
-  } catch (serverErr) {
-    console.error("Duffel API Error:", serverErr);
+  } catch (err) {
+    console.error("Flight search error:", err);
   }
 
-  // Strict real data - return empty array if not found from API
   return [];
 }
 

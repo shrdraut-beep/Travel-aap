@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileSpreadsheet, Calendar, Search, Download, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { exportToExcel } from '../../utils/excelUtils';
 
 export const AgencyStatementView = () => {
   const [fromDate, setFromDate] = useState(() => {
@@ -18,21 +18,20 @@ export const AgencyStatementView = () => {
     { id: 'TXN-9015', date: '2026-08-10', type: 'Payout', confId: 'UTR-991203', gross: 0, comm: 0, tds: 0, net: -2500, status: 'Processed' },
   ];
 
-  const handleExport = () => {
-    const worksheet = XLSX.utils.json_to_sheet(ledger.map(tx => ({
-      'Transaction ID': tx.id,
-      'Date': tx.date,
-      'Type': tx.type,
-      'Confirmation ID': tx.confId,
-      'Gross Amount (INR)': tx.gross,
-      'Commission (INR)': tx.comm,
-      'TDS Deducted (INR)': tx.tds,
-      'Net Payout (INR)': tx.net,
-      'Status': tx.status
-    })));
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Agency Statement");
-    XLSX.writeFile(workbook, `Agency_Statement_${fromDate}_to_${toDate}.xlsx`);
+  const handleExport = async () => {
+    const columns = [
+      { header: 'Transaction ID', key: 'id', width: 18 },
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Type', key: 'type', width: 20 },
+      { header: 'Confirmation ID', key: 'confId', width: 18 },
+      { header: 'Gross Amount (INR)', key: 'gross', width: 20 },
+      { header: 'Commission (INR)', key: 'comm', width: 18 },
+      { header: 'TDS Deducted (INR)', key: 'tds', width: 18 },
+      { header: 'Net Payout (INR)', key: 'net', width: 18 },
+      { header: 'Status', key: 'status', width: 14 }
+    ];
+
+    await exportToExcel(`Agency_Statement_${fromDate}_to_${toDate}.xlsx`, 'Agency Statement', columns, ledger);
   };
 
   return (

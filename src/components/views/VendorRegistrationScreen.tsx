@@ -3,7 +3,7 @@ import {
   Building2, 
   Car, 
   ShieldCheck, 
-  Sparkles, 
+  Compass as Sparkles, 
   CheckCircle2, 
   FileText, 
   DollarSign, 

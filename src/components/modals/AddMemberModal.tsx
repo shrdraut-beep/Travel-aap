@@ -1,7 +1,7 @@
 import { ScrollView } from '../ScrollView';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, UserPlus, Check, Search, BookUser, Plus, Phone, CreditCard, Sparkles } from 'lucide-react';
+import { X, UserPlus, Check, Search, BookUser, Plus, Phone, CreditCard, Compass as Sparkles } from 'lucide-react';
 import { Member, MasterContact } from '../../types';
 import { getMasterContacts, addMasterContact } from '../../utils/contacts';
 

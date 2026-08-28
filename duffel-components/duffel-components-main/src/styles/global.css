@@ -1,0 +1,70 @@
+@import "./colors.css";
+@import "./flex.css";
+@import "./font-families.css";
+@import "./margin.css";
+@import "./spacing.css";
+@import "./transitions.css";
+@import "./typography.css";
+@import "./utilities.css";
+
+@import "./components/AirlineSelector.css";
+@import "./components/Amenity.css";
+@import "./components/BaggageDisplay.css";
+@import "./components/Button.css";
+@import "./components/CfarSelectionModal.css";
+@import "./components/Card.css";
+@import "./components/Counter.css";
+@import "./components/DuffelNGSView.css";
+@import "./components/DuffelPayments.css";
+@import "./components/FilterControl.css";
+@import "./components/IconButton.css";
+@import "./components/Legend.css";
+@import "./components/Loader.css";
+@import "./components/LoadingState.css";
+@import "./components/Modal.css";
+@import "./components/NGSShelfInfoCard.css";
+@import "./components/NGSSliceFareCard.css";
+@import "./components/NGSTable.css";
+@import "./components/OfferSlice.css";
+@import "./components/OfferSliceModal.css";
+@import "./components/OfferSliceDetailTravelItem.css";
+@import "./components/PassengerSelect.css";
+@import "./components/PassengersLayout.css";
+@import "./components/RadioButton.css";
+@import "./components/Row.css";
+@import "./components/Seat.css";
+@import "./components/SeatInfo.css";
+@import "./components/SeatMap.css";
+@import "./components/SeatSelect.css";
+@import "./components/Segment.css";
+@import "./components/SelectionSegment.css";
+@import "./components/SliceCarriersTitle.css";
+@import "./components/SliceSummary.css";
+@import "./components/StaysAmenities.css";
+@import "./components/StaysSummary.css";
+@import "./components/StaysRoomRateCard.css";
+@import "./components/StaysCancellationTimeline.css";
+@import "./components/Summary.css";
+@import "./components/Tabs.css";
+@import "./components/TimelineItem.css";
+@import "./components/TimeRangeSelector.css";
+
+.duffel-components {
+  --BUTTON-RADIUS: 5px;
+  --TRANSITION-CUBIC-BEZIER: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--FONT-FAMILY);
+  overflow: hidden;
+  height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}

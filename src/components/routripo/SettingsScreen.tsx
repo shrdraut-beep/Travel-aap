@@ -22,7 +22,10 @@ import {
   Loader2,
   Send,
   Download,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Layers,
+  Terminal,
+  Plane
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "../../context/LanguageContext";
@@ -33,8 +36,10 @@ import { enablePushNotifications } from "../../utils/push";
 import { shareAppOnWhatsApp } from "../../utils/shareUtils";
 import { LanguageOnboardingModal } from "../modals/LanguageOnboardingModal";
 import { PrivacyAndCreditsModal } from "../modals/PrivacyAndCreditsModal";
+import { TravelportWorkflowConsole } from "../travelport/TravelportWorkflowConsole";
 
 interface SettingsScreenProps {
+  onBack?: () => void;
   onLogout: () => void;
   setActive?: (tab: string, subTab?: string) => void;
   onSOS?: () => void;
@@ -84,7 +89,7 @@ const ToggleSwitch: React.FC<{ checked: boolean; onChange: (v: boolean) => void 
   </button>
 );
 
-export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenProps) {
+export function SettingsScreen({ onLogout, setActive, onSOS, onBack }: SettingsScreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrolled = useScrolled(scrollRef);
   const { lang, setLang, t } = useLanguage();
@@ -105,6 +110,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showTravelportDevKit, setShowTravelportDevKit] = useState(false);
 
   // Form & Execution state
   const [feedbackRating, setFeedbackRating] = useState(5);
@@ -141,12 +147,6 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
 
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rating: feedbackRating, feedback: feedbackText, tripName: activeTrip.name })
-    }).catch(err => console.log("Feedback log:", err));
-
     setFeedbackSubmitted(true);
     setTimeout(() => {
       setShowFeedbackModal(false);
@@ -160,12 +160,12 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
     try {
       await signOutUser();
       logout();
-      setIsLoggingOut(false);
-      setShowLogoutModal(false);
       onLogout();
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error("Logout failed", err);
+    } finally {
       setIsLoggingOut(false);
+      setShowLogoutModal(false);
     }
   };
 
@@ -173,23 +173,13 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
     setIsDeletingAccount(true);
     setDeleteError(null);
     try {
-      await deleteUserAccountAndData(currentUser?.id);
+      await deleteUserAccountAndData();
       logout();
-      setIsDeletingAccount(false);
-      setShowDeleteModal(false);
       onLogout();
     } catch (err: any) {
-      console.error("Account deletion error:", err);
+      setDeleteError(err.message || "Failed to delete account. Please re-authenticate.");
+    } finally {
       setIsDeletingAccount(false);
-      if (err?.message === "REAUTH_REQUIRED") {
-        setDeleteError(
-          "For security reasons, please re-authenticate before deleting your account."
-        );
-      } else {
-        setDeleteError(
-          "Failed to delete account. Please try again."
-        );
-      }
     }
   };
 
@@ -200,7 +190,8 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
         title={<LogoName />} 
         scrolled={scrolled} 
         onLogout={onLogout} 
-        onSOS={onSOS || (() => alert("SOS Triggered!"))} 
+        onSOS={onSOS || (() => alert("SOS Triggered!"))}
+        onBack={onBack} 
       />
 
       {/* Settings Sub-Header with Back Button */}
@@ -293,15 +284,14 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
           </h2>
 
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-4">
-            {/* Budget Alerts */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                   <Bell className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">Budget & Overflow Alerts</p>
-                  <p className="text-[10px] text-slate-500 font-medium">Notify when expenses exceed planned trip budget</p>
+                  <p className="text-xs font-bold text-slate-800">Kharch & Budget Alerts</p>
+                  <p className="text-[10px] text-slate-500">Notify when group expense limit exceeds 80%</p>
                 </div>
               </div>
               <ToggleSwitch checked={budgetAlerts} onChange={handleToggleBudgetAlerts} />
@@ -309,15 +299,14 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
 
             <div className="h-[1px] bg-slate-100" />
 
-            {/* Push Notifications */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                   <Smartphone className="w-4 h-4" />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-800">Push Notifications</p>
-                  <p className="text-[10px] text-slate-500 font-medium">Get instant alerts when members add new expenses</p>
+                  <p className="text-[10px] text-slate-500">Live flight delays, check-in, and member updates</p>
                 </div>
               </div>
               <ToggleSwitch checked={pushNotifications} onChange={handleTogglePushNotifications} />
@@ -325,15 +314,14 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
 
             <div className="h-[1px] bg-slate-100" />
 
-            {/* SOS Alerts */}
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
                   <Siren className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-800">Emergency & SOS Alerts</p>
-                  <p className="text-[10px] text-slate-500 font-medium">Receive instant location broadcast if SOS is triggered</p>
+                  <p className="text-xs font-bold text-slate-800">Emergency SOS Broadcast</p>
+                  <p className="text-[10px] text-slate-500">Enable high-priority SMS & GPS location sharing</p>
                 </div>
               </div>
               <ToggleSwitch checked={sosAlerts} onChange={handleToggleSosAlerts} />
@@ -341,10 +329,42 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
           </div>
         </div>
 
-        {/* 3. APP ACTIONS & ABOUT */}
+        {/* 3. TRAVELPORT TRIPSERVICES DEVKIT & WORKFLOW */}
         <div className="space-y-3">
           <h2 className="text-xs font-black uppercase tracking-wider text-indigo-600">
-            3. APP ACTIONS & ABOUT
+            3. TRAVELPORT TRIPSERVICES & GDS/NDC DEVKIT
+          </h2>
+
+          <div 
+            onClick={() => setShowTravelportDevKit(true)}
+            className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-4 shadow-md border border-indigo-500/30 text-white cursor-pointer hover:border-indigo-400 transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 flex items-center justify-center shrink-0">
+                <Layers className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-black text-white">TripServices 20-Step Orchestrator</p>
+                  <span className="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 text-[9px] font-black uppercase rounded border border-indigo-500/30">
+                    A–T Spec
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                  Test Air Search, Price, Workbench, Seats, Ancillaries, PNR, Ticketing & Stays 11.33/12
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-white/20 text-white flex items-center justify-center shrink-0 transition-all">
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+
+        {/* 4. APP SUPPORT & LEGAL */}
+        <div className="space-y-3">
+          <h2 className="text-xs font-black uppercase tracking-wider text-indigo-600">
+            4. SUPPORT & ABOUT
           </h2>
 
           <div className="bg-white rounded-2xl p-2 shadow-sm border border-slate-200/80 divide-y divide-slate-100">
@@ -389,7 +409,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>
 
-            {/* Send Feedback / Report Bug */}
+            {/* Support Email */}
             <div 
               onClick={() => window.location.href = "mailto:support@routripo.com"}
               className="p-3 hover:bg-slate-50 rounded-xl flex items-center justify-between cursor-pointer transition-all"
@@ -400,7 +420,7 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-800">Send Feedback / Report Bug</p>
-                  <p className="text-[10px] text-sky-600 font-semibold underline">contact@raoutripo.com</p>
+                  <p className="text-[10px] text-sky-600 font-semibold underline">support@routripo.com</p>
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -422,21 +442,6 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
             </div>
-
-            {/* Credits & Data Sources */}
-            <div className="p-3 hover:bg-slate-50 rounded-xl flex items-center justify-between transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                  <Info className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-800">Credits & Data Sources</p>
-                  <p className="text-[10px] text-slate-500 font-medium">
-                    Flight data provided by <a href="https://opensky-network.org" target="_blank" rel="noreferrer" className="text-indigo-600 underline font-semibold">The OpenSky Network</a>
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* LOGOUT / SIGN OUT Button */}
@@ -448,37 +453,51 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
             <span>LOGOUT / SIGN OUT</span>
           </button>
 
-          {/* DELETE ACCOUNT & ALL DATA Button */}
+          {/* Delete Account */}
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all cursor-pointer"
+            className="w-full py-3 text-rose-600 hover:bg-rose-50 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-2"
           >
             <UserX className="w-4 h-4" />
-            <span>DELETE ACCOUNT & ALL DATA</span>
+            <span>Delete Account & Data</span>
           </button>
-
-          {/* Footer Branding Tag */}
-          <div className="pt-4 text-center">
-            
-            <p className="text-[10px] text-slate-400 font-medium mt-1">Version 2.0 Native Android Edition</p>
-          </div>
         </div>
       </div>
 
+      {/* Travelport TripServices DevKit Modal */}
+      <AnimatePresence>
+        {showTravelportDevKit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-5xl"
+            >
+              <TravelportWorkflowConsole onClose={() => setShowTravelportDevKit(false)} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Language / Vibe Modal */}
-      <LanguageOnboardingModal 
-        isOpen={showVibeModal} 
-        onClose={() => setShowVibeModal(false)} 
-      />
+      {showVibeModal && (
+        <LanguageOnboardingModal 
+          isOpen={showVibeModal}
+          onClose={() => setShowVibeModal(false)}
+        />
+      )}
 
-      {/* Privacy Policy & Credits Modal */}
-      <PrivacyAndCreditsModal 
-        isOpen={showPrivacyModal} 
-        onClose={() => setShowPrivacyModal(false)} 
-        lang={lang} 
-      />
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && (
+        <PrivacyAndCreditsModal 
+          isOpen={showPrivacyModal}
+          lang={lang}
+          onClose={() => setShowPrivacyModal(false)}
+        />
+      )}
 
-      {/* Feedback Modal */}
+      {/* In-App Feedback Modal */}
       <AnimatePresence>
         {showFeedbackModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -486,20 +505,21 @@ export function SettingsScreen({ onLogout, setActive, onSOS }: SettingsScreenPro
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 flex flex-col"
+              className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100"
             >
-              <div className="p-6 bg-slate-900 text-white relative">
+              <div className="p-5 bg-indigo-600 text-white relative">
                 <button
+                  type="button"
                   onClick={() => setShowFeedbackModal(false)}
-                  className="absolute top-5 right-5 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer"
+                  className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center mb-3">
-                  <Star className="w-6 h-6 text-amber-400 fill-amber-400" />
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-3">
+                  <MessageSquare className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-black">Send In-App Feedback</h3>
-                <p className="text-xs text-slate-300 mt-1 font-medium">How is your experience with Routripo?</p>
+                <p className="text-xs text-slate-100 mt-1 font-medium">How is your experience with Routripo?</p>
               </div>
 
               {feedbackSubmitted ? (

@@ -1,7 +1,7 @@
 import { ScrollView } from '../ScrollView';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Receipt, Calculator, Coins, Calendar, Sparkles, RefreshCw, Smartphone, Download, CheckCircle, Info, Share2, Wifi, Users, Mic, MicOff } from 'lucide-react';
+import { X, Receipt, Calculator, Coins, Calendar, Compass as Sparkles, Compass, Zap, RefreshCw, Smartphone, Download, CheckCircle, Info, Share2, Wifi, Users, Mic, MicOff } from 'lucide-react';
 import { Category, Member, Stage, TripGroup, DialogConfig } from '../../types';
 import { getUniqueMembers } from '../../utils';
 
@@ -270,7 +270,7 @@ export const ModalsContainer: React.FC<ModalsContainerProps> = (props) => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <Zap className="w-4 h-4 text-indigo-600" />
                       </div>
                       <div className="flex flex-col">
                         <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">Smart</span>
@@ -882,7 +882,7 @@ export const ModalsContainer: React.FC<ModalsContainerProps> = (props) => {
                   disabled={planForm.isParsing}
                   className="w-full py-4 bg-teal-600 text-white rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl shadow-teal-200 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
-                  {planForm.isParsing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  {planForm.isParsing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Compass className="w-4 h-4" />}
                   {lang === 'mr' ? 'माहिती मिळवा' : 'Extract Info'}
                 </button>
               </form>

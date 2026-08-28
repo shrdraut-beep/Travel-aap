@@ -1,7 +1,7 @@
 import { ScrollView } from '../ScrollView';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Music, Play, Pause, Plus, Check, RefreshCw, Radio, Sparkles, Volume2 } from 'lucide-react';
+import { X, Search, Music, Play, Pause, Plus, Check, RefreshCw, Radio, Compass as Sparkles, Volume2 } from 'lucide-react';
 import { useMusicPlayer } from '../MusicPlayerContext';
 import { PlaylistItem } from '../../types';
 import { sanitizeString } from '../../utils/security';

@@ -6,13 +6,15 @@ import { useVendorStore } from '../../store/useVendorStore';
 import { authedFetch } from '../../utils/apiClient';
 import { TopBar, LogoName } from '../routripo/SharedUI';
 import { AdManager } from './AdManager';
+import { PentAGISecurityCenter } from '../security/PentAGISecurityCenter';
+import { CodexSecurityCenter } from '../security/CodexSecurityCenter';
 import { 
   Users, Activity, CheckCircle2, XCircle, AlertTriangle, Link2Off, 
   ShieldCheck, PackageSearch, DollarSign, TrendingUp, FileText, ShieldAlert,
   Bell, MessageSquare, Gift, LayoutDashboard, Database, ChevronRight,
   RefreshCcw, Smartphone, Loader2, Search, Filter, Server, Globe, Zap,
   Layers, Send, Terminal, Code2, Building2, Check, X, Clock,
-  RotateCcw, Key, Lock, Download, FileSpreadsheet
+  RotateCcw, Key, Lock, Download, FileSpreadsheet, ArrowRight, BarChart3
 } from 'lucide-react';
 import { MaskedSensitiveText } from '../common/MaskedSensitiveText';
 
@@ -38,12 +40,13 @@ interface ApiHealth {
 }
 
 export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
+  lang = 'en',
   onLaunchMainApp
 }) => {
   const { applications: vendorApps, approveApplication, rejectApplication, resetApplications } = useVendorStore();
   const [vendorFilter, setVendorFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
 
-  const [activeTab, setActiveTab] = useState<'analytics' | 'vendors' | 'payouts' | 'ads' | 'apis' | 'support' | 'users'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'security' | 'vendors' | 'payouts' | 'ads' | 'apis' | 'support' | 'users'>('analytics');
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
@@ -342,13 +345,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   const pendingVendorCount = vendorApps.filter(a => a.status === 'PENDING').length;
 
   const tabs = [
-    { id: 'analytics', icon: LayoutDashboard, label: 'Platform Analytics' },
-    { id: 'vendors', icon: Building2, label: `Vendor Approvals ${pendingVendorCount > 0 ? `(${pendingVendorCount})` : ''}` },
-    { id: 'payouts', icon: DollarSign, label: 'Commission & Payouts' },
-    { id: 'ads', icon: Gift, label: 'Active Ads & Offers' },
-    { id: 'apis', icon: Activity, label: 'API & System Health' },
-    { id: 'support', icon: MessageSquare, label: 'Support & Security' },
-    { id: 'users', icon: Users, label: 'User Directory' },
+    { id: 'analytics', icon: LayoutDashboard, label: 'Platform Analytics', category: 'General' },
+    { id: 'security', icon: ShieldAlert, label: 'PentAGI & Codex Security', category: 'Security' },
+    { id: 'vendors', icon: Building2, label: `Vendor Approvals ${pendingVendorCount > 0 ? `(${pendingVendorCount})` : ''}`, category: 'Partners' },
+    { id: 'payouts', icon: DollarSign, label: 'Commission & Payouts', category: 'Finance' },
+    { id: 'ads', icon: Gift, label: 'Active Ads & Offers', category: 'Marketing' },
+    { id: 'apis', icon: Activity, label: 'API & System Health', category: 'DevOps' },
+    { id: 'support', icon: MessageSquare, label: 'Support & Vault', category: 'Zero-Trust' },
+    { id: 'users', icon: Users, label: 'User Directory', category: 'Users' },
   ] as const;
 
   const filteredVendors = vendorApps.filter(app => {
@@ -454,55 +458,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
         onOpenSettings={() => setActiveTab('analytics')}
       />
 
-      {/* Admin Theme Header Sub-bar */}
-      <div className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between text-xs font-bold shadow-xs shrink-0 gap-2">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-200" />
-          <span className="text-white font-bold">Super Admin Control Hub</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={handlePingAll}
-            className="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors text-xs font-bold cursor-pointer flex items-center gap-1.5 backdrop-blur-xs"
-          >
-            <RefreshCcw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh Diagnostics</span>
-          </button>
-          {onLaunchMainApp && (
-            <button 
-              onClick={onLaunchMainApp}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white transition-colors text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
-            >
-              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Launch Main App</span>
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* Categorized Navigation Tabs Bar */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2 shrink-0 overflow-x-auto scrollbar-none">
-        <div className="flex items-center gap-2 max-w-7xl mx-auto min-w-max">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  isActive
-                    ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Main Content Area (Scrollable with proper padding) */}
       <main className="flex-1 overflow-y-auto pb-32 px-2 sm:px-4 lg:px-6 py-6">
@@ -511,6 +467,130 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
           {/* TAB 1: PLATFORM ANALYTICS */}
           {activeTab === 'analytics' && (
             <div className="space-y-6">
+
+              {/* ROUTRIPO HERO ACTION BANNER */}
+              <div className="bg-emerald-50 border border-emerald-200/80 rounded-3xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-emerald-600/20">
+                    🛡️
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-black text-slate-900">सक्रिय अ‍ॅडमिन कमांड सेंटर</h2>
+                    <p className="text-xs font-medium text-slate-600">सिस्टम सुरक्षा, व्हेंडर मंजुरी आणि पे-आउट्स व्यवस्थापन</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setActiveTab('vendors')}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95 self-end sm:self-auto"
+                >
+                  <span>व्हेंडर मंजुरी कडे जा ({pendingVendorCount})</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* ROUTRIPO HERO DUAL ACTION CARDS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div 
+                  onClick={() => setActiveTab('vendors')}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-5 text-white shadow-md shadow-emerald-500/10 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-between"
+                >
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider">पार्टनर पडताळणी</span>
+                    <h3 className="text-lg font-black mt-1">व्हेंडर व एजन्सी मंजुरी</h3>
+                    <p className="text-xs text-emerald-100 font-medium mt-0.5">नवीन B2B एजन्सी KYC अर्ज तपासा</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+                    <Building2 className="w-6 h-6" />
+                  </div>
+                </div>
+
+                <div 
+                  onClick={() => setActiveTab('apis')}
+                  className="bg-gradient-to-r from-teal-700 to-emerald-900 rounded-3xl p-5 text-white shadow-md shadow-teal-500/10 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-between"
+                >
+                  <div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-wider">सिस्टम सुरक्षा</span>
+                    <h3 className="text-lg font-black mt-1">APIs आणि तिजोरी (Vault)</h3>
+                    <p className="text-xs text-teal-100 font-medium mt-0.5">लाइव्ह रिस्पॉन्स टाईम आणि एन्क्रिप्शन डायग्नोस्टिक्स</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2x3 MODULE CONTROLS GRID (ROUTRIPO STYLE) */}
+              <div className="bg-white rounded-3xl border border-slate-200/90 p-5 shadow-xs space-y-3">
+                <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                  <Activity className="w-4 h-4 text-emerald-600" />
+                  <h3 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">अ‍ॅडमिन नियंत्रण केंद्रे (Admin Modules)</h3>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                  <button 
+                    onClick={() => setActiveTab('analytics')}
+                    className="p-3 bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">📊</div>
+                    <span className="text-xs font-bold text-slate-800">अ‍ॅनालिटिक्स</span>
+                    <span className="text-[10px] text-emerald-700 font-medium">Platform Stats</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('security')}
+                    className="p-3 bg-sky-50/80 hover:bg-sky-100 border border-sky-200/80 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group shadow-xs"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">🛡️</div>
+                    <span className="text-xs font-bold text-slate-800">सिक्युरिटी</span>
+                    <span className="text-[10px] text-sky-700 font-bold">PentAGI & Codex</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('vendors')}
+                    className="p-3 bg-teal-50/80 hover:bg-teal-100 border border-teal-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">🏪</div>
+                    <span className="text-xs font-bold text-slate-800">पार्टनर्स</span>
+                    <span className="text-[10px] text-teal-700 font-medium">{pendingVendorCount} Pending</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('payouts')}
+                    className="p-3 bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">💸</div>
+                    <span className="text-xs font-bold text-slate-800">पे-आउट्स</span>
+                    <span className="text-[10px] text-indigo-700 font-medium">Payment Release</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('apis')}
+                    className="p-3 bg-purple-50/80 hover:bg-purple-100 border border-purple-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">🔌</div>
+                    <span className="text-xs font-bold text-slate-800">APIs</span>
+                    <span className="text-[10px] text-purple-700 font-medium">Health Test</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('ads')}
+                    className="p-3 bg-amber-50/80 hover:bg-amber-100 border border-amber-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-amber-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">📢</div>
+                    <span className="text-xs font-bold text-slate-800">जाहिराती</span>
+                    <span className="text-[10px] text-amber-700 font-medium">Banner Ad Rules</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setActiveTab('support')}
+                    className="p-3 bg-rose-50/80 hover:bg-rose-100 border border-rose-100 rounded-2xl text-center flex flex-col items-center transition-all cursor-pointer group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-sm mb-1.5 shadow-sm group-hover:scale-110 transition-transform">🔒</div>
+                    <span className="text-xs font-bold text-slate-800">तिजोरी</span>
+                    <span className="text-[10px] text-rose-700 font-medium">Zero-Trust</span>
+                  </button>
+                </div>
+              </div>
               {/* System Health Overview Card */}
               <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -600,6 +680,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
             </div>
           )}
 
+          {/* TAB: PENTAGI & CODEX SECURITY CENTER */}
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              <PentAGISecurityCenter lang={lang} onShowToast={(msg) => showToast(msg)} />
+              <CodexSecurityCenter lang={lang} onShowToast={(msg) => showToast(msg)} />
+            </div>
+          )}
+
           {/* TAB 2: VENDOR APPROVALS */}
           {activeTab === 'vendors' && (
             <div className="space-y-6">
@@ -639,10 +727,21 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
               {/* Vendor List */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredVendors.length === 0 ? (
-                  <div className="col-span-full bg-white border border-slate-200 rounded-3xl p-10 text-center text-slate-400">
-                    <Building2 className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                    <p className="text-sm font-bold text-slate-600">No vendor applications found</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Applications submitted by travel partners will appear here for review.</p>
+                  <div className="col-span-full bg-emerald-50/80 border-2 border-dashed border-emerald-300 rounded-[32px] p-10 text-center space-y-3">
+                    <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white mx-auto">
+                      <BarChart3 className="w-8 h-8" />
+                    </div>
+                    <h4 className="text-base font-black text-slate-800">No Admin Data / Applications Found 📊</h4>
+                    <p className="text-xs font-semibold text-slate-600 max-w-sm mx-auto leading-relaxed">
+                      All partner registrations, vendor KYC applications, and real-time revenue analytics will appear here as travel partners register.
+                    </p>
+                    <button
+                      onClick={resetApplications}
+                      className="px-5 py-2.5 bg-emerald-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset Filters & Refresh</span>
+                    </button>
                   </div>
                 ) : (
                   filteredVendors.map((vendor) => (
@@ -1048,6 +1147,51 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
 
         </div>
       </main>
+
+      {/* Category-Based Bottom Navigation Bar for Admin Account (User Layout Style) */}
+      <div className="fixed bottom-3 left-3 right-3 z-50 max-w-5xl mx-auto">
+        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-slate-950/60 border border-slate-700/80 p-2 flex items-center justify-between overflow-x-auto scrollbar-none gap-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            const isSecurity = tab.id === 'security';
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`relative flex-1 min-w-[68px] sm:min-w-[76px] flex flex-col items-center gap-1 py-1.5 px-2 rounded-2xl transition-all duration-300 cursor-pointer ${
+                  isActive
+                    ? isSecurity
+                      ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-lg shadow-sky-500/30 scale-105 font-bold'
+                      : 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-500/30 scale-105 font-bold'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                {isActive && (
+                  <span className="absolute -top-1 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                )}
+                <div className="relative">
+                  <Icon className={`w-4 h-4 transition-transform ${isActive ? 'scale-110 text-white' : ''}`} />
+                  {tab.id === 'vendors' && pendingVendorCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center border border-slate-900">
+                      {pendingVendorCount}
+                    </span>
+                  )}
+                </div>
+                <span className={`text-[9px] font-extrabold tracking-tight whitespace-nowrap ${isActive ? 'text-white' : 'text-slate-400'}`}>
+                  {tab.id === 'analytics' ? 'Dashboard' :
+                   tab.id === 'security' ? 'Security' :
+                   tab.id === 'vendors' ? 'Vendors' :
+                   tab.id === 'payouts' ? 'Payouts' :
+                   tab.id === 'ads' ? 'Ads' :
+                   tab.id === 'apis' ? 'APIs' :
+                   tab.id === 'support' ? 'Support' : 'Users'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };

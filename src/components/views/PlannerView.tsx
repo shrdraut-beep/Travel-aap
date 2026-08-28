@@ -5,7 +5,7 @@ import { WikipediaSnippet } from "../WikipediaSnippet";
 import { TimepassGame } from './TimepassGame';
 import React from 'react';
 import {  motion, AnimatePresence } from 'framer-motion';
-import { Plus, Compass, MapPin, ChevronRight, Music, Camera, ExternalLink, Play, Trash2, Clock, Ticket, Hotel, TreePalm, Sparkles, RefreshCw, MessageSquareQuote, Info, TrendingUp, AlertTriangle, Milestone, Train, Share2, Check, CheckCircle2, Navigation, Fuel, Calculator, X, ChevronDown, ChevronUp, FileText, Stethoscope, Shirt, Smartphone, Package, List, CalendarDays, Users } from 'lucide-react';
+import { Plus, Compass, MapPin, ChevronRight, Music, Camera, ExternalLink, Play, Trash2, Clock, Ticket, Hotel, TreePalm, Compass as Sparkles, RefreshCw, MessageSquareQuote, Info, TrendingUp, AlertTriangle, Milestone, Train, Share2, Check, CheckCircle2, Navigation, Fuel, Calculator, X, ChevronDown, ChevronUp, FileText, Stethoscope, Shirt, Smartphone, Package, List, CalendarDays, Users } from 'lucide-react';
 import { TripPlan, TripGroup, PackingItem, PackingCategory } from '../../types';
 import Markdown from 'react-markdown';
 import { BudgetDashboardModal } from '../modals/BudgetDashboardModal';
