@@ -17,8 +17,8 @@ export interface HeaderProps {
 }
 
 /**
- * Transparent over the hero, solid once scrolled. Brand mark and name are the
- * app's existing assets and must not be restyled away.
+ * Transparent over the light hero, frosted once scrolled. Brand mark and name
+ * are the app's existing assets and must not be restyled away.
  */
 export const Header: React.FC<HeaderProps> = ({
   onSignIn,
@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "border-b border-slate-200/70 bg-white/85 backdrop-blur-xl"
+          ? "border-b border-slate-200/70 bg-white/85 shadow-[0_8px_30px_-24px_rgba(15,23,42,0.35)] backdrop-blur-xl"
           : "border-b border-transparent"
       }`}
     >
@@ -54,11 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
             alt="RouTripO"
             className="h-9 w-auto"
           />
-          <span
-            className={`text-[19px] font-bold tracking-tight ${
-              scrolled ? "text-slate-900" : "text-white drop-shadow-sm"
-            }`}
-          >
+          <span className="text-[19px] font-bold tracking-tight text-slate-900">
             RouTripO
           </span>
         </a>
@@ -69,11 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
               key={item.label}
               href={item.href}
               onClick={() => onNavigate?.(item.href)}
-              className={`rounded-full px-4 py-2 text-[14px] font-semibold transition-colors ${
-                scrolled
-                  ? "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  : "text-white/90 hover:bg-white/15 hover:text-white"
-              }`}
+              className="rounded-full px-4 py-2 text-[14px] font-semibold text-slate-600 transition-colors hover:bg-white/70 hover:text-slate-900"
             >
               {item.label}
             </a>
@@ -84,24 +76,15 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             aria-label="Change language and currency"
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-              scrolled
-                ? "text-slate-600 hover:bg-slate-100"
-                : "text-white hover:bg-white/15"
-            }`}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-white/70"
           >
             <Globe className="h-[18px] w-[18px]" />
           </button>
-          <PremiumButton
-            variant={scrolled ? "ghost" : "ghost"}
-            size="sm"
-            onClick={onSignIn}
-            className={scrolled ? "" : "text-white hover:bg-white/15"}
-          >
+          <PremiumButton variant="ghost" size="sm" onClick={onSignIn}>
             Sign in
           </PremiumButton>
           <PremiumButton
-            variant={scrolled ? "primary" : "secondary"}
+            variant="primary"
             size="sm"
             icon={<UserCircle2 className="h-4 w-4" />}
             onClick={onSignUp}
@@ -114,9 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
           aria-label="Open menu"
           onClick={() => setMenuOpen((open) => !open)}
-          className={`flex h-10 w-10 items-center justify-center rounded-full sm:hidden ${
-            scrolled ? "text-slate-900" : "text-white"
-          }`}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-slate-900 sm:hidden"
         >
           {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>

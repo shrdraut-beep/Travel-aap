@@ -124,7 +124,7 @@ const DestinationCard: React.FC<{
           }}
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/25 to-transparent" />
 
         <button
           type="button"

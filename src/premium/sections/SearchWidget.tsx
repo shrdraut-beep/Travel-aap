@@ -205,7 +205,7 @@ export const SearchWidget: React.FC<SearchWidgetProps> = ({ onSearch }) => {
               onClick={() => setTripType(option.id)}
               className={`rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-all ${
                 tripType === option.id
-                  ? "bg-slate-900 text-white"
+                  ? "bg-[var(--color-coral)] text-white shadow-sm shadow-[var(--color-coral)]/30"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >

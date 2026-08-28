@@ -10,11 +10,12 @@ type ButtonVariant = "primary" | "secondary" | "ghost";
 type ButtonSize = "sm" | "md" | "lg";
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
+  // Accent is the app's existing brand coral, not black.
   primary:
-    "bg-slate-900 text-white shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/25",
+    "bg-[var(--color-coral)] text-white shadow-lg shadow-[var(--color-coral)]/30 hover:brightness-95 hover:shadow-xl hover:shadow-[var(--color-coral)]/35",
   secondary:
     "bg-white text-slate-900 ring-1 ring-slate-200 shadow-sm hover:ring-slate-300 hover:shadow-md",
-  ghost: "text-slate-700 hover:bg-slate-100"
+  ghost: "text-slate-700 hover:bg-slate-100/80"
 };
 
 const BUTTON_SIZES: Record<ButtonSize, string> = {
@@ -105,7 +106,7 @@ export const FloatingField: React.FC<FieldProps> = ({
             }
           : undefined
       }
-      className={`group relative flex h-[68px] w-full items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 text-left transition-all duration-200 focus-within:border-slate-900 focus-within:shadow-[0_0_0_4px_rgba(15,23,42,0.06)] hover:border-slate-300 ${
+      className={`group relative flex h-[68px] w-full items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 text-left transition-all duration-200 focus-within:border-[var(--color-coral)] focus-within:shadow-[0_0_0_4px_rgba(255,90,95,0.12)] hover:border-slate-300 ${
         interactive ? "cursor-pointer" : ""
       }`}
     >
