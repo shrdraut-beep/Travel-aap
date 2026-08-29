@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { AccountSheet } from "./mobile/AccountSheet";
-import type { AccountItemId } from "./mobile/AccountSheet";
+import { AccountScreen } from "./account/AccountScreen";
+import type { AccountItemId } from "./account/types";
 import { AppBar } from "./mobile/AppBar";
 import { BottomNav } from "./mobile/BottomNav";
 import { DestinationRail } from "./mobile/DestinationRail";
@@ -14,6 +14,8 @@ import { SearchCard } from "./mobile/SearchCard";
 import type { NavTab, SearchMode, SearchPayload } from "./mobile/types";
 
 export interface UserLandingPageProps {
+  userName?: string;
+  userEmail?: string;
   onSearch?: (payload: SearchPayload) => void;
   onNotifications?: () => void;
   onAccountItem?: (item: AccountItemId) => void;
@@ -31,6 +33,8 @@ export interface UserLandingPageProps {
  * Every action is a typed prop so the existing backend wires straight in.
  */
 export const UserLandingPage: React.FC<UserLandingPageProps> = ({
+  userName,
+  userEmail,
   onSearch,
   onNotifications,
   onAccountItem,
@@ -46,7 +50,7 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
   const [accountOpen, setAccountOpen] = useState(false);
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[520px] bg-slate-50 pb-24">
+    <div className="premium-root mx-auto min-h-screen w-full max-w-[520px] bg-[var(--premium-page)] pb-24">
       <AppBar
         onMenu={() => setAccountOpen(true)}
         onNotifications={onNotifications}
@@ -96,11 +100,15 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
         }}
       />
 
-      <AccountSheet
+      <AccountScreen
         open={accountOpen}
+        userName={userName}
+        userEmail={userEmail}
         onSelect={(item) => {
-          setAccountOpen(false);
-          setTab("home");
+          if (item === "logout") {
+            setAccountOpen(false);
+            setTab("home");
+          }
           onAccountItem?.(item);
         }}
         onClose={() => {
