@@ -199,13 +199,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         label="Emergency contacts"
         caption="Who we call when SOS fires"
         tone="pink"
-        onClick={() => onSelect("sos")}
+        onClick={() => onSelect("emergency-contacts")}
       />
       <ListRow
         Icon={Workflow}
         label="Trip orchestrator"
         caption="Review the 20-step service pipeline"
-        onClick={() => onSelect("orchestrator")}
+        onClick={() => onSelect("orchestrator-pipeline")}
       />
 
       <SectionHeader title="Help center" />
