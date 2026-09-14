@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Pravas Wataghati</string>
+    <string name="title_activity_main">Pravas Wataghati</string>
+    <string name="package_name">com.pravaswataghati.app</string>
+    <string name="custom_url_scheme">com.pravaswataghati.app</string>
+</resources>

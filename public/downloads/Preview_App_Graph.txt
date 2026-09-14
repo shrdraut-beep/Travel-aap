@@ -1,0 +1,46 @@
+# Preview App (Premium Design Kit) Account-wise Graph
+
+1. USER ACCOUNT (Premium Mobile View)
+   ├── Bottom Navigation
+   │    ├── Home
+   │    │    ├── Search Card (Flights, Hotels, Trains, Buses, Cabs) -> Sheet Pickers
+   │    │    ├── Quick Actions (My trips, Wallet, AI planner, Support)
+   │    │    ├── Offers Rail (Promo coupons)
+   │    │    └── Destination Rail (Trending cities, Wishlist toggle)
+   │    ├── My trips (Trips tab placeholder)
+   │    ├── Explore (Explore tab placeholder)
+   │    ├── Offers (Offers tab placeholder)
+   │    └── Account (Account Sheet)
+   │         ├── Bargaining (Deal requests, Active chats/quotes)
+   │         ├── Expenses (Category breakdown, Daily trend, Expense log)
+   │         ├── Booking (Upcoming, Current, Past bookings)
+   │         └── Settings (Theme, Language, Notifications, Legal Vault)
+   ├── Interactive Sheets (Mobile Pickers)
+   │    ├── Date Range Picker (Sheet)
+   │    ├── Traveller & Class Picker (Sheet)
+   │    └── City Selector (Sheet)
+   └── Authentication
+        └── Login Screen (Sky panel, Phone/Email auth, Socials)
+
+2. AGENT ACCOUNT (Premium Agent Portal)
+   └── Agent Screen (Swipeable Tabs)
+        ├── Overview (Sales graph, Quick stats)
+        ├── Offers (Active lead requests, Submit quotes)
+        ├── Inventory (Package listings, Edit status)
+        ├── Bookings (Upcoming passenger lists)
+        ├── Earnings (Total balance, Withdrawal)
+        ├── Markups (Commission sliders)
+        ├── Marketing (Ads campaigns)
+        ├── Support (Helpdesk)
+        └── Profile (Agency details)
+
+3. ADMIN ACCOUNT (Premium Admin Portal)
+   └── Admin Screen (Swipeable Tabs)
+        ├── Analytics (Platform revenue, Bookings chart)
+        ├── Security (Threat logs, RASP dashboard)
+        ├── Vendors (Pending vendor applications, Approve/Reject)
+        ├── Payouts (Wallet settlement, Payment queue)
+        ├── Ads (Banner management)
+        ├── APIs (Integration health status)
+        ├── Support (User tickets)
+        └── Users (Directory, Manage accounts)

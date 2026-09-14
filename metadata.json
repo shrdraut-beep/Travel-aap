@@ -1,0 +1,8 @@
+{
+  "name": "RoutTripo",
+  "description": "Enterprise Travel Operating System: instant bookings, smart splitting, AI itineraries & reverse bidding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

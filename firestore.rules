@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Auth helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if user is an owner of the trip
+    function isTripOwner() {
+      return isAuthenticated() && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.ownerId == request.auth.uid
+      );
+    }
+    
+    // Check if user is a participant of the trip
+    function isTripParticipant() {
+      return isAuthenticated() && 
+             resource.data.participants != null && 
+             request.auth.uid in resource.data.participants;
+    }
+
+    // Default deny for all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users and Profiles: Only the owner can read/write their own data
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+    match /user_profiles/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+    match /user_keys/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Trips: Owners and participants can read. Both can edit day plans/expenses. Only owners can delete.
+    match /trips/{tripId} {
+      // Anyone who owns it, is a participant, or if the trip has no owner (demo) can read
+      allow read: if isTripOwner() || isTripParticipant() || (!("ownerId" in resource.data) && !("userId" in resource.data));
+      
+      // Any authenticated user can create a trip
+      allow create: if isAuthenticated();
+      
+      // ONLY the owner or a participant can update the trip
+      allow update: if isTripOwner() || isTripParticipant();
+      
+      // ONLY the owner can delete the trip
+      allow delete: if isTripOwner();
+    }
+
+    // Bookings: Users can read their own bookings
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.customer.email == request.auth.token.email
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Expenses: Users can read/write their own expenses
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.paidBy == request.auth.uid ||
+        request.auth.uid in resource.data.splitAmong
+      );
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.paidBy == request.auth.uid
+      );
+    }
+
+    // Support Tickets
+    match /support_tickets/{ticketId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Coupons/Promos
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Admin backend only
+    }
+
+    // FCM Tokens
+    match /fcm_tokens/{tokenId} {
+      allow write: if isAuthenticated();
+    }
+
+    // Crash Reports
+    match /crash_reports/{reportId} {
+      allow create: if true;
+    }
+
+    // System Config
+    match /system_config/{configId} {
+      allow read: if true;
+    }
+        
+    // Test collection for connectivity checks
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

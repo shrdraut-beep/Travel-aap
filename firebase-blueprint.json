@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "TripGroup": {
+      "title": "Trip Group",
+      "description": "Main document for a trip",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "maxLength": 200 },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "members": { "type": "array" },
+        "expenses": { "type": "array" },
+        "deposits": { "type": "array" },
+        "itinerary": { "type": "array" },
+        "tripType": { "type": "string", "enum": ["friends", "family"] },
+        "adminId": { "type": "string" },
+        "defaultCurrency": { "type": "string", "maxLength": 5 },
+        "totalBudget": { "type": "number" },
+        "passcode": { "type": "string", "minLength": 4, "maxLength": 10 },
+        "logoUrl": { "type": "string" },
+        "wallpaperUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "startDate", "endDate", "members", "expenses", "deposits", "itinerary"]
+    },
+    "CrashReport": {
+      "title": "Crash Report",
+      "description": "Crashlytics and error telemetry report",
+      "type": "object",
+      "properties": {
+        "message": { "type": "string" },
+        "stack": { "type": "string" },
+        "name": { "type": "string" },
+        "isFatal": { "type": "boolean" },
+        "userId": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "url": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "customKeys": { "type": "object" },
+        "breadcrumbs": { "type": "array" },
+        "appVersion": { "type": "string" },
+        "platform": { "type": "string" }
+      },
+      "required": ["message", "isFatal", "deviceId"]
+    }
+  },
+  "firestore": {
+    "/trips/{tripId}": {
+      "schema": "TripGroup",
+      "description": "Individual trip documents"
+    },
+    "/crash_reports/{reportId}": {
+      "schema": "CrashReport",
+      "description": "Crashlytics telemetry logs"
+    }
+  }
+}
+

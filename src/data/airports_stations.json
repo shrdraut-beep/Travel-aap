@@ -1,0 +1,122 @@
+[
+  {
+    "code": "NMI",
+    "city": "Navi Mumbai",
+    "airportName": "Navi Mumbai International Airport, India"
+  },
+  {
+    "code": "GOX",
+    "city": "Goa (Mopa)",
+    "airportName": "Manohar International Airport, Goa"
+  },
+  {
+    "code": "AY",
+    "city": "Ayodhya",
+    "airportName": "Maharishi Valmiki International Airport, Ayodhya"
+  },
+  {
+    "code": "AYJ",
+    "city": "Ayodhya",
+    "airportName": "Maharishi Valmiki International Airport, Ayodhya"
+  },
+  {
+    "code": "HSR",
+    "city": "Rajkot",
+    "airportName": "Rajkot International Airport, Hirasar"
+  },
+  {
+    "code": "HGI",
+    "city": "Itanagar",
+    "airportName": "Donyi Polo Airport, Itanagar"
+  },
+  {
+    "code": "RQY",
+    "city": "Shivamogga",
+    "airportName": "Shivamogga Airport, Karnataka"
+  },
+  {
+    "code": "DGH",
+    "city": "Deoghar",
+    "airportName": "Deoghar Airport, Jharkhand"
+  },
+  {
+    "code": "KBK",
+    "city": "Kushinagar",
+    "airportName": "Kushinagar International Airport, UP"
+  },
+  {
+    "code": "SMVB",
+    "city": "Bengaluru",
+    "airportName": "Sir M. Visvesvaraya Terminal Railway Station"
+  },
+  {
+    "code": "RKMP",
+    "city": "Bhopal",
+    "airportName": "Rani Kamlapati Railway Station"
+  },
+  {
+    "code": "GNC",
+    "city": "Gandhinagar",
+    "airportName": "Gandhinagar Capital Railway Station"
+  },
+  {
+    "code": "BOM",
+    "city": "Mumbai",
+    "airportName": "Chhatrapati Shivaji Maharaj International Airport"
+  },
+  {
+    "code": "DEL",
+    "city": "Delhi",
+    "airportName": "Indira Gandhi International Airport"
+  },
+  {
+    "code": "PNQ",
+    "city": "Pune",
+    "airportName": "Pune International Airport"
+  },
+  {
+    "code": "BLR",
+    "city": "Bengaluru",
+    "airportName": "Kempegowda International Airport"
+  },
+  {
+    "code": "HYD",
+    "city": "Hyderabad",
+    "airportName": "Rajiv Gandhi International Airport"
+  },
+  {
+    "code": "MAA",
+    "city": "Chennai",
+    "airportName": "Chennai International Airport"
+  },
+  {
+    "code": "CCU",
+    "city": "Kolkata",
+    "airportName": "Netaji Subhash Chandra Bose Intl Airport"
+  },
+  {
+    "code": "GOI",
+    "city": "Goa (Dabolim)",
+    "airportName": "Dabolim Airport"
+  },
+  {
+    "code": "ISK",
+    "city": "Nashik",
+    "airportName": "Nashik Ozar Airport"
+  },
+  {
+    "code": "NAG",
+    "city": "Nagpur",
+    "airportName": "Dr. Babasaheb Ambedkar International Airport"
+  },
+  {
+    "code": "CSMT",
+    "city": "Mumbai CSMT",
+    "airportName": "Chhatrapati Shivaji Maharaj Terminus"
+  },
+  {
+    "code": "NDLS",
+    "city": "New Delhi",
+    "airportName": "New Delhi Railway Station"
+  }
+]

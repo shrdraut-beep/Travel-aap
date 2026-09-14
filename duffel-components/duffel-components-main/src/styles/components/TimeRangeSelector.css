@@ -1,0 +1,19 @@
+@import "rc-slider/assets/index.css";
+
+.rc-slider-handle {
+  border-color: black !important;
+  opacity: 1 !important;
+}
+
+.rc-slider-handle:focus,
+.rc-slider-handle-dragging {
+  box-shadow: 0 0 0 3px lightgrey !important;
+}
+
+.rc-slider-track {
+  background-color: black !important;
+}
+
+.rc-slider-dot-active {
+  border-color: black !important;
+}

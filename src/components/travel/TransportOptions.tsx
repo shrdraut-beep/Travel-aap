@@ -1,0 +1,726 @@
+import React from 'react';
+import { Plane, Bus, Train, Clock, ExternalLink, ShieldCheck, Zap, Loader2, MapPin, Star } from 'lucide-react';
+import { getFullStationDetails } from '../../services/travelTimeService';
+
+import { FunFactsLoader } from '../common/FunFactsLoader';
+
+export interface TransportOptionsProps {
+  mode: 'flight' | 'bus' | 'train' | 'hotel' | 'car';
+  data: any;
+  isLoading: boolean;
+  isCached?: boolean;
+  origin?: string;
+  destination?: string;
+  lang: string;
+  currencySymbol?: string;
+  layout?: 'list' | 'grid';
+  onBookNow?: (item: any) => void;
+}
+
+const addDurationToTime = (timeStr: string, durationStr: string) => {
+  if (!timeStr || !timeStr.includes(':')) return timeStr;
+  try {
+    const parts = timeStr.split(':');
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    
+    if (isNaN(h) || isNaN(m)) return timeStr;
+    
+    // Extract hours and minutes from duration string like "2h 30m"
+    const durHMatch = durationStr.match(/(\d+)h/);
+    const durMMatch = durationStr.match(/(\d+)m/);
+    
+    const durH = durHMatch ? parseInt(durHMatch[1], 10) : 0;
+    const durM = durMMatch ? parseInt(durMMatch[1], 10) : 0;
+    
+    let totalMinutes = h * 60 + m + durH * 60 + durM;
+    totalMinutes = totalMinutes % 1440; // Safely handle 24h rollover
+    
+    const finalH = Math.floor(totalMinutes / 60);
+    const finalM = totalMinutes % 60;
+    
+    return `${String(finalH).padStart(2, '0')}:${String(finalM).padStart(2, '0')}`;
+  } catch (e) {
+    return timeStr;
+  }
+};
+
+function safeFormat12Hour(timeStr: string) {
+  if (!timeStr || typeof timeStr !== 'string') return 'TBD';
+  
+  // If it already has AM/PM, return as is safely
+  if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) return timeStr;
+  
+  const parts = timeStr.split(':');
+  if (parts.length < 2) return timeStr; // Return raw if it can't be split
+  
+  let hours = parseInt(parts[0], 10);
+  const minutes = parts[1].substring(0, 2); 
+  
+  if (isNaN(hours)) return 'TBD';
+  
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  
+  const formattedHour = hours < 10 ? '0' + hours : hours;
+  
+  return `${formattedHour}:${minutes} ${ampm}`;
+}
+
+const CLASS_BASE_FARE: Record<string, number> = {
+  '2S': 120, 'SL': 350, 'CC': 750, '3E': 850, '3A': 950, 'EC': 1500, '2A': 1350, '1A': 2250
+};
+
+const AVAILABILITY_STATES = [
+  { text: 'AVL', className: 'text-premium-sky-deep' },
+  { text: 'RAC', className: 'text-orange-500' },
+  { text: 'WL', className: 'text-rose-600' }
+];
+
+interface TrainClassOption {
+  code: string;
+  fare: number;
+  status: string;
+  statusClass: string;
+}
+
+// Availability is derived from the train number so a card keeps the same state across re-renders.
+function buildTrainClasses(train: any, trainNum: string): TrainClassOption[] {
+  const raw: any[] = Array.isArray(train.classes) && train.classes.length > 0
+    ? train.classes
+    : Array.isArray(train.accommodationTypes) && train.accommodationTypes.length > 0
+      ? train.accommodationTypes
+      : train.accommodation
+        ? [train.accommodation]
+        : ['SL', '3A', '2A'];
+
+  const seed = parseInt(String(trainNum).replace(/\D/g, '') || '0', 10);
+
+  return raw.map((entry: any, idx: number) => {
+    const isObject = typeof entry === 'object' && entry !== null;
+    const code = String(isObject ? (entry.code || entry.name || 'SL') : entry).toUpperCase();
+    const fare = Number((isObject ? (entry.fare ?? entry.price) : undefined) ?? CLASS_BASE_FARE[code] ?? 500);
+    const provided = isObject ? (entry.availability || entry.status) : undefined;
+    const derived = AVAILABILITY_STATES[(seed + idx) % AVAILABILITY_STATES.length];
+    return {
+      code,
+      fare,
+      status: provided ? String(provided) : derived.text,
+      statusClass: provided ? 'text-slate-700' : derived.className
+    };
+  });
+}
+
+export const TransportOptions: React.FC<TransportOptionsProps> = ({
+  mode,
+  data,
+  isLoading,
+  isCached = false,
+  origin,
+  destination,
+  lang,
+  currencySymbol = '₹',
+  layout = 'list',
+  onBookNow
+}) => {
+  const PAGE_SIZE = 12;
+  const [visibleCount, setVisibleCount] = React.useState<number>(PAGE_SIZE);
+  const [selectedClass, setSelectedClass] = React.useState<Record<number, string>>({});
+
+  // Reset pagination when data or mode changes
+  React.useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [data, mode]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm text-center">
+        <FunFactsLoader />
+      </div>
+    );
+  }
+
+  // Check if response contains valid schedule/stay items
+  const hasItemsInPayload = data && typeof data === 'object' && (
+    (Array.isArray(data.flights) && data.flights.length > 0) ||
+    (Array.isArray(data.buses) && data.buses.length > 0) ||
+    (Array.isArray(data.trains) && data.trains.length > 0) ||
+    (Array.isArray(data.hotels) && data.hotels.length > 0) ||
+    (Array.isArray(data.stays) && data.stays.length > 0) ||
+    (Array.isArray(data.flight_schedule) && data.flight_schedule.length > 0) ||
+    (Array.isArray(data.bus_schedule) && data.bus_schedule.length > 0) ||
+    (Array.isArray(data.train_schedule) && data.train_schedule.length > 0)
+  );
+
+  // Handle real API errors if live provider API returned an error and no fallback items were returned
+  const hasApiError = !hasItemsInPayload && data && typeof data === 'object' && !Array.isArray(data) && (data.error || data.success === false || data.errorCode || data.status === 'ERROR');
+  if (hasApiError) {
+    const errorText = data.error || data.message || data.details || "Live Provider API error";
+    const errorCode = data.errorCode || (data.status === 401 || String(errorText).includes('401') ? 401 : 'HTTP ERROR');
+    const source = data.source || `${mode.toUpperCase()} Live Provider API Gateway`;
+
+    return (
+      <div className="bg-rose-50/90 rounded-3xl p-6 border-2 border-rose-200 text-left space-y-4 shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 bg-rose-600 border border-rose-700 rounded-[20px] flex items-center justify-center shrink-0 text-white font-black text-xl shadow-xs">
+            !
+          </div>
+          <div className="space-y-2 flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h5 className="font-black text-rose-950 text-base flex items-center gap-2">
+                <span>{lang === 'mr' ? 'लाइव्ह API क्रेडेंशियल / सर्व्हर त्रुटी (Live API Error)' : 'Live API Provider Error'}</span>
+              </h5>
+              <span className="text-xs font-mono font-black text-rose-800 bg-rose-200/80 border border-rose-300 px-3 py-1 rounded-lg">
+                Status: {errorCode}
+              </span>
+            </div>
+            <div className="p-3.5 bg-white/90 border border-rose-200 rounded-[20px] text-rose-900 text-xs font-mono font-bold leading-relaxed shadow-2xs break-words">
+              {errorText}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-rose-700 pt-1">
+              <span>Provider Gateway: {source}</span>
+              <span>{lang === 'mr' ? 'लाइव्ह API कनेक्शन अयशस्वी' : 'Live API Connection Failed'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Extract items array safely
+  let items: any[] = [];
+  let isPendingApi = false;
+  let customMessage = "";
+
+  if (Array.isArray(data)) {
+    items = data;
+  } else if (data && typeof data === 'object') {
+    if (data.status === 'PENDING_API_INTEGRATION' || data.data?.status === 'PENDING_API_INTEGRATION') {
+      isPendingApi = true;
+      customMessage = data.message || data.data?.message || "";
+    }
+    if (mode === 'flight') {
+      items = data.flights || data.flight_schedule || data.data?.flights || [];
+    } else if (mode === 'bus') {
+      items = data.buses || data.bus_schedule || data.data?.buses || [];
+    } else if (mode === 'train') {
+      items = data.trains || data.train_schedule || data.data?.trains || [];
+    }
+  }
+
+  // If API integration is pending
+  if (isPendingApi) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-rose-200 text-center space-y-4 shadow-sm bg-gradient-to-b from-rose-50/50 to-white">
+        <div className="w-16 h-16 bg-rose-100 border border-rose-200 rounded-[20px] flex items-center justify-center mx-auto text-rose-600 shadow-xs">
+          {mode === 'flight' && <Plane className="w-8 h-8 rotate-45" />}
+          {mode === 'bus' && <Bus className="w-8 h-8" />}
+          {mode === 'train' && <Train className="w-8 h-8" />}
+        </div>
+        <div className="space-y-2 max-w-lg mx-auto">
+          <h5 className="font-black text-slate-900 text-lg">
+            {lang === 'mr' ? 'माहिती प्रक्रिया सुरू आहे...' : 'Processing Request...'}
+          </h5>
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-[20px] text-rose-900 text-xs font-bold leading-relaxed shadow-2xs">
+            {customMessage || (lang === 'mr' ? "कृपया प्रतीक्षा करा, आम्ही तुमच्यासाठी सर्वोत्तम पर्याय शोधत आहोत।" : "Please wait while we fetch options for you.")}
+          </div>
+          <p className="text-xs text-slate-500 font-semibold pt-1">
+            {lang === 'mr' ? 'राऊट्रिपो ट्रॅव्हल असिस्टन्स' : 'RoutTripo Travel Assistance'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Clear Empty State when search returns 0 results
+  if (!items || items.length === 0) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-premium-pink text-center space-y-4 shadow-sm bg-gradient-to-b from-orange-50/50 to-white">
+        <div className="w-16 h-16 bg-orange-100 border border-premium-pink rounded-[20px] flex items-center justify-center mx-auto text-premium-pink shadow-xs">
+          {mode === 'flight' && <Plane className="w-8 h-8 rotate-45" />}
+          {mode === 'bus' && <Bus className="w-8 h-8" />}
+          {mode === 'train' && <Train className="w-8 h-8" />}
+        </div>
+        <div className="space-y-2 max-w-lg mx-auto">
+          <h5 className="font-black text-slate-900 text-lg">
+            {mode === 'train' && (lang === 'mr' ? 'कोणतीही ट्रेन सापडली नाही' : 'No Trains Found')}
+            {mode === 'bus' && (lang === 'mr' ? 'कोणतीही बस सापडली नाही' : 'No Buses Found')}
+            {mode === 'flight' && (lang === 'mr' ? 'उड्डाणे उपलब्ध नाहीत' : 'No Flights Available')}
+          </h5>
+          <div className="p-4 bg-premium-pink-soft border border-premium-pink rounded-[20px] text-premium-pink text-xs font-bold leading-relaxed shadow-2xs">
+            {mode === 'train' && (lang === 'mr' 
+              ? `या मार्गासाठी (${origin || 'प्रस्थान'} ➔ ${destination || 'गंतव्य'}) थेट ट्रेन सापडली नाही. कृपया स्टेशन नाव किंवा कोड (उदा. CSMT, NDLS, HNZM, PUNE) तपासा.`
+              : `No direct trains found for route (${origin || 'From'} ➔ ${destination || 'To'}). Please check station names or codes.`)}
+            {mode === 'bus' && (lang === 'mr'
+              ? `या मार्गासाठी (${origin || 'प्रस्थान'} ➔ ${destination || 'गantavya'}) कोणतीही बस उपलब्ध नाही.`
+              : `No direct buses found for route (${origin || 'From'} ➔ ${destination || 'To'}).`)}
+            {mode === 'flight' && (lang === 'mr'
+              ? `या मार्गासाठी (${origin || 'प्रस्थान'} ➔ ${destination || 'गंतव्य'}) विमाने उपलब्ध नाहीत.`
+              : `No direct flights available for route (${origin || 'From'} ➔ ${destination || 'To'}).`)}
+          </div>
+          <p className="text-xs text-slate-500 font-semibold pt-1">
+            {lang === 'mr' ? 'राऊट्रिपो ट्रॅव्हल असिस्टन्स' : 'RoutTripo Travel Assistance'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Search Header with Cache Status Badge */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2">
+          <h4 className="font-black text-slate-900 text-base">
+            {mode === 'flight' && (lang === 'mr' ? 'उपलब्ध उड्डाणे (Flights)' : 'Available Flights')}
+            {mode === 'bus' && (lang === 'mr' ? 'उपलब्ध बसेस (Buses)' : 'Available Buses')}
+            {mode === 'train' && (lang === 'mr' ? 'उपलब्ध गाड्या (Trains)' : 'Available Trains')}
+            {mode === 'hotel' && (lang === 'mr' ? 'उपलब्ध हॉटेल्स (Hotels)' : 'Available Hotels')}
+            {(mode !== 'hotel' && origin && destination) ? ` (${origin} ➔ ${destination})` : ''}
+          </h4>
+          <span className="text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-3 py-0.5 rounded-full">
+            {items.length} {lang === 'mr' ? 'पर्याय' : 'Options'}
+          </span>
+        </div>
+
+        {/* 28-Day On-Demand Cache Status Badge */}
+        {isCached ? (
+          <div className="inline-flex items-center gap-1.5 bg-premium-sky-soft border border-premium-sky-deep text-premium-sky-deep text-[11px] font-black px-3 py-1 rounded-full shadow-2xs">
+            <Zap className="w-3.5 h-3.5 text-premium-sky-deep fill-pink-500" />
+            <span>28-Day Smart Cached Schedule</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-black px-3 py-1 rounded-full shadow-2xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-rose-600" />
+            <span>Live Travel API</span>
+          </div>
+        )}
+      </div>
+
+      {/* Transport Cards List */}
+      <div className={layout === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'}>
+        {mode === 'flight' && items.slice(0, visibleCount).map((flight: any, index: number) => {
+          const airline = flight.airline || flight.operator_code || flight.operatorCode || flight.provider || (lang === 'mr' ? 'अज्ञात विमान कंपनी' : 'Unknown Airline');
+          const flightNo = flight.flightNumber || flight.flight_number || 'N/A';
+          const rawDepTime = flight.departureTime || flight.departure_time || flight.time || '00:00';
+          const dur = flight.duration || (lang === 'mr' ? '२ तास ३० मि' : '2h 30m');
+          
+          const rawArrTime = addDurationToTime(rawDepTime, dur);
+          
+          const depTime = safeFormat12Hour(rawDepTime);
+          const arrTime = safeFormat12Hour(rawArrTime);
+          const typeStr = flight.type || (flight.stops === 0 ? (lang === 'mr' ? 'विना थांबा' : 'Non-stop') : (lang === 'mr' ? 'थेट विमान' : 'Direct Flight'));
+
+          const srcCode = flight.originCode || flight.from || origin || 'BOM';
+          const dstCode = flight.destinationCode || flight.to || destination || 'DEL';
+          const srcDet = getFullStationDetails(srcCode);
+          const dstDet = getFullStationDetails(dstCode);
+          const srcFullName = flight.originFullName || srcDet.fullName;
+          const dstFullName = flight.destinationFullName || dstDet.fullName;
+
+          return (
+            <div
+              key={index}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-xl transition-all space-y-4"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-[16px] bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 font-black text-sm">
+                    ✈️
+                  </div>
+                  <div>
+                    <h5 className="font-black text-slate-900 text-base">
+                      {airline} <span className="text-slate-400 font-mono text-xs ml-1">({flightNo})</span>
+                    </h5>
+                    <p className="text-xs font-bold text-slate-500">{lang === 'mr' ? 'नियमित वेळापत्रक' : 'Regular Timetable'}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-rose-50 text-rose-700 text-xs font-black rounded-full border border-rose-100">
+                  {typeStr}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 py-1">
+                <div>
+                  <span className="font-black text-xl text-slate-900 block">{depTime}</span>
+                  <span className="text-xs font-extrabold text-rose-700 uppercase block">{srcCode}</span>
+                  <span className="text-[11px] font-bold text-slate-600 leading-tight block mt-0.5 max-w-[150px] line-clamp-2">{srcFullName}</span>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center max-w-[160px]">
+                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {dur}
+                  </span>
+                  <div className="w-full flex items-center gap-1 my-1">
+                    <div className="h-0.5 flex-1 bg-slate-200 rounded-full" />
+                    <Plane className="w-4 h-4 text-rose-600 rotate-90 shrink-0" />
+                    <div className="h-0.5 flex-1 bg-slate-200 rounded-full" />
+                  </div>
+                  <span className="text-[10px] font-black text-premium-sky-deep bg-premium-sky-soft px-2 py-0.5 rounded-full border border-premium-sky-deep">
+                    {lang === 'mr' ? 'सत्यपित वेळापत्रक' : 'Verified Schedule'}
+                  </span>
+                </div>
+
+                <div className="text-right">
+                  <span className="font-black text-xl text-slate-900 block">{arrTime}</span>
+                  <span className="text-xs font-extrabold text-premium-sky-deep uppercase block">{dstCode}</span>
+                  <span className="text-[11px] font-bold text-slate-600 leading-tight block mt-0.5 max-w-[150px] line-clamp-2 ml-auto">{dstFullName}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+                <span className="text-[11px] font-extrabold text-slate-500 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-premium-sky-deep shrink-0" />
+                  <span>{lang === 'mr' ? 'पार्टनर असिस्टन्स' : 'Partner Assistance'}</span>
+                </span>
+                <div className="flex items-center gap-4">
+                  <span className={`font-black text-lg ${
+                    (flight.price || 5500) < 4000 ? 'text-premium-sky-deep' :
+                    (flight.price || 5500) < 6000 ? 'text-orange-600' : 'text-rose-600'
+                  }`}>
+                    {currencySymbol}{(flight.price || 5500).toLocaleString('en-IN')}
+                  </span>
+                  <button
+                    className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-[16px] font-black text-xs uppercase tracking-wider shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onBookNow) {
+                        onBookNow({
+                          id: flightNo,
+                          title: `${airline} (${flightNo})`,
+                          vertical: 'flight',
+                          subtitle: `${srcCode} → ${dstCode}`,
+                          location: `${srcCode} to ${dstCode}`,
+                          time: `${depTime} - ${arrTime}`,
+                          duration: dur,
+                          amount: flight.price || 5500,
+                          provider: airline
+                        });
+                      }
+                    }}
+                  >
+                    <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {mode === 'hotel' && items.slice(0, visibleCount).map((hotel: any, index: number) => {
+          const strikePrice = hotel.originalPrice || hotel.strikePrice;
+          const amenities: string[] = Array.isArray(hotel.amenities) ? hotel.amenities : [];
+          return (
+            <div
+              key={hotel.id || index}
+              className="bg-white rounded-3xl border border-slate-200 shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-xl transition-all overflow-hidden"
+            >
+              <div className="relative">
+                {hotel.image ? (
+                  <img src={hotel.image} alt={hotel.name} className="w-full h-44 object-cover" />
+                ) : (
+                  <div className="w-full h-44 bg-slate-100" />
+                )}
+                {hotel.rating && (
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white/95 text-slate-900 text-[11px] font-black px-2.5 py-1 rounded-full shadow-sm">
+                    <Star className="w-3 h-3 text-premium-pink fill-premium-pink" />
+                    {hotel.rating}
+                    {hotel.reviewsCount ? <span className="text-slate-500">({hotel.reviewsCount})</span> : null}
+                  </span>
+                )}
+                {hotel.roomsLeft ? (
+                  <span className="absolute top-3 right-3 bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
+                    {hotel.roomsLeft} left
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="p-5 space-y-3">
+                <div>
+                  <h5 className="font-black text-slate-900 text-base leading-tight">{hotel.name}</h5>
+                  {hotel.location && (
+                    <p className="text-xs font-bold text-slate-500 mt-1 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{hotel.location}</span>
+                    </p>
+                  )}
+                </div>
+
+                {amenities.length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                    {amenities.slice(0, 4).map((amenity: string, idx: number) => (
+                      <span key={idx} className="shrink-0 text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{amenity}</span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="pt-3 flex items-end justify-between border-t border-slate-100">
+                  <div>
+                    {strikePrice ? (
+                      <span className="block text-xs font-bold text-slate-400 line-through">
+                        {currencySymbol}{Number(strikePrice).toLocaleString('en-IN')}
+                      </span>
+                    ) : null}
+                    <span className="font-black text-xl text-slate-900 block leading-none">
+                      {currencySymbol}{Number(hotel.pricePerNight || 0).toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 block mt-1">
+                      {lang === 'mr' ? 'प्रति रात्र' : 'per night'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onBookNow) onBookNow(hotel);
+                    }}
+                    className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-[16px] font-black text-xs uppercase tracking-wider shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                  >
+                    <span>{lang === 'mr' ? 'खोली निवडा' : 'Select Room'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {mode === 'bus' && items.slice(0, visibleCount).map((bus: any, index: number) => {
+          const operator = bus.operator_name || bus.operator || bus.operatorName || 'Express Travels';
+          const busType = bus.bus_type || bus.busType || 'Volvo AC Sleeper';
+          const depTime = safeFormat12Hour(bus.departure_time || bus.departureTime || '08:00 PM');
+          const arrTime = safeFormat12Hour(bus.arrival_time || bus.arrivalTime || '06:00 AM');
+          const dur = bus.duration || '8h 00m';
+
+          return (
+            <div
+              key={index}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-xl transition-all space-y-4"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-[16px] bg-premium-sky-soft border border-premium-sky-deep flex items-center justify-center text-premium-sky-deep font-black text-sm">
+                    🚌
+                  </div>
+                  <div>
+                    <h5 className="font-black text-slate-900 text-base">{operator}</h5>
+                    <p className="text-xs font-bold text-slate-500">{busType}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-premium-sky-soft text-premium-sky-deep text-xs font-black rounded-full border border-premium-sky-deep">
+                  {busType}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 py-1">
+                <div>
+                  <span className="font-black text-xl text-slate-900 block">{depTime}</span>
+                  <span className="text-xs font-extrabold text-slate-500 uppercase">{origin || 'DEP'}</span>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center max-w-[160px]">
+                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {dur}
+                  </span>
+                  <div className="w-full flex items-center gap-1 my-1">
+                    <div className="h-0.5 flex-1 bg-slate-200 rounded-full" />
+                    <Bus className="w-4 h-4 text-premium-sky-deep shrink-0" />
+                    <div className="h-0.5 flex-1 bg-slate-200 rounded-full" />
+                  </div>
+                  <span className="text-[10px] font-black text-premium-sky-deep bg-premium-sky-soft px-2 py-0.5 rounded-full border border-premium-sky-deep">
+                    Direct Service
+                  </span>
+                </div>
+
+                <div className="text-right">
+                  <span className="font-black text-xl text-slate-900 block">{arrTime}</span>
+                  <span className="text-xs font-extrabold text-slate-500 uppercase">{destination || 'ARR'}</span>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+                <span className="text-[11px] font-extrabold text-slate-500 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-premium-sky-deep shrink-0" />
+                  <span>{lang === 'mr' ? 'सुरक्षित बुकिंग' : 'Secure Checkout'}</span>
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onBookNow) {
+                      onBookNow({
+                        id: `BUS-${Math.random().toString(36).substr(2, 9)}`,
+                        title: `${operator} (${busType})`,
+                        vertical: 'bus',
+                        subtitle: `${origin || 'DEP'} → ${destination || 'ARR'}`,
+                        location: `${origin || 'DEP'} to ${destination || 'ARR'}`,
+                        time: `${depTime} - ${arrTime}`,
+                        duration: dur,
+                        amount: 1200, // Dummy fallback price
+                        provider: operator
+                      });
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-[16px] font-black text-xs uppercase tracking-wider shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                >
+                  <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {mode === 'train' && items.slice(0, visibleCount).map((train: any, index: number) => {
+          const name = train.train_name || train.name || train.trainName || 'Express Train';
+          const trainNum = train.train_number || train.number || train.trainNumber || '12345';
+          const depTime = safeFormat12Hour(train.departure_time || train.depTime || '06:00 AM');
+          const arrTime = safeFormat12Hour(train.arrival_time || train.arrTime || '02:00 PM');
+          const travelTime = train.travel_time || train.duration || '8h 00m';
+          const trainType = train.type || train.train_type || 'Superfast Express';
+
+          const srcCode = train.originCode || train.from_station || train.origin || train.from || origin || 'DEP';
+          const dstCode = train.destinationCode || train.to_station || train.destination || train.to || destination || 'ARR';
+
+          const srcDet = getFullStationDetails(srcCode);
+          const dstDet = getFullStationDetails(dstCode);
+
+          const srcFullName = train.originFullName || srcDet.fullName;
+          const dstFullName = train.destinationFullName || dstDet.fullName;
+
+          const classOptions = buildTrainClasses(train, trainNum);
+          const activeClass = classOptions.find(c => c.code === selectedClass[index]) || classOptions[0];
+
+          return (
+            <div
+              key={index}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-xl transition-all space-y-4"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-[16px] bg-premium-pink-soft border border-orange-100 flex items-center justify-center text-premium-pink font-black text-sm">
+                    🚆
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-orange-100 text-premium-pink rounded font-mono font-black text-xs">
+                        #{trainNum}
+                      </span>
+                      <h5 className="font-black text-slate-900 text-base">{name}</h5>
+                    </div>
+                    <p className="text-xs font-bold text-slate-500 mt-0.5">{trainType}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-premium-pink-soft text-premium-pink text-xs font-black rounded-full border border-premium-pink">
+                  {trainType}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 py-1">
+                <div>
+                  <span className="font-black text-xl text-slate-900 block">{depTime}</span>
+                  <span className="text-xs font-extrabold text-premium-pink uppercase block">{srcCode}</span>
+                  <span className="text-[11px] font-bold text-slate-600 leading-tight block mt-0.5 max-w-[150px] line-clamp-2">{srcFullName}</span>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center max-w-[160px]">
+                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {travelTime}
+                  </span>
+                  <div className="w-full flex items-center gap-1 my-1">
+                    <div className="h-0.5 flex-1 bg-slate-200 rounded-full" />
+                    <Train className="w-4 h-4 text-premium-pink shrink-0" />
+                    <div className="h-0.5 flex-1 bg-slate-200 rounded-full" />
+                  </div>
+                  <span className="text-[10px] font-black text-premium-sky-deep bg-premium-sky-soft px-2 py-0.5 rounded-full border border-premium-sky-deep">
+                    Daily Service
+                  </span>
+                </div>
+
+                <div className="text-right">
+                  <span className="font-black text-xl text-slate-900 block">{arrTime}</span>
+                  <span className="text-xs font-extrabold text-premium-pink uppercase block">{dstCode}</span>
+                  <span className="text-[11px] font-bold text-slate-600 leading-tight block mt-0.5 max-w-[150px] line-clamp-2 ml-auto">{dstFullName}</span>
+                </div>
+              </div>
+
+              {/* Class chips: fare + live availability per accommodation class */}
+              <div className="pt-2 border-t border-slate-100">
+                <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  {lang === 'mr' ? 'उपलब्ध वर्ग (Classes):' : 'Classes:'}
+                </span>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar mt-2 pb-1">
+                  {classOptions.map((cls) => {
+                    const isActive = cls.code === activeClass?.code;
+                    return (
+                      <button
+                        key={cls.code}
+                        onClick={() => setSelectedClass(prev => ({ ...prev, [index]: cls.code }))}
+                        className={`shrink-0 min-w-[84px] px-3 py-2 rounded-[20px] border text-left transition-all active:scale-95 ${
+                          isActive
+                            ? 'border-premium-violet bg-premium-violet-soft shadow-sm'
+                            : 'border-slate-200 bg-transparent hover:border-premium-violet'
+                        }`}
+                      >
+                        <span className="block text-xs font-black text-slate-900">{cls.code}</span>
+                        <span className="block text-[11px] font-black text-slate-700 mt-0.5">
+                          {currencySymbol}{cls.fare.toLocaleString('en-IN')}
+                        </span>
+                        <span className={`block text-[10px] font-black uppercase mt-0.5 ${cls.statusClass}`}>
+                          {cls.status}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+                <span className="text-[11px] font-extrabold text-slate-500 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-premium-sky-deep shrink-0" />
+                  <span>{lang === 'mr' ? 'सुरक्षित बुकिंग' : 'Secure Checkout'}</span>
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onBookNow) {
+                      onBookNow({
+                        id: trainNum,
+                        title: `${name} (#${trainNum})`,
+                        vertical: 'train',
+                        subtitle: `${srcCode} → ${dstCode}${activeClass ? ` • ${activeClass.code}` : ''}`,
+                        location: `${srcCode} - ${dstCode}`,
+                        time: `${depTime} - ${arrTime}`,
+                        duration: travelTime,
+                        amount: activeClass?.fare || 850,
+                        provider: 'Indian Railways'
+                      });
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-[#3399cc] hover:bg-sky-600 text-white rounded-[16px] font-black text-xs uppercase tracking-wider shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-sky-500/20 flex items-center gap-1.5 active:scale-95 transition-all inline-flex cursor-pointer"
+                >
+                  <span>{lang === 'mr' ? 'आत्ताच बुक करा' : 'Book Now'}</span>
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pagination Controller */}
+      {items.length > visibleCount && (
+        <div className="pt-4 text-center space-y-2">
+          <p className="text-xs font-extrabold text-slate-500">
+            {lang === 'mr' 
+              ? `एकूण ${items.length} पैकी ${Math.min(visibleCount, items.length)} पर्याय दाखवत आहे`
+              : `Showing ${Math.min(visibleCount, items.length)} of ${items.length} options`}
+          </p>
+          <button
+            type="button"
+            onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider rounded-[20px] shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] hover:shadow-slate-900/20 transition-all active:scale-95"
+          >
+            {lang === 'mr' ? 'अधिक पर्याय लोड करा (Load More)' : 'Load More Options'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};

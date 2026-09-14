@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Brand colours referenced by styles.xml. The Capacitor template's styles.xml points at
+  @color/colorPrimary, colorPrimaryDark and colorAccent but ships no colors.xml, so the
+  project does not compile until they are defined. Values carried over from the previous
+  hand-written android theme (indigo primary, amber accent) to match the web app.
+-->
+<resources>
+    <color name="colorPrimary">#6366F1</color>
+    <color name="colorPrimaryDark">#4F46E5</color>
+    <color name="colorAccent">#F59E0B</color>
+    <color name="colorSplashBackground">#FFFFFF</color>
+</resources>

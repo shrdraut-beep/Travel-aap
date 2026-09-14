@@ -1,0 +1,25 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+# Standard package manager: npm (package-lock.json is tracked)
+.env*
+!.env.example
+*.zip
+*.tar.gz
+binaries/
+
+# Android & Capacitor build artifacts
+.gradle/
+scratch/
+android/app/src/main/assets/public/
+android/app/build/
+android/.gradle/
+android/build/
+
+# Unused archives, vendor dumps, and scratchpad scripts
+_build_archive/
+_archive_mocks/
+*.tmp
+

@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "./premium/premium.css";
+@import "tailwindcss";
+
+html, body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  background-color: var(--premium-page, #f8f6f0);
+}
+
+#root {
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--premium-page, #f8f6f0);
+}
+
+/* Allow text selection only in input fields and specific areas */
+input, textarea, [contenteditable="true"], .selectable {
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+html {
+  font-size: 16px; /* Base font size restored to 16px for readability */
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+body {
+  background-color: var(--premium-page, #f8f6f0);
+  min-height: 100vh;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #0f172a; /* Deep ocean slate */
+  font-size: 1rem; 
+  font-weight: 500; 
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+/* Global Typography Hierarchy Scale - Responsive */
+h1 {
+  font-size: 1.75rem; 
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+@media (min-width: 768px) { h1 { font-size: 1.875rem; } }
+
+h2 {
+  font-size: 1.375rem; 
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+@media (min-width: 768px) { h2 { font-size: 1.5rem; } }
+
+h3 {
+  font-size: 1.125rem; 
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+@media (min-width: 768px) { h3 { font-size: 1.25rem; } }
+
+h4, h5, h6 {
+  font-size: 1.0625rem; 
+  line-height: 1.4;
+  font-weight: 600;
+}
+@media (min-width: 768px) { h4, h5, h6 { font-size: 1.125rem; } }
+
+/* Restored readability overrides for small text classes */
+.text-2xs, .text-\[9px\], .text-\[10px\] {
+  font-size: 0.78rem !important; /* ~12.5px min for readability */
+  line-height: 1.4 !important;
+}
+
+.text-\[11px\] {
+  font-size: 0.8125rem !important; /* 13px */
+  line-height: 1.45 !important;
+}
+
+.text-xs {
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.5 !important;
+}
+
+.text-sm {
+  font-size: 0.9375rem !important; /* 15px */
+  line-height: 1.55 !important;
+}
+
+@theme {
+  --font-sans: "D-DIN", "Open Sans", "Inter", "Poppins", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-coral: #FF5A5F;
+  --color-pink: #ec4899;
+}
+
+/* Ensure secondary text has high contrast & is easy to read */
+p, span, label, input, select, textarea, button {
+  font-family: var(--font-sans);
+}
+
+/* High readability override for faint text */
+.text-slate-400, .text-gray-400 {
+  color: #475569 !important; /* Darker slate for high contrast */
+  font-weight: 500;
+}
+
+.text-slate-500, .text-gray-500 {
+  color: #334155 !important; /* Rich readable slate */
+  font-weight: 500;
+}
+
+/* Base button styles to ensure they are visible and have tactile 3D feedback globally */
+button {
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+button:not(:disabled) {
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+button:not(:disabled):active {
+  transform: scale(0.96);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Hide scrollbars for tab-row navigation while maintaining functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe areas for mobile notches */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+.pb-safe-offset-2 {
+  padding-bottom: calc(env(safe-area-inset-bottom, 1rem) + 0.5rem);
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 1);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.dark-glass-effect {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+@keyframes travelMarqueeSeamless {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-travel-marquee {
+  display: flex;
+  white-space: nowrap;
+  width: max-content;
+  animation: travelMarqueeSeamless 22s linear infinite;
+  will-change: transform;
+}
+
+@keyframes planeGlide {
+  0%, 100% { transform: translateY(0px) rotate(6deg); }
+  50% { transform: translateY(-3px) rotate(10deg); }
+}
+
+.animate-plane {
+  display: inline-block;
+  animation: planeGlide 2.5s ease-in-out infinite;
+}
+
+@keyframes vanDrive {
+  0%, 100% { transform: translateY(0px); }
+  30% { transform: translateY(-1.5px); }
+  70% { transform: translateY(0.5px); }
+}
+
+.animate-van {
+  display: inline-block;
+  animation: vanDrive 0.35s ease-in-out infinite;
+}
+
+@keyframes floatSmoke {
+  0% { opacity: 0.9; transform: scale(0.7) translate(2px, 1px); }
+  100% { opacity: 0; transform: scale(1.6) translate(-12px, -8px); }
+}
+
+.animate-smoke {
+  display: inline-block;
+  animation: floatSmoke 0.9s infinite ease-out;
+}
+
+
+
+@keyframes shipRock {
+  0%, 100% { transform: rotate(-5deg) translateY(0); }
+  50% { transform: rotate(5deg) translateY(-2px); }
+}
+.animate-ship {
+  display: inline-block;
+  animation: shipRock 2.5s ease-in-out infinite;
+}
+
+@keyframes scooterDash {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px) rotate(2deg); }
+}
+.animate-scooter {
+  display: inline-block;
+  animation: scooterDash 0.4s ease-in-out infinite;
+}
+
+@keyframes floatBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35% { transform: translateY(-5px) rotate(1deg); }
+  38% { transform: translateY(-3px) rotate(-2deg) scale(1.05); }
+  40% { transform: translateY(-6px) rotate(3deg) skewX(5deg); }
+  42% { transform: translateY(-5px) rotate(0deg) skewX(-5deg) scale(0.95); }
+  44% { transform: translateY(-4px) rotate(0deg) skewX(0); }
+  50% { transform: translateY(-5px) rotate(0deg); }
+  85% { transform: translateY(-1px) rotate(0deg); }
+  87% { transform: translate(2px, -2px) skewX(-8deg); }
+  89% { transform: translate(-2px, 1px) skewX(8deg); }
+  91% { transform: translate(0, 0) skewX(0); }
+}
+.animate-float {
+  display: inline-block;
+  animation: floatBounce 1.8s ease-in-out infinite;
+}
+
+@keyframes trainShake {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-1px); }
+  75% { transform: translateY(1px); }
+}
+.animate-train {
+  display: inline-block;
+  animation: trainShake 0.3s linear infinite;
+}
+
+/* Auto-hide bottom navigation and sticky overlays on mobile virtual keyboard opening */
+@media (max-height: 540px) {
+  .fixed-bottom-nav,
+  nav.fixed {
+    display: none !important;
+  }
+}
+
+/* Global Mobile Layout & Sizing Optimizations (Prevents tablet-like scaling on phones) */
+@media (max-width: 640px) {
+  /* Scale down massive card paddings globally on mobile */
+  .p-10, .p-8, .p-12 {
+    padding: 1.25rem !important; /* Forces 20px padding instead of 32px/40px/48px */
+  }
+  .p-6 {
+    padding: 1rem !important; /* Forces 16px instead of 24px */
+  }
+  .px-10, .px-8, .px-12 {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+  .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .py-10, .py-8, .py-12 {
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.25rem !important;
+  }
+  .py-6 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  .gap-6, .gap-8 {
+    gap: 1rem !important;
+  }
+  
+  /* Make cards fit screen better */
+  .premium-card {
+    border-radius: 20px !important;
+  }
+  
+  /* Prevent fixed max-widths from cramping components unnecessarily or forcing scrolling */
+  .max-w-md, .max-w-lg, .max-w-xl, .max-w-2xl, .max-w-3xl {
+    max-width: 100% !important;
+  }
+  
+  /* Handle desktop simulated views (like max-w-[520px]) so they don't break flex layouts */
+  .max-w-\[520px\] {
+    max-width: 100% !important;
+  }
+}

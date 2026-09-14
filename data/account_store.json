@@ -1,0 +1,15 @@
+{
+  "users": [],
+  "vendors": [],
+  "payouts": [],
+  "tickets": [],
+  "partnerData": {
+    "default": {
+      "balance": 0,
+      "pending": 0,
+      "lifetime": 0,
+      "commissionRate": "7.5%",
+      "transactions": []
+    }
+  }
+}

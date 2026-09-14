@@ -1,0 +1,17 @@
+# Feature Comparison: Missing Functions (Regular vs Preview)
+
+## 1. Features present in REGULAR APP, but MISSING in PREVIEW APP:
+- **Full Booking & Checkout Flows**: The Regular App has multi-step screens for Seat Selection, Baggage, Meals, Ancillaries, and Checkout. The Preview App only has the initial Search Card.
+- **Detailed Planning Workspace**: AI Itineraries, Smart Day Plans.
+- **Social Workspace**: Community Hub, Trip Polls, Shared Memories, Group Management.
+- **Advanced Expense Tools**: Fuel Calculator, Smart Expense (Receipt) Scanner via OCR, detailed Budget Dashboard Modal.
+- **Entertainment**: Floating Music Player (Spotify/Mood integration) with full playback UI.
+- **Security & Safety**: SOS Button, Emergency Flow, PentAGI/RASP Security Threat Modal.
+- **Payments**: UPI / Payment QR code scanning modal.
+- **Agent Orchestrator**: The backend Travelport Workflow Console / GDS terminal.
+
+## 2. Features present in PREVIEW APP, but MISSING/DIFFERENT in REGULAR APP:
+- **Consolidated Account Sheet**: The Preview App groups Bargaining, Expenses, Bookings, and Settings neatly into one slide-up Account Sheet. In the Regular app, these are scattered across global navigation tabs.
+- **Dedicated Bargaining/Chat UI**: The Preview App has a highly polished chat interface for user-agent deal negotiations inside the Account Sheet. The Regular App has "Caught Deals" but lacks this premium chat layout.
+- **Marketing Tab for Agents**: The Premium Agent Portal explicitly includes a "Marketing" tab for ad campaigns. The Regular Agent Portal does not have a dedicated marketing tab.
+- **Premium Mobile-First Pickers**: The Preview App uses full-screen/bottom-sheet native-like pickers for Dates, Cities, and Travellers. The Regular App uses standard web popovers/modals.

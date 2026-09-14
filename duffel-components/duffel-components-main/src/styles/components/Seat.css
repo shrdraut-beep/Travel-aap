@@ -1,0 +1,59 @@
+.map-element__seat {
+  appearance: none;
+  outline: none;
+  cursor: default;
+  width: var(--SPACING-LG-2);
+  height: var(--SPACING-LG-2);
+  border-radius: 8px;
+  border: 2px solid var(--GREY-200);
+  box-sizing: border-box;
+  color: var(--GREY-600);
+  background-color: var(--GREY-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: var(--SPACING-MD-3);
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: var(--FONT-SIZES-C3);
+  text-align: left;
+  position: relative;
+}
+
+.map-element--available {
+  border: 2px solid
+    var(--TERTIARY, rgba(var(--ACCENT), var(--ACCENT-LIGHT-200)));
+  background-color: rgba(var(--ACCENT), var(--ACCENT-LIGHT-100));
+  color: var(--TERTIARY, rgba(var(--ACCENT), var(--ACCENT-LIGHT-300)));
+}
+
+.map-element--fee-payable {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  color: var(--TERTIARY, rgba(var(--ACCENT), var(--ACCENT-LIGHT-300)));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .map-element--actionable:hover {
+    cursor: pointer;
+  }
+
+  .map-element--actionable:not(.map-element--selected):hover {
+    background-color: rgba(var(--ACCENT), var(--ACCENT-LIGHT-200));
+    color: var(--SECONDARY, rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000)));
+    transition: var(--TRANSITIONS-CUBIC-BEZIER);
+  }
+
+  .map-element--fee-payable {
+    color: var(--TERTIARY, rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000)));
+    transition: var(--TRANSITIONS-CUBIC-BEZIER);
+  }
+}
+
+.map-element--selected {
+  background-color: rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000));
+  border: 2px solid
+    var(--SECONDARY, rgba(var(--ACCENT), var(--ACCENT-LIGHT-1000)));
+  color: var(--SECONDARY, rgba(var(--WHITE), 1));
+}

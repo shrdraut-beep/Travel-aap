@@ -1,0 +1,219 @@
+@font-face {
+  font-family: "D-DIN";
+  src: url("/fonts/D-DIN.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "D-DIN";
+  src: url("/fonts/D-DIN-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --premium-sky: #0ea5e9;
+  --premium-sky-deep: #0284c7;
+  --premium-sky-soft: #f0f9ff;
+  --premium-violet: #6366f1;
+  --premium-violet-soft: #e0e7ff;
+  --premium-pink: #ec4899;
+  --premium-pink-soft: #fdf2f8;
+  --premium-ink: #0f172a;
+  --premium-muted: #64748b;
+  --premium-page: #f8f6f0;
+  --premium-accent: #0284c7;
+  --premium-accent-soft: #e0f2fe;
+  --premium-sand: #f0ebe1;
+  --premium-sand-light: #faf8f5;
+  --premium-sand-deep: #bfa98d;
+
+  /*
+   * Z-INDEX SCALE — use these instead of arbitrary z-[N] values.
+   * Found 15 different hardcoded values in use across the app (0, 10, 20, 30, 50, 60,
+   * 70, 100, 110, 120, 200, 300, 400, 9999, 999999, 9999999) with no consistent system —
+   * every new modal that didn't appear on top just got a bigger arbitrary number, which
+   * is why fixing one screen's stacking often breaks another's.
+   */
+  --z-header: 40;         /* BrandHeader and other in-flow sticky headers */
+  --z-dropdown: 50;       /* Dropdowns, tooltips, inline popovers */
+  --z-bottom-sheet: 60;   /* Bottom sheets, drawers */
+  --z-modal: 100;         /* Standard modals/dialogs (the vast majority should use this) */
+  --z-modal-stacked: 110; /* A modal opened from within another modal */
+  --z-toast: 150;         /* Toast/snackbar notifications — must beat any modal */
+  --z-critical: 200;      /* SOS, safety alerts — must beat everything except debug overlay */
+  --z-debug: 9999;        /* Dev-only overlays — never ship UI above this */
+}
+.premium-root {
+  font-family:
+    "Outfit",
+    "D-DIN",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  color: var(--premium-ink);
+  letter-spacing: 0.01em;
+}
+/* Iconic Sky Blue to Pink Brand Gradient */
+.premium-gradient {
+  background-image: linear-gradient(
+    135deg,
+    #0284c7 0%,
+    #0ea5e9 40%,
+    #ec4899 100%
+  );
+}
+/* Pure Radiant Pink Gradient for Badges, Avatar, & Highlights */
+.premium-gradient-pink {
+  background-image: linear-gradient(
+    135deg,
+    #ec4899 0%,
+    #f43f5e 100%
+  );
+}
+/* Pure Radiant Sky Gradient */
+.premium-gradient-sky {
+  background-image: linear-gradient(
+    135deg,
+    #0284c7 0%,
+    #0ea5e9 50%,
+    #38bdf8 100%
+  );
+}
+.premium-gradient-text {
+  background-image: linear-gradient(
+    120deg,
+    #0284c7 0%,
+    #0ea5e9 40%,
+    #ec4899 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+/* Beach Sand kit: white cards, very large radius, soft ocean & sand diffused shadow. */
+.premium-card {
+  background-color: #ffffff;
+  border-radius: 26px;
+  box-shadow: 0 16px 36px -22px rgba(2, 132, 199, 0.12);
+}
+/* Outlined ocean aqua pill used for filters, dropdowns and CTAs with tactile 3D elevation. */
+.premium-pill {
+  border: 1.5px solid #0284c7;
+  border-radius: 9999px;
+  color: #0284c7;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 700;
+}
+.premium-pill:hover {
+  background-color: #f0f9ff;
+  border-color: #0ea5e9;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+.premium-pill:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================================================
+   UNIVERSAL 3D BUTTON PATTERNS & TACTILE DEPTH (ADMIN, VENDOR & USER)
+   ========================================================================= */
+.btn-3d-primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 45%, #6366f1 100%);
+  color: #ffffff !important;
+  font-weight: 800;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.32), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.btn-3d-primary:hover {
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.44), 0 2px 4px rgba(0, 0, 0, 0.08);
+  filter: brightness(1.03);
+}
+.btn-3d-primary:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.btn-3d-pink {
+  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+  color: #ffffff !important;
+  font-weight: 800;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.32), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.btn-3d-pink:hover {
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.44), 0 2px 4px rgba(0, 0, 0, 0.08);
+  filter: brightness(1.03);
+}
+.btn-3d-pink:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.btn-3d-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff !important;
+  font-weight: 800;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.32), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.btn-3d-emerald:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.44), 0 2px 4px rgba(0, 0, 0, 0.08);
+  filter: brightness(1.03);
+}
+.btn-3d-emerald:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.btn-3d-white {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 700;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.btn-3d-white:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.btn-3d-white:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.icon-3d {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.18));
+}
+.icon-3d-lg {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22));
+}
+/* Sky Blue Header Panel */
+.premium-sky-panel {
+  background-color: var(--premium-sky);
+  background: linear-gradient(145deg, #0284c7 0%, #0ea5e9 55%, #38bdf8 100%);
+}
+@theme {
+  --color-premium-sky: var(--premium-sky);
+  --color-premium-sky-deep: var(--premium-sky-deep);
+  --color-premium-sky-soft: var(--premium-sky-soft);
+  --color-premium-violet: var(--premium-violet);
+  --color-premium-violet-soft: var(--premium-violet-soft);
+  --color-premium-pink: var(--premium-pink);
+  --color-premium-pink-soft: var(--premium-pink-soft);
+  --color-premium-ink: var(--premium-ink);
+  --color-premium-muted: var(--premium-muted);
+  --color-premium-page: var(--premium-page);
+}
