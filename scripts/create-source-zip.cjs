@@ -51,6 +51,7 @@ function createZip(outputPath) {
       ignore: [
         'node_modules/**',
         '**/node_modules/**',
+        'dist/**',
         '**/.git/**',
         '.git/**',
         '.gradle/**',
