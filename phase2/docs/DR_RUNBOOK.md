@@ -1,43 +1,51 @@
-# Disaster Recovery (DR) Runbook
+# Disaster Recovery Runbook — RoutTripo (Firestore)
 
-This document outlines the standard procedures for responding to critical failures within the RoutTripo application infrastructure.
+## Targets
 
-## 1. Database Failure or Corruption (Firestore)
+| Data class | RPO (max data loss) | RTO (max time to restore) |
+|---|---|---|
+| Bookings, payments, webhook events | 1 hour (hourly critical export) | 2 hours |
+| Everything else (packages, hotels catalog, user_consent, etc.) | 24 hours (daily full export) | 4 hours |
 
-**Symptom**: Data corruption, accidental mass deletion, or complete data loss.
+If these don't match your actual business tolerance, change the Cloud Scheduler cron
+expressions in `backup-firestore.sh`'s setup comments — hourly-critical can go to every
+15 minutes if you need a tighter RPO for payments.
 
-**Action Plan**:
-1. Check Cloud Logging for recent anomalies indicating how the data was lost (e.g., erroneous script).
-2. Stop the traffic or scale down instances to prevent further corruption.
-3. Access the latest backup from the Firestore backup GCS bucket (`gs://[PROJECT_ID]-firestore-backups`).
-4. Run the restore command:
+## Restore procedure
+
+1. **Identify the export to restore from:**
    ```bash
-   gcloud firestore import gs://[PROJECT_ID]-firestore-backups/[TIMESTAMP]
+   gsutil ls gs://YOUR_PROJECT-firestore-backups/hourly-critical/
+   gsutil ls gs://YOUR_PROJECT-firestore-backups/daily/
    ```
-5. Verify data integrity in the staging environment before fully routing production traffic back.
+   Pick the most recent export before the incident.
 
-## 2. API Key / Secret Compromise
-
-**Symptom**: Unauthorized usage alerts on Razorpay, Travelport, or GCP resources, or detection via GitHub secret scanning.
-
-**Action Plan**:
-1. Immediately **revoke** the compromised key in the respective provider's dashboard (Razorpay Dashboard, Travelport Portal, etc.).
-2. Generate a new set of keys.
-3. Update the keys securely in Google Cloud Secret Manager.
+2. **Restore to a NEW database first, never directly into production:**
    ```bash
-   echo -n "NEW_SECRET_VALUE" | gcloud secrets versions add [SECRET_NAME] --data-file=-
-   ```
-4. Restart the Cloud Run instances to ensure the lazy-loader (`loadSecrets()`) fetches the latest version of the secrets.
-   ```bash
-   gcloud run services update [SERVICE_NAME] --update-env-vars RESTART_TRIGGER=$(date +%s)
+   gcloud firestore databases create --database=restore-drill --location=asia-southeast1
+   gcloud firestore import gs://YOUR_PROJECT-firestore-backups/daily/EXPORT_ID \
+     --database=restore-drill
    ```
 
-## 3. High Traffic DDoS or Spike
+3. **Verify data integrity** in `restore-drill` — spot-check a few recent bookings,
+   confirm `payment_records` and `checkout_orders` counts look sane, check no partial-write
+   corruption from the moment of the incident.
 
-**Symptom**: 503 Errors, high latency, alerts from Sentry indicating prefill queue overload or timeout.
+4. **Only after verification**, either:
+   - Point the app at `restore-drill` via `FIRESTORE_DATABASE_ID` env var (fastest — no
+     data movement, matches how `adminDb()` already takes a database ID in `server.ts`), or
+   - Import into `(default)` if you need to keep the original database ID (slower, requires
+     the corrupted data to be cleared first).
 
-**Action Plan**:
-1. Open Google Cloud Armor dashboard.
-2. Enable strict rate limiting (e.g., max 100 requests per IP per minute).
-3. If specific abusive IPs are identified, block them manually in Cloud Armor.
-4. Scale up maximum Cloud Run instances if the traffic is legitimate.
+5. **Post-incident:** replay any webhook events from the payment gateway's dashboard
+   (Razorpay/Stripe both let you resend webhooks for a date range) to fill the gap between
+   the last backup and the incident — this is why `webhook_events` has replay-protection
+   (`db.runTransaction` + event ID dedup) already built into `paymentWebhook.ts`, so resending
+   is safe and won't double-process.
+
+## Run a restore drill quarterly
+
+A backup you've never restored from is unverified. Put a recurring calendar reminder to:
+1. Run the restore procedure above into `restore-drill`.
+2. Time how long it actually takes — compare against the RTO targets.
+3. Delete `restore-drill` after (`gcloud firestore databases delete --database=restore-drill`).

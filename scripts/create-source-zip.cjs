@@ -3,10 +3,10 @@ const path = require('path');
 const archiver = require('archiver');
 
 const rootDir = path.resolve(__dirname, '..');
-const publicZipPath = path.join(rootDir, 'public', 'routripo-project.zip');
-const rootZipPath = path.join(rootDir, 'routripo-source.zip');
+const publicZipPath = path.join(rootDir, 'public', 'RoutTripo_Complete_App.zip');
+const rootZipPath = path.join(rootDir, 'RoutTripo_Complete_App.zip');
 
-console.log('[Zip Creator] Starting source zip generation...');
+console.log('[Zip Creator] Starting full application zip generation...');
 
 // Ensure public directory exists
 if (!fs.existsSync(path.join(rootDir, 'public'))) {
@@ -44,13 +44,14 @@ function createZip(outputPath) {
 
     archive.pipe(output);
 
-    // Glob patterns to include while excluding build caches and heavy dependencies
+    // Glob patterns to include all project files, .env, dist, and configs while excluding heavy 3rd-party caches
     archive.glob('**/*', {
       cwd: rootDir,
-      dot: true, // include dotfiles like .env.example, .gitignore
+      dot: true, // include dotfiles like .env, .env.example, .gitignore
       ignore: [
         'node_modules/**',
-        'dist/**',
+        '**/node_modules/**',
+        '**/.git/**',
         '.git/**',
         '.gradle/**',
         '**/.gradle/**',
@@ -58,15 +59,20 @@ function createZip(outputPath) {
         'android/.gradle/**',
         'android/app/build/**',
         'android/app/src/main/assets/public/**',
-        'public/*.zip',
+        '**/*.zip',
         '*.zip',
         '*.tar.gz',
+        '**/*.tar.gz',
         '*.log',
         '**/*.log',
         '_build_archive/**',
         '_archive_mocks/**',
         'coverage/**',
-        'graphify-out/**'
+        'graphify-out/**',
+        'scratch/**',
+        'staging_new_folder/**',
+        'app_screenshots/**',
+        'duffel-components/duffel-components-main/.yarn/**'
       ]
     });
 
@@ -76,16 +82,22 @@ function createZip(outputPath) {
 
 async function main() {
   try {
-    // 1. Create public/routripo-project.zip
-    console.log('[Zip Creator] Writing to public/routripo-project.zip ...');
+    // 1. Create public/RoutTripo_Complete_App.zip
+    console.log('[Zip Creator] Writing to public/RoutTripo_Complete_App.zip ...');
     await createZip(publicZipPath);
 
-    // 2. Copy or create routripo-source.zip at root
-    console.log('[Zip Creator] Copying to root routripo-source.zip ...');
+    // 2. Copy to root RoutTripo_Complete_App.zip
+    console.log('[Zip Creator] Copying to root RoutTripo_Complete_App.zip ...');
     fs.copyFileSync(publicZipPath, rootZipPath);
     console.log(`[Zip Creator] Successfully created root zip: ${rootZipPath}`);
 
-    console.log('[Zip Creator] Done! Both zips are ready and synchronized.');
+    // Also sync old alias names so existing download links continue to work
+    const legacyPublicZip = path.join(rootDir, 'public', 'routripo-project.zip');
+    const legacyRootZip = path.join(rootDir, 'routripo-source.zip');
+    fs.copyFileSync(publicZipPath, legacyPublicZip);
+    fs.copyFileSync(publicZipPath, legacyRootZip);
+
+    console.log('[Zip Creator] Done! All complete project zips are synchronized.');
   } catch (err) {
     console.error('[Zip Creator Error]', err);
     process.exit(1);

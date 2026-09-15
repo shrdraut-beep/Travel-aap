@@ -95,6 +95,7 @@
     "@types/jsdom": "^30.0.0",
     "@types/nodemailer": "^8.0.1",
     "@types/papaparse": "^5.5.2",
+    "puppeteer-core": "^25.11.0",
     "typescript": "^5.9.3"
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ArrowLeft, CheckCircle2, ShieldCheck, Briefcase, Info } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Briefcase, Info } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 
 export interface SelectedFare {
   id: string;
@@ -80,31 +81,14 @@ export const FareSelectionStep: React.FC<FareSelectionStepProps> = ({
   return (
     <div className="min-h-screen bg-[var(--premium-page)] text-[var(--premium-ink)] pb-28">
       {/* Header */}
-      <header className="relative z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center shrink-0"
-            aria-label="Back to results"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                Select Fare Type
-              </h1>
-              <span className="text-xs font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
-                Step 2 of 6
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {airline} {flightNo} • {aircraft} • {org} to {dst} • {totalPax} Traveler{totalPax > 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-      </header>
+      <BookingStepHeader
+        title="Select Fare Type"
+        step="Step 2 of 6"
+        subtitle={<>{airline} {flightNo} • {aircraft} • {org} to {dst} • {totalPax} Traveler{totalPax > 1 ? "s" : ""}</>}
+        onBack={onBack}
+        backAriaLabel="Back to results"
+        maxWidth="max-w-4xl"
+      />
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         <div className="bg-sky-50 text-sky-800 rounded-2xl p-4 border border-sky-100 flex items-start gap-3">

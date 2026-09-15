@@ -25,8 +25,17 @@ export const BookingFlowCoordinator: React.FC<BookingFlowCoordinatorProps> = ({
   initialSearchParams,
   onClose
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [currentStep, setCurrentStep] = useState<BookingStep>("results");
   const [searchParams, setSearchParams] = useState<FlightSearchParams>(initialSearchParams);
+
+  // Reset scroll position to top whenever currentStep advances or changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [currentStep]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [flights, setFlights] = useState<any[]>([]);
   const [provider, setProvider] = useState<string>("Travelport TripServices (GDS/NDC)");
@@ -231,7 +240,7 @@ export const BookingFlowCoordinator: React.FC<BookingFlowCoordinatorProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)]">
+    <div ref={containerRef} className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)]">
       {/* Session Expired Modal Overlay */}
       {isSessionExpired && currentStep !== "results" && (
         <div className="fixed inset-0 z-60 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">

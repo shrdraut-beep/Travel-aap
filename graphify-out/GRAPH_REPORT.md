@@ -1,22 +1,27 @@
-# Graph Report - group-travel-planner-splitter-8  (2026-09-14)
+# Graph Report - group-travel-planner-splitter-8  (2026-09-15)
 
 ## Corpus Check
-- 1315 files · ~2,325,997 words
+- 1235 files · ~2,178,988 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 13463 nodes · 20125 edges · 697 communities (592 shown, 69 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 600 edges (avg confidence: 0.85)
+- 13230 nodes · 19908 edges · 669 communities (586 shown, 55 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 593 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
+
+## Graph Freshness
+- Built from commit: `09c9ad81`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - yarn-4.5.3.cjs
 - x_e
-- lucide-react
+- App.tsx
 - r
 - types/index.ts
-- App.tsx
-- framer-motion
+- useLanguage
+- getAirlinesText.ts
 - BaggageSelectionCard.tsx
 - server.ts
 - .push
@@ -26,11 +31,11 @@
 - agent/tabs.tsx
 - .slice
 - bidding.ts
-- src/types.ts
+- framer-motion
 - DuffelAncillaries.tsx
 - SearchCard.tsx
-- routtripo-booking/context/BookingFlowContext.tsx
-- getAirlinesText.ts
+- so
+- TravelDetails.ts
 - gr
 - NGSTable.tsx
 - agency-agents/README.md
@@ -40,24 +45,24 @@
 - devDependencies
 - BookingFlowModal.tsx
 - get
-- AdminScreen.tsx
+- localSearchService.ts
 - install.sh
 - travelportService
-- useAuthStore
+- firebase.ts
 - CheckoutPage.tsx
 - StaysRoomRateCard.stories.tsx
-- AgentPortalView.tsx
+- IconButton.tsx
 - example/lib/types.ts
 - Supply Chain Strategist Agent
-- PlanningWorkspace.tsx
+- src/types.ts
 - :arrows_counterclockwise: Your Workflow Process
-- Element.tsx
+- formatAvailableServices.ts
 - Civil Engineer Agent
 - constructor
 - TripPlan
 - 🌱 ESG & Sustainability Officer Agent
 - Model QA Specialist
-- Button.tsx
+- DuffelPayments.tsx
 - partnerKyc.ts
 - 智能体名称
 - Enable HPA if not active
@@ -66,7 +71,7 @@
 - Godot Gameplay Scripter Agent Personality
 - AgentsOrchestrator Agent Personality
 - Image Prompt Engineer Agent
-- BookingFunnelLayout.tsx
+- getTravelItem.ts
 - Persona Walkthrough Specialist
 - 🤝 M&A Integration Manager Agent
 - Unreal Systems Engineer Agent Personality
@@ -78,9 +83,9 @@
 - Threat Detection Engineer Agent
 - ⚙️ Operations Manager Agent
 - 🚨 Critical Rules You Must Follow
-- DashboardView.tsx
-- express
-- localSearchService.ts
+- aiAgentOrchestrator
+- server/services/zuelpay.service.ts
+- travelCacheService.ts
 - Agent Personality
 - Unity Architect Agent Personality
 - Offer & Lead Gen Strategist
@@ -94,7 +99,7 @@
 - China Market Localization Strategist
 - convert.sh
 - ZK Steward Agent
-- TransportOptions.tsx
+- getSliceDetails.ts
 - BaseService
 - Technical Deliverables
 - Solidity Smart Contract Engineer
@@ -120,7 +125,7 @@
 - Core Mission
 - Developer Advocate Agent
 - Accessibility Auditor Agent Personality
-- TravelDetails.ts
+- R6e
 - Data Engineer Agent
 - Feishu Integration Developer
 - Blender Add-on Engineer Agent Personality
@@ -137,7 +142,7 @@
 - macOS Spatial/Metal Engineer Agent Personality
 - 🏥 Healthcare Customer Service Agent
 - LSP/Index Engineer Agent Personality
-- run
+- match
 - Brand Guardian Agent Personality
 - UX Researcher Agent Personality
 - DevOps Automator Agent Personality
@@ -238,7 +243,7 @@
 - Tool Evaluator Agent Personality
 - Workflow Optimizer Agent Personality
 - What You Must Do When Invoked
-- src/index.ts
+- createThreeDSecureSession.ts
 - rules.test.mjs
 - travelTimeService.ts
 - Statistician Agent Personality
@@ -256,8 +261,8 @@
 - 🔨 Phase 3 Playbook — Build & Iterate
 - QA Agent Personality
 - payment.ts
-- Mistral Vibe Integration
-- firebase.ts
+- getSegmentDates
+- duffelFlightService.ts
 - Prompt Engineer
 - CartographyDesigner Agent Personality
 - Marketing TikTok Strategist
@@ -266,8 +271,8 @@
 - 🎯 NEXUS Agent Activation Prompts
 - DuffelCardForm/lib/types.ts
 - read
-- PackageCheckoutAgent.ts
-- TrainInfoTab.tsx
+- server/services/rtaip/PackageCheckoutAgent.ts
+- BookingFunnelLayout.tsx
 - UI Finish-Gate Reviewer Agent Personality
 - Embedded Firmware Engineer
 - 🛡️ Phase 4 Playbook — Quality & Hardening
@@ -280,9 +285,9 @@
 - Compliance Auditor Agent
 - 🌱 Personal Growth Mentor
 - Master Plan Architect & Technical Educator
-- Icon.tsx
-- travelport.ts
-- bargaining/types.ts
+- StaysRoomRateCard.tsx
+- flightLookup.ts
+- BookingStepHeader.tsx
 - Network Engineer
 - OrgScript Engineer Personality
 - 3DSceneDeveloper Agent Personality
@@ -316,10 +321,10 @@
 - 🚨 Runbook: Incident Response
 - DuffelCardFormCustomElement.tsx
 - DuffelPaymentsCustomElement.tsx
-- FlightTrackerWidget.tsx
-- useVendorStore.ts
+- CreateTripModal.tsx
+- useCouponStore.ts
 - accountStore.ts
-- RazorpayCheckoutModal.tsx
+- Paid Media Search Query Analyst Agent
 - compilerOptions
 - API Platform Engineer
 - Data Visualization Engineer
@@ -338,8 +343,8 @@
 - ⚙️ Phase 2 Playbook — Foundation & Scaffolding
 - 🚀 Phase 5 Playbook — Launch & Growth
 - Test Automation Engineer
-- premium/preview.tsx
-- rasp.ts
+- generate-fixture.ts
+- getSliceDetails.test.ts
 - 🔌 Integrations
 - Discovery Coach Agent
 - Outbound Strategist Agent
@@ -362,19 +367,19 @@
 - ⚡ NEXUS Quick-Start Guide
 - 🏢 Runbook: Enterprise Feature Development
 - FAQ
-- StaysAmenitiesCustomElement.tsx
+- src/index.ts
 - aiFallbackCircuitBreaker
-- TripPlannerMapView.tsx
+- FutureTripModal.tsx
 - FlightsResultsPage.tsx
-- SmartDayPlanner.tsx
+- OperationType
 - orq_duplicates.ts
 - 🚀 Runbook: Startup MVP Build
-- OfferSliceDetailLayoverItem.tsx
+- t8e
 - Project Manager Agent Personality
 - 📢 Runbook: Multi-Channel Marketing Campaign
 - scripts
 - StaysSummary.stories.tsx
-- push.ts
+- engines
 - Technical Plan: Planning Workspace
 - Git Workflow Master Agent
 - Software Architect Agent
@@ -383,12 +388,10 @@
 - Terminal Integration Specialist
 - Strategy Duel Agent
 - dependencies
-- getTravelItem.ts
-- LanguageContext.tsx
+- ErrorBoundary
 - WalletService
 - mockDataStore.ts
 - SeatMap.tsx
-- FullScreenBargainChat.tsx
 - icons.tsx
 - 📸 Inclusive Visuals Specialist
 - ⚙️ Autonomous Optimization Architect
@@ -398,7 +401,6 @@
 - What you scan for
 - 🌍 Cultural Intelligence Strategist
 - src/components/modals/AmenitiesModal.tsx
-- Paid Media Auditor Agent
 - Code Reviewer Agent
 - SRE (Site Reliability Engineer) Agent
 - Multi-Agent Workflow: Startup MVP with Persistent Memory
@@ -410,11 +412,10 @@
 - 📑 NEXUS Executive Brief
 - CrashlyticsService
 - Paid Media Programmatic & Display Buyer Agent
-- Marketing Growth Hacker Agent
 - tripManager.ts
 - parse-flights.ts
 - rtaip/types.ts
-- MusicPlayerContext.tsx
+- security.ts
 - notifications.ts
 - XR Immersive Developer Agent Personality
 - CurrencyWidget.tsx
@@ -444,8 +445,7 @@
 - compilerOptions
 - StaysRatingCustomElement.tsx
 - Paid Media Tracking & Measurement Specialist Agent
-- test_modules.ts
-- getSliceDetails.ts
+- express
 - tsserver.js
 - tsserverlibrary.js
 - cleanup-duplicate-members.mjs
@@ -454,35 +454,35 @@
 - 005 — Premium Admin Dashboard & Agent Portal
 - 2. File Changes & Technical Strategy
 - trainCatalogService.ts
-- Paid Media Ad Creative Strategist Agent
+- Paid Media Auditor Agent
 - Paid Media PPC Campaign Strategist Agent
-- PlanningScreen.tsx
-- getSegmentDates
+- Icon.tsx
+- DuffelNGSView.tsx
 - getDayDiff.ts
 - check-divisions.sh
 - Security Policy
 - 🔎 SAST & Secrets Detection — Full Pattern Reference
 - 15. Quick-Start Activation Guide
-- contacts.ts
-- engines
+- DuffelNGSView.stories.tsx
+- capture_all_screens.cjs
 - typescript/package.json
 - dataLoader.ts
 - create-source-zip.cjs
-- generate-fixture.ts
+- CitySheet.tsx
 - Specification: Full-Page Trip Forms & Solo Trip Option
 - Feature Specification: Premium Login Screen & 4-Tab User Account Screen
 - 005 — Technical plan
-- getSliceDetails.test.ts
 - inventoryDeduplication.ts
 - Architecture Review Checklist
 - Workflow Example: Book Chapter Development
-- razorpay.ts
+- BusBookingCoordinator.tsx
 - 🎮 Game Development Division
 - 🎯 Real-World Use Cases
 - 🇨🇳 Chinese (zh-CN) Localization
 - Recruitment Specialist Agent
 - setup-suggestion-data.ts
 - devDependencies
+- filter-results.ts
 - services/BusService.ts
 - Core Engineering Principles
 - HolidayAlertWidget.tsx
@@ -507,8 +507,6 @@
 - tsserver
 - tsc.js
 - typescript.js
-- sanitization.ts
-- ScreenLayoutWithBack.tsx
 - Specification: GitHub Spec-Kit Setup
 - Technical Plan: Premium Login Screen & 4-Tab User Account Screen
 - Specification: Authentic Razorpay Payment Integration & Flight/Hotel Booking Gateway Fix
@@ -531,14 +529,12 @@
 - index.e2e.ts
 - resolutions
 - main.ts
-- Disaster Recovery (DR) Runbook
-- Server Modularization Plan
-- fix_headers.cjs
-- RoutTripo — New Booking Modules
+- Disaster Recovery Runbook — RoutTripo (Firestore)
+- RoutTripo — `server.ts` Modularization Plan
+- Qr
 - PortalShell.tsx
-- 🗄️ Database Optimizer
+- getMountPromise
 - XR Cockpit Interaction Specialist Agent Personality
-- Paid Media Search Query Analyst Agent
 - XR Interface Architect Agent Personality
 - generate-pdf-ui.cjs
 - Implementation Tasks: [Feature Name]
@@ -550,10 +546,9 @@
 - API Contracts
 - FastImage.tsx
 - 007 — Admin & Agent/Vendor Bottom Navigation & Full Backend Wiring
-- flightService
 - src/lib/convertDurationToString.ts
 - auditLogService.ts
-- GuestDetailsModal.tsx
+- lucide-react
 - Trust & Permission Scoping
 - Evaluation Framework
 - Agent Specialization Strategy
@@ -588,10 +583,8 @@
 - graphify reference: commit hook and native CLAUDE.md integration
 - graphify reference: incremental update and cluster-only
 - Duffel Components CDN example
-- modify_accountsheet.cjs
-- offlineOtpVault.ts
+- push.ts
 - Marketing Content Creator Agent
-- test_parse.cjs
 - inject-firebase-sw.js
 - payment/taxEngine.ts
 - Technical Plan: GitHub Spec-Kit Setup
@@ -599,8 +592,6 @@
 - Technical Plan: Full-Page Trip Forms & Solo Trip Option
 - App Reorganization Plan
 - Specifications Index (`/specs`)
-- WeatherWidget.tsx
-- osm.ts
 - src/services/travelport.service.ts
 - types_patch.ts
 - whatsappNotification.ts
@@ -622,14 +613,8 @@
 - GT
 - preload_font.cjs
 - Run and deploy your AI Studio app
-- fix_modals_header.cjs
-- modify_searchcard.cjs
-- modify_searchcard.js
-- rename_kharch.cjs
-- SecurityWatermark.tsx
-- test-duffel.js
-- update_dest_offers.cjs
-- trainService
+- TimeRangeSelector.tsx
+- RoutTripo — Phase 1 Implementation Guide
 - Task Checklist: Authentic Razorpay Payment Integration
 - youtubeService.ts
 - src/theme/tokens.ts
@@ -650,13 +635,12 @@
 - create-local-ssl-certificate.sh
 - upload-to-cdn.sh
 - list_all_keys.cjs
-- k6-search-endpoints.js
+- phase2/loadtest/k6-search-endpoints.js
 - backup-firestore.sh
 - firebase-messaging-sw.js
-- modify_components.sh
-- test-date.js
-- test-script.js
-- update_other_components.sh
+- Paid Media Paid Social Strategist Agent
+- Header Architecture — What's in this zip
+- RoutTripo — Security & Global-Readiness Roadmap
 - check-android-build.js
 - setup_i18n.sh
 - analyze.md
@@ -669,15 +653,16 @@
 - 003-ai-smart-planner-redesign/tasks.md
 - 004-premium-login-account/tasks.md
 - 005-premium-admin-agent/tasks.md
-- privacyTranslations.ts
 - scripts
+- TripPlannerMapView.tsx
+- OfflineBanner.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `lucide-react` - 266 edges
+1. `lucide-react` - 214 edges
 2. `r()` - 137 edges
 3. `o()` - 113 edges
 4. `e()` - 112 edges
-5. `framer-motion` - 84 edges
+5. `framer-motion` - 74 edges
 6. `x_e()` - 65 edges
 7. `a()` - 64 edges
 8. `travelportService` - 59 edges
@@ -685,61 +670,61 @@
 10. `u()` - 44 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ActivityEditorProps` --references--> `Activity`  [EXTRACTED]
-  scratch/archive_legacy_app_backup/src/components/planning/ActivityEditor.tsx → src/types.ts
-- `ActivityEditor()` --calls--> `usePlanningStore`  [EXTRACTED]
-  scratch/archive_legacy_app_backup/src/components/planning/ActivityEditor.tsx → src/store/usePlanningStore.ts
-- `DayPlanViewProps` --references--> `DayPlan`  [EXTRACTED]
-  scratch/archive_legacy_app_backup/src/components/planning/DayPlanView.tsx → src/types.ts
-- `startServer()` --calls--> `initObservability()`  [EXTRACTED]
-  server.ts → server/config/observability.ts
+- `startServer()` --calls--> `encryptPII()`  [EXTRACTED]
+  server.ts → server/security/zeroTrustCrypto.ts
 - `startServer()` --calls--> `getOrCreateUserDEK()`  [EXTRACTED]
   server.ts → server/security/zeroTrustCrypto.ts
+- `CancellationProcessResult` --references--> `BiddingContract`  [EXTRACTED]
+  server/payment/escrowManager.ts → src/types.ts
+- `CfarSelectionCard()` --indirect_call--> `isCancelForAnyReasonService()`  [INFERRED]
+  duffel-components/duffel-components-main/src/components/DuffelAncillaries/cancel_for_any_reason/CfarSelectionCard.tsx → duffel-components/duffel-components-main/src/lib/isCancelForAnyReasonService.ts
+- `SliceStopsAndDurationOverview()` --calls--> `withPlural()`  [EXTRACTED]
+  duffel-components/duffel-components-main/src/components/DuffelNGSView/SliceSummary.tsx → duffel-components/duffel-components-main/src/lib/withPlural.ts
 
 ## Import Cycles
 - 2-file cycle: `src/components/travel/api.ts -> src/services/duffelFlightService.ts -> src/components/travel/api.ts`
 
-## Communities (697 total, 69 thin omitted)
+## Communities (669 total, 55 thin omitted)
 
 ### Community 0 - "yarn-4.5.3.cjs"
 Cohesion: 0.01
-Nodes (257): $3e(), A_e(), addPath(), addPositional(), addProxy(), addRest(), aHe(), aJe() (+249 more)
+Nodes (198): $3e(), addPath(), addPositional(), addProxy(), addRest(), aHe(), aJe(), appendFile() (+190 more)
 
 ### Community 1 - "x_e"
-Cohesion: 0.03
-Nodes (157): b(), T(), crt(), b(), C(), ce(), le(), N() (+149 more)
+Cohesion: 0.09
+Nodes (46): vn(), sync(), Z(), V0(), x_e(), _A(), A0(), An() (+38 more)
 
-### Community 2 - "lucide-react"
-Cohesion: 0.01
-Nodes (71): lucide-react, react-router-dom, GuestCounts, Props, FareSelectionModalProps, AmenityCategory, DEFAULT_CATEGORIES, Props (+63 more)
+### Community 2 - "App.tsx"
+Cohesion: 0.04
+Nodes (60): qrcode, MainApp(), FareSelectionModal(), FareSelectionModalProps, AIRLINE_LOGOS, AIRPORT_MAP, FlightCard(), FlightCardProps (+52 more)
 
 ### Community 3 - "r"
-Cohesion: 0.05
-Nodes (136): accessPromise(), accessSync(), aP(), appendFilePromise(), appendFileSync(), BT(), changeFileBufferPromise(), changeFileBufferSync() (+128 more)
+Cohesion: 0.06
+Nodes (119): accessPromise(), accessSync(), appendFilePromise(), appendFileSync(), changeFileBufferPromise(), changeFileBufferSync(), changeFilePromise(), changeFileSync() (+111 more)
 
 ### Community 4 - "types/index.ts"
-Cohesion: 0.10
-Nodes (25): BaggageSelectionCardProps, BaggageSelectionController(), BaggageSelectionControllerProps, BaggageSelectionModalProps, BaggageSelectionModalBody(), BaggageSelectionModalBodyProps, BaggageSelectionModalBodyPassenger(), BaggageSelectionModalBodyPassengerProps (+17 more)
+Cohesion: 0.14
+Nodes (19): BaggageSelectionCardProps, BaggageSelectionController(), BaggageSelectionControllerProps, BaggageSelectionModalProps, BaggageSelectionModalBody(), BaggageSelectionModalBodyProps, BaggageSelectionModalBodyPassenger(), BaggageSelectionModalBodyPassengerProps (+11 more)
 
-### Community 5 - "App.tsx"
+### Community 5 - "useLanguage"
 Cohesion: 0.04
-Nodes (82): MainApp(), CurrencyContext, CurrencyContextType, CurrencyProvider(), useCurrency(), CreateTripModal(), GroupDecisionPolls(), LiveFlightTrackerWidget() (+74 more)
+Nodes (68): App(), InitialLanguageModal(), InitialLanguageModalProps, LANGUAGE_LIST, LanguageOnboardingModal(), LanguageOnboardingModalProps, WelcomeTourModalProps, GroupDecisionPolls() (+60 more)
 
-### Community 6 - "framer-motion"
-Cohesion: 0.03
-Nodes (33): framer-motion, AppShellProps, AddMemberModalProps, PRESET_COLORS, AuthModalProps, InitialLanguageModalProps, LANGUAGE_LIST, LanguageOnboardingModal() (+25 more)
+### Community 6 - "getAirlinesText.ts"
+Cohesion: 0.18
+Nodes (10): getAirlinesText(), getCarriers(), CabinClassMap, getFareBrandName(), getSegmentFlightNumber(), aa, ba, vy (+2 more)
 
 ### Community 7 - "BaggageSelectionCard.tsx"
 Cohesion: 0.10
-Nodes (34): BaggageSelectionCard(), BaggageSelectionModal(), BaggageSelectionModalFooter(), BaggageSelectionModalFooterProps, IncludedBaggageBanner(), IncludedBaggageBannerProps, CfarSelectionCard(), SeatSelectionCard() (+26 more)
+Nodes (33): BaggageSelectionCard(), BaggageSelectionModal(), BaggageSelectionModalFooter(), BaggageSelectionModalFooterProps, IncludedBaggageBanner(), IncludedBaggageBannerProps, CfarSelectionCard(), SeatSelectionCard() (+25 more)
 
 ### Community 8 - "server.ts"
 Cohesion: 0.04
-Nodes (70): ADMIN_EMAILS, adminDb(), aiLimiter, apiFailures, apiStats, app, AuthedRequest, buildTripPlannerMapData() (+62 more)
+Nodes (73): axios, ADMIN_EMAILS, adminDb(), aiLimiter, apiFailures, apiStats, app, AuthedRequest (+65 more)
 
 ### Community 9 - ".push"
-Cohesion: 0.04
-Nodes (64): a5e(), BKe(), Bqe(), Bs(), c8e(), compile(), CZe(), $D() (+56 more)
+Cohesion: 0.03
+Nodes (68): a5e(), b5e(), BKe(), Bqe(), Bs(), c8e(), c$e(), A() (+60 more)
 
 ### Community 10 - "DuffelAncillaries.stories.tsx"
 Cohesion: 0.06
@@ -750,64 +735,64 @@ Cohesion: 0.03
 Nodes (77): dependencies, @anthropic-ai/sdk, autoprefixer, axios, bcrypt, @capacitor/android, @capacitor/cli, @capacitor/core (+69 more)
 
 ### Community 12 - "UserLandingPage.tsx"
-Cohesion: 0.06
-Nodes (46): react-i18next, LanguageSwitcher(), BookingFlowCoordinator(), BusBookingCoordinator(), BusBookingCoordinatorProps, BusSearchParams, FALLBACK_BUSES, CarBookingCoordinator() (+38 more)
+Cohesion: 0.08
+Nodes (31): react-i18next, LanguageSwitcher(), HolidayBookingCoordinator(), HolidayBookingCoordinatorProps, HolidaySearchParams, mockPackages, FALLBACK_HOTELS, HotelBookingCoordinator() (+23 more)
 
 ### Community 13 - "agent/tabs.tsx"
-Cohesion: 0.13
-Nodes (20): AgentPrimaryTab, AgentScreenProps, BOTTOM_TABS, WorkspaceSubTab, AgentSupportPanel(), BookingsPanel(), EarningsPanel(), InventoryPanel() (+12 more)
+Cohesion: 0.06
+Nodes (49): StatCard(), AdminPrimaryTab, AdminScreen(), AdminScreenProps, BOTTOM_TABS, OperationsSubTab, SystemSubTab, AdsPanel() (+41 more)
 
 ### Community 14 - ".slice"
 Cohesion: 0.06
-Nodes (68): AV(), B6e(), Bm(), C6e(), CHe(), cP(), cV(), Da() (+60 more)
+Nodes (45): AV(), B6e(), bV(), C6e(), CHe(), cV(), d6e(), dHe() (+37 more)
 
 ### Community 15 - "bidding.ts"
-Cohesion: 0.04
-Nodes (53): CancellationEvaluationResult, CancellationProcessResult, evaluateCancellationEligibility(), executeAutoRefundEscrow(), bidOffers, chatMessages, contracts, router (+45 more)
+Cohesion: 0.06
+Nodes (46): dompurify, CancellationEvaluationResult, CancellationProcessResult, evaluateCancellationEligibility(), executeAutoRefundEscrow(), bidOffers, chatMessages, contracts (+38 more)
 
-### Community 16 - "src/types.ts"
+### Community 16 - "framer-motion"
 Cohesion: 0.03
-Nodes (112): recharts, PrimaryButton(), PrimaryButtonProps, CATEGORY_META, ExpensePieChart(), ExpensePieChartProps, calculateDistance(), createItineraryIcon() (+104 more)
+Nodes (81): framer-motion, recharts, AirplaneLoadingAnimationProps, DateRangePickerProps, CATEGORY_META, ExpensePieChart(), ExpensePieChartProps, calculateDistance() (+73 more)
 
 ### Community 17 - "DuffelAncillaries.tsx"
-Cohesion: 0.04
-Nodes (64): DuffelAncillaries(), DuffelAncillariesCustomElement, DuffelAncillariesCustomElementRenderArguments, IntrinsicElements, JSX, onDuffelAncillariesPayloadReady(), OnPayloadReadyCustomEvent, renderDuffelAncillariesCustomElement() (+56 more)
+Cohesion: 0.07
+Nodes (47): DuffelAncillaries(), DuffelAncillariesCustomElement, DuffelAncillariesCustomElementRenderArguments, IntrinsicElements, JSX, onDuffelAncillariesPayloadReady(), OnPayloadReadyCustomEvent, renderDuffelAncillariesCustomElement() (+39 more)
 
 ### Community 18 - "SearchCard.tsx"
-Cohesion: 0.05
-Nodes (52): AccountGroup, AccountItem, AccountItemId, AccountSheetProps, GROUPS, CITIES, CityOption, CitySheet() (+44 more)
+Cohesion: 0.08
+Nodes (39): MODES, ModeStrip(), ModeStripProps, PLACE_LABELS, SearchCard(), SearchCardProps, TRIP_LABELS, TRIP_LABELS_KEY (+31 more)
 
-### Community 19 - "routtripo-booking/context/BookingFlowContext.tsx"
-Cohesion: 0.06
-Nodes (43): BaggageOption, BaggageSelection(), Props, BillingAndFareBreakup(), inputStyle, Props, FarePlansSheet(), Props (+35 more)
+### Community 19 - "so"
+Cohesion: 0.14
+Nodes (18): ig(), Bl(), ca(), Ec(), ki(), la(), Lo(), lp() (+10 more)
 
-### Community 20 - "getAirlinesText.ts"
-Cohesion: 0.18
-Nodes (10): getAirlinesText(), getCarriers(), CabinClassMap, getFareBrandName(), getSegmentFlightNumber(), aa, ba, vy (+2 more)
+### Community 20 - "TravelDetails.ts"
+Cohesion: 0.10
+Nodes (23): OfferSliceDetailItemProps, getLayoverString(), OfferSliceDetailLayoverItem(), SliceDetailsLayoverItemProps, SliceDetailsTravelItemProps, FilterableWebhookEventType, FilterableWebhookEventTypes, FilterItems (+15 more)
 
 ### Community 21 - "gr"
-Cohesion: 0.06
-Nodes (61): aqe(), bV(), BW(), Bz(), d6e(), dL(), dqe(), Dz() (+53 more)
+Cohesion: 0.07
+Nodes (55): _6e(), addOption(), aqe(), BW(), Bz(), cO(), dL(), dqe() (+47 more)
 
 ### Community 22 - "NGSTable.tsx"
-Cohesion: 0.09
-Nodes (41): DuffelNGSView(), getDurationSortDirection(), getSortShelfAndDirection(), useSort(), sortingFunction(), deduplicateMappedOffersByFareBrand(), getCheapestOffer(), getFareBrandNameForOffer() (+33 more)
+Cohesion: 0.13
+Nodes (25): deduplicateMappedOffersByFareBrand(), getCheapestOffer(), getFareBrandNameForOffer(), groupByFareBrandName(), doesSliceHaveMixedCabins(), doOffersHaveMixedCabin(), getBaggagesQuantity(), getMaxBaggagesForOfferSlice() (+17 more)
 
 ### Community 23 - "agency-agents/README.md"
 Cohesion: 0.03
 Nodes (50): Activate an Agent, Aider Integration, Install, Manual Usage, Regenerate, Activate a Skill, Antigravity Integration, File Format (+42 more)
 
 ### Community 24 - "AirlineSelector.tsx"
-Cohesion: 0.07
-Nodes (43): addToSelected(), AirlineSelector(), AirlineSelectorProps, FilterAirline, getSelectLabel(), isOptionSelected(), OptionProps, removeFromSelected() (+35 more)
+Cohesion: 0.10
+Nodes (26): addToSelected(), AirlineSelector(), AirlineSelectorProps, FilterAirline, getSelectLabel(), isOptionSelected(), OptionProps, removeFromSelected() (+18 more)
 
 ### Community 25 - "duffel-components-main/package.json"
 Cohesion: 0.03
-Nodes (61): bugs, url, description, exports, ./custom-elements, homepage, dotenv, esbuild (+53 more)
+Nodes (60): bugs, url, description, exports, ./custom-elements, homepage, dotenv, esbuild (+52 more)
 
 ### Community 26 - "package.json"
 Cohesion: 0.04
-Nodes (50): config, dotenv, esbuild, firebase, react, react-dom, @types/node, @types/react (+42 more)
+Nodes (52): config, dotenv, esbuild, firebase, react, react-dom, @types/node, @types/react (+44 more)
 
 ### Community 27 - "devDependencies"
 Cohesion: 0.04
@@ -818,32 +803,32 @@ Cohesion: 0.08
 Nodes (42): BaggageOption, BaggageSelection(), BaggageSelectionProps, DEFAULT_BAGGAGE_OPTIONS, BillingAndFareBreakup(), BillingAndFareBreakupProps, BookingFlowModal(), DEFAULT_FARE_TIERS() (+34 more)
 
 ### Community 29 - "get"
-Cohesion: 0.05
-Nodes (51): A1(), AL(), AWe(), Cg(), cKe(), cqe(), del(), delete() (+43 more)
+Cohesion: 0.04
+Nodes (73): A1(), AL(), AWe(), az(), catch(), Cg(), cKe(), cqe() (+65 more)
 
-### Community 30 - "AdminScreen.tsx"
-Cohesion: 0.15
-Nodes (20): StatCard(), AdminPrimaryTab, AdminScreenProps, BOTTOM_TABS, OperationsSubTab, SystemSubTab, AdsPanel(), AnalyticsPanel() (+12 more)
+### Community 30 - "localSearchService.ts"
+Cohesion: 0.25
+Nodes (16): fetchFlightData(), AIRLINE_LOGOS, LocalBusResult, LocalFlightResult, LocalTrainResult, matchStationAlias(), searchLocalBuses(), searchLocalFlights() (+8 more)
 
 ### Community 31 - "install.sh"
 Cohesion: 0.07
 Nodes (44): agent_slug_exists(), box_bot(), box_row(), box_top(), build_selection(), capacity_warn(), check_integrations(), detect_aider() (+36 more)
 
-### Community 33 - "useAuthStore"
-Cohesion: 0.04
-Nodes (52): react-barcode, react-qr-code, FutureTripModal(), FutureTripModalProps, getSmartViaRoutes(), POPULAR_DESTINATIONS, PROMPT_PRESETS, SmartViaRoute (+44 more)
+### Community 33 - "firebase.ts"
+Cohesion: 0.06
+Nodes (38): react-barcode, react-qr-code, AuthModal(), AuthModalProps, NewTripScreen(), NewTripScreenProps, BrandLogo(), Card() (+30 more)
 
 ### Community 34 - "CheckoutPage.tsx"
-Cohesion: 0.08
-Nodes (39): html2canvas, html2canvas-pro, html2pdf.js, BillingForm(), BookingFlowModalProps, ContactFormData, PassengerDetailsWizard(), PassengerDetailsWizardProps (+31 more)
+Cohesion: 0.07
+Nodes (40): html2canvas, html2canvas-pro, html2pdf.js, jspdf, BillingForm(), BookingFlowModalProps, ContactFormData, PassengerDetailsWizard() (+32 more)
 
 ### Community 35 - "StaysRoomRateCard.stories.tsx"
-Cohesion: 0.11
-Nodes (15): SOURCE_NAME_MAP, StaysRoomRateCardProps, CustomElement, CustomElementRenderArguments, IntrinsicElements, JSX, renderDuffelStaysRoomRateCardCustomElement(), tryToGetCustomElement() (+7 more)
+Cohesion: 0.12
+Nodes (14): StaysRoomRateCardProps, CustomElement, CustomElementRenderArguments, IntrinsicElements, JSX, renderDuffelStaysRoomRateCardCustomElement(), tryToGetCustomElement(), accommodation (+6 more)
 
-### Community 36 - "AgentPortalView.tsx"
-Cohesion: 0.06
-Nodes (31): AgentBiddingScreen(), AgentBiddingScreenProps, FastTrackHotelOnboardingModal(), FastTrackHotelOnboardingModalProps, CodeScanResult, CodexSecurityCenter(), CodexSecurityCenterProps, PentAGISecurityCenter() (+23 more)
+### Community 36 - "IconButton.tsx"
+Cohesion: 0.16
+Nodes (12): Counter(), CounterProps, ICON_BUTTON_VARIANTS, IconButton(), IconButtonProps, IconButtonVariants, NativeButtonProps, Default (+4 more)
 
 ### Community 37 - "example/lib/types.ts"
 Cohesion: 0.10
@@ -853,29 +838,29 @@ Nodes (28): duffelHeaders, environment, EXAMPLE_DIRECTORY, requestListener, crea
 Cohesion: 0.04
 Nodes (44): Advanced Capabilities, Balance Cost and Quality, Build an Efficient Supplier Management System, Communication Style, Compliance & ESG Management, Compliance & Ethical Procurement, Core Mission, Cost Control Methodology (+36 more)
 
-### Community 39 - "PlanningWorkspace.tsx"
-Cohesion: 0.12
-Nodes (23): ActivityEditor(), ActivityEditorProps, DayPlanViewProps, AiItineraryGenerator(), AiItineraryGeneratorProps, FormData, PlanningWorkspace(), SmartDayPlanner() (+15 more)
+### Community 39 - "src/types.ts"
+Cohesion: 0.04
+Nodes (63): AiItineraryGenerator(), AiItineraryGeneratorProps, FormData, PlanningWorkspace(), SmartDayPlanner(), SmartDayPlannerProps, TripCard(), TripCardProps (+55 more)
 
 ### Community 40 - ":arrows_counterclockwise: Your Workflow Process"
 Cohesion: 0.05
 Nodes (43): Agent Collaboration Protocol, :arrows_counterclockwise: Learning & Memory, :arrows_counterclockwise: Your Workflow Process, :brain: Your Identity & Memory, :clipboard: Your Technical Deliverables, Curiosity-Driven Bug Discovery, :dart: Your Core Mission, :dart: Your Success Metrics (+35 more)
 
-### Community 41 - "Element.tsx"
-Cohesion: 0.10
-Nodes (23): amenitiesWithoutWrapper, Amenity(), AmenityProps, Element(), ElementProps, EmptyElement(), ExitElement(), ExitElementProps (+15 more)
+### Community 41 - "formatAvailableServices.ts"
+Cohesion: 0.35
+Nodes (6): formatAvailableServices(), multipleCurrenciesErrorMessage(), checkFunctionsMap, isBaggageService(), isCancelForAnyReasonService(), offer
 
 ### Community 42 - "Civil Engineer Agent"
 Cohesion: 0.05
 Nodes (41): Advanced Analysis, 🚀 Advanced Capabilities, Asia, Australia & New Zealand, BIM Coordination Checklist, Building Code Compliance, Civil Engineer Agent, Code Compliance (+33 more)
 
 ### Community 43 - "constructor"
-Cohesion: 0.08
-Nodes (42): age(), _ageValue(), _allowsStoringAuthenticated(), _assertRequestHasHeaders(), BJe(), _checkIterableAdaptar(), Cnt(), constructor() (+34 more)
+Cohesion: 0.07
+Nodes (46): age(), _ageValue(), _allowsStoringAuthenticated(), _assertRequestHasHeaders(), BJe(), _checkIterableAdaptar(), Cnt(), constructor() (+38 more)
 
 ### Community 44 - "TripPlan"
-Cohesion: 0.07
-Nodes (30): react-markdown, NearbyUtilitiesModal(), NearbyUtilitiesModalProps, HARDCODED_PACKING_CATEGORIES(), PlannerView(), PlannerViewProps, DynamicTripImage(), DynamicTripImageProps (+22 more)
+Cohesion: 0.10
+Nodes (22): react-markdown, DynamicTripImage(), DynamicTripImageProps, imageCache, ItineraryCard(), ItineraryCardProps, FuelCalculatorModal(), FuelCalculatorModalProps (+14 more)
 
 ### Community 45 - "🌱 ESG & Sustainability Officer Agent"
 Cohesion: 0.05
@@ -885,9 +870,9 @@ Nodes (39): Board-Level Oversight, CDP Response Structure, Community Investment 
 Cohesion: 0.05
 Nodes (39): 10. Business Impact & Communication, 1. Documentation & Governance Review, 2. Data Reconstruction & Quality, 3. Target / Label Analysis, 4. Segmentation & Cohort Assessment, 5. Feature Analysis & Engineering, 6. Model Replication & Construction, 7. Calibration Testing (+31 more)
 
-### Community 47 - "Button.tsx"
-Cohesion: 0.06
-Nodes (33): Counter(), CounterProps, Button(), BUTTON_SIZES, BUTTON_VARIANTS, ButtonProps, ButtonSizes, ButtonVariants (+25 more)
+### Community 47 - "DuffelPayments.tsx"
+Cohesion: 0.05
+Nodes (38): SeatMapUnavailable(), CARD_ELEMENT_STYLE_BASE, CARD_ELEMENT_STYLE_INVALID, DuffelPayments(), DuffelPaymentsProps, Button(), BUTTON_SIZES, BUTTON_VARIANTS (+30 more)
 
 ### Community 48 - "partnerKyc.ts"
 Cohesion: 0.09
@@ -903,7 +888,7 @@ Nodes (38): 🚀 Advanced Capabilities, Blameless Culture, Build Incident Readin
 
 ### Community 51 - "captureErrorInSentry"
 Cohesion: 0.08
-Nodes (29): BaggageSelectionModalHeader(), BaggageSelectionModalHeaderProps, SeatSelectionModalHeader(), SeatSelectionModalHeaderProps, AirlineLogo(), AirlineLogoProps, getFallbackLogoUrl(), getSrcForIataCode() (+21 more)
+Nodes (28): BaggageSelectionModalHeader(), BaggageSelectionModalHeaderProps, SeatSelectionModalHeader(), SeatSelectionModalHeaderProps, AirlineLogo(), AirlineLogoProps, getFallbackLogoUrl(), getSrcForIataCode() (+20 more)
 
 ### Community 52 - "🤝 Contributing to The Agency"
 Cohesion: 0.05
@@ -921,9 +906,9 @@ Nodes (37): 🚀 Advanced Pipeline Capabilities, AgentsOrchestrator Agent Person
 Cohesion: 0.05
 Nodes (36): Advanced Capabilities, Advanced Prompt Patterns, Cinematic Portrait, Critical Rules You Must Follow, Environment & Setting Layer, Environmental Portrait, Example Prompt Templates, Fashion Photography (+28 more)
 
-### Community 56 - "BookingFunnelLayout.tsx"
-Cohesion: 0.14
-Nodes (19): DateFareStrip(), DateFareStripProps, FlightPriceCalendarModal(), FlightPriceCalendarModalProps, BookingFunnelLayout(), BookingFunnelLayoutProps, MultiCityLeg, CarSearchTab() (+11 more)
+### Community 56 - "getTravelItem.ts"
+Cohesion: 0.31
+Nodes (5): getTravelItem(), NOTE: need to make passengers optional because order request change offer slice, isISO8601Duration(), iso8601DurationRegex, segment
 
 ### Community 57 - "Persona Walkthrough Specialist"
 Cohesion: 0.06
@@ -950,8 +935,8 @@ Cohesion: 0.06
 Nodes (34): 🚀 Advanced Capabilities, Agent Collaboration Protocol, Codebase Archaeologist Agent Personality, 💬 Communication Style, Confirm Shared Purpose Before Flagging Duplication, 🚨 Critical Rules You Must Follow, Discover Drift That Nobody Flagged, Distinguish Real Bugs From Cosmetic Drift (+26 more)
 
 ### Community 63 - "BookingFlowCoordinator.tsx"
-Cohesion: 0.14
-Nodes (22): BAGGAGE_OPTIONS, BaggageSelectionStep(), BaggageSelectionStepProps, SelectedBaggageItem, BookingStep, CheckoutStep(), CheckoutStepProps, FlightPricingAPIResponse (+14 more)
+Cohesion: 0.11
+Nodes (27): BAGGAGE_OPTIONS, BaggageSelectionStep(), BaggageSelectionStepProps, SelectedBaggageItem, BookingFlowCoordinator(), BookingFlowCoordinatorProps, BookingStep, CheckoutStepProps (+19 more)
 
 ### Community 64 - "Sovereign Health Systems Agent"
 Cohesion: 0.06
@@ -969,17 +954,13 @@ Nodes (33): Analyze, Balanced Scorecard Approach, BCP Framework — Key Componen
 Cohesion: 0.06
 Nodes (33): 10. Purpose Over Busy Work, 11. Impact Positioning — Outputs Go Where They Work, 1. The Filter — What Gets to the Boss, 2. Process Ownership — Consistency Is the Deliverable, 3. Cascading Updates — The Document Dependency Graph, 4. Output Routing — The Right Place, Ready to Use, 5. Never Take the Boss's Position, 6. Remember. Never Repeat. (+25 more)
 
-### Community 68 - "DashboardView.tsx"
-Cohesion: 0.07
-Nodes (15): BookingScreenProps, HubScreenProps, PAST_AND_ACTIVE_TRIPS, ActiveVerticalModal, BookingsView(), BookingsViewProps, COLORS, DashboardView() (+7 more)
+### Community 69 - "server/services/zuelpay.service.ts"
+Cohesion: 0.08
+Nodes (18): registerBusRoutes(), carService, carService, router, busLookupService, POPULAR_OPERATORS, VerifiedBus, CarDetails (+10 more)
 
-### Community 69 - "express"
-Cohesion: 0.06
-Nodes (29): axios, express, app, request(), runTests(), server, registerBusRoutes(), registerPublicApiRoutes() (+21 more)
-
-### Community 70 - "localSearchService.ts"
-Cohesion: 0.14
-Nodes (32): loadLocalData(), AIRLINE_LOGOS, LocalBusResult, LocalFlightResult, LocalTrainResult, matchStationAlias(), searchLocalBuses(), searchLocalFlights() (+24 more)
+### Community 70 - "travelCacheService.ts"
+Cohesion: 0.21
+Nodes (16): searchLocalTrainStatus(), getTrainFromCatalog(), parseAccommodation(), enrichTrainDetails(), fetchRealNameFromLLM(), getCachedRealName(), getFromCache(), getOrFetchRealTrainName() (+8 more)
 
 ### Community 71 - "Agent Personality"
 Cohesion: 0.06
@@ -1033,13 +1014,13 @@ Nodes (28): accumulate_aider(), accumulate_windsurf(), clean_tool_output(), conv
 Cohesion: 0.06
 Nodes (31): 🚀 Advanced Capabilities, Build the Knowledge Network, Companion Skills (Optional), 🚨 Critical Rules You Must Follow, Daily Log Entry Example, Deep-reading output example (structure note), Deliverable Template (Task Close), Domain–Expert Mapping (Quick Reference) (+23 more)
 
-### Community 84 - "TransportOptions.tsx"
-Cohesion: 0.11
-Nodes (16): FUN_FACTS, FunFactsLoader(), ICONS, BusSearchTab(), getTomorrowDate(), addDurationToTime(), AVAILABILITY_STATES, buildTrainClasses() (+8 more)
+### Community 84 - "getSliceDetails.ts"
+Cohesion: 0.47
+Nodes (4): getDurationString(), getLayoverOriginDestinationKey(), getSliceDetails(), splitTravelDetailsWithStops()
 
 ### Community 85 - "BaseService"
-Cohesion: 0.11
-Nodes (6): BaseService, busService, cabService, carService, hotelService, packageService
+Cohesion: 0.06
+Nodes (10): BaseService, busService, cabService, carService, flightService, hotelService, packageService, bookingService (+2 more)
 
 ### Community 86 - "Technical Deliverables"
 Cohesion: 0.06
@@ -1086,12 +1067,12 @@ Cohesion: 0.06
 Nodes (30): compilerOptions, allowImportingTsExtensions, allowJs, alwaysStrict, baseUrl, declaration, declarationDir, downlevelIteration (+22 more)
 
 ### Community 97 - "server/services/travelport.service.ts"
-Cohesion: 0.09
-Nodes (29): registerTravelportRoutes(), calculateNameSimilarity(), cleanPropertyName(), CURATED_DESTINATION_HOTELS, LodgingBookAgent, LodgingSearchAgent, PropertyDeduplicationAgent, RateComparisonAgent (+21 more)
+Cohesion: 0.10
+Nodes (28): registerTravelportRoutes(), calculateNameSimilarity(), cleanPropertyName(), CURATED_DESTINATION_HOTELS, LodgingBookAgent, LodgingSearchAgent, PropertyDeduplicationAgent, RateComparisonAgent (+20 more)
 
 ### Community 98 - "api.ts"
-Cohesion: 0.09
-Nodes (23): fetchFlightData(), FetchFlightParams, FetchHotelParams, FetchLiveStationParams, fetchTrainData(), FetchTrainParams, FlightOption, formatDateToYYYYMMDD() (+15 more)
+Cohesion: 0.13
+Nodes (15): FetchFlightParams, FetchHotelParams, FetchLiveStationParams, fetchTrainData(), FetchTrainParams, formatDateToYYYYMMDD(), getTomorrowDateString(), HotelOption (+7 more)
 
 ### Community 99 - "ArchitectUX Agent Personality"
 Cohesion: 0.07
@@ -1137,9 +1118,9 @@ Nodes (29): 🚀 Advanced Capabilities, Advocacy Ethics, Community Building & En
 Cohesion: 0.07
 Nodes (29): Accessibility Audit Report Template, Accessibility Auditor Agent Personality, 🚀 Advanced Capabilities, Audit Against WCAG Standards, Catch What Automation Misses, 🚨 Critical Rules You Must Follow, Cross-Agent Collaboration, Design System Accessibility (+21 more)
 
-### Community 110 - "TravelDetails.ts"
-Cohesion: 0.12
-Nodes (15): FilterableWebhookEventType, FilterableWebhookEventTypes, FilterItems, ProcessedRequestError, PropsOrError, RandomlyGeneratedPassenger, RandomlyGeneratedPeople, SliceDetails (+7 more)
+### Community 110 - "R6e"
+Cohesion: 0.19
+Nodes (28): R6e(), Cc(), Di(), Dl(), dn(), it(), ja(), Mo() (+20 more)
 
 ### Community 111 - "Data Engineer Agent"
 Cohesion: 0.07
@@ -1205,9 +1186,9 @@ Nodes (28): 🚀 Advanced Capabilities, Billing Inquiry Response, Complaint Hand
 Cohesion: 0.07
 Nodes (28): 🚀 Advanced Capabilities, Build the graphd LSP Aggregator, Create Semantic Index Infrastructure, 🚨 Critical Rules You Must Follow, Graph Consistency Requirements, Graph Construction Pipeline, Graph Engineering Excellence, graphd Core Architecture (+20 more)
 
-### Community 127 - "run"
-Cohesion: 0.12
-Nodes (22): _6e(), addOption(), cO(), definition(), definitions(), eje(), error(), format() (+14 more)
+### Community 127 - "match"
+Cohesion: 0.05
+Nodes (59): A_e(), ag(), AO(), Btt(), C1(), clear(), cy(), D1() (+51 more)
 
 ### Community 128 - "Brand Guardian Agent Personality"
 Cohesion: 0.07
@@ -1443,7 +1424,7 @@ Nodes (26): For /graphify add and --watch, For /graphify query, For the commit h
 
 ### Community 186 - "@storybook/react"
 Cohesion: 0.05
-Nodes (38): SliceStopsAndDurationOverview(), SliceSummary(), SliceSummaryProps, OfferSlice(), OfferSliceProps, OfferSliceRow, OfferSliceModal(), OfferSliceModalProps (+30 more)
+Nodes (39): SliceStopsAndDurationOverview(), SliceSummary(), SliceSummaryProps, OfferSlice(), OfferSliceProps, OfferSliceRow, OfferSliceModal(), OfferSliceModalProps (+31 more)
 
 ### Community 187 - "travelAIService.ts"
 Cohesion: 0.14
@@ -1609,9 +1590,9 @@ Nodes (24): 🚀 Advanced Capabilities, Advanced Workflow Optimization Framework
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 228 - "src/index.ts"
-Cohesion: 0.11
-Nodes (23): create3DSSessionPayload, createClient(), getAPIHeaders(), Service, ThreeDSecureSession, ThreeDSSessionStatus, createThreeDSecureSession(), CreateThreeDSecureSessionFn (+15 more)
+### Community 228 - "createThreeDSecureSession.ts"
+Cohesion: 0.12
+Nodes (20): create3DSSessionPayload, createClient(), getAPIHeaders(), Service, ThreeDSecureSession, ThreeDSSessionStatus, createThreeDSecureSession(), CreateThreeDSecureSessionFn (+12 more)
 
 ### Community 229 - "rules.test.mjs"
 Cohesion: 0.08
@@ -1681,13 +1662,13 @@ Nodes (23): Accordion Testing Protocol, Build Expertise In:, "Default to Finding
 Cohesion: 0.24
 Nodes (9): getKeyId(), getKeySecret(), getRazorpayClient(), router, calculateServerTax(), getDb(), ServiceType, app (+1 more)
 
-### Community 246 - "Mistral Vibe Integration"
-Cohesion: 0.15
-Nodes (12): Agent TOML File, Filtering, Generate, Generated Format, Install, Integration files not generated, Mistral Vibe Integration, Mistral Vibe not detected (+4 more)
+### Community 246 - "getSegmentDates"
+Cohesion: 0.28
+Nodes (6): getSegmentDates(), TODO: remove the fallback once AIC returns arrivingAt and departingAt for AICs…, offerSegment, orderSegment, offerSegment, orderSegment
 
-### Community 247 - "firebase.ts"
-Cohesion: 0.09
-Nodes (18): app, appCheck, deleteUserAccount, FirestoreErrorInfo, googleProvider, OperationType, CREATE, DELETE (+10 more)
+### Community 247 - "duffelFlightService.ts"
+Cohesion: 0.28
+Nodes (7): FlightOption, DuffelSearchParams, fetchCachedFlights, fetchDuffelFlights(), formatDuffelDuration(), formatDuffelTime(), mapDuffelOffersToFlightOptions()
 
 ### Community 248 - "Prompt Engineer"
 Cohesion: 0.09
@@ -1721,13 +1702,13 @@ Nodes (17): getIFrameOriginForEnvironment(), getIframeURL(), getPathnameForInten
 Cohesion: 0.10
 Nodes (23): aet(), api(), cet(), close(), closeFreeSessions(), _emitEntry(), finally(), _getReaderOptions() (+15 more)
 
-### Community 256 - "PackageCheckoutAgent.ts"
-Cohesion: 0.22
-Nodes (12): findReservationShape(), getAgencyHotelGuaranteeCard(), getAgencyPaymentMethod(), HospitalityReservationBuildRequest, HospitalityReservationResponse, packageCheckoutAgent, toTravelportTraveler(), TravelportReservationShape (+4 more)
+### Community 256 - "server/services/rtaip/PackageCheckoutAgent.ts"
+Cohesion: 0.11
+Nodes (21): findReservationShape(), getAgencyHotelGuaranteeCard(), getAgencyPaymentMethod(), HospitalityReservationBuildRequest, HospitalityReservationResponse, packageCheckoutAgent, toTravelportTraveler(), TravelportReservationShape (+13 more)
 
-### Community 257 - "TrainInfoTab.tsx"
-Cohesion: 0.10
-Nodes (22): SharedBookingWidgetProps, CABIN_CLASSES, departureMinutes(), durationMinutes(), FlightSearchTab(), getTomorrowDate(), getTomorrowDate(), HotelSearchTab() (+14 more)
+### Community 257 - "BookingFunnelLayout.tsx"
+Cohesion: 0.05
+Nodes (48): FUN_FACTS, FunFactsLoader(), ICONS, LogoName(), SharedBookingWidgetProps, BookingFunnelLayout(), BookingFunnelLayoutProps, MultiCityLeg (+40 more)
 
 ### Community 258 - "UI Finish-Gate Reviewer Agent Personality"
 Cohesion: 0.09
@@ -1742,12 +1723,12 @@ Cohesion: 0.09
 Nodes (21): Agent Activation Sequence, 🔌 API Tester — Full API Regression, Critical Mindset, 📸 Evidence Collector — Comprehensive Visual Evidence, Gate Decision, If NEEDS WORK (return to Phase 3):, If NOT READY (return to Phase 1/2):, If READY (proceed to Phase 5): (+13 more)
 
 ### Community 261 - "u"
-Cohesion: 0.06
-Nodes (71): a(), abort(), ag(), az(), Aze(), Brt(), c$e(), A() (+63 more)
+Cohesion: 0.05
+Nodes (91): a(), abort(), Aze(), Brt(), BT(), p(), b(), T() (+83 more)
 
 ### Community 263 - "BargainingTab.tsx"
-Cohesion: 0.19
-Nodes (17): AcceptAndLockComparisonView(), AcceptAndLockComparisonViewProps, CAB_INVENTORY_401, CAB_INVENTORY_402, CAB_INVENTORY_403, generateDemandComparison(), HOTEL_INVENTORY_501, INITIAL_REQUESTS (+9 more)
+Cohesion: 0.08
+Nodes (38): AccountScreen(), AccountScreenProps, TABS, AcceptAndLockComparisonView(), AcceptAndLockComparisonViewProps, ALL_NUMBER_WORDS, BLOCKED_TAG, ENGLISH_NUMBER_WORDS (+30 more)
 
 ### Community 264 - "Marketing Instagram Curator"
 Cohesion: 0.10
@@ -1773,17 +1754,17 @@ Nodes (20): 1. Clarity Before Action, 2. Systems Over Isolated Tips, 30-Day Exec
 Cohesion: 0.10
 Nodes (20): 1. Deliver the Conceptual Masterclass (Learn Before Acting), 2. Ruthless Red Teaming & Risk Critique (Anti-Fantasy Standard), 3. Human-Centered Governance & Equilibrium, 4. Author the Standard Implementation Plan (.md), 🚀 Advanced Capabilities, 🚨 Critical Rules You Must Follow, 🔄 Learning & Memory, Master Plan Architect & Technical Educator (+12 more)
 
-### Community 270 - "Icon.tsx"
-Cohesion: 0.05
-Nodes (73): CfarSelectionModalBody(), CfarSelectionModalBodyProps, CfarSelectionModalBodyListItem(), SeatElement(), SeatInfo(), SeatInfoProps, SeatUnavailable(), getHighlightStyles() (+65 more)
+### Community 270 - "StaysRoomRateCard.tsx"
+Cohesion: 0.06
+Nodes (54): getHighlightStyles(), OfferSliceConditionsProps, getTerminalString(), OfferSliceDetailTravelItem(), DivProps, HSpace(), HSpaceProps, RadioButton() (+46 more)
 
-### Community 271 - "travelport.ts"
-Cohesion: 0.11
-Nodes (15): AIRLINE_METADATA, CITY_TO_IATA, flightLookupService, RawSchedule, VerifiedFlight, FullWorkflowExecutionResult, TravelportAncillarySelection, TravelportFlightOffer (+7 more)
+### Community 271 - "flightLookup.ts"
+Cohesion: 0.27
+Nodes (5): AIRLINE_METADATA, CITY_TO_IATA, flightLookupService, RawSchedule, VerifiedFlight
 
-### Community 272 - "bargaining/types.ts"
-Cohesion: 0.18
-Nodes (11): AcceptLockFlowViewProps, INITIAL_BARGAINING_TRIPS, SAMPLE_VENDOR_OFFERS, FullScreenChatViewProps, TripRequirementModalProps, BargainingCategory, BargainingTrip, ChatMessage (+3 more)
+### Community 272 - "BookingStepHeader.tsx"
+Cohesion: 0.17
+Nodes (13): AcceptLockFlowViewProps, INITIAL_BARGAINING_TRIPS, SAMPLE_VENDOR_OFFERS, FullScreenChatViewProps, TripRequirementModalProps, BargainingCategory, BargainingTrip, ChatMessage (+5 more)
 
 ### Community 273 - "Network Engineer"
 Cohesion: 0.10
@@ -1917,21 +1898,21 @@ Nodes (17): createCardForTemporaryUse(), DuffelCardFormCustomElementRenderArgume
 Cohesion: 0.21
 Nodes (10): DuffelPaymentsCustomElement, DuffelPaymentsCustomElementRenderArguments, IntrinsicElements, JSX, onDuffelPaymentsFailedPayment(), onDuffelPaymentsSuccessfulPayment(), OnFailedPaymentCustomEvent, renderDuffelPaymentsCustomElement() (+2 more)
 
-### Community 306 - "FlightTrackerWidget.tsx"
-Cohesion: 0.27
-Nodes (8): FlightTrackerProps, FlightTrackerWidget(), FlightData, generateFallbackRadarData(), LiveRadarModal(), LiveRadarModalProps, fetchFlightStatus(), FlightStatus
+### Community 306 - "CreateTripModal.tsx"
+Cohesion: 0.07
+Nodes (37): PrimaryButton(), PrimaryButtonProps, FlightTrackerProps, FlightTrackerWidget(), AddMemberModal(), AddMemberModalProps, PRESET_COLORS, FlightData (+29 more)
 
-### Community 307 - "useVendorStore.ts"
-Cohesion: 0.08
-Nodes (26): zustand, CouponWidget(), CouponWidgetProps, ACTIVE_COUPONS, Coupon, CouponService, CouponValidationResult, BookingStoreState (+18 more)
+### Community 307 - "useCouponStore.ts"
+Cohesion: 0.23
+Nodes (10): CouponWidget(), CouponWidgetProps, ACTIVE_COUPONS, Coupon, CouponService, CouponValidationResult, CouponStoreState, getInitialCoupons() (+2 more)
 
 ### Community 308 - "accountStore.ts"
-Cohesion: 0.10
-Nodes (39): AdminModuleDeps, registerAdminRoutes(), exportUserDataForLegalHandler(), verifySecretTokenConstantTime(), decryptObjectPII(), decryptPII(), dekMemoryCache, generateDEK() (+31 more)
+Cohesion: 0.09
+Nodes (41): AdminModuleDeps, registerAdminRoutes(), exportUserDataForLegalHandler(), verifySecretTokenConstantTime(), decryptObjectPII(), decryptPII(), dekMemoryCache, encryptObjectPII() (+33 more)
 
-### Community 309 - "RazorpayCheckoutModal.tsx"
-Cohesion: 0.15
-Nodes (7): jspdf, qrcode, GroupSplitPaymentModal(), GroupSplitPaymentModalProps, PaymentTab, RazorpayCheckoutModalProps, HotelVoucherData
+### Community 309 - "Paid Media Search Query Analyst Agent"
+Cohesion: 0.25
+Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Search Query Analyst Agent, Specialized Skills, Success Metrics, Tooling & Automation
 
 ### Community 310 - "compilerOptions"
 Cohesion: 0.10
@@ -2005,17 +1986,17 @@ Nodes (17): Content & Campaign Preparation (Parallel), Gate Decision, Handoff to
 Cohesion: 0.11
 Nodes (17): 🚀 Advanced Capabilities, CI: Sharded, Traced, Merge-Blocking (GitHub Actions), 🚨 Critical Rules You Must Follow, Deterministic Playwright Test (No Sleeps, API Setup, Role Selectors), Flake Triage Table, Framework Depth, 🔄 Learning & Memory, Suite Operations at Scale (+9 more)
 
-### Community 328 - "premium/preview.tsx"
-Cohesion: 0.18
-Nodes (10): AdminScreen(), AgentScreen(), LoginMode, LoginPayload, LoginScreen(), LoginScreenProps, SocialProvider, SOCIALS (+2 more)
+### Community 328 - "generate-fixture.ts"
+Cohesion: 0.43
+Nodes (7): createOfferRequest(), duffelHeaders, getOffer(), getSeatMaps(), main(), makeMockDateInTheFuture(), prompts
 
-### Community 329 - "rasp.ts"
-Cohesion: 0.23
-Nodes (9): SecurityThreatModal(), SecurityThreatModalProps, checkDebuggerTiming(), checkRootAndJailbreak(), KNOWN_SUSPICIOUS_GLOBAL_OBJECTS, KNOWN_SUSPICIOUS_PATHS, performRaspSecurityCheck(), SecurityStatus (+1 more)
+### Community 329 - "getSliceDetails.test.ts"
+Cohesion: 0.25
+Nodes (7): marketingCarrier, partialSlice, passenger, segment1, segment2, segment3, segmentWithStops
 
 ### Community 330 - "🔌 Integrations"
-Cohesion: 0.12
-Nodes (17): Aider, Antigravity, Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, 🔌 Integrations (+9 more)
+Cohesion: 0.06
+Nodes (29): Aider, Antigravity, Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, 🔌 Integrations (+21 more)
 
 ### Community 331 - "Discovery Coach Agent"
 Cohesion: 0.12
@@ -2046,12 +2027,12 @@ Cohesion: 0.12
 Nodes (16): background_color, categories, description, display, display_override, icons, id, lang (+8 more)
 
 ### Community 338 - "apiClient.ts"
-Cohesion: 0.23
-Nodes (15): idb, addToSyncQueue(), clearSyncQueue(), createDBPromise(), deleteTripOffline(), getSyncDB(), getSyncQueue(), getTripsOffline() (+7 more)
+Cohesion: 0.10
+Nodes (22): idb, CrashlyticsErrorBoundary, Props, State, addToSyncQueue(), clearSyncQueue(), createDBPromise(), deleteTripOffline() (+14 more)
 
 ### Community 339 - "BargainingPaywallModal.tsx"
-Cohesion: 0.30
-Nodes (10): BargainingPaywallModal(), BargainingPaywallModalProps, checkCustomBiddingAllowance(), CUSTOM_BID_UNLOCK_FEE_INR, CustomBiddingLimitState, formatBiddingResetCountdown(), FREE_DAILY_CUSTOM_BID_LIMIT, getCustomBiddingRateLimit() (+2 more)
+Cohesion: 0.27
+Nodes (11): BargainingPaywallModal(), BargainingPaywallModalProps, CUSTOM_BID_UNLOCK_FEE_INR, CustomBiddingLimitState, formatBiddingResetCountdown(), FREE_DAILY_CUSTOM_BID_LIMIT, getCustomBiddingRateLimit(), recordCustomBiddingSubmission() (+3 more)
 
 ### Community 340 - "Anthropologist Agent Personality"
 Cohesion: 0.12
@@ -2101,37 +2082,37 @@ Nodes (15): Agent Roster, Compliance & Governance, Core Team, Execution Plan, Ph
 Cohesion: 0.12
 Nodes (15): Are there integration guides?, `createThreeDSecureSession`, @duffel/components, `DuffelCardForm`, Evervault sandbox, FAQ, Getting started, Integrating custom element without node (+7 more)
 
-### Community 352 - "StaysAmenitiesCustomElement.tsx"
-Cohesion: 0.28
-Nodes (6): CustomElement, CustomElementRenderArguments, IntrinsicElements, JSX, renderDuffelStaysAmenitiesCustomElement(), tryToGetCustomElement()
+### Community 352 - "src/index.ts"
+Cohesion: 0.13
+Nodes (15): hrefToComponentStyles, amenityIcon(), StaysAmenities(), StaysAmenitiesProps, CustomElement, CustomElementRenderArguments, IntrinsicElements, JSX (+7 more)
 
 ### Community 353 - "aiFallbackCircuitBreaker"
-Cohesion: 0.11
-Nodes (12): @google-cloud/secret-manager, @sentry/node, @sentry/profiling-node, initObservability(), sentryErrorHandler(), REQUIRED_SECRETS, aiFallbackCircuitBreaker, CircuitBreakerConfig (+4 more)
+Cohesion: 0.12
+Nodes (11): getClient(), loadSecrets(), REQUIRED_SECRETS, @google-cloud/secret-manager, REQUIRED_SECRETS, aiFallbackCircuitBreaker, CircuitBreakerConfig, CircuitBreakerStatus (+3 more)
 
-### Community 354 - "TripPlannerMapView.tsx"
-Cohesion: 0.16
-Nodes (9): leaflet, react-leaflet, MapViewProps, getMarkerIcon(), MapMarkerItem, RouteMapData, TripPlannerMapView(), TripPlannerMapViewProps (+1 more)
+### Community 354 - "FutureTripModal.tsx"
+Cohesion: 0.09
+Nodes (27): FutureTripModal(), FutureTripModalProps, getSmartViaRoutes(), POPULAR_DESTINATIONS, PROMPT_PRESETS, SmartViaRoute, TRANSPORT_OPTIONS, TRIP_TYPES (+19 more)
 
 ### Community 355 - "FlightsResultsPage.tsx"
-Cohesion: 0.08
-Nodes (31): AIRLINE_LOGOS, AIRPORT_MAP, FlightCard(), FlightCardProps, formatDuration(), formatTime(), getAirportInfo(), FilterState (+23 more)
+Cohesion: 0.12
+Nodes (25): DateFareStrip(), DateFareStripProps, FilterState, FlightFilterSortModal(), FlightFilterSortModalProps, SortOption, FlightPriceCalendarModal(), FlightPriceCalendarModalProps (+17 more)
 
-### Community 356 - "SmartDayPlanner.tsx"
-Cohesion: 0.19
-Nodes (9): SmartDayPlannerProps, ActivityChip(), ActivityChipProps, DayTabNavigator(), DayTabNavigatorProps, TimeSlotPicker(), TimeSlotPickerProps, WeatherBadge() (+1 more)
+### Community 356 - "OperationType"
+Cohesion: 0.29
+Nodes (7): OperationType, CREATE, DELETE, GET, LIST, UPDATE, WRITE
 
 ### Community 357 - "orq_duplicates.ts"
-Cohesion: 0.04
-Nodes (40): DuffelNGSViewProps, A1F1, A1F2, A2F1, A2F2, B1F1, B1F2, B2F1 (+32 more)
+Cohesion: 0.07
+Nodes (26): A1F1, A1F2, A2F1, A2F2, B1F1, B1F2, B2F1, B2F2 (+18 more)
 
 ### Community 358 - "🚀 Runbook: Startup MVP Build"
 Cohesion: 0.13
 Nodes (14): Agent Roster, Common Pitfalls & Mitigations, Core Team (Always Active), Growth Team (Activated Week 3+), Key Decisions, 🚀 Runbook: Startup MVP Build, Scenario, Success Criteria (+6 more)
 
-### Community 359 - "OfferSliceDetailLayoverItem.tsx"
-Cohesion: 0.27
-Nodes (8): OfferSliceDetailItemProps, getLayoverString(), OfferSliceDetailLayoverItem(), SliceDetailsLayoverItemProps, SliceDetailsTravelItemProps, LayoverDetails, SliceDetailItemChangeStatus, SliceItem
+### Community 359 - "t8e"
+Cohesion: 0.12
+Nodes (38): te(), pg(), aa(), t5e(), He(), ht(), I(), J() (+30 more)
 
 ### Community 360 - "Project Manager Agent Personality"
 Cohesion: 0.14
@@ -2148,10 +2129,6 @@ Nodes (14): scripts, build-and-publish, build-storybook, check-types, create-loc
 ### Community 363 - "StaysSummary.stories.tsx"
 Cohesion: 0.10
 Nodes (16): StaysSummaryProps, CustomElement, CustomElementRenderArguments, IntrinsicElements, JSX, renderDuffelStaysSummaryCustomElement(), tryToGetCustomElement(), accommodation (+8 more)
-
-### Community 364 - "push.ts"
-Cohesion: 0.21
-Nodes (8): @capacitor/core, @capacitor/push-notifications, enablePushNotifications(), initNativePushListeners(), isNativePush(), PushResult, registerNative(), registerWeb()
 
 ### Community 365 - "Technical Plan: Planning Workspace"
 Cohesion: 0.14
@@ -2185,13 +2162,9 @@ Nodes (12): 🚀 Advanced Capabilities, 🚨 Critical Rules You Must Follow, Exa
 Cohesion: 0.15
 Nodes (13): dependencies, classnames, date-fns, date-fns-tz, @duffel/api, duration-fns, form-data, fuse.js (+5 more)
 
-### Community 373 - "getTravelItem.ts"
-Cohesion: 0.35
-Nodes (6): convertDurationToString(), getTravelItem(), NOTE: need to make passengers optional because order request change offer slice, isISO8601Duration(), iso8601DurationRegex, segment
-
-### Community 374 - "LanguageContext.tsx"
-Cohesion: 0.07
-Nodes (19): i18next, i18next-browser-languagedetector, @sentry/react, App(), LANGUAGE_OPTIONS, QuirkyLanguageSelector(), AppLockScreen(), AppLockScreenProps (+11 more)
+### Community 374 - "ErrorBoundary"
+Cohesion: 0.15
+Nodes (4): @sentry/react, ErrorBoundary, Props, State
 
 ### Community 375 - "WalletService"
 Cohesion: 0.23
@@ -2202,12 +2175,8 @@ Cohesion: 0.24
 Nodes (9): mockBuses, mockCabs, mockCars, MockCoupon, mockCoupons, mockFlights, mockHotels, mockPackages (+1 more)
 
 ### Community 377 - "SeatMap.tsx"
-Cohesion: 0.10
-Nodes (17): DeckSelect(), DeckSelectProps, Legend(), LegendProps, SeatMap(), SeatMapProps, SeatMapUnavailable(), SeatSelectionModalBody() (+9 more)
-
-### Community 378 - "FullScreenBargainChat.tsx"
-Cohesion: 0.25
-Nodes (9): ALL_NUMBER_WORDS, BLOCKED_TAG, ENGLISH_NUMBER_WORDS, HINDI_NUMBER_WORDS, MARATHI_NUMBER_WORDS, obfuscateBargainChatText(), ObfuscationResult, renderObfuscatedMessageContent() (+1 more)
+Cohesion: 0.07
+Nodes (29): DeckSelect(), DeckSelectProps, Element(), ElementProps, EmptyElement(), ExitElement(), ExitElementProps, Row() (+21 more)
 
 ### Community 379 - "icons.tsx"
 Cohesion: 0.15
@@ -2244,10 +2213,6 @@ Nodes (11): 🚀 Advanced Capabilities, 🚨 Critical Rules You Must Follow, �
 ### Community 387 - "src/components/modals/AmenitiesModal.tsx"
 Cohesion: 0.22
 Nodes (7): FullScreenPortal(), FullScreenPortalProps, Z_VAR, ZLayer, AmenityCategory, DEFAULT_CATEGORIES, Props
-
-### Community 388 - "Paid Media Auditor Agent"
-Cohesion: 0.25
-Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Auditor Agent, Specialized Skills, Success Metrics, Tooling & Automation
 
 ### Community 389 - "Code Reviewer Agent"
 Cohesion: 0.18
@@ -2289,12 +2254,8 @@ Nodes (10): 1. SITUATION OVERVIEW, 2. KEY FINDINGS, 3. BUSINESS IMPACT, 4. WHAT 
 Cohesion: 0.25
 Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Programmatic & Display Buyer Agent, Specialized Skills, Success Metrics, Tooling & Automation
 
-### Community 400 - "Marketing Growth Hacker Agent"
-Cohesion: 0.29
-Nodes (6): Core Capabilities, Decision Framework, Identity & Role Definition, Marketing Growth Hacker Agent, Specialized Skills, Success Metrics
-
 ### Community 401 - "tripManager.ts"
-Cohesion: 0.20
+Cohesion: 0.25
 Nodes (4): @google/genai, getDeterministicBudgetWarning(), getDeterministicFallbacks(), router
 
 ### Community 402 - "parse-flights.ts"
@@ -2303,11 +2264,11 @@ Nodes (10): CITY_NAME_FIXES, EXCEL_PATH, formatDuration(), formatTime(), getCity
 
 ### Community 403 - "rtaip/types.ts"
 Cohesion: 0.10
-Nodes (32): FlightBookAgent, FlightPriceAgent, FlightSearchAgent, CITY_AIRPORT_MAP, inventoryBindingAgent, resolveAirportCode(), AgentContext, AgentResponse (+24 more)
+Nodes (36): AIAgentTelemetry, OrchestratorState, FlightBookAgent, FlightPriceAgent, FlightSearchAgent, CITY_AIRPORT_MAP, inventoryBindingAgent, resolveAirportCode() (+28 more)
 
-### Community 404 - "MusicPlayerContext.tsx"
-Cohesion: 0.29
-Nodes (8): MusicPlayerBar(), MusicPlayerBarProps, MusicPlayerContext, MusicPlayerContextType, MusicPlayerProvider(), MusicPlayerProviderProps, useMusicPlayer(), PlaylistItem
+### Community 404 - "security.ts"
+Cohesion: 0.09
+Nodes (23): zustand, CreateTripModal(), MusicSearchModal(), MusicSearchModalProps, MusicPlayerBar(), MusicPlayerBarProps, MusicPlayerContext, MusicPlayerContextType (+15 more)
 
 ### Community 405 - "notifications.ts"
 Cohesion: 0.33
@@ -2330,8 +2291,8 @@ Cohesion: 0.20
 Nodes (10): Agent Team, Key Patterns, Multi-Agent Workflow: Startup MVP, The Scenario, The Workflow, Tips, Week 1: Discovery + Architecture, Week 2: Build Core Features (+2 more)
 
 ### Community 410 - "Meeting Notes Specialist"
-Cohesion: 0.10
-Nodes (16): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Paid Social Strategist Agent, Specialized Skills, Success Metrics, Tooling & Automation, Communication Style (+8 more)
+Cohesion: 0.20
+Nodes (9): Communication Style, Core Mission, Critical Rules, Identity, Learning and Memory, Meeting Notes Specialist, Success Metrics, Technical Deliverables (+1 more)
 
 ### Community 411 - "visionOS Spatial Engineer"
 Cohesion: 0.20
@@ -2425,13 +2386,9 @@ Nodes (6): CustomElement, CustomElementRenderArguments, IntrinsicElements, JSX, 
 Cohesion: 0.25
 Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Tracking & Measurement Specialist Agent, Specialized Skills, Success Metrics, Tooling & Automation
 
-### Community 434 - "test_modules.ts"
-Cohesion: 0.11
-Nodes (16): razorpay, router, calculateServerTax(), db, ServiceType, razorpay, app, dummyRazorpay (+8 more)
-
-### Community 435 - "getSliceDetails.ts"
-Cohesion: 0.47
-Nodes (4): getDurationString(), getLayoverOriginDestinationKey(), getSliceDetails(), splitTravelDetailsWithStops()
+### Community 434 - "express"
+Cohesion: 0.08
+Nodes (22): sentryErrorHandler, AuthedRequest, razorpay, router, calculateServerTax(), db, ServiceType, express (+14 more)
 
 ### Community 436 - "tsserver.js"
 Cohesion: 0.22
@@ -2465,21 +2422,21 @@ Nodes (8): 1. Architecture & Component Design, 2.1. Shared Gateway Component: `s
 Cohesion: 0.17
 Nodes (8): catalogArray, EnrichedTrainInfo, exactMap, getTrainDetails(), numberPartMap, ParsedClass, TrainCatalogEntry, TrainDetails
 
-### Community 444 - "Paid Media Ad Creative Strategist Agent"
-Cohesion: 0.25
-Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Ad Creative Strategist Agent, Specialized Skills, Success Metrics, Tooling & Automation
+### Community 444 - "Paid Media Auditor Agent"
+Cohesion: 0.06
+Nodes (25): Communication Style, Core Mission, Critical Rules, 🗄️ Database Optimizer, Identity & Memory, Core Capabilities, Decision Framework, Identity & Role Definition (+17 more)
 
 ### Community 445 - "Paid Media PPC Campaign Strategist Agent"
 Cohesion: 0.25
 Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media PPC Campaign Strategist Agent, Specialized Skills, Success Metrics, Tooling & Automation
 
-### Community 446 - "PlanningScreen.tsx"
-Cohesion: 0.67
-Nodes (3): HARDCODED_PACKING_CATEGORIES(), PlanningScreen(), PlanningScreenProps
+### Community 446 - "Icon.tsx"
+Cohesion: 0.09
+Nodes (28): CfarSelectionCardProps, CfarSelectionModal(), CfarSelectionModalProps, CfarSelectionModalBody(), CfarSelectionModalBodyProps, CfarSelectionModalBodyListItem(), CfarSelectionModalFooter(), CfarSelectionModalFooterProps (+20 more)
 
-### Community 447 - "getSegmentDates"
-Cohesion: 0.28
-Nodes (6): getSegmentDates(), TODO: remove the fallback once AIC returns arrivingAt and departingAt for AICs…, offerSegment, orderSegment, offerSegment, orderSegment
+### Community 447 - "DuffelNGSView.tsx"
+Cohesion: 0.21
+Nodes (15): getDurationSortDirection(), getSortShelfAndDirection(), useSort(), sortingFunction(), NGSOfferRow, DurationSort, DurationSortDirection, sortNGSRowsByDuration() (+7 more)
 
 ### Community 448 - "getDayDiff.ts"
 Cohesion: 0.19
@@ -2501,25 +2458,29 @@ Nodes (8): API Security, Authentication & JWT, CORS & Headers, Database & Inject
 Cohesion: 0.25
 Nodes (8): 15.1 NEXUS-Full Activation (Enterprise), 15.2 NEXUS-Sprint Activation (Feature/MVP), 15.3 NEXUS-Micro Activation (Targeted Task), 15.4 Agent Activation Prompt Templates, 15. Quick-Start Activation Guide, For Developer Agents (Task Implementation), For QA Agents (Task Validation), For the Orchestrator (Pipeline Start)
 
-### Community 453 - "contacts.ts"
-Cohesion: 0.57
-Nodes (6): MasterContact, addMasterContact(), deleteMasterContact(), getMasterContacts(), saveMasterContacts(), updateMasterContact()
+### Community 453 - "DuffelNGSView.stories.tsx"
+Cohesion: 0.11
+Nodes (13): DuffelNGSViewProps, offerRequestWithDuplicates, alternativeCheapOffer, alternativeExpensiveOffer, alternativeMediumOffer, cheapOffer, deduplicatedProps, defaultProps (+5 more)
+
+### Community 454 - "capture_all_screens.cjs"
+Cohesion: 0.06
+Nodes (31): puppeteer-core, captureScreen(), ensureDir(), fs, path, puppeteer, run(), setAuthUser() (+23 more)
 
 ### Community 455 - "typescript/package.json"
 Cohesion: 0.25
 Nodes (7): bin, tsc, tsserver, main, name, type, version
 
 ### Community 456 - "dataLoader.ts"
-Cohesion: 0.32
-Nodes (6): papaparse, cache, fallbackFetchCSV(), fallbackFetchJSON(), fetchCSV(), fetchJSON()
+Cohesion: 0.33
+Nodes (7): papaparse, cache, fallbackFetchCSV(), fallbackFetchJSON(), fetchCSV(), fetchJSON(), loadLocalData()
 
 ### Community 457 - "create-source-zip.cjs"
 Cohesion: 0.28
 Nodes (8): archiver, createZip(), fs, main(), path, publicZipPath, rootDir, rootZipPath
 
-### Community 458 - "generate-fixture.ts"
-Cohesion: 0.43
-Nodes (7): createOfferRequest(), duffelHeaders, getOffer(), getSeatMaps(), main(), makeMockDateInTheFuture(), prompts
+### Community 458 - "CitySheet.tsx"
+Cohesion: 0.13
+Nodes (13): AccountGroup, AccountItem, AccountItemId, AccountSheetProps, GROUPS, CITIES, CityOption, CitySheet() (+5 more)
 
 ### Community 459 - "Specification: Full-Page Trip Forms & Solo Trip Option"
 Cohesion: 0.25
@@ -2533,10 +2494,6 @@ Nodes (7): 1. Overview & Objectives, 2. Requirements & Scope, 3. Non-Functional 
 Cohesion: 0.25
 Nodes (7): 005 — Technical plan, Contracts, Files, Preview wiring, Shared foundations, Stack, Verification
 
-### Community 462 - "getSliceDetails.test.ts"
-Cohesion: 0.25
-Nodes (7): marketingCarrier, partialSlice, passenger, segment1, segment2, segment3, segmentWithStops
-
 ### Community 463 - "inventoryDeduplication.ts"
 Cohesion: 0.39
 Nodes (7): calculateDistanceMeters(), calculateNameSimilarity(), InventoryItem, isDuplicateInventory(), mergeAndDeduplicateInventory(), normalizeName(), SmartMergeResult
@@ -2549,9 +2506,9 @@ Nodes (7): Architecture Review Checklist, Design, Evaluation, Failure Resilience
 Cohesion: 0.29
 Nodes (6): Agent Used, Example Activation, Expected Output Shape, Quality Bar, When to Use This, Workflow Example: Book Chapter Development
 
-### Community 466 - "razorpay.ts"
-Cohesion: 0.24
-Nodes (5): FullPageVendorOffers(), bookingService, initiateBargainMicroPayment(), initiateRazorpayPayment(), loadRazorpayScript()
+### Community 466 - "BusBookingCoordinator.tsx"
+Cohesion: 0.12
+Nodes (16): BusBookingCoordinator(), BusBookingCoordinatorProps, BusSearchParams, FALLBACK_BUSES, CarBookingCoordinator(), CarBookingCoordinatorProps, CarSearchParams, FALLBACK_CARS (+8 more)
 
 ### Community 467 - "🎮 Game Development Division"
 Cohesion: 0.29
@@ -2574,8 +2531,12 @@ Cohesion: 0.48
 Nodes (6): AirportCsvRow, CityCsvRow, loadAirports(), loadCities(), main(), readCSVIntoMatrix()
 
 ### Community 472 - "devDependencies"
-Cohesion: 0.29
-Nodes (7): devDependencies, @types/cors, @types/dompurify, @types/jsdom, @types/nodemailer, @types/papaparse, typescript
+Cohesion: 0.25
+Nodes (8): devDependencies, puppeteer-core, @types/cors, @types/dompurify, @types/jsdom, @types/nodemailer, @types/papaparse, typescript
+
+### Community 473 - "filter-results.ts"
+Cohesion: 0.24
+Nodes (11): DuffelNGSView(), filterResults(), isMatchOnAirlines(), isMatchOnStops(), isMatchOnTimes(), transformDateToMinutes(), getInitialFilterValues(), getAirlines() (+3 more)
 
 ### Community 474 - "services/BusService.ts"
 Cohesion: 0.29
@@ -2669,14 +2630,6 @@ Nodes (5): absPnpApiPath, absRequire, {createRequire}, {existsSync}, {resolve}
 Cohesion: 0.33
 Nodes (5): absPnpApiPath, absRequire, {createRequire}, {existsSync}, {resolve}
 
-### Community 500 - "sanitization.ts"
-Cohesion: 0.38
-Nodes (6): dompurify, jsdom, purify, sanitizeInput(), sanitizeMiddleware(), sanitizeString()
-
-### Community 501 - "ScreenLayoutWithBack.tsx"
-Cohesion: 0.40
-Nodes (3): ScreenLayoutWithBack(), ScreenLayoutWithBackProps, WithBackButtonProps
-
 ### Community 502 - "Specification: GitHub Spec-Kit Setup"
 Cohesion: 0.33
 Nodes (5): 1. Executive Summary, 2. Requirements & Deliverables, 3. Scope Boundaries, 4. Acceptance Criteria, Specification: GitHub Spec-Kit Setup
@@ -2765,37 +2718,29 @@ Nodes (5): resolutions, @babel/traverse, esbuild, semver, uuid
 Cohesion: 0.40
 Nodes (3): config, @storybook/react-webpack5, tsconfig-paths-webpack-plugin
 
-### Community 524 - "Disaster Recovery (DR) Runbook"
+### Community 524 - "Disaster Recovery Runbook — RoutTripo (Firestore)"
 Cohesion: 0.40
-Nodes (4): 1. Database Failure or Corruption (Firestore), 2. API Key / Secret Compromise, 3. High Traffic DDoS or Spike, Disaster Recovery (DR) Runbook
+Nodes (4): Disaster Recovery Runbook — RoutTripo (Firestore), Restore procedure, Run a restore drill quarterly, Targets
 
-### Community 525 - "Server Modularization Plan"
-Cohesion: 0.40
-Nodes (4): Migration Strategy, Objective, Proposed Structure, Server Modularization Plan
+### Community 525 - "RoutTripo — `server.ts` Modularization Plan"
+Cohesion: 0.33
+Nodes (5): Estimated effort, Migration pattern (repeat per module), RoutTripo — `server.ts` Modularization Plan, What to explicitly NOT move yet, Why this order (do these first)
 
-### Community 526 - "fix_headers.cjs"
-Cohesion: 0.40
-Nodes (4): cssContent, filesToFix, fs, modalsContent
-
-### Community 527 - "RoutTripo — New Booking Modules"
-Cohesion: 0.40
-Nodes (4): Files, Nothing here touches, RoutTripo — New Booking Modules, Wiring steps
+### Community 527 - "Qr"
+Cohesion: 0.11
+Nodes (41): aP(), Bm(), cP(), Da(), dm(), fw(), gHe(), GK() (+33 more)
 
 ### Community 528 - "PortalShell.tsx"
 Cohesion: 0.43
 Nodes (4): PortalShellProps, TabDescriptor, TabStrip(), TabStripProps
 
-### Community 529 - "🗄️ Database Optimizer"
-Cohesion: 0.33
-Nodes (5): Communication Style, Core Mission, Critical Rules, 🗄️ Database Optimizer, Identity & Memory
+### Community 529 - "getMountPromise"
+Cohesion: 0.67
+Nodes (4): getMountPromise(), getMountSync(), limitOpenFiles(), saveAndClose()
 
 ### Community 530 - "XR Cockpit Interaction Specialist Agent Personality"
 Cohesion: 0.33
 Nodes (5): Build cockpit-based immersive interfaces for XR users, 🛠️ What You Can Do, XR Cockpit Interaction Specialist Agent Personality, 🎯 Your Core Mission, 🧠 Your Identity & Memory
-
-### Community 531 - "Paid Media Search Query Analyst Agent"
-Cohesion: 0.25
-Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Search Query Analyst Agent, Specialized Skills, Success Metrics, Tooling & Automation
 
 ### Community 532 - "XR Interface Architect Agent Personality"
 Cohesion: 0.33
@@ -2848,6 +2793,10 @@ Nodes (3): convertDurationToString(), isISO8601Duration(), iso8601DurationRegex
 ### Community 545 - "auditLogService.ts"
 Cohesion: 0.50
 Nodes (4): BiddingAuditPayload, generateBlockSha256Hash(), StoredAuditBlock, verifyAuditChainIntegrity()
+
+### Community 546 - "lucide-react"
+Cohesion: 0.03
+Nodes (48): lucide-react, react-router-dom, BillingDetailsSection(), FareBreakupCard(), GuestCounts, Props, PaymentStatusScreen(), SortFilterSheet() (+40 more)
 
 ### Community 547 - "Trust & Permission Scoping"
 Cohesion: 0.50
@@ -2985,21 +2934,13 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.50
 Nodes (3): Configure the environment, Duffel Components CDN example, Run the example
 
-### Community 581 - "modify_accountsheet.cjs"
-Cohesion: 0.50
-Nodes (3): content, fs, lastParen
-
-### Community 582 - "offlineOtpVault.ts"
-Cohesion: 0.39
-Nodes (7): base64ToBuffer(), bufferToBase64(), DecryptedOtpData, deriveEncryptionKey(), EncryptedOtpVaultPayload, getDecryptedOtpOffline(), storeEncryptedOtpOffline()
+### Community 582 - "push.ts"
+Cohesion: 0.13
+Nodes (15): @capacitor/core, @capacitor/push-notifications, base64ToBuffer(), bufferToBase64(), DecryptedOtpData, deriveEncryptionKey(), EncryptedOtpVaultPayload, getDecryptedOtpOffline() (+7 more)
 
 ### Community 583 - "Marketing Content Creator Agent"
 Cohesion: 0.29
 Nodes (6): Core Capabilities, Decision Framework, Identity & Role Definition, Marketing Content Creator Agent, Specialized Skills, Success Metrics
-
-### Community 584 - "test_parse.cjs"
-Cohesion: 0.50
-Nodes (3): cleaned, data, fs
 
 ### Community 585 - "inject-firebase-sw.js"
 Cohesion: 0.50
@@ -3024,14 +2965,6 @@ Nodes (3): App Reorganization Plan, Architecture Changes, Component Adjustments
 ### Community 591 - "Specifications Index (`/specs`)"
 Cohesion: 0.50
 Nodes (3): Available Commands, Directory Structure, Specifications Index (`/specs`)
-
-### Community 592 - "WeatherWidget.tsx"
-Cohesion: 0.60
-Nodes (4): mapWmoCodeToCondition(), WeatherWidget(), WeatherWidgetProps, WeatherCondition
-
-### Community 593 - "osm.ts"
-Cohesion: 0.67
-Nodes (3): fetchNearbyUtilities(), getDistanceFromLatLonInKm(), OSMPlace
 
 ### Community 594 - "src/services/travelport.service.ts"
 Cohesion: 0.40
@@ -3065,22 +2998,50 @@ Nodes (3): peerDependencies, react, react-dom
 Cohesion: 0.67
 Nodes (3): repository, type, url
 
+### Community 616 - "TimeRangeSelector.tsx"
+Cohesion: 0.36
+Nodes (8): getSliderLabel(), getTargetLabel(), Range, sliderMarks, targetLabelConectors, TimeRangeSelector(), transformMinutesToTimeString(), rc-slider
+
+### Community 618 - "RoutTripo — Phase 1 Implementation Guide"
+Cohesion: 0.22
+Nodes (8): 0. Install dependencies, 1. CI Dependency & Security Scanning, 2. Secrets Management (Google Secret Manager), 3. DPDP Compliance Endpoints, 4. Observability (Sentry), Rollout order (recommended), RoutTripo — Phase 1 Implementation Guide, Security & Compliance Hardening (CI Scanning + Secrets + DPDP + Observability)
+
+### Community 647 - "phase2/loadtest/k6-search-endpoints.js"
+Cohesion: 0.18
+Nodes (9): busSearchDuration, checkoutDuration, DESTINATIONS, errorRate, flightSearchDuration, options, ORIGINS, IMPORTANT: run this against STAGING first, never production, until you've… (+1 more)
+
+### Community 651 - "Paid Media Paid Social Strategist Agent"
+Cohesion: 0.25
+Nodes (7): Core Capabilities, Decision Framework, Identity & Role Definition, Paid Media Paid Social Strategist Agent, Specialized Skills, Success Metrics, Tooling & Automation
+
+### Community 654 - "Header Architecture — What's in this zip"
+Cohesion: 0.29
+Nodes (6): Deleted (dead code, not included since they no longer exist), Header Architecture — What's in this zip, Kept as-is (each serves a distinct, actually-used purpose), Migrated to use BookingStepHeader, New, Still using their own inline <header> (not touched yet)
+
+### Community 655 - "RoutTripo — Security & Global-Readiness Roadmap"
+Cohesion: 0.29
+Nodes (6): Already Solid (keep as-is), Phase 0 — This Week (Critical, blocking), Phase 1 — 1–2 Months: Security & Compliance Hardening, Phase 2 — 3–6 Months: Infra & Scale, Phase 3 — 6–12 Months: Global Product Readiness, RoutTripo — Security & Global-Readiness Roadmap
+
 ### Community 696 - "scripts"
 Cohesion: 0.29
 Nodes (7): scripts, build, dev, lint, prebuild, start, zip
 
+### Community 713 - "TripPlannerMapView.tsx"
+Cohesion: 0.16
+Nodes (9): leaflet, react-leaflet, MapViewProps, getMarkerIcon(), MapMarkerItem, RouteMapData, TripPlannerMapView(), TripPlannerMapViewProps (+1 more)
+
 ## Knowledge Gaps
-- **7327 isolated node(s):** `setup.sh script`, `check-agent-originality.sh script`, `check-runbooks.sh script`, `lib.sh script`, `test-agent-selection.sh script` (+7322 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 8047 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **69 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **7250 isolated node(s):** `setup.sh script`, `check-agent-originality.sh script`, `check-runbooks.sh script`, `lib.sh script`, `test-agent-selection.sh script` (+7245 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 7892 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **55 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `lucide-react` connect `lucide-react` to `TrainInfoTab.tsx`, `src/components/modals/AmenitiesModal.tsx`, `App.tsx`, `framer-motion`, `BargainingTab.tsx`, `UserLandingPage.tsx`, `agent/tabs.tsx`, `bidding.ts`, `src/types.ts`, `bargaining/types.ts`, `SearchCard.tsx`, `PortalShell.tsx`, `MusicPlayerContext.tsx`, `notifications.ts`, `CurrencyWidget.tsx`, `package.json`, `BookingFlowModal.tsx`, `FastImage.tsx`, `AdminScreen.tsx`, `useAuthStore`, `GuestDetailsModal.tsx`, `CheckoutPage.tsx`, `AgentPortalView.tsx`, `SavedTravellersSelector.tsx`, `PlanningWorkspace.tsx`, `TripPlan`, `FlightTrackerWidget.tsx`, `useVendorStore.ts`, `RazorpayCheckoutModal.tsx`, `BookingFunnelLayout.tsx`, `travelAIService.ts`, `PlanningScreen.tsx`, `BookingFlowCoordinator.tsx`, `DashboardView.tsx`, `premium/preview.tsx`, `rasp.ts`, `WeatherWidget.tsx`, `SearchInput.tsx`, `BargainingPaywallModal.tsx`, `TransportOptions.tsx`, `HolidayAlertWidget.tsx`, `WikipediaSnippet.tsx`, `FlightsResultsPage.tsx`, `ScreenLayoutWithBack.tsx`, `LanguageContext.tsx`, `WalletService`, `FullScreenBargainChat.tsx`, `icons.tsx`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
-- **Why does `react-router-dom` connect `lucide-react` to `TrainInfoTab.tsx`, `CheckoutPage.tsx`, `FlightsResultsPage.tsx`, `DashboardView.tsx`, `App.tsx`, `useAuthStore`, `SearchInput.tsx`, `TransportOptions.tsx`, `LanguageContext.tsx`, `BookingFunnelLayout.tsx`, `package.json`, `travelAIService.ts`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `lucide-react` connect `lucide-react` to `BookingFunnelLayout.tsx`, `App.tsx`, `src/components/modals/AmenitiesModal.tsx`, `useLanguage`, `BargainingTab.tsx`, `UserLandingPage.tsx`, `agent/tabs.tsx`, `bidding.ts`, `framer-motion`, `BookingStepHeader.tsx`, `SearchCard.tsx`, `PortalShell.tsx`, `security.ts`, `notifications.ts`, `CurrencyWidget.tsx`, `package.json`, `BookingFlowModal.tsx`, `FastImage.tsx`, `firebase.ts`, `CheckoutPage.tsx`, `SavedTravellersSelector.tsx`, `src/types.ts`, `TripPlan`, `CreateTripModal.tsx`, `useCouponStore.ts`, `travelAIService.ts`, `BookingFlowCoordinator.tsx`, `OfflineBanner.tsx`, `CitySheet.tsx`, `apiClient.ts`, `SearchInput.tsx`, `BargainingPaywallModal.tsx`, `BusBookingCoordinator.tsx`, `HolidayAlertWidget.tsx`, `WikipediaSnippet.tsx`, `FutureTripModal.tsx`, `FlightsResultsPage.tsx`, `WalletService`, `icons.tsx`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `react-router-dom` connect `lucide-react` to `BookingFunnelLayout.tsx`, `App.tsx`, `CheckoutPage.tsx`, `FlightsResultsPage.tsx`, `useLanguage`, `SearchInput.tsx`, `package.json`, `travelAIService.ts`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Are the 92 inferred relationships involving `r()` (e.g. with `accessPromise()` and `accessSync()`) actually correct?**
   _`r()` has 92 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 91 inferred relationships involving `o()` (e.g. with `_6e()` and `a5e()`) actually correct?**
@@ -3088,6 +3049,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 77 inferred relationships involving `e()` (e.g. with `accessPromise()` and `accessSync()`) actually correct?**
   _`e()` has 77 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `setup.sh script`, `check-agent-originality.sh script`, `check-runbooks.sh script` to the rest of the system?**
-  _7327 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _7250 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `yarn-4.5.3.cjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.007677225804927598 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.008096188514035539 - nodes in this community are weakly interconnected._

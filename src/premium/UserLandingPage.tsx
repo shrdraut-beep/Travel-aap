@@ -92,6 +92,11 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
 
   const { t } = useTranslation();
 
+  // Reset scroll to top when changing tab or mode
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [tab, mode]);
+
   const handleCardSearch = (payload: SearchPayload) => {
     onSearch?.(payload);
 

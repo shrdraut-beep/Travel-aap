@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, CheckCircle2, MapPin, Calendar, Star, Navigation, Palmtree, Users } from "lucide-react";
+import { CheckCircle2, MapPin, Calendar, Star, Navigation, Palmtree, Users } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 import { RazorpayPaymentModal } from "./RazorpayPaymentModal";
-import { useAuthStore } from "../../store/useAuthStore";
 
 export interface HolidaySearchParams {
   location: string;
@@ -55,10 +55,18 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
   initialSearchParams,
   onExit
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<"results" | "checkout">("results");
+  // Reset scroll position to top whenever step changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [step]);
+
   const [selectedPkg, setSelectedPkg] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const currentUser = useAuthStore((s) => s.currentUser);
   
   // Payment state
   const [showPayment, setShowPayment] = useState(false);
@@ -110,38 +118,23 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
   return (
     <div className="fixed inset-0 z-50 bg-[var(--premium-page)] text-[var(--premium-ink)] overflow-y-auto font-sans flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={() => step === "checkout" ? setStep("results") : onExit()}
-              className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors shrink-0 flex items-center justify-center"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="min-w-0 flex flex-col">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate flex-1 min-w-0">
-                  {step === "results" ? "Holiday Packages" : "Review Booking"}
-                </h1>
-                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--premium-violet)] text-white border border-transparent">
-                  {step === "results" ? "Step 1" : "Step 2"}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium truncate mt-0.5">
-                {initialSearchParams.location} • {initialSearchParams.travelers || 2} Travelers
-              </p>
-            </div>
-          </div>
+      <BookingStepHeader
+        title={step === "results" ? "Holiday Packages" : "Review Booking"}
+        step={<span className="hidden sm:inline">{step === "results" ? "Step 1" : "Step 2"}</span>}
+        subtitle={<>{initialSearchParams.location} • {initialSearchParams.travelers || 2} Travelers</>}
+        onBack={() => step === "checkout" ? setStep("results") : onExit()}
+        backAriaLabel="Back"
+        maxWidth="max-w-5xl"
+        sticky
+        rightElement={
           <button
             onClick={onExit}
             className="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full hover:bg-slate-100 transition-colors shrink-0"
           >
             Exit
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6">
@@ -207,15 +200,15 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2 sm:col-span-1">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">First Name</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--premium-violet)]" placeholder="John" defaultValue={currentUser?.name ? currentUser.name.split(" ")[0] : ""} />
+                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--premium-violet)]" placeholder="John" defaultValue="Cara" />
                   </div>
                   <div className="col-span-2 sm:col-span-1">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Last Name</label>
-                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--premium-violet)]" placeholder="Doe" defaultValue={currentUser?.name && currentUser.name.split(" ").length > 1 ? currentUser.name.split(" ").slice(1).join(" ") : ""} />
+                    <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--premium-violet)]" placeholder="Doe" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address</label>
-                    <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--premium-violet)]" placeholder="john@example.com" defaultValue={currentUser?.email || ""} />
+                    <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--premium-violet)]" placeholder="john@example.com" defaultValue="cara@routripo.app" />
                   </div>
                 </div>
               </div>
@@ -257,7 +250,7 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
         isOpen={showPayment}
         onClose={() => setShowPayment(false)}
         amount={(selectedPkg?.price * (initialSearchParams.travelers || 2)) + Math.round(selectedPkg?.price * 0.18) || 0}
-        serviceName="RoutTripo Holidays"
+        serviceName="Routripo Holidays"
         orderDescription={selectedPkg?.name || "Holiday Package"}
         onSuccess={handlePaymentSuccess}
       />

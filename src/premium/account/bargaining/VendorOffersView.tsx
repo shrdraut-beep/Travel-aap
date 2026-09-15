@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  ArrowLeft,
   Clock,
   ShieldCheck,
   Sparkles,
@@ -23,6 +22,7 @@ import {
   ChevronUp,
   X
 } from 'lucide-react';
+import { BookingStepHeader } from '../../booking/BookingStepHeader';
 import { BargainingTrip, VendorBidOffer } from './types';
 
 interface VendorOffersViewProps {
@@ -131,39 +131,27 @@ export const VendorOffersView: React.FC<VendorOffersViewProps> = ({
   return (
     <div className="min-h-screen bg-slate-50 pb-28 text-slate-900 animate-in fade-in duration-200">
       {/* Top Sticky Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-xs">
-        <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <button
-              type="button"
-              onClick={onBack}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-colors shrink-0"
-              aria-label="Go back to bargaining"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-black uppercase tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">
-                  {trip.id}
-                </span>
-                <h1 className="text-[15px] font-black text-slate-900 truncate">
-                  {trip.title}
-                </h1>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium truncate">
-                {trip.route}
-              </p>
-            </div>
-          </div>
-
-          {/* Overall 15-Minute Auction Timer Display */}
+      <BookingStepHeader
+        title={
+          <span className="flex items-center gap-1.5">
+            <span className="text-[11px] font-black uppercase tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-md">
+              {trip.id}
+            </span>
+            <span className="truncate">{trip.title}</span>
+          </span>
+        }
+        subtitle={trip.route}
+        onBack={onBack}
+        backAriaLabel="Go back to bargaining"
+        maxWidth="max-w-3xl"
+        sticky
+        rightElement={
           <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-900 text-white font-mono text-[12px] font-bold shadow-xs">
             <Clock className={`w-3.5 h-3.5 ${isAuctionExpired ? 'text-rose-400' : 'text-amber-400 animate-pulse'}`} />
             <span>{isAuctionExpired ? 'EXPIRED' : formatTimer(secondsRemaining)}</span>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <div className="max-w-3xl mx-auto px-4 pt-3 space-y-3">
         {/* Requirement 10: Live Activity Urgency Banner */}

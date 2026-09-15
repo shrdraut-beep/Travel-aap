@@ -1,7 +1,6 @@
 // src/premium/booking/TrainBookingCoordinator.tsx
 import React, { useState, useEffect } from "react";
 import {
-  ArrowLeft,
   Clock,
   CheckCircle2,
   Lock,
@@ -13,6 +12,7 @@ import {
   ChevronRight,
   Sparkles
 } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 import { RazorpayPaymentModal } from "./RazorpayPaymentModal";
 
 export interface TrainSearchParams {
@@ -82,15 +82,24 @@ export const TrainBookingCoordinator: React.FC<TrainBookingCoordinatorProps> = (
   initialSearchParams,
   onClose
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<"list" | "passengers" | "review" | "success">("list");
+  // Reset scroll position to top whenever step changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [step]);
+
   const [trains, setTrains] = useState<any[]>(FALLBACK_TRAINS);
   const [selectedTrain, setSelectedTrain] = useState<any | null>(null);
   const [selectedClass, setSelectedClass] = useState<any | null>(null);
-  const [paxName, setPaxName] = useState("");
-  const [paxAge, setPaxAge] = useState("");
+  const [paxName, setPaxName] = useState("Cara Sharma");
+  const [paxAge, setPaxAge] = useState("28");
   const [paxGender, setPaxGender] = useState("Female");
   const [berthPref, setBerthPref] = useState("Lower");
-  const [irctcId, setIrctcId] = useState("");
+  const [irctcId, setIrctcId] = useState("CARA_IRCTC_26");
   const [isRazorpayOpen, setIsRazorpayOpen] = useState(false);
   const [pnr, setPnr] = useState("");
 
@@ -128,34 +137,29 @@ export const TrainBookingCoordinator: React.FC<TrainBookingCoordinatorProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page,#f8fafc)]">
+    <div ref={containerRef} className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page,#f8fafc)]">
       {/* Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 py-3.5 backdrop-blur-md shadow-xs">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={step === "list" ? onClose : () => setStep(step === "review" ? "passengers" : "list")}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 active:scale-95 transition-all shadow-xs"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-[15px] font-black tracking-tight text-slate-900">
-              {step === "list" && "IRCTC Train Booking"}
-              {step === "passengers" && "Passenger & Berth Details"}
-              {step === "review" && "Booking Review & Fare Breakdown"}
-              {step === "success" && "Ticket Confirmed"}
-            </h1>
-            <p className="text-[11px] font-semibold text-slate-500">
-              {initialSearchParams.origin} → {initialSearchParams.destination} · {initialSearchParams.date}
-            </p>
-          </div>
-        </div>
-        <span className="flex items-center gap-1 rounded-full bg-pink-50 px-2.5 py-1 text-[11px] font-bold text-pink-600 border border-pink-200">
-          <Sparkles className="h-3 w-3" />
-          IRCTC Authorized
-        </span>
-      </header>
+      <BookingStepHeader
+        title={
+          <>
+            {step === "list" && "IRCTC Train Booking"}
+            {step === "passengers" && "Passenger & Berth Details"}
+            {step === "review" && "Booking Review & Fare Breakdown"}
+            {step === "success" && "Ticket Confirmed"}
+          </>
+        }
+        subtitle={<>{initialSearchParams.origin} → {initialSearchParams.destination} · {initialSearchParams.date}</>}
+        onBack={step === "list" ? onClose : () => setStep(step === "review" ? "passengers" : "list")}
+        backAriaLabel="Back"
+        maxWidth="max-w-5xl"
+        sticky
+        rightElement={
+          <span className="flex items-center gap-1 rounded-full bg-pink-50 px-2.5 py-1 text-[11px] font-bold text-pink-600 border border-pink-200">
+            <Sparkles className="h-3 w-3" />
+            IRCTC Authorized
+          </span>
+        }
+      />
 
       {/* STEP 1: Train Search Results */}
       {step === "list" && (

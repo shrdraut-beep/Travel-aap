@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RoutTripo Application Flowcharts</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 40px;
+    }
+
+    .flowchart-wrapper {
+      width: 1400px;
+      margin: 0 auto 80px auto;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flowchart-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .flowchart-wrapper::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      right: -100px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .header {
+      margin-bottom: 36px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h2 {
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(129, 140, 248, 0.3);
+      color: #a5b4fc;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .diagram-container {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      position: relative;
+    }
+
+    .step-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      position: relative;
+    }
+
+    .node-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 22px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .node-card.primary {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: linear-gradient(145deg, rgba(56, 189, 248, 0.08), rgba(30, 41, 59, 0.8));
+    }
+
+    .node-card.accent {
+      border-color: rgba(236, 72, 153, 0.4);
+      background: linear-gradient(145deg, rgba(236, 72, 153, 0.08), rgba(30, 41, 59, 0.8));
+    }
+
+    .node-card.emerald {
+      border-color: rgba(52, 211, 153, 0.4);
+      background: linear-gradient(145deg, rgba(52, 211, 153, 0.08), rgba(30, 41, 59, 0.8));
+    }
+
+    .node-card.amber {
+      border-color: rgba(251, 191, 36, 0.4);
+      background: linear-gradient(145deg, rgba(251, 191, 36, 0.08), rgba(30, 41, 59, 0.8));
+    }
+
+    .node-card.violet {
+      border-color: rgba(168, 85, 247, 0.4);
+      background: linear-gradient(145deg, rgba(168, 85, 247, 0.08), rgba(30, 41, 59, 0.8));
+    }
+
+    .node-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .node-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .sub-features {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sub-item {
+      font-size: 11px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sub-item::before {
+      content: '•';
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    .arrow-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 13px;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 0;
+    }
+
+    .arrow-divider span {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+    }
+
+    .arrow-divider::before, .arrow-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FLOWCHART 1: Complete App Hierarchy & User Journey -->
+  <div id="flowchart-1" class="flowchart-wrapper">
+    <div class="header">
+      <h2>🌐 1. RoutTripo Full App Architecture & User Journey Flowchart</h2>
+      <div class="badge">Master Navigation Hierarchy</div>
+    </div>
+    <div class="diagram-container">
+      <div class="step-row">
+        <div class="node-card primary">
+          <div class="node-title">1. Entry & Splash</div>
+          <div class="node-sub">App Initialization & Health Check</div>
+          <div class="sub-features">
+            <div class="sub-item">Brand Logo & Compass Spin</div>
+            <div class="sub-item">Auto transition (1.7s) to Auth</div>
+            <div class="sub-item">RASP Security Pre-check</div>
+          </div>
+        </div>
+        <div class="node-card primary">
+          <div class="node-title">2. Authentication</div>
+          <div class="node-sub">Role-Based Access Control</div>
+          <div class="sub-features">
+            <div class="sub-item">Traveller Login / Guest mode</div>
+            <div class="sub-item">B2B Agent / Vendor Login</div>
+            <div class="sub-item">Super Admin Portal Login</div>
+            <div class="sub-item">Google / Apple / FB OAuth</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-divider"><span>Role Split & Navigation Routes</span></div>
+
+      <div class="step-row">
+        <div class="node-card accent">
+          <div class="node-title">ROLE: TRAVELLER</div>
+          <div class="node-sub">User Experience Core</div>
+          <div class="sub-features">
+            <div class="sub-item">Bargaining Hub (Live Reverse Bids)</div>
+            <div class="sub-item">Multi-Modal Booking (Air, Hotel, Bus, Cab)</div>
+            <div class="sub-item">My Trips Workspace (AI Planner)</div>
+            <div class="sub-item">Kharch & Expense Scanner</div>
+            <div class="sub-item">Social Hub & Group Polls</div>
+            <div class="sub-item">Zero-Trust Vault & SOS</div>
+          </div>
+        </div>
+
+        <div class="node-card amber">
+          <div class="node-title">ROLE: B2B AGENT</div>
+          <div class="node-sub">Agency Business Portal</div>
+          <div class="sub-features">
+            <div class="sub-item">Live Traveller Leads & Bidding</div>
+            <div class="sub-item">Custom Tour Package Inventory</div>
+            <div class="sub-item">Booking Confirmations & PNRs</div>
+            <div class="sub-item">Wallet Balance & Earnings</div>
+            <div class="sub-item">Dynamic Markup Sliders</div>
+            <div class="sub-item">Agency KYC & Profile</div>
+          </div>
+        </div>
+
+        <div class="node-card emerald">
+          <div class="node-title">ROLE: SUPER ADMIN</div>
+          <div class="node-sub">Platform Governance & Security</div>
+          <div class="sub-features">
+            <div class="sub-item">Executive Revenue Analytics</div>
+            <div class="sub-item">RASP & PentAGI Threat Center</div>
+            <div class="sub-item">Vendor Document Verification</div>
+            <div class="sub-item">Agent Payout Settlements</div>
+            <div class="sub-item">API Telemetry & Circuit Breaker</div>
+            <div class="sub-item">User Management Directory</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART 2: Multi-Modal Booking Engine Flowchart -->
+  <div id="flowchart-2" class="flowchart-wrapper">
+    <div class="header">
+      <h2>✈️ 2. Multi-Modal Booking Engine Pipeline Flowchart</h2>
+      <div class="badge">Flight • Hotel • Bus • Cab • Holiday</div>
+    </div>
+    <div class="diagram-container">
+      <div class="step-row">
+        <div class="node-card primary">
+          <div class="node-title">Step 1: Search & Filter</div>
+          <div class="node-sub">Origin, Destination, Dates & Guests</div>
+          <div class="sub-features">
+            <div class="sub-item">City Selector Sheet Picker</div>
+            <div class="sub-item">Interactive Date Range Picker</div>
+            <div class="sub-item">Traveller Count & Cabin Class</div>
+            <div class="sub-item">Live API Query (Travelport / Duffel)</div>
+          </div>
+        </div>
+        <div class="node-card primary">
+          <div class="node-title">Step 2: Inventory Results</div>
+          <div class="node-sub">Compare, Sort & Select Option</div>
+          <div class="sub-features">
+            <div class="sub-item">Airlines / Hotels Price Matrix</div>
+            <div class="sub-item">Non-stop vs 1-stop filters</div>
+            <div class="sub-item">Fare Tiers (Saver, Flex, VIP)</div>
+            <div class="sub-item">Refundable vs Non-refundable</div>
+          </div>
+        </div>
+        <div class="node-card violet">
+          <div class="node-title">Step 3: Customization</div>
+          <div class="node-sub">Interactive Seat & Ancillaries</div>
+          <div class="sub-features">
+            <div class="sub-item">Interactive 2D Aircraft Seat Map</div>
+            <div class="sub-item">Bus Sleeper/Seater Deck Selector</div>
+            <div class="sub-item">Pre-booked Meals & Extra Baggage</div>
+            <div class="sub-item">Travel Insurance Opt-in</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-divider"><span>Order Fulfillment & Checkout</span></div>
+
+      <div class="step-row">
+        <div class="node-card amber">
+          <div class="node-title">Step 4: Passenger Details</div>
+          <div class="node-sub">KYC & Contact Verification</div>
+          <div class="sub-features">
+            <div class="sub-item">Name, DOB & Passport info</div>
+            <div class="sub-item">GST Number (Optional B2B tax)</div>
+            <div class="sub-item">Emergency Contact phone/email</div>
+          </div>
+        </div>
+        <div class="node-card emerald">
+          <div class="node-title">Step 5: Payment Gateway</div>
+          <div class="node-sub">Escrow Protected Financial Engine</div>
+          <div class="sub-features">
+            <div class="sub-item">UPI QR / Netbanking / Credit Card</div>
+            <div class="sub-item">Razorpay & Stripe Webhook Sync</div>
+            <div class="sub-item">Group Split Payment Option</div>
+            <div class="sub-item">Tax Engine (CGST + SGST Calculation)</div>
+          </div>
+        </div>
+        <div class="node-card accent">
+          <div class="node-title">Step 6: Ticket & Passes</div>
+          <div class="node-sub">Instant Digital Boarding Pass</div>
+          <div class="sub-features">
+            <div class="sub-item">Confirmed PNR Generation</div>
+            <div class="sub-item">QR Code E-Ticket (Offline IDB cache)</div>
+            <div class="sub-item">PDF Download & Email Delivery</div>
+            <div class="sub-item">Sync with My Trips Itinerary</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART 3: B2B Agent Bidding & Bargaining Flowchart -->
+  <div id="flowchart-3" class="flowchart-wrapper">
+    <div class="header">
+      <h2>🤝 3. B2B Reverse Bidding & Bargaining Negotiation Flowchart</h2>
+      <div class="badge">Dynamic Deal Matchmaker</div>
+    </div>
+    <div class="diagram-container">
+      <div class="step-row">
+        <div class="node-card primary">
+          <div class="node-title">1. Traveller Posts Request</div>
+          <div class="node-sub">Bargain New Request Modal</div>
+          <div class="sub-features">
+            <div class="sub-item">Select Destination & Travel Dates</div>
+            <div class="sub-item">Enter Target Budget (e.g. ₹25,000)</div>
+            <div class="sub-item">Select Services: Flight + Hotel + Cab</div>
+            <div class="sub-item">Special Requests & Inclusions</div>
+          </div>
+        </div>
+        <div class="node-card violet">
+          <div class="node-title">2. Agent Broadcast</div>
+          <div class="node-sub">Real-time Lead Distribution</div>
+          <div class="sub-features">
+            <div class="sub-item">Verified Local Agents receive lead</div>
+            <div class="sub-item">Agency analyzes traveller requirements</div>
+            <div class="sub-item">Submits custom package quote</div>
+            <div class="sub-item">Includes itinerary, hotels & cab details</div>
+          </div>
+        </div>
+        <div class="node-card amber">
+          <div class="node-title">3. Traveller Review</div>
+          <div class="node-sub">Caught Deals & Comparison</div>
+          <div class="sub-features">
+            <div class="sub-item">Traveller views competing agent quotes</div>
+            <div class="sub-item">Compares ratings, inclusions & price</div>
+            <div class="sub-item">Shortlists preferred agency</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-divider"><span>Live Negotiation & Deal Closure</span></div>
+
+      <div class="step-row">
+        <div class="node-card accent">
+          <div class="node-title">4. Real-time Live Chat</div>
+          <div class="node-sub">Bargain Chat Modal with Agent</div>
+          <div class="sub-features">
+            <div class="sub-item">Two-way instant messaging</div>
+            <div class="sub-item">Counter-offer proposals (e.g. ₹22,500)</div>
+            <div class="sub-item">Free upgrade requests (Breakfast, cab)</div>
+            <div class="sub-item">Apply secret vouchers & promo codes</div>
+          </div>
+        </div>
+        <div class="node-card emerald">
+          <div class="node-title">5. Agreement & Escrow</div>
+          <div class="node-sub">Secure Contract Lock</div>
+          <div class="sub-features">
+            <div class="sub-item">Both parties accept negotiated amount</div>
+            <div class="sub-item">Traveller deposits funds into Escrow</div>
+            <div class="sub-item">Funds held safely until trip completion</div>
+          </div>
+        </div>
+        <div class="node-card primary">
+          <div class="node-title">6. Fulfillment & Voucher</div>
+          <div class="node-sub">Booking Confirmation</div>
+          <div class="sub-features">
+            <div class="sub-item">Agent issues hotel & cab vouchers</div>
+            <div class="sub-item">Automated commission split for platform</div>
+            <div class="sub-item">Trip added to Traveller Timeline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART 4: Smart Expense Management & Group Split Flowchart -->
+  <div id="flowchart-4" class="flowchart-wrapper">
+    <div class="header">
+      <h2>💰 4. Smart Kharch (Expenses) & Group Split Flowchart</h2>
+      <div class="badge">OCR Scanner • Fuel Calc • UPI Split</div>
+    </div>
+    <div class="diagram-container">
+      <div class="step-row">
+        <div class="node-card primary">
+          <div class="node-title">1. Expense Entry Points</div>
+          <div class="node-sub">Multiple Ways to Capture Costs</div>
+          <div class="sub-features">
+            <div class="sub-item">Smart Bill Scanner (OCR via Camera)</div>
+            <div class="sub-item">Fuel Calculator (Distance, Mileage, Fuel Price)</div>
+            <div class="sub-item">Manual Quick Add Expense Form</div>
+            <div class="sub-item">Automated Booking Invoices Sync</div>
+          </div>
+        </div>
+        <div class="node-card violet">
+          <div class="node-title">2. Categorization & Tax</div>
+          <div class="node-sub">Automatic Classification</div>
+          <div class="sub-features">
+            <div class="sub-item">Categories: Stay, Food, Travel, Leisure</div>
+            <div class="sub-item">Tax Engine computes GST & charges</div>
+            <div class="sub-item">Attach receipt image to Zero-Trust vault</div>
+          </div>
+        </div>
+        <div class="node-card amber">
+          <div class="node-title">3. Group Split Logic</div>
+          <div class="node-sub">Multi-Traveller Accounting</div>
+          <div class="sub-features">
+            <div class="sub-item">Select payer (who paid the bill)</div>
+            <div class="sub-item">Split Equally or Custom % shares</div>
+            <div class="sub-item">Select participating trip members</div>
+            <div class="sub-item">Real-time update to member balances</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-divider"><span>Analytics & Instant Settlement</span></div>
+
+      <div class="step-row">
+        <div class="node-card emerald">
+          <div class="node-title">4. Budget Dashboard</div>
+          <div class="node-sub">Visual Financial Health</div>
+          <div class="sub-features">
+            <div class="sub-item">Total Trip Budget vs Spent Gauge</div>
+            <div class="sub-item">Category-wise Recharts Donut Graph</div>
+            <div class="sub-item">75% Budget Warning alerts</div>
+            <div class="sub-item">Per-member net balance (+/-)</div>
+          </div>
+        </div>
+        <div class="node-card accent">
+          <div class="node-title">5. Dynamic UPI QR Pay</div>
+          <div class="node-sub">1-Click Mobile Settlement</div>
+          <div class="sub-features">
+            <div class="sub-item">UpiQrModal renders dynamic QR code</div>
+            <div class="sub-item">Encodes exact owed amount & UPI ID</div>
+            <div class="sub-item">Scan with GPay, PhonePe, Paytm</div>
+            <div class="sub-item">Direct Peer-to-Peer settlement</div>
+          </div>
+        </div>
+        <div class="node-card primary">
+          <div class="node-title">6. Audit & PDF Export</div>
+          <div class="node-sub">Post-Trip Financial Report</div>
+          <div class="sub-features">
+            <div class="sub-item">Complete expense ledger & transactions</div>
+            <div class="sub-item">Export to Excel (.xlsx) & PDF report</div>
+            <div class="sub-item">Final zero-balance reconciliation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART 5: Admin Governance & Security Operations Flowchart -->
+  <div id="flowchart-5" class="flowchart-wrapper">
+    <div class="header">
+      <h2>🛡️ 5. Super Admin Governance & Security Operations Flowchart</h2>
+      <div class="badge">Platform Health • RASP • KYC • Payouts</div>
+    </div>
+    <div class="diagram-container">
+      <div class="step-row">
+        <div class="node-card primary">
+          <div class="node-title">1. Executive Overview</div>
+          <div class="node-sub">Real-Time Platform Pulse</div>
+          <div class="sub-features">
+            <div class="sub-item">Gross Booking Value (GBV) Metric</div>
+            <div class="sub-item">Platform Net Commission Revenue</div>
+            <div class="sub-item">Daily Active Users & Conversion %</div>
+            <div class="sub-item">Interactive Recharts Revenue Curves</div>
+          </div>
+        </div>
+        <div class="node-card amber">
+          <div class="node-title">2. Vendor Verification</div>
+          <div class="node-sub">Zoop B2B Partner KYC</div>
+          <div class="sub-features">
+            <div class="sub-item">Agency PAN Verification (Zoop API)</div>
+            <div class="sub-item">Commercial Vehicle RC Verification</div>
+            <div class="sub-item">Admin Approve / Reject / Request Info</div>
+            <div class="sub-item">Auto-assign Agency Tier & Trust badge</div>
+          </div>
+        </div>
+        <div class="node-card emerald">
+          <div class="node-title">3. Payout Management</div>
+          <div class="node-sub">Financial Settlement Queue</div>
+          <div class="sub-features">
+            <div class="sub-item">Agent Wallet Withdrawal Requests</div>
+            <div class="sub-item">TDS Deductions & Tax Holding Account</div>
+            <div class="sub-item">One-click Batch Bank Transfer Approval</div>
+            <div class="sub-item">Automated GST Invoices & Ledgers</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-divider"><span>Defensive Shield & System Health</span></div>
+
+      <div class="step-row">
+        <div class="node-card accent">
+          <div class="node-title">4. RASP & PentAGI Shield</div>
+          <div class="node-sub">Runtime App Self-Protection</div>
+          <div class="sub-features">
+            <div class="sub-item">Anti-Tamper & DevTools Hook Monitoring</div>
+            <div class="sub-item">Automated IP & Rate Limit Throttling</div>
+            <div class="sub-item">Zero-Trust AES-256 Envelope Encryption</div>
+            <div class="sub-item">Real-time Threat Event Log & Alerts</div>
+          </div>
+        </div>
+        <div class="node-card violet">
+          <div class="node-title">5. API Telemetry & Health</div>
+          <div class="node-sub">3rd-Party Integrations Monitor</div>
+          <div class="sub-features">
+            <div class="sub-item">Travelport / Duffel Flight API latency</div>
+            <div class="sub-item">Razorpay / Stripe Webhook health</div>
+            <div class="sub-item">AI Circuit Breaker (OpenAI / Gemini)</div>
+            <div class="sub-item">Automated Fallback to Curated Cache</div>
+          </div>
+        </div>
+        <div class="node-card primary">
+          <div class="node-title">6. User & Vault Control</div>
+          <div class="node-sub">Legal & Directory Ops</div>
+          <div class="sub-features">
+            <div class="sub-item">Global User Directory (Block/Unblock)</div>
+            <div class="sub-item">Customer Support Tickets & Resolution</div>
+            <div class="sub-item">Legal Vault Constant-Time Data Export</div>
+            <div class="sub-item">Banner Ads & Promo Code Campaign Control</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

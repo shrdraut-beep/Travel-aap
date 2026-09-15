@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ArrowLeft, Utensils, ChevronRight, Plus, Minus, CheckCircle2 } from "lucide-react";
+import { Utensils, ChevronRight, Plus, Minus, CheckCircle2 } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 
 export interface SelectedMealItem {
   id: string;
@@ -99,33 +100,13 @@ export const MealsSelectionStep: React.FC<MealsSelectionStepProps> = ({
   return (
     <div className="min-h-screen bg-[var(--premium-page)] text-[var(--premium-ink)] pb-28">
       {/* Top Header */}
-      <header className="relative z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center shrink-0"
-              aria-label="Back to seats"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                  In-Flight Meals
-                </h1>
-                <span className="text-xs font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
-                  Step 4 of 6
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Freshly prepared meals served hot on your flight
-              </p>
-            </div>
-          </div>
-        </div>
-
+      <BookingStepHeader
+        title="In-Flight Meals"
+        step="Step 4 of 6"
+        subtitle="Freshly prepared meals served hot on your flight"
+        onBack={onBack}
+        backAriaLabel="Back to seats"
+      >
         {/* Veg / Non-Veg Diet Filter */}
         <div className="max-w-3xl mx-auto px-4 py-2 border-t border-slate-100 flex items-center gap-2">
           <button
@@ -164,7 +145,7 @@ export const MealsSelectionStep: React.FC<MealsSelectionStepProps> = ({
             Non-Veg
           </button>
         </div>
-      </header>
+      </BookingStepHeader>
 
       {/* Main Meals Menu List */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-3">

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  ArrowLeft,
   ShieldCheck,
   Send,
   Lock,
@@ -11,6 +10,7 @@ import {
   Paperclip,
   PhoneCall
 } from 'lucide-react';
+import { BookingStepHeader } from '../../booking/BookingStepHeader';
 import { BargainingTrip, VendorBidOffer, ChatMessage } from './types';
 
 interface FullScreenChatViewProps {
@@ -30,7 +30,7 @@ export const FullScreenChatView: React.FC<FullScreenChatViewProps> = ({
     {
       id: 'm1',
       sender: 'system',
-      text: `🔒 Safe Bargaining Room Active. Real contact details are protected under RoutTripo Escrow. Complete 'Accept & Lock' to unmask direct contact numbers.`,
+      text: `🔒 Safe Bargaining Room Active. Real contact details are protected under RouTripO Escrow. Complete 'Accept & Lock' to unmask direct contact numbers.`,
       time: '10:00 AM'
     },
     {
@@ -97,36 +97,24 @@ export const FullScreenChatView: React.FC<FullScreenChatViewProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-100 text-slate-900 animate-in fade-in duration-150">
       {/* Top Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 shadow-xs shrink-0">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <button
-              type="button"
-              onClick={onBack}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-colors shrink-0"
-              aria-label="Back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[14px] font-black text-slate-900 truncate">
-                  {offer.maskedPartnerName}
-                </span>
-                <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" title="Online" />
-              </div>
-              <p className="text-[11px] text-slate-500 truncate">
-                ★ {offer.rating} · {offer.vehicleOrRoomTitle}
-              </p>
-            </div>
-          </div>
-
+      <BookingStepHeader
+        title={
+          <span className="flex items-center gap-1.5">
+            <span className="truncate">{offer.maskedPartnerName}</span>
+            <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" title="Online" />
+          </span>
+        }
+        subtitle={<>★ {offer.rating} · {offer.vehicleOrRoomTitle}</>}
+        onBack={onBack}
+        backAriaLabel="Back"
+        maxWidth="max-w-2xl"
+        rightElement={
           <div className="flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 shrink-0">
             <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
             <span>Escrow Monitored</span>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Requirement 6: STICKY "ACCEPT & LOCK" BUTTON DIRECTLY INSIDE CHAT */}
       <div className="bg-gradient-to-r from-pink-600 via-rose-600 to-pink-700 text-white px-4 py-2.5 shadow-md shrink-0 border-b border-pink-500/50">

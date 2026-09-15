@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  ArrowLeft,
   ShieldCheck,
   CheckCircle2,
   XCircle,
@@ -21,6 +20,7 @@ import {
   Share2,
   AlertTriangle
 } from 'lucide-react';
+import { BookingStepHeader } from '../../booking/BookingStepHeader';
 import { BargainingTrip, VendorBidOffer } from './types';
 
 interface AcceptLockFlowViewProps {
@@ -69,34 +69,26 @@ export const AcceptLockFlowView: React.FC<AcceptLockFlowViewProps> = ({
   return (
     <div className="min-h-screen bg-slate-50 pb-28 text-slate-900 animate-in fade-in duration-200">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 shadow-xs">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={step === 'confirmed' ? onComplete : onBack}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-[15px] font-black text-slate-900">
-                {step === 'compare' && 'Demand vs. Offer Comparison'}
-                {step === 'payment' && 'Secure Escrow Payment'}
-                {step === 'confirmed' && 'Deal Locked & Voucher Generated'}
-              </h1>
-              <p className="text-[11px] text-slate-500 font-medium">
-                {step === 'confirmed' ? offer.realAgencyName : offer.maskedPartnerName}
-              </p>
-            </div>
-          </div>
-
+      <BookingStepHeader
+        title={
+          <>
+            {step === 'compare' && 'Demand vs. Offer Comparison'}
+            {step === 'payment' && 'Secure Escrow Payment'}
+            {step === 'confirmed' && 'Deal Locked & Voucher Generated'}
+          </>
+        }
+        subtitle={step === 'confirmed' ? offer.realAgencyName : offer.maskedPartnerName}
+        onBack={step === 'confirmed' ? onComplete : onBack}
+        backAriaLabel="Back"
+        maxWidth="max-w-2xl"
+        sticky
+        rightElement={
           <div className="flex items-center gap-1 text-[11px] font-bold text-pink-700 bg-pink-50 px-3 py-1 rounded-full border border-pink-200">
             <ShieldCheck className="w-3.5 h-3.5 text-pink-600" />
             <span>Escrow Protected</span>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="max-w-2xl mx-auto px-4 pt-4 space-y-4">
         {/* STEP 1: COMPARISON (Requirement 5: Vendor Offer vs User Demand - Unfulfilled = RED, Fulfilled = GREEN) */}
@@ -206,7 +198,7 @@ export const AcceptLockFlowView: React.FC<AcceptLockFlowViewProps> = ({
                 />
                 <div className="text-[12px] text-slate-600 leading-relaxed">
                   <span className="font-bold text-slate-900">
-                    I accept the RoutTripo 100% Escrow Protection Terms & Conditions.
+                    I accept the RouTripO 100% Escrow Protection Terms & Conditions.
                   </span>{' '}
                   Payment is held securely in escrow and only released to the vendor upon successful trip
                   verification via mutual OTP handshake. Free cancellation policy: {offer.cancellationPolicy}
@@ -280,7 +272,7 @@ export const AcceptLockFlowView: React.FC<AcceptLockFlowViewProps> = ({
               <div className="p-3 bg-sky-50 rounded-2xl border border-sky-100 flex items-start gap-2.5 text-[11px] text-sky-900 font-medium">
                 <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong>RoutTripo SafeLock Promise:</strong> If the vehicle or room does not match the
+                  <strong>RouTripO SafeLock Promise:</strong> If the vehicle or room does not match the
                   specs confirmed here, get a 100% immediate escrow refund with our one-click guarantee.
                 </span>
               </div>

@@ -11,6 +11,7 @@ import partnerKycRouter from './server/routes/partnerKyc.ts';
 import searchRouter from './server/routes/search.ts';
 import biddingRouter from './server/routes/bidding.ts';
 import paymentRouter from './server/routes/payment.ts';
+import { aiAgentOrchestrator } from './server/services/aiAgentOrchestrator.ts';
 import { getCuratedRealItinerary, REAL_DESTINATIONS } from './server/realDestinationsData.ts';
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -4828,6 +4829,16 @@ async function startServer() {
 
   // Admin Vault List for Support & Vault Tab
 
+  // --- Admin Autonomous AI Agents Telemetry & Trigger ---
+  app.get("/api/admin/ai-agents/status", (req, res) => {
+    res.json({ success: true, ...aiAgentOrchestrator.getState() });
+  });
+
+  app.post("/api/admin/ai-agents/trigger", async (req, res) => {
+    await aiAgentOrchestrator.runOrchestratorCycle();
+    res.json({ success: true, message: "AI Agent Orchestrator cycle executed manually", ...aiAgentOrchestrator.getState() });
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true, hmr: false },
@@ -4855,6 +4866,7 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`[Pravas Wataghati] Server running on http://0.0.0.0:${PORT}`);
+    aiAgentOrchestrator.start(60000);
   });
 }
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ArrowLeft,
   Star,
   MapPin,
   Clock,
@@ -16,6 +15,7 @@ import {
   Circle,
   Zap
 } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 import { RazorpayPaymentModal } from "./RazorpayPaymentModal";
 
 export interface BusSearchParams {
@@ -95,7 +95,16 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
   initialSearchParams,
   onClose
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<"results" | "seatmap" | "checkout">("results");
+  // Reset scroll position to top whenever step changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [step]);
+
   const [buses, setBuses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedBus, setSelectedBus] = useState<any | null>(null);
@@ -188,7 +197,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
   // STEP 3: Confirmed Ticket View
   if (isConfirmed) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)] text-[var(--premium-ink)] py-12 px-4 flex flex-col items-center justify-center animate-in fade-in">
+      <div ref={containerRef} className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)] text-[var(--premium-ink)] py-12 px-4 flex flex-col items-center justify-center animate-in fade-in">
         <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-2xl text-center space-y-6">
           <div className="w-16 h-16 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto shadow-xs">
             <CheckCircle2 className="w-9 h-9" />
@@ -267,45 +276,37 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)] text-[var(--premium-ink)] flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={() => {
-                if (step === "checkout") setStep("seatmap");
-                else if (step === "seatmap") setStep("results");
-                else onClose();
-              }}
-              className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center shrink-0"
-              aria-label="Back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="min-w-0 flex flex-col">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate flex-1 min-w-0">
-                  {step === "results" && `${initialSearchParams.origin || "Mumbai"} to ${initialSearchParams.destination || "Goa"}`}
-                  {step === "seatmap" && `Select Seats • ${selectedBus?.operatorName}`}
-                  {step === "checkout" && "Checkout"}
-                </h1>
-                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--premium-violet)] text-white border border-transparent">
-                  {step === "results" ? "Step 1" : step === "seatmap" ? "Step 2" : "Step 3"}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 truncate mt-0.5">
-                {initialSearchParams.date} • {selectedSeats.length} Seat(s) selected
-              </p>
-            </div>
-          </div>
+      <BookingStepHeader
+        title={
+          <>
+            {step === "results" && `${initialSearchParams.origin || "Mumbai"} to ${initialSearchParams.destination || "Goa"}`}
+            {step === "seatmap" && `Select Seats • ${selectedBus?.operatorName}`}
+            {step === "checkout" && "Checkout"}
+          </>
+        }
+        step={
+          <span className="hidden sm:inline">
+            {step === "results" ? "Step 1" : step === "seatmap" ? "Step 2" : "Step 3"}
+          </span>
+        }
+        subtitle={<>{initialSearchParams.date} • {selectedSeats.length} Seat(s) selected</>}
+        onBack={() => {
+          if (step === "checkout") setStep("seatmap");
+          else if (step === "seatmap") setStep("results");
+          else onClose();
+        }}
+        backAriaLabel="Back"
+        maxWidth="max-w-5xl"
+        sticky
+        rightElement={
           <button
             onClick={onClose}
             className="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full hover:bg-slate-100 transition-colors shrink-0"
           >
             Exit
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main Content Body */}
       <div className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6 pb-24">

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   User,
   Mail,
@@ -13,6 +12,7 @@ import {
   Plane,
   X
 } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 import type { SelectedFare } from "./FareSelectionStep";
 
 export interface PassengerDetail {
@@ -322,41 +322,26 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
       )}
 
       {/* Top Header */}
-      <header className="relative z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
-              aria-label="Back to fare selection"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                  Passenger Details
-                </h1>
-                <span className="text-xs font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
-                  Step 2 of 6
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
-                <span>{airline} {flightNo}</span>
+      <BookingStepHeader
+        title="Passenger Details"
+        step="Step 2 of 6"
+        subtitle={
+          <span className="flex items-center gap-1.5">
+            <span>{airline} {flightNo}</span>
+            <span>•</span>
+            <span>{org} ➔ {dst}</span>
+            {selectedFare && (
+              <>
                 <span>•</span>
-                <span>{org} ➔ {dst}</span>
-                {selectedFare && (
-                  <>
-                    <span>•</span>
-                    <span className="font-semibold text-slate-700">{selectedFare.name}</span>
-                  </>
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
+                <span className="font-semibold text-slate-700">{selectedFare.name}</span>
+              </>
+            )}
+          </span>
+        }
+        onBack={onBack}
+        backAriaLabel="Back to fare selection"
+        maxWidth="max-w-4xl"
+      >
         {/* Multi-Passenger Tab Switcher */}
         {count > 1 && (
           <div className="max-w-4xl mx-auto px-4 py-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
@@ -395,7 +380,7 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
             })}
           </div>
         )}
-      </header>
+      </BookingStepHeader>
 
       {/* Main Content Form */}
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -678,8 +663,7 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
 
               <button
                 type="submit"
-                disabled={passengers.filter((_, i) => isPaxComplete(i)).length !== count}
-                className="px-6 sm:px-8 py-3.5 rounded-xl bg-[var(--premium-violet)] text-white font-bold text-sm shadow-xs hover:opacity-95 transition-opacity flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 sm:px-8 py-3.5 rounded-xl bg-[var(--premium-violet)] text-white font-bold text-sm shadow-xs hover:opacity-95 transition-opacity flex items-center gap-2 cursor-pointer"
               >
                 <span>Proceed to Seat Selection</span>
                 <ArrowRight className="w-4 h-4" />

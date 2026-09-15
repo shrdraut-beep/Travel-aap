@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ArrowLeft, Luggage, CheckCircle2, ChevronRight, Plus, Minus, ShieldCheck } from "lucide-react";
+import { Luggage, CheckCircle2, ChevronRight, Plus, Minus, ShieldCheck } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 
 export interface SelectedBaggageItem {
   id: string;
@@ -86,33 +87,13 @@ export const BaggageSelectionStep: React.FC<BaggageSelectionStepProps> = ({
   return (
     <div className="min-h-screen bg-[var(--premium-page)] text-[var(--premium-ink)] pb-28">
       {/* Top Header */}
-      <header className="relative z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center shrink-0"
-              aria-label="Back to meals"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                  Add Extra Baggage
-                </h1>
-                <span className="text-xs font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
-                  Step 5 of 6
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Pre-book online & save up to 40% vs airport counter rates
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <BookingStepHeader
+        title="Add Extra Baggage"
+        step="Step 5 of 6"
+        subtitle="Pre-book online & save up to 40% vs airport counter rates"
+        onBack={onBack}
+        backAriaLabel="Back to meals"
+      />
 
       {/* Main Options Container */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-4">

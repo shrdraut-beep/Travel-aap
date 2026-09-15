@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  ArrowLeft,
   Star,
   MapPin,
   ShieldCheck,
@@ -21,6 +20,7 @@ import {
   X,
   RefreshCw
 } from "lucide-react";
+import { BookingStepHeader } from "./BookingStepHeader";
 
 export interface HotelSearchParams {
   destination: string;
@@ -98,7 +98,16 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
   initialSearchParams,
   onClose
 }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [step, setStep] = useState<"results" | "rooms" | "checkout">("results");
+  // Reset scroll position to top whenever step changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [step]);
+
   const [hotels, setHotels] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedHotel, setSelectedHotel] = useState<any | null>(null);
@@ -280,7 +289,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
         key: effectiveKey,
         amount: orderData.amount,
         currency: orderData.currency || "INR",
-        name: "RoutTripo Hotels",
+        name: "RouTripO Hotels",
         description: `Hotel Booking - ${selectedHotel?.name}`,
         order_id: orderData.orderId || orderData.id,
         prefill: {
@@ -385,26 +394,20 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
   // Compute filtered & sorted hotels
   const filteredHotels = hotels
     .filter((h) => {
-      const r = h.rating || h.accommodation?.rating || h.propertyInfo?.ratings?.[0]?.value || 0;
-      if (minRating > 0 && r < minRating) return false;
+      if (minRating > 0 && (h.rating || 0) < minRating) return false;
       if (onlyFreeCancel && !h.freeCancellation) return false;
       return true;
     })
     .sort((a, b) => {
       const priceA = Number(a.pricePerNight || a.rates?.[0]?.total_amount || 5000);
       const priceB = Number(b.pricePerNight || b.rates?.[0]?.total_amount || 5000);
-      const ratingA = a.rating || a.accommodation?.rating || a.propertyInfo?.ratings?.[0]?.value || 0;
-      const ratingB = b.rating || b.accommodation?.rating || b.propertyInfo?.ratings?.[0]?.value || 0;
       if (sortBy === "cheapest") return priceA - priceB;
-      return ratingB - ratingA;
+      return (b.rating || 0) - (a.rating || 0);
     });
 
   // Calculation for Checkout
   const roomPrice = selectedRoom?.price || selectedHotel?.pricePerNight || 8500;
-  const computedNights = initialSearchParams?.checkInDate && initialSearchParams?.checkOutDate
-    ? Math.max(1, Math.round((new Date(initialSearchParams.checkOutDate).getTime() - new Date(initialSearchParams.checkInDate).getTime()) / (1000 * 60 * 60 * 24)))
-    : 2;
-  const nights = computedNights;
+  const nights = 2; // Default 2 nights calculation
   const totalBase = roomPrice * nights;
   const taxes = Math.round(totalBase * 0.12);
   const grandTotal = totalBase + taxes;
@@ -427,7 +430,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
   // STEP 3 Confirmation view
   if (isConfirmed) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)] text-[var(--premium-ink)] py-12 px-4 flex flex-col items-center justify-center animate-in fade-in">
+      <div ref={containerRef} className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)] text-[var(--premium-ink)] py-12 px-4 flex flex-col items-center justify-center animate-in fade-in">
         <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-2xl text-center space-y-6">
           <div className="w-16 h-16 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center mx-auto shadow-xs">
             <CheckCircle2 className="w-9 h-9" />
@@ -506,45 +509,27 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--premium-page)] text-[var(--premium-ink)] flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={() => {
-                if (step === "checkout") setStep("rooms");
-                else if (step === "rooms") setStep("results");
-                else onClose();
-              }}
-              className="p-2.5 -ml-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors flex items-center justify-center shrink-0"
-              aria-label="Back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="min-w-0 flex flex-col">
-              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate flex-1 min-w-0">
-                  {step === "results" ? `Hotels in ${initialSearchParams.destination || "Mumbai"}` : step === "rooms" ? (selectedHotel?.name || "Select Room") : "Checkout"}
-                </h1>
-                <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--premium-violet)] text-white border border-transparent">
-                  {step === "results" ? "Step 1" : step === "rooms" ? "Step 2" : "Step 3"}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 truncate mt-0.5">
-                {initialSearchParams.checkInDate} · {initialSearchParams.adults} Guests · {initialSearchParams.rooms} Room(s)
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={onClose}
-              className="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full hover:bg-slate-100 transition-colors"
-            >
-              Exit
-            </button>
-          </div>
-        </div>
-      </header>
+      <BookingStepHeader
+        title={step === "results" ? `Hotels in ${initialSearchParams.destination || "Mumbai"}` : step === "rooms" ? (selectedHotel?.name || "Select Room") : "Checkout"}
+        step={<span className="hidden sm:inline">{step === "results" ? "Step 1" : step === "rooms" ? "Step 2" : "Step 3"}</span>}
+        subtitle={<>{initialSearchParams.checkInDate} · {initialSearchParams.adults} Guests · {initialSearchParams.rooms} Room(s)</>}
+        onBack={() => {
+          if (step === "checkout") setStep("rooms");
+          else if (step === "rooms") setStep("results");
+          else onClose();
+        }}
+        backAriaLabel="Back"
+        maxWidth="max-w-5xl"
+        sticky
+        rightElement={
+          <button
+            onClick={onClose}
+            className="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full hover:bg-slate-100 transition-colors"
+          >
+            Exit
+          </button>
+        }
+      />
 
       {/* Main Content Body */}
       <div className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6 pb-24">
