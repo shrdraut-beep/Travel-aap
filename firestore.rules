@@ -113,7 +113,7 @@ service cloud.firestore {
         
     // Test collection for connectivity checks
     match /test/{docId} {
-      allow read, write: if true;
+      allow read, write: if isAuthenticated();
     }
   }
 }
