@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-09-17T14:52:57Z",
+  "target": "http://localhost:3000",
+  "summary": {
+    "total": 18,
+    "pass": 18,
+    "warn": 0,
+    "fail": 0
+  },
+  "results": [
+    {
+      "category": "Availability",
+      "test": "Server Ping",
+      "status": "PASS",
+      "details": "Server responded with HTTP 200 in 2166ms",
+      "severity": "INFO"
+    },
+    {
+      "category": "Security Headers",
+      "test": "Header: x-content-type-options",
+      "status": "PASS",
+      "details": "Configured correctly (nosniff)",
+      "severity": "LOW"
+    },
+    {
+      "category": "Security Headers",
+      "test": "Header: x-frame-options",
+      "status": "PASS",
+      "details": "Configured correctly (SAMEORIGIN)",
+      "severity": "LOW"
+    },
+    {
+      "category": "Security Headers",
+      "test": "Header: content-security-policy",
+      "status": "PASS",
+      "details": "Present (Content Security Policy (CSP)): default-src 'self';base-uri 'self';font-...",
+      "severity": "LOW"
+    },
+    {
+      "category": "Security Headers",
+      "test": "Header: referrer-policy",
+      "status": "PASS",
+      "details": "Present (Referrer leakage protection): strict-origin-when-cross-origin...",
+      "severity": "LOW"
+    },
+    {
+      "category": "Sensitive Files",
+      "test": "Access /.env",
+      "status": "PASS",
+      "details": "/.env properly blocked (HTTP 403)",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Sensitive Files",
+      "test": "Access /.env.local",
+      "status": "PASS",
+      "details": "/.env.local properly blocked (HTTP 403)",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Sensitive Files",
+      "test": "Access /firebase-applet-config.json",
+      "status": "PASS",
+      "details": "/firebase-applet-config.json properly blocked (HTTP 403)",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Sensitive Files",
+      "test": "Access /server.ts",
+      "status": "PASS",
+      "details": "/server.ts properly blocked (HTTP 403)",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Sensitive Files",
+      "test": "Access /package.json",
+      "status": "PASS",
+      "details": "/package.json properly blocked (HTTP 403)",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Secret Leakage",
+      "test": "Client Bundle Secrets",
+      "status": "PASS",
+      "details": "No backend master secrets exposed in root HTML document",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Input Validation",
+      "test": "AI Chat Schema Check",
+      "status": "PASS",
+      "details": "Handled non-conforming payload gracefully (HTTP 400)",
+      "severity": "MEDIUM"
+    },
+    {
+      "category": "Input Validation",
+      "test": "KYC PAN Format Validation",
+      "status": "PASS",
+      "details": "Malformed PAN format correctly identified and rejected",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Input Validation",
+      "test": "KYC RC Empty Input Check",
+      "status": "PASS",
+      "details": "Missing required RC parameter rejected with HTTP 400",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Access Control",
+      "test": "Admin Agent Telemetry",
+      "status": "PASS",
+      "details": "Admin AI Agents status endpoint active and functional",
+      "severity": "LOW"
+    },
+    {
+      "category": "Access Control",
+      "test": "Vault Upload Validation",
+      "status": "PASS",
+      "details": "Incomplete vault payload rejected with HTTP 400",
+      "severity": "HIGH"
+    },
+    {
+      "category": "Rate Limiting",
+      "test": "RateLimit Headers",
+      "status": "PASS",
+      "details": "RateLimit draft-7 standard headers present in responses",
+      "severity": "MEDIUM"
+    },
+    {
+      "category": "CORS",
+      "test": "Origin Isolation",
+      "status": "PASS",
+      "details": "No permissive CORS header reflected for untrusted origin",
+      "severity": "MEDIUM"
+    }
+  ]
+}

@@ -282,21 +282,55 @@ async function requireAdmin(req: AuthedRequest, res: express.Response, next: exp
 
 
 // 1. HTTP Security (Helmet)
-// Smart Configuration: Automatically relaxes security for AI Studio iframe previews during development,
-// but enforces strict security when deployed in production (NODE_ENV=production).
+// Smart Configuration: Enforces strict security headers, CSP, and clickjacking protection (SAMEORIGIN/deny)
 const isProduction = process.env.NODE_ENV === 'production';
 const allowIframe = process.env.ALLOW_IFRAME_EMBED === 'true' || !isProduction;
 
 app.use(helmet({
-  // If allowIframe is true, disable CSP to allow embedding in AI Studio. 
-  // Otherwise, use Helmet's strict default CSP for production security.
-  contentSecurityPolicy: allowIframe ? false : undefined, 
-  frameguard: allowIframe ? false : { action: 'deny' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://apis.google.com"],
+      connectSrc: ["'self'", "*"],
+      imgSrc: ["'self'", "data:", "blob:", "https:"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
+      frameAncestors: allowIframe ? ["'self'", "https://*.google.com", "https://*.run.app"] : ["'self'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: isProduction ? [] : null,
+    }
+  },
+  frameguard: allowIframe ? { action: 'sameorigin' } : { action: 'deny' },
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  hsts: isProduction ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 }));
+
+// Block direct access to server-side source files, configs, and secret manifests
+const BLOCKED_FILE_PATTERNS = [
+  /^\/server\.ts$/i,
+  /^\/package\.json$/i,
+  /^\/package-lock\.json$/i,
+  /^\/tsconfig.*\.json$/i,
+  /^\/\.env.*/i,
+  /^\/\.git.*/i,
+  /^\/server(\/.*)?$/i,
+  /^\/scripts(\/.*)?$/i,
+  /^\/firebase-applet-config\.json$/i,
+  /^\/security_audit_report\.json$/i,
+];
+
+app.use((req, res, next) => {
+  const reqPath = req.path || "";
+  for (const pattern of BLOCKED_FILE_PATTERNS) {
+    if (pattern.test(reqPath)) {
+      return res.status(403).json({ error: "Access denied. Server-side resource is protected." });
+    }
+  }
+  next();
+});
 
 // 2. CORS Configuration
 // PRODUCTION: exact-match allowlist only. Never use .endsWith() on shared public
@@ -4558,7 +4592,10 @@ async function startServer() {
   // 1. Secure AI Inference Proxy (OpenAI / Gemini)
   app.post('/api/ai/chat', async (req, res) => {
     try {
-      const { messages, prompt } = req.body;
+      const { messages, prompt } = req.body || {};
+      if (!prompt && (!messages || !Array.isArray(messages) || messages.length === 0)) {
+        return res.status(400).json({ success: false, error: "Either 'prompt' string or non-empty 'messages' array is required." });
+      }
       const openaiKey = process.env.OPENAI_API_KEY;
       const geminiKey = process.env.GEMINI_API_KEY;
 

@@ -2382,9 +2382,9 @@
     "semantic_hash": ""
   },
   "server.ts": {
-    "mtime": 1789656526.5355973,
-    "seen": 1789656916.474153,
-    "ast_hash": "bd17ce752642cd830c5022e27b7357d9",
+    "mtime": 1789491254.6694076,
+    "seen": 1789494629.0736525,
+    "ast_hash": "3659f5b9c84b1607f8b9f7373273e8f4",
     "semantic_hash": ""
   },
   "server/config/observability.ts": {
@@ -4956,9 +4956,9 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1789496423.9160376,
-    "seen": 1789656916.5787556,
-    "ast_hash": "05958995d2a5b78fe2b71fa6bf25b6d9",
+    "mtime": 1789118420.0,
+    "seen": 1789183758.3661847,
+    "ast_hash": "34736759448b5dc6dff71927334761d9",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
@@ -7818,9 +7818,9 @@
     "semantic_hash": ""
   },
   "scripts/create-source-zip.cjs": {
-    "mtime": 1789495277.9465978,
-    "seen": 1789656916.4724076,
-    "ast_hash": "186624292375c8014e72c146d9937431",
+    "mtime": 1789493994.8673959,
+    "seen": 1789494629.069945,
+    "ast_hash": "9af5ff7ecf8de76a37e496d3fc5ad566",
     "semantic_hash": ""
   },
   "scripts/process_icon.py": {
@@ -8295,24 +8295,6 @@
     "mtime": 1789491030.5940578,
     "seen": 1789494629.084215,
     "ast_hash": "2ab1a676cbfdf98c7c95c07a880a0aba",
-    "semantic_hash": ""
-  },
-  "scripts/antigravity_security_audit.py": {
-    "mtime": 1789656248.912534,
-    "seen": 1789656916.4713414,
-    "ast_hash": "9a3dd8167dd7bc2e81d47ffdb982f729",
-    "semantic_hash": ""
-  },
-  "security_audit_report.json": {
-    "mtime": 1789656777.0455735,
-    "seen": 1789656916.4741492,
-    "ast_hash": "88d59e9e1d41927323c292991100b145",
-    "semantic_hash": ""
-  },
-  "GO_LIVE_CHECKLIST.md": {
-    "mtime": 1789496359.8580542,
-    "seen": 1789656916.579114,
-    "ast_hash": "63a02aba5b69abbc6a74119b37b7e951",
     "semantic_hash": ""
   }
 }

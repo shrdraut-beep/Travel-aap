@@ -1,0 +1,124 @@
+name: Strix AI Penetration Test & Security Audit
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      scan_mode:
+        description: 'Strix Scan Mode (quick / deep)'
+        required: false
+        default: 'quick'
+        type: choice
+        options:
+          - quick
+          - deep
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Native Antigravity Security Audit (Fast OWASP & Config Gate)
+  # ---------------------------------------------------------------------------
+  native-security-audit:
+    name: Native Antigravity Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Start Server in Background
+        env:
+          NODE_ENV: development
+          PORT: 3000
+        run: |
+          npm run dev &
+          python -c "import urllib.request, time, sys; start = time.time()
+          while time.time() - start < 60:
+              try:
+                  if urllib.request.urlopen('http://localhost:3000/api/circuit-breaker/status', timeout=2).status == 200:
+                      print('Server ready!')
+                      sys.exit(0)
+              except Exception:
+                  time.sleep(2)
+          print('Server startup timeout', file=sys.stderr)
+          sys.exit(1)
+          "
+
+      - name: Run Antigravity Native Security Audit
+        run: python scripts/antigravity_security_audit.py
+
+      - name: Upload Native Audit Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-native-audit-report
+          path: security_audit_report.json
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Autonomous Strix AI Penetration Test (Docker Sandbox Runner)
+  # ---------------------------------------------------------------------------
+  strix-penetration-test:
+    name: Strix AI Red-Team Penetration Test
+    runs-on: ubuntu-latest
+    needs: native-security-audit
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Strix CLI
+        run: |
+          curl -sSL https://strix.ai/install | bash
+          echo "$HOME/.strix/bin" >> $GITHUB_PATH
+          echo "/root/.strix/bin" >> $GITHUB_PATH
+
+      - name: Verify Docker & Strix Environment
+        run: |
+          docker --version
+          export PATH="$HOME/.strix/bin:/root/.strix/bin:$PATH"
+          strix --version || echo "Strix CLI installed."
+
+      - name: Run Strix Autonomous Penetration Scan
+        env:
+          STRIX_LLM: ${{ secrets.STRIX_LLM || 'openai/gpt-4o-mini' }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY || secrets.OPENAI_API_KEY || secrets.GEMINI_API_KEY }}
+          SCAN_MODE: ${{ github.event.inputs.scan_mode || 'quick' }}
+        run: |
+          export PATH="$HOME/.strix/bin:/root/.strix/bin:$PATH"
+          if [ -z "$LLM_API_KEY" ]; then
+            echo "::warning::LLM_API_KEY or OPENAI_API_KEY secret is not set in GitHub repository settings. Skipping live LLM scan."
+            echo "To enable Strix: Go to GitHub Repo Settings -> Secrets and variables -> Actions -> Add LLM_API_KEY or OPENAI_API_KEY."
+            exit 0
+          fi
+          strix -n -t ./ --scan-mode "$SCAN_MODE"
+
+      - name: Upload Strix Findings & PoC Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strix-penetration-test-artifacts
+          path: |
+            .strix/
+            strix-report.*
+            strix-findings.*
+          if-no-files-found: ignore
