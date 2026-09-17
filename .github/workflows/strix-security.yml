@@ -108,16 +108,39 @@ jobs:
 
       - name: Run Strix Autonomous Penetration Scan
         env:
-          STRIX_LLM: ${{ secrets.STRIX_LLM || 'openai/gpt-4o-mini' }}
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY || secrets.OPENAI_API_KEY || secrets.GEMINI_API_KEY }}
+          INPUT_STRIX_LLM: ${{ secrets.STRIX_LLM }}
+          SECRET_LLM_KEY: ${{ secrets.LLM_API_KEY }}
+          SECRET_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SECRET_GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECRET_GOOGLE_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SECRET_VITE_GEMINI_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
           SCAN_MODE: ${{ github.event.inputs.scan_mode || 'quick' }}
         run: |
           export PATH="$HOME/.strix/bin:/root/.strix/bin:$PATH"
-          if [ -z "$LLM_API_KEY" ]; then
-            echo "::warning::LLM_API_KEY or OPENAI_API_KEY secret is not set in GitHub repository settings. Skipping live LLM scan."
-            echo "To enable Strix: Go to GitHub Repo Settings -> Secrets and variables -> Actions -> Add LLM_API_KEY or OPENAI_API_KEY."
+
+          # Determine which API Key was provided
+          KEY="${SECRET_GEMINI_KEY:-${SECRET_GOOGLE_KEY:-${SECRET_VITE_GEMINI_KEY:-${SECRET_LLM_KEY:-${SECRET_OPENAI_KEY}}}}}"
+
+          if [ -z "$KEY" ]; then
+            echo "::warning::No LLM API key found in GitHub Secrets (checked GEMINI_API_KEY, GOOGLE_API_KEY, VITE_GEMINI_API_KEY, OPENAI_API_KEY, LLM_API_KEY)."
+            echo "To enable Strix: Go to GitHub Repo Settings -> Secrets and variables -> Actions -> Add GEMINI_API_KEY or OPENAI_API_KEY."
             exit 0
           fi
+
+          export LLM_API_KEY="$KEY"
+          export GEMINI_API_KEY="$KEY"
+          export GOOGLE_API_KEY="$KEY"
+
+          # Auto-configure model: prioritize Gemini when Gemini key is used
+          if [ -n "$INPUT_STRIX_LLM" ]; then
+            export STRIX_LLM="$INPUT_STRIX_LLM"
+          elif [ -n "$SECRET_GEMINI_KEY" ] || [ -n "$SECRET_GOOGLE_KEY" ] || [ -n "$SECRET_VITE_GEMINI_KEY" ]; then
+            export STRIX_LLM="gemini/gemini-2.5-flash"
+          else
+            export STRIX_LLM="openai/gpt-4o-mini"
+          fi
+
+          echo "Configured Strix with model provider: $STRIX_LLM"
           strix -n -t ./ --scan-mode "$SCAN_MODE"
 
       - name: Upload Strix Findings & PoC Reports
