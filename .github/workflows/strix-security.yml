@@ -41,31 +41,34 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Start Server in Background
+      - name: Start Server and Run Antigravity Native Security Audit
         env:
           NODE_ENV: development
           PORT: 3000
         run: |
-          npx tsx server.ts > /tmp/server.log 2>&1 &
-          python -c "import urllib.request, time, sys; start = time.time()
-          while time.time() - start < 60:
-              try:
-                  if urllib.request.urlopen('http://localhost:3000/api/circuit-breaker/status', timeout=2).status == 200:
-                      print('Server ready!')
-                      sys.exit(0)
-              except Exception:
-                  time.sleep(2)
-          print('Server startup timeout! Server logs:', file=sys.stderr)
-          try:
-              with open('/tmp/server.log') as f:
-                  print(f.read(), file=sys.stderr)
-          except Exception:
-              pass
-          sys.exit(1)
-          "
+          set -uo pipefail
+          npx tsx server.ts > server.log 2>&1 &
+          SERVER_PID=$!
 
-      - name: Run Antigravity Native Security Audit
-        run: python scripts/antigravity_security_audit.py
+          echo "Waiting for server to become ready on http://127.0.0.1:3000/api/circuit-breaker/status..."
+          for i in {1..60}; do
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Server exited before becoming ready! Server logs:"
+              cat server.log
+              exit 1
+            fi
+            if curl --fail --silent --show-error --max-time 2 http://127.0.0.1:3000/api/circuit-breaker/status > /dev/null 2>&1; then
+              echo "Server ready!"
+              break
+            fi
+            sleep 1
+          done
+
+          echo "Running Antigravity Native Security Audit..."
+          python scripts/antigravity_security_audit.py
+
+          # Gracefully stop server after audit completes
+          kill "$SERVER_PID" 2>/dev/null || true
 
       - name: Upload Native Audit Report
         if: always()
