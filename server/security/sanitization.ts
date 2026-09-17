@@ -1,12 +1,30 @@
-import { JSDOM } from 'jsdom';
-import DOMPurify from 'dompurify';
-import express from 'express';
+import type express from 'express';
 
-const window = new JSDOM('').window;
-const purify = DOMPurify(window);
+let purify: any = null;
+try {
+  // Polyfill worker_threads.markAsUncloneable if missing on older/certain Node runtimes
+  // to prevent undici/jsdom crash: TypeError: webidl.util.markAsUncloneable is not a function
+  try {
+    const workerThreads = require('node:worker_threads');
+    if (workerThreads && typeof workerThreads.markAsUncloneable !== 'function') {
+      workerThreads.markAsUncloneable = (val: any) => val;
+    }
+  } catch {}
+
+  const { JSDOM } = require('jsdom');
+  const DOMPurify = require('dompurify');
+  const window = new JSDOM('').window;
+  purify = DOMPurify(window);
+} catch (err: any) {
+  console.warn('[Sanitization] JSDOM initialization fallback active:', err?.message || err);
+}
 
 const sanitizeString = (str: string): string => {
-  return purify.sanitize(str);
+  if (purify && typeof purify.sanitize === 'function') {
+    return purify.sanitize(str);
+  }
+  return str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+            .replace(/[<>]/g, '');
 };
 
 const sanitizeInput = (input: any): any => {
