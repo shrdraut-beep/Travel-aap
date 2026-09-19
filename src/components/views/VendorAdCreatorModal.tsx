@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useOfferStore } from '../../store/useOfferStore';
 import { OfferCategory } from '../../types';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 
 export interface VendorAdCreatorModalProps {
   isOpen: boolean;

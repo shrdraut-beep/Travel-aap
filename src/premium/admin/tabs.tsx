@@ -37,8 +37,12 @@ import {
   XCircle
 } from "lucide-react";
 import { ListRow, PillButton, SectionHeader, StatCard } from "../account/ui";
+import { maskEmail } from "../../security/privacyUtils";
 import { ModalSheet } from "../shared/ModalSheet";
 import { authedFetch } from "../../utils/apiClient";
+import { taxationConfigService, type VerticalTaxRule, type ServiceVertical } from "../../services/tax/TaxationConfigService";
+import { PendingPayoutsQueueFlowPage } from "./flows/PendingPayoutsQueueFlowPage";
+import { TaxationPolicyFlowPage } from "./flows/TaxationPolicyFlowPage";
 import type { AdminActionId } from "./types";
 
 export interface PanelProps {
@@ -910,6 +914,39 @@ export const PayoutsPanel: React.FC<PanelProps> = ({ onAction }) => {
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showLifetimeModal, setShowLifetimeModal] = useState(false);
 
+  // Dynamic Government Statutory Taxation & Commission Rules State
+  const [taxRules, setTaxRules] = useState<Record<ServiceVertical, VerticalTaxRule>>(() => ({
+    ...taxationConfigService.getConfig().rules
+  }));
+
+  const handleUpdateVerticalRule = (
+    vertical: ServiceVertical,
+    field: keyof VerticalTaxRule,
+    value: any
+  ) => {
+    setTaxRules((prev) => ({
+      ...prev,
+      [vertical]: {
+        ...prev[vertical],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveTaxRules = () => {
+    taxationConfigService.updateConfig(taxRules, 'Admin Panel Portal');
+    setToast("Government taxation & commission policy updated! All 4 inventory forms synchronized live.");
+    setShowRulesModal(false);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleResetStatutoryDefaults = () => {
+    taxationConfigService.resetToDefaults();
+    setTaxRules({ ...taxationConfigService.getConfig().rules });
+    setToast("Statutory Government GST Council slabs restored successfully!");
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const fetchPayouts = async () => {
     try {
       const res = await authedFetch("/api/admin/payouts");
@@ -1052,63 +1089,33 @@ export const PayoutsPanel: React.FC<PanelProps> = ({ onAction }) => {
         </div>
       </ModalSheet>
 
-      {/* Pending Payout Queue Modal */}
-      <ModalSheet
-        isOpen={showQueueModal}
-        onClose={() => setShowQueueModal(false)}
-        title="Pending Vendor Disbursals"
-        subtitle="Batch awaiting release"
-      >
-        <div className="space-y-3">
-          {payoutsList.length === 0 ? (
-            <div className="py-8 text-center text-slate-400 text-[13px]">
-              No payouts currently in queue
-            </div>
-          ) : (
-            payoutsList.map((item) => (
-              <div key={item.id} className="p-3 rounded-2xl border border-slate-200 flex justify-between items-center">
-                <div>
-                  <p className="font-bold text-[14px] text-slate-800">{item.vendor || item.agencyName || "Vendor Settlement"}</p>
-                  <p className="text-[12px] text-slate-500">{item.bank || item.accountNumber || "IMPS / NEFT Transfer"}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-[14px] text-violet-800">₹{Number(item.amount).toLocaleString("en-IN")}</p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.status === 'completed' || item.status === 'settled' ? 'text-emerald-700 bg-emerald-50' : 'text-amber-700 bg-amber-50'}`}>
-                    {item.status || "Pending"}
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-          {payoutsList.some(p => p.status === 'pending') && (
-            <div className="pt-2">
-              <PillButton label="Disburse Entire Batch Now" variant="solid" onClick={handleReleaseAll} />
-            </div>
-          )}
-        </div>
-      </ModalSheet>
+      {/* Dedicated Full-Page Flight-Flow: Pending Payout Queue */}
+      {showQueueModal && (
+        <PendingPayoutsQueueFlowPage
+          payoutsList={payoutsList}
+          balance={balance}
+          onClose={() => setShowQueueModal(false)}
+          onDisbursed={() => {
+            setPendingCount(0);
+            setBalance(0);
+            setPayoutsList((prev) => prev.map((p) => ({ ...p, status: "settled" })));
+            setToast("All pending payouts released via IMPS/NEFT gateway successfully!");
+            setTimeout(() => setToast(null), 4000);
+          }}
+        />
+      )}
 
-      {/* Commission Rules Modal */}
-      <ModalSheet
-        isOpen={showRulesModal}
-        onClose={() => setShowRulesModal(false)}
-        title="Category Commission Slabs"
-        subtitle="Adjust platform take-rates"
-      >
-        <div className="space-y-3">
-          {[
-            { cat: "Flights (GDS Air)", slab: "₹250 flat per booking" },
-            { cat: "Hotels & Stays", slab: "8.5% of room base tariff" },
-            { cat: "Holiday Packages", slab: "10.0% of package price" },
-            { cat: "Cab & Taxi Fleet", slab: "5.0% of trip fare" }
-          ].map((rule) => (
-            <div key={rule.cat} className="p-3 rounded-2xl border border-slate-200 flex justify-between items-center">
-              <span className="font-bold text-[13px] text-slate-800">{rule.cat}</span>
-              <span className="font-extrabold text-[13px] text-sky-700">{rule.slab}</span>
-            </div>
-          ))}
-        </div>
-      </ModalSheet>
+      {/* Dedicated Full-Page Flight-Flow: Government Statutory Taxation & Commission Policy */}
+      {showRulesModal && (
+        <TaxationPolicyFlowPage
+          onClose={() => setShowRulesModal(false)}
+          onSaved={() => {
+            setToast("Statutory taxation & commission policy saved! Real-time broadcast complete.");
+            fetchPayouts();
+            setTimeout(() => setToast(null), 4000);
+          }}
+        />
+      )}
 
       {/* Lifetime Earnings Modal */}
       <ModalSheet
@@ -1705,7 +1712,7 @@ export const UsersPanel: React.FC<PanelProps> = ({ onAction }) => {
                 {user.name}
               </span>
               <span className="block truncate text-[12px] font-medium text-[var(--premium-muted)]">
-                {user.email} · {user.role}
+                {maskEmail(user.email)} · {user.role}
               </span>
             </div>
             <button
@@ -1731,7 +1738,7 @@ export const UsersPanel: React.FC<PanelProps> = ({ onAction }) => {
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
         title={selectedUser?.name || "User Profile"}
-        subtitle={`ID: ${selectedUser?.id} · Email: ${selectedUser?.email}`}
+        subtitle={`ID: ${selectedUser?.id} · Email: ${maskEmail(selectedUser?.email || '')}`}
       >
         {selectedUser && (
           <div className="space-y-4">

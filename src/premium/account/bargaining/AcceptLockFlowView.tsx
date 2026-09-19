@@ -269,12 +269,23 @@ export const AcceptLockFlowView: React.FC<AcceptLockFlowViewProps> = ({
                 ))}
               </div>
 
-              <div className="p-3 bg-sky-50 rounded-2xl border border-sky-100 flex items-start gap-2.5 text-[11px] text-sky-900 font-medium">
-                <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-                <span>
-                  <strong>RouTripO SafeLock Promise:</strong> If the vehicle or room does not match the
-                  specs confirmed here, get a 100% immediate escrow refund with our one-click guarantee.
-                </span>
+              <div className="p-3 bg-sky-50 rounded-2xl border border-sky-100 space-y-1.5 text-[11px] text-sky-900 font-medium">
+                <div className="flex items-start gap-2.5">
+                  <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>RouTripO SafeLock Promise:</strong> If the vehicle or room does not match the
+                    specs confirmed here, get a 100% immediate escrow refund under Section 5 of our policy.
+                  </span>
+                </div>
+                <div className="pl-7">
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'bargaining-bidding' } }))}
+                    className="text-sky-700 font-bold underline hover:text-sky-900"
+                  >
+                    Read Full Bargaining & Escrow Policy →
+                  </button>
+                </div>
               </div>
 
               <button

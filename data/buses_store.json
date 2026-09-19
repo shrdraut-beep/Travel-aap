@@ -1,0 +1,118 @@
+[
+  {
+    "id": "BUS-NAS-PUN-166",
+    "vendor_id": "VEND-1001",
+    "operator_name": "Sai Travels",
+    "registration_number": "MH15ZY1122",
+    "bus_type": "2x1 AC Sleeper",
+    "total_capacity": 30,
+    "driver_details": {
+      "name": "Raju Bhai",
+      "contact": "9911223344"
+    },
+    "legal": {
+      "permit_type": "State Permit",
+      "fitness_valid_till": "2027-05-20",
+      "insurance_valid_till": "2027-08-15"
+    },
+    "schedule": {
+      "runs_on_type": "DAILY",
+      "specific_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ]
+    },
+    "route": {
+      "source": "Nashik",
+      "destination": "Pune"
+    },
+    "points": {
+      "boarding": [
+        {
+          "location": "Nashik Central Stand",
+          "time": "22:00"
+        }
+      ],
+      "dropping": [
+        {
+          "location": "Pune Station Point",
+          "time": "05:00"
+        }
+      ]
+    },
+    "pricing": {
+      "selling_price": 800,
+      "vendor_net_price": 700
+    },
+    "amenities": {
+      "ac": true,
+      "wifi": false,
+      "waterBottle": true
+    },
+    "status": "ACTIVE",
+    "created_at": "2026-09-19T12:11:33.994Z"
+  },
+  {
+    "id": "BUS-NSK-PUN-001",
+    "vendor_id": "VEND-1001",
+    "operator_name": "Sai Travels",
+    "registration_number": "MH-15-ZY-1122",
+    "bus_type": "2x1 AC Sleeper",
+    "total_capacity": 30,
+    "driver_details": {
+      "name": "Raju Bhai",
+      "contact": "9911223344"
+    },
+    "legal": {
+      "permit_type": "State Permit",
+      "fitness_valid_till": "2027-05-20",
+      "insurance_valid_till": "2027-08-15"
+    },
+    "schedule": {
+      "runs_on_type": "DAILY",
+      "specific_days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ]
+    },
+    "route": {
+      "source": "Nashik",
+      "destination": "Pune"
+    },
+    "points": {
+      "boarding": [
+        {
+          "location": "Dwarka Circle",
+          "time": "22:00"
+        }
+      ],
+      "dropping": [
+        {
+          "location": "Wakad",
+          "time": "03:00"
+        }
+      ]
+    },
+    "pricing": {
+      "selling_price": 800,
+      "vendor_net_price": 700
+    },
+    "amenities": {
+      "ac": true,
+      "wifi": false,
+      "waterBottle": true
+    },
+    "status": "ACTIVE",
+    "created_at": "2026-09-19T12:11:33.995Z"
+  }
+]

@@ -124,17 +124,44 @@ class AIAgentOrchestrator {
     try {
       // Mock validation payload to verify drift detection in real-time
       const sampleItinerary: BoundItinerary = {
-        itineraryId: 'itin_live_audit',
-        boundFlights: [],
-        boundHotels: [],
+        id: 'itin_live_audit',
+        tripTitle: 'Live Audit Trip',
+        destination: 'Goa',
+        origin: 'Mumbai',
+        startDate: '2026-10-01',
+        endDate: '2026-10-03',
+        totalDays: 2,
+        totalTravelers: 2,
+        transportMode: 'flight',
+        isLiveInventoryBound: true,
+        boundAt: new Date().toISOString(),
+        livePricing: {
+          transportCost: 4000,
+          hotelCost: 6000,
+          estimatedFoodCost: 2000,
+          estimatedActivitiesCost: 1000,
+          totalPayable: 13000,
+          currency: 'INR',
+          isGuaranteed: true,
+          fareHoldExpiresAt: Date.now() + 15 * 60 * 1000
+        },
         itinerary: [
           {
-            dayNumber: 1,
+            day: 1,
+            date: '2026-10-01',
+            dayTitle: 'Arrival & Welcome',
+            description: 'Arrival day',
+            keyPlaces: ['Airport', 'Hotel'],
+            foodSpecialty: 'Goan Fish Curry',
             activities: [
               {
-                time: '09:00',
-                activityName: 'Morning Transit',
-                description: 'Arrival transfer'
+                id: 'act-1',
+                timeSlot: '09:00 - 10:00',
+                startTime24h: '09:00',
+                endTime24h: '10:00',
+                title: 'Morning Transit',
+                description: 'Arrival transfer',
+                category: 'transit'
               }
             ]
           }
@@ -143,7 +170,7 @@ class AIAgentOrchestrator {
 
       const input: TimelineValidationInput = {
         boundItinerary: sampleItinerary,
-        toleranceMinutes: 30
+        minimumTransitBufferMinutes: 30
       };
 
       const res = await this.validationDriftAgent.execute(input);
@@ -151,10 +178,11 @@ class AIAgentOrchestrator {
       agentData.lastRunTimestamp = new Date().toISOString();
       agentData.status = 'healthy';
 
-      if (res.data && res.data.detectedDrifts && res.data.detectedDrifts.length > 0) {
-        agentData.anomaliesDetected += res.data.detectedDrifts.length;
-        this.addAlert('warn', `Detected ${res.data.detectedDrifts.length} schedule drift anomalies. Timelines automatically reconciled.`, key);
-        agentData.lastActionSummary = `Reconciled ${res.data.detectedDrifts.length} timeline drifts successfully.`;
+      const drifts = res.data?.validatedPlan?.drifts || [];
+      if (drifts.length > 0) {
+        agentData.anomaliesDetected += drifts.length;
+        this.addAlert('warn', `Detected ${drifts.length} schedule drift anomalies. Timelines automatically reconciled.`, key);
+        agentData.lastActionSummary = `Reconciled ${drifts.length} timeline drifts successfully.`;
       } else {
         agentData.lastActionSummary = 'All active itineraries verified against GDS transit schedules. Zero drift.';
       }

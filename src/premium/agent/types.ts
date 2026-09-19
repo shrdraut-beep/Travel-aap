@@ -4,6 +4,7 @@ export type AgentTabId =
   | "inventory"
   | "bookings"
   | "earnings"
+  | "api_access"
   | "markups"
   | "marketing"
   | "support"

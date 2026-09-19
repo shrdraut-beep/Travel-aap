@@ -1,0 +1,99 @@
+[
+  {
+    "id": "PKG-RAT-1001",
+    "vendor_id": "vendor-admin-1",
+    "package_name": "Konkan Coast & Ratnagiri Escape",
+    "title": "Konkan Coast & Ratnagiri Escape",
+    "destination": "ratnagiri",
+    "duration_days": 4,
+    "days": 4,
+    "price_per_person": 18500,
+    "price": 18500,
+    "vendor_net_price": 15500,
+    "inclusions": [
+      "Beach Resort Stay",
+      "Private AC Cab",
+      "Authentic Malvani Meals",
+      "Scuba & Watersports"
+    ],
+    "itinerary": [
+      "Day 1: Ganpatipule Temple & Sunset Beach",
+      "Day 2: Ratnadurg Fort & Lighthouse",
+      "Day 3: Are Ware Coastal Drive & Water Sports",
+      "Day 4: Mango Orchard Tour & Departure"
+    ],
+    "image_url": "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=1000",
+    "imageUrl": "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=1000",
+    "gallery_urls": [
+      "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=800"
+    ],
+    "status": "ACTIVE",
+    "published": true,
+    "created_at": "2026-09-19T12:08:29.997Z"
+  },
+  {
+    "id": "PKG-GOA-2002",
+    "vendor_id": "vendor-admin-2",
+    "package_name": "Goa Tropical Heritage & Coastal Bliss",
+    "title": "Goa Tropical Heritage & Coastal Bliss",
+    "destination": "goa",
+    "duration_days": 5,
+    "days": 5,
+    "price_per_person": 24000,
+    "price": 24000,
+    "vendor_net_price": 20000,
+    "inclusions": [
+      "4-Star Beach Villa",
+      "South & North Goa Sightseeing",
+      "Mandovi River Cruise",
+      "Breakfast & Dinner"
+    ],
+    "itinerary": [
+      "Day 1: Arrival & Calangute Beach Leisure",
+      "Day 2: Old Goa Churches & Spice Plantation",
+      "Day 3: Dudhsagar Waterfalls Trek",
+      "Day 4: South Goa Beaches & Sunset Cruise",
+      "Day 5: Souvenir Shopping & Departure"
+    ],
+    "image_url": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&q=80&w=1000",
+    "imageUrl": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&q=80&w=1000",
+    "gallery_urls": [
+      "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&q=80&w=800"
+    ],
+    "status": "ACTIVE",
+    "published": true,
+    "created_at": "2026-09-19T12:08:29.997Z"
+  },
+  {
+    "id": "PKG-MAH-3003",
+    "vendor_id": "vendor-admin-3",
+    "package_name": "Sahyadri Valley & Strawberry Trails",
+    "title": "Sahyadri Valley & Strawberry Trails",
+    "destination": "mahabaleshwar",
+    "duration_days": 3,
+    "days": 3,
+    "price_per_person": 12500,
+    "price": 12500,
+    "vendor_net_price": 10500,
+    "inclusions": [
+      "Hill View Resort",
+      "Panchgani Sightseeing",
+      "Strawberry Farm Experience",
+      "Mapro Garden Tour"
+    ],
+    "itinerary": [
+      "Day 1: Arrival & Arthur's Seat View",
+      "Day 2: Strawberry Plucking & Venna Lake Boating",
+      "Day 3: Table Land Panchgani & Departure"
+    ],
+    "image_url": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&q=80&w=1000",
+    "imageUrl": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&q=80&w=1000",
+    "gallery_urls": [
+      "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&q=80&w=800"
+    ],
+    "status": "ACTIVE",
+    "published": true,
+    "created_at": "2026-09-19T12:08:29.997Z"
+  }
+]

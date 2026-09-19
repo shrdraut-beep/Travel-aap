@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, BookUser, Plus, Trash2, Edit2, Phone, CreditCard, Save, Compass as  Search } from 'lucide-react';
 import { MasterContact } from '../../types';
 import { getMasterContacts, saveMasterContacts, addMasterContact, updateMasterContact, deleteMasterContact } from '../../utils/contacts';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 
 interface ManageContactsModalProps {
   isOpen: boolean;

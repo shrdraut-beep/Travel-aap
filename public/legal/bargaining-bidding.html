@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoutTripo — Bargaining & Bidding Policy</title>
+    <meta name="description" content="Rules governing reverse-bidding, multi-stage escrow payment protection, anti-leakage chat safety, vendor commitments, offer locking, and dispute resolution for custom travel requests.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+    <!-- Top Header (No print button as per policy requirements) -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+                    R
+                </div>
+                <div>
+                    <span class="text-lg font-black tracking-tight text-slate-900">RoutTripo</span>
+                    <span class="hidden sm:inline text-xs font-medium text-slate-500 ml-1.5 border-l border-slate-300 pl-2">Legal & Policy Center</span>
+                </div>
+            </a>
+
+            <div class="flex items-center gap-3">
+                <a href="/legal" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+                    All Policies
+                </a>
+                <a href="/" class="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition shadow-sm">
+                    Open App
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Header -->
+        <div class="mb-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-sky-950 text-white shadow-xl relative overflow-hidden">
+            <div class="relative z-10 max-w-3xl space-y-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-sky-300 text-xs font-semibold backdrop-blur-sm">
+                    <span>Marketplace & Bidding</span>
+                    <span>•</span>
+                    <span>Official Version 1.0</span>
+                    <span>•</span>
+                    <span>Escrow & Marketplace</span>
+                </div>
+                <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
+                    Bargaining & Bidding Policy
+                </h1>
+                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                    Rules governing reverse-bidding, multi-stage escrow payment protection, anti-leakage chat safety, vendor commitments, offer locking, and dispute resolution for custom travel requests.
+                </p>
+                <div class="flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-400 border-t border-white/10 pt-4">
+                    <div>Effective Date: <strong class="text-slate-200">September 19, 2026</strong></div>
+                    <div>Last Updated: <strong class="text-slate-200">September 19, 2026</strong></div>
+                    <div>Entity: <strong class="text-slate-200">RoutTripo Technologies Private Limited</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            <!-- Left Sidebar -->
+            <aside class="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
+                <!-- All Policies Navigation -->
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 mb-3">All Legal Documents</h3>
+                    <nav class="space-y-1">
+                        
+            <a href="/legal/terms.html" class="flex items-center justify-between px-3 py-2 text-xs rounded-r-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-l-4 border-transparent">
+                <span>Terms of Service</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Core Agreement</span>
+            </a>
+        
+            <a href="/legal/privacy.html" class="flex items-center justify-between px-3 py-2 text-xs rounded-r-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-l-4 border-transparent">
+                <span>Privacy Policy</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Google Play Required</span>
+            </a>
+        
+            <a href="/legal/cancellation-refund.html" class="flex items-center justify-between px-3 py-2 text-xs rounded-r-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-l-4 border-transparent">
+                <span>Cancellations & Refunds</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Razorpay Required</span>
+            </a>
+        
+            <a href="/legal/dpdp.html" class="flex items-center justify-between px-3 py-2 text-xs rounded-r-xl transition text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-l-4 border-transparent">
+                <span>DPDP Compliance</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">DPDPA 2023 Mandate</span>
+            </a>
+        
+            <a href="/legal/bargaining-bidding.html" class="flex items-center justify-between px-3 py-2 text-xs rounded-r-xl transition bg-sky-50 text-sky-700 font-bold border-l-4 border-sky-600">
+                <span>Bargaining & Escrow</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Escrow & Marketplace</span>
+            </a>
+        
+                    </nav>
+                </div>
+
+                <!-- Table of Contents -->
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm max-h-[50vh] overflow-y-auto">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 mb-3">Table of Contents</h3>
+                    <ul class="space-y-1 border-l-2 border-slate-100 pl-3">
+                        
+            <li>
+                <a href="#sec-1" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    1. Overview of the Feature
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-2" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    2. How Bargaining Works — Step by Step
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-3" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    3. Requester Obligations
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-4" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    4. Anti-Leakage and Chat Safety
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-5" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    5. Escrow Mechanism
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-6" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    6. Vendor Obligations
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-7" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    7. Cancellation of a Locked Bargaining Booking
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-8" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    8. Dispute Resolution Specific to Bargaining
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-9" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    9. Fees and Commission
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-10" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    10. Prohibited Conduct
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-11" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    11. Relationship of the Parties
+                </a>
+            </li>
+        
+            <li>
+                <a href="#sec-12" class="text-xs text-slate-600 hover:text-sky-600 block py-1 transition line-clamp-1">
+                    12. Relationship to Other RouTripo Policies
+                </a>
+            </li>
+        
+                    </ul>
+                </div>
+
+                <!-- Grievance Officer Quick Contact -->
+                <div class="bg-sky-50/80 rounded-2xl p-4 border border-sky-100 text-xs text-sky-950 space-y-2">
+                    <div class="font-bold flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Statutory Assistance
+                    </div>
+                    <p class="text-slate-600 text-[11px]">For grievances, data deletion requests, or formal legal notices:</p>
+                    <div class="font-semibold text-slate-900">grievance@routripo.com</div>
+                    <div class="text-[11px] text-slate-500">Helpline: 1800-ROUTRIPO (+91 1800-768-87476)</div>
+                </div>
+            </aside>
+
+            <!-- Document Content -->
+            <main class="lg:col-span-3">
+                
+            <section id="sec-1" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 1
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Overview of the Feature
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">The Bargaining feature ("Bargaining") is a marketplace mechanism within the RouTripo Platform through which a User ("Requester") posts a Trip Request describing their travel requirements (route, dates, budget range, vehicle/room/vertical preference), to which one or more onboarded Agents/Partners ("Vendors") may respond with a competitive bid ("Offer"). The Requester may negotiate with one or more Vendors through an in-app chat, compare Offers, and accept a single Offer, which is then secured through an escrow-based payment before being locked as a confirmed Booking. This Policy governs the rights and obligations of both Requesters and Vendors using this feature, and is incorporated into, and forms part of, our Terms &amp; Conditions.</p>
+                </div>
+            </section>
+        
+            <section id="sec-2" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 2
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        How Bargaining Works — Step by Step
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">Trip Request: The Requester submits a Trip Request specifying trip details, indicative budget, and any specific requirements. The Trip Request is visible to eligible Vendors, without disclosing the Requester's name, phone number, or email address.
+Vendor Offers: Eligible Vendors submit an Offer against the Trip Request within the response window shown on the Platform. Each Offer is masked to display the Vendor's business category and indicative profile (e.g., rating, verification badge) without disclosing the Vendor's direct contact details to the Requester at this stage.
+Negotiation: The Requester may open an in-app chat with one or more Vendors to negotiate price, inclusions, or terms. All chat messages pass through an automated content-safety and contact-detail-masking system (see Section 4) before being delivered.
+Auction/Response Timer: Where displayed, a countdown timer indicates the window within which the Requester must accept an Offer before it, or the overall Trip Request auction, expires. An expired Offer or Trip Request must be re-initiated by the Requester.
+Accept &amp; Lock: On accepting an Offer, the Requester proceeds to a comparison screen confirming the accepted Offer against the original Trip Request, followed by payment. On successful payment, the deal is "locked": the Vendor's real, verified business name and confirmation details are revealed to the Requester, a voucher/confirmation is generated, and the Booking is confirmed with that Vendor.
+Escrow Hold: Payment made at the Accept &amp; Lock stage is held by RouTripo in escrow and is not released to the Vendor until the criteria in Section 5 are met.</p>
+                </div>
+            </section>
+        
+            <section id="sec-3" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 3
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Requester Obligations
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">You must provide accurate and complete trip requirements in your Trip Request. RouTripo and Vendors are not responsible for an unsuitable Offer resulting from incomplete or inaccurate information you provided.
+Once you accept an Offer and complete payment, you are bound to that Booking on the terms of the accepted Offer, subject to the cancellation terms in Section 7 below.
+You must not use the in-app chat to solicit a Vendor's direct contact details, or to arrange payment or service delivery outside the Platform, for the purpose of avoiding RouTripo's applicable service fee. Any such attempt may result in suspension of your access to the Bargaining feature or your account, in accordance with Section 13 of our Terms &amp; Conditions.</p>
+                </div>
+            </section>
+        
+            <section id="sec-4" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 4
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Anti-Leakage and Chat Safety
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">To protect both Requesters and Vendors, and to preserve the integrity of the masked-identity negotiation process, all messages exchanged through the Bargaining chat are automatically screened by RouTripo's content-safety system before delivery. This system is designed to detect and block phone numbers, email addresses, external messaging-app handles, and similar contact information from being exchanged before a deal is locked. A message that is blocked or redacted for this reason will be flagged to the sender within the chat. This screening is a safety and platform-integrity measure and is not a substitute for your own judgment in what you choose to share once a deal is locked and direct contact details are appropriately exchanged for service coordination.</p>
+                </div>
+            </section>
+        
+            <section id="sec-5" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 5
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Escrow Mechanism
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">Payment made on accepting an Offer is held by RouTripo, via our payment gateway partner's escrow/nodal-account mechanism, and is not released to the Vendor immediately on payment.
+Funds are released to the Vendor once the relevant service (the trip, stay, or transport covered by the Offer) is confirmed as commenced or delivered, or upon expiry of the applicable dispute window following the scheduled service date — whichever occurs first under the settlement rule configured for that Offer category.
+If the Requester raises a valid dispute (Section 8) before funds are released, disbursement to the Vendor is paused pending resolution.
+Vendors acknowledge that amounts held in escrow are not treated as settled revenue until released in accordance with this Section and the Vendor settlement terms provided at onboarding.</p>
+                </div>
+            </section>
+        
+            <section id="sec-6" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 6
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Vendor Obligations
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">A Vendor's Offer must be an accurate, honourable quote for the service described; a Vendor may not knowingly submit an Offer it does not intend to honour if accepted.
+Once an Offer is accepted and locked by a Requester, the Vendor is contractually bound to deliver the service on the terms of that Offer, subject to the cancellation terms in Section 7.
+Vendors must not use the in-app chat to solicit the Requester's direct contact details before a deal is locked for the purpose of completing the transaction outside the Platform.
+Vendors are independent contractors and are solely responsible for the lawful and safe delivery of the service offered. RouTripo verifies Vendor onboarding documentation (including business registration and, where applicable, GSTIN) but does not guarantee, and is not liable for, the quality of service independently rendered by a Vendor.</p>
+                </div>
+            </section>
+        
+            <section id="sec-7" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 7
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Cancellation of a Locked Bargaining Booking
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">Cancellation by the Requester after a deal is locked is subject to a cancellation charge disclosed at the time of Accept &amp; Lock, which may be higher than a standard catalogue Booking given the bespoke nature of a negotiated Offer, and which will be clearly shown before you confirm cancellation.
+Cancellation or non-fulfilment by the Vendor entitles the Requester to a full refund of the escrowed amount, and may additionally affect the Vendor's standing/rating on the Platform.
+Where a dispute is raised regarding service quality or non-delivery, escrowed funds will not be released to the Vendor until the dispute is resolved under Section 8.</p>
+                </div>
+            </section>
+        
+            <section id="sec-8" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 8
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Dispute Resolution Specific to Bargaining
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">A Requester who believes a Vendor has not honoured the terms of a locked Offer may raise a dispute through the Platform within 48 hours of the scheduled service date (or such other window as displayed for that Booking). RouTripo will review the Bargaining chat history, the terms of the accepted Offer, and any evidence submitted by either party, and will determine whether to release the escrowed funds to the Vendor, refund the Requester in full or in part, or seek further information from either party. This process operates in addition to, and does not replace, the general Grievance Redressal mechanism described in our Terms &amp; Conditions.</p>
+                </div>
+            </section>
+        
+            <section id="sec-9" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 9
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Fees and Commission
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">RouTripo charges a service fee to the Requester and/or a commission to the Vendor on a Bargaining transaction, disclosed to each party at the relevant stage (to the Requester at Accept &amp; Lock, and to the Vendor at onboarding/settlement). These fees are separate from, and in addition to, the negotiated Offer price, and are non-refundable except where the underlying Booking itself is cancelled due to a RouTripo-side error or a Vendor's non-fulfilment.</p>
+                </div>
+            </section>
+        
+            <section id="sec-10" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 10
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Prohibited Conduct
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">In addition to the general prohibited-conduct provisions in our Terms &amp; Conditions, the following are specifically prohibited within the Bargaining feature:
+Attempting to bypass the contact-masking system described in Section 4, whether by encoding, obfuscating, or otherwise disguising contact information in chat messages;
+Creating multiple Trip Requests or Vendor accounts to manipulate the auction/bidding process;
+Submitting a bid or accepting an Offer with no genuine intention to honour it;
+Coordinating with another Vendor to fix or inflate bid pricing on a specific Trip Request.
+A violation of this Section may result in forfeiture of the applicable Offer, reversal of an in-progress transaction prior to service delivery, and suspension or termination of the violating party's access to the Bargaining feature or their RouTripo account.</p>
+                </div>
+            </section>
+        
+            <section id="sec-11" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 11
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Relationship of the Parties
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">RouTripo's role in a Bargaining transaction is limited to that of a technology platform and escrow facilitator connecting Requesters and Vendors. RouTripo is not a party to the underlying contract for travel services formed between the Requester and the Vendor upon acceptance of an Offer, and does not itself act as the travel-service provider in that transaction.</p>
+                </div>
+            </section>
+        
+            <section id="sec-12" class="scroll-mt-24 p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 shadow-sm mb-6 transition hover:border-slate-300">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-[11px] font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-100">
+                        Section 12
+                    </span>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">
+                        Relationship to Other RouTripo Policies
+                    </h2>
+                </div>
+                <div class="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-4">
+                    <p class="leading-relaxed text-slate-700 mb-3">This Policy operates alongside, and does not replace, our Terms &amp; Conditions, Privacy Policy, and Cancellation &amp; Refund Policy. Where this Policy specifically addresses a matter relating to the Bargaining feature (such as escrow release or Bargaining-specific cancellation charges), this Policy prevails over any general provision to the contrary in another RouTripo policy, solely for matters within the scope of the Bargaining feature.</p>
+                </div>
+            </section>
+        
+
+                <!-- Statutory Grievance Redressal Card -->
+                <div class="p-6 sm:p-8 rounded-2xl bg-slate-900 text-white shadow-lg space-y-4 mb-10">
+                    <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Statutory Grievance Redressal & Legal Officers
+                    </h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        In accordance with the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023, the details of our designated officers are set forth below:
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2">
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <span class="text-slate-400 block mb-1 text-[11px]">Grievance Redressal Officer:</span>
+                            <span class="font-bold text-white block">Adv. Rohan Deshmukh (Legal & Grievance Redressal Officer)</span>
+                            <span class="text-sky-300 block mt-1 font-mono text-[11px]">grievance@routripo.com</span>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                            <span class="text-slate-400 block mb-1 text-[11px]">Data Protection & Privacy Desk:</span>
+                            <span class="font-bold text-white block">DPDP Compliance Officer</span>
+                            <span class="text-sky-300 block mt-1 font-mono text-[11px]">privacy@routripo.com</span>
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-slate-400 pt-3 border-t border-white/10">
+                        Registered Office: Shreeram Sankul, Gangapur Road, Nashik, Maharashtra 422005, India
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
+            <p>© 2026 RoutTripo Technologies Private Limited. All rights reserved.</p>
+            <p class="text-[11px] text-slate-400">
+                Governed by the Laws of the Republic of India. Exclusive jurisdiction at Courts of Nashik, Maharashtra, India.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

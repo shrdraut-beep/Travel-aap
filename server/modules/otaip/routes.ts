@@ -14,7 +14,7 @@ import {
   inventoryBindingAgent,
   validationDriftAgent,
   packageCheckoutAgent,
-} from "../../services/otaip/index.ts";
+} from "../../services/rtaip/index.js";
 
 function parseOtaipJsonSafe(val: any) {
   if (typeof val === 'string') {

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "VEND-6531",
+    "business_name": "Sai Travels & Tours",
+    "owner_name": "Ramesh Patil",
+    "email": "ramesh@saitravels.com",
+    "phone": "+91-9876543210",
+    "business_type": "Proprietorship",
+    "address": {
+      "full_address": "MG Road",
+      "city": "Nashik",
+      "state": "Maharashtra",
+      "pincode": "422001"
+    },
+    "legal": {
+      "pan_number": "ABCDE1234F",
+      "gstin": "27ABCDE1234F1Z5",
+      "has_gst": true,
+      "trade_license": "SHOP-MH-9988"
+    },
+    "bank_details": {
+      "account_name": "Sai Travels & Tours",
+      "account_number": "112233445566",
+      "ifsc_code": "HDFC0001234",
+      "bank_name": "HDFC Bank",
+      "verified_via_penny_drop": true
+    },
+    "kyc_documents": {
+      "pan_url": "",
+      "gst_url": "",
+      "cheque_url": ""
+    },
+    "kyc_status": "APPROVED",
+    "created_at": "2026-09-19T12:11:52.528Z"
+  }
+]

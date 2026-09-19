@@ -2,9 +2,266 @@ import express, { Request, Response } from 'express';
 import { travelportService } from '../services/travelport.ts';
 import { busLookupService } from '../services/busLookup.ts';
 import { CarService } from '../services/CarService.ts';
+import { getApps } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import {
+  meilisearchService,
+  syncAllVerticalsToMeilisearch,
+  type HotelSearchFilters,
+} from '../services/meilisearchService.ts';
+import { photonService } from '../services/photonService.ts';
 
 const router = express.Router();
 const carService = new CarService();
+
+// ============================================================================
+// UNIFIED SEARCH & SYNC ENDPOINTS (Hotels, Airports, Trains, Locations)
+// ============================================================================
+
+// 1. Unified Multi-Index Search API Endpoint (GET /api/search)
+router.get(['/', '/unified'], async (req: Request, res: Response) => {
+  try {
+    const q = (req.query.q || req.query.query || '').toString().trim();
+    const index = (req.query.index || 'hotels').toString().toLowerCase();
+    const limit = req.query.limit ? Number(req.query.limit) : 20;
+
+    // Multi-Index Federated Search: Searches Hotels, Airports & Stations simultaneously
+    if (index === 'all' || index === 'universal') {
+      const [hotels, airports, stations] = await Promise.all([
+        meilisearchService.searchHotels({ q, limit }),
+        meilisearchService.searchAirports(q, Math.min(limit, 10)),
+        meilisearchService.searchTrainStations(q, Math.min(limit, 10)),
+      ]);
+
+      return res.status(200).json({
+        success: true,
+        query: q,
+        hotels: (hotels as any)?.hits || [],
+        airports: (airports as any)?.hits || [],
+        train_stations: (stations as any)?.hits || [],
+        totalHits: ((hotels as any)?.totalHits || 0) + ((airports as any)?.totalHits || 0) + ((stations as any)?.totalHits || 0),
+        source: (hotels as any)?.source || 'meilisearch-self-hosted',
+      });
+    }
+
+    // Specific Index Searches
+    if (index === 'airports' || index === 'flights') {
+      const results = await meilisearchService.searchAirports(q, limit);
+      return res.status(200).json({ success: true, ...results });
+    }
+
+    if (index === 'train_stations' || index === 'trains' || index === 'railways') {
+      const results = await meilisearchService.searchTrainStations(q, limit);
+      return res.status(200).json({ success: true, ...results });
+    }
+
+    if (index === 'locations' || index === 'places') {
+      const results = await photonService.searchLocations(q, limit);
+      return res.status(200).json({ success: true, ...results });
+    }
+
+    // Default: Hotels Search with full faceted filtering
+    const searchFilters: HotelSearchFilters = {
+      q,
+      city: req.query.city ? req.query.city.toString() : undefined,
+      minPrice: req.query.minPrice !== undefined ? Number(req.query.minPrice) : undefined,
+      maxPrice: req.query.maxPrice !== undefined ? Number(req.query.maxPrice) : undefined,
+      starRating: req.query.starRating !== undefined ? Number(req.query.starRating) : undefined,
+      amenities: req.query.amenities as string | string[] | undefined,
+      propertyType: req.query.propertyType ? req.query.propertyType.toString() : undefined,
+      refundType: req.query.refundType ? req.query.refundType.toString() : undefined,
+      sort: req.query.sort ? req.query.sort.toString() : undefined,
+      limit,
+      offset: req.query.offset ? Number(req.query.offset) : 0,
+    };
+
+    const results = await meilisearchService.searchHotels(searchFilters);
+    return res.status(200).json({
+      success: true,
+      ...results,
+    });
+  } catch (error: any) {
+    console.error('[Search] Unified Search Error:', error);
+    return res.status(500).json({ error: error?.message || 'Search failed' });
+  }
+});
+
+// 2. Real-Time Firestore to Meilisearch Sync Endpoint (POST /api/sync-search)
+router.post(['/sync-search', '/sync'], async (req: Request, res: Response) => {
+  try {
+    const { collectionName, indexName } = req.body || {};
+
+    if (!collectionName || !indexName) {
+      return res.status(400).json({
+        error: 'Missing required parameters: collectionName and indexName',
+        example: { collectionName: 'master_hotels', indexName: 'hotels' },
+      });
+    }
+
+    let documents: any[] = [];
+    if (getApps().length > 0) {
+      const db = getFirestore();
+      const snapshot = await db.collection(collectionName).get();
+      documents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    }
+
+    // Fallback if local collections are empty
+    if (documents.length === 0) {
+      if (collectionName.includes('hotel') || indexName.includes('hotel')) {
+        documents = meilisearchService['fallbackSearchHotels']({ limit: 100 }).hits;
+      } else if (collectionName.includes('airport') || indexName.includes('airport')) {
+        documents = meilisearchService.getLocalAirports();
+      } else if (collectionName.includes('train') || indexName.includes('train')) {
+        documents = meilisearchService.getLocalTrainStations();
+      }
+    }
+
+    const client = meilisearchService.getClient();
+    const index = client.index(indexName);
+    await index.addDocuments(documents);
+
+    return res.status(200).json({
+      success: true,
+      message: `Synced ${documents.length} docs from '${collectionName}' to Meilisearch index '${indexName}'`,
+      count: documents.length,
+      index: indexName,
+    });
+  } catch (error: any) {
+    console.error('[Search] Sync Error:', error);
+    return res.status(500).json({ error: error?.message || 'Sync Failed' });
+  }
+});
+
+// 3. Multi-Vertical Full Sync Trigger (POST /api/sync-all)
+router.post('/sync-all', async (_req: Request, res: Response) => {
+  try {
+    const db = getApps().length > 0 ? getFirestore() : null;
+    const stats = await syncAllVerticalsToMeilisearch(db);
+    return res.status(200).json({
+      success: true,
+      message: 'Successfully synced all verticals to Meilisearch indexes!',
+      ...stats,
+    });
+  } catch (error: any) {
+    console.error('[Search] Sync All Error:', error);
+    return res.status(500).json({ error: error?.message || 'Sync All Failed' });
+  }
+});
+
+// 4. Meilisearch Engine Health Check
+router.get('/meili/health', async (_req: Request, res: Response) => {
+  const health = await meilisearchService.checkHealth();
+  res.status(health.healthy ? 200 : 503).json(health);
+});
+
+// 5. Hotels Search with Dynamic Facets (Price, Rating, Amenities, City)
+router.all('/meili/hotels', async (req: Request, res: Response) => {
+  try {
+    const params = req.method === 'POST' ? req.body : req.query;
+
+    const searchFilters: HotelSearchFilters = {
+      q: typeof params.q === 'string' ? params.q : (params.destination || params.location || params.city || '').toString(),
+      city: params.city ? params.city.toString() : undefined,
+      minPrice: params.minPrice !== undefined ? Number(params.minPrice) : undefined,
+      maxPrice: params.maxPrice !== undefined ? Number(params.maxPrice) : undefined,
+      starRating: params.starRating !== undefined ? Number(params.starRating) : undefined,
+      amenities: params.amenities,
+      propertyType: params.propertyType ? params.propertyType.toString() : undefined,
+      refundType: params.refundType ? params.refundType.toString() : undefined,
+      sort: params.sort ? params.sort.toString() : undefined,
+      limit: params.limit ? Number(params.limit) : 20,
+      offset: params.offset ? Number(params.offset) : 0,
+    };
+
+    const results = await meilisearchService.searchHotels(searchFilters);
+    res.json({
+      success: true,
+      ...results,
+    });
+  } catch (err: any) {
+    console.error('[Search] Meilisearch hotel search error:', err);
+    res.status(500).json({
+      success: false,
+      error: err?.message || 'Meilisearch hotel query failed',
+      hint: 'Ensure Meilisearch container is running at MEILISEARCH_HOST',
+    });
+  }
+});
+
+// 3. Airports Search & Instant IATA Autocomplete
+router.all('/meili/airports', async (req: Request, res: Response) => {
+  try {
+    const params = req.method === 'POST' ? req.body : req.query;
+    const query = (params.q || params.query || params.search || '').toString().trim();
+    const limit = params.limit ? Number(params.limit) : 10;
+
+    if (!query) {
+      return res.json({ success: true, hits: [], totalHits: 0 });
+    }
+
+    const results = await meilisearchService.searchAirports(query, limit);
+    res.json({
+      success: true,
+      ...results,
+    });
+  } catch (err: any) {
+    console.error('[Search] Meilisearch airport search error:', err);
+    res.status(500).json({
+      success: false,
+      error: err?.message || 'Airport lookup failed',
+    });
+  }
+});
+
+// 4. Train Stations Search & Station Code Lookup
+router.all('/meili/train-stations', async (req: Request, res: Response) => {
+  try {
+    const params = req.method === 'POST' ? req.body : req.query;
+    const query = (params.q || params.query || params.search || '').toString().trim();
+    const limit = params.limit ? Number(params.limit) : 10;
+
+    if (!query) {
+      return res.json({ success: true, hits: [], totalHits: 0 });
+    }
+
+    const results = await meilisearchService.searchTrainStations(query, limit);
+    res.json({
+      success: true,
+      ...results,
+    });
+  } catch (err: any) {
+    console.error('[Search] Meilisearch train station search error:', err);
+    res.status(500).json({
+      success: false,
+      error: err?.message || 'Train station lookup failed',
+    });
+  }
+});
+
+// 5. Komoot Photon Location & City Autocomplete
+router.get('/locations/autocomplete', async (req: Request, res: Response) => {
+  try {
+    const query = (req.query.q || req.query.query || '').toString().trim();
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const lang = (req.query.lang || 'en').toString();
+
+    const response = await photonService.searchLocations(query, limit, lang);
+    res.json({
+      success: true,
+      ...response,
+    });
+  } catch (err: any) {
+    console.error('[Search] Photon geocoding error:', err);
+    res.status(500).json({
+      success: false,
+      error: err?.message || 'Location autocomplete failed',
+    });
+  }
+});
+
+// ============================================================================
+// LEGACY & GDS VENDOR SEARCH ENDPOINTS
+// ============================================================================
 
 // Hotels Search (GET & POST)
 router.all('/hotels', async (req: Request, res: Response) => {
@@ -95,3 +352,4 @@ router.all('/flights', async (req: Request, res: Response) => {
 });
 
 export default router;
+

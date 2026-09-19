@@ -2,16 +2,17 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 export interface BookingStepHeaderProps {
-  title: string;
-  /** e.g. "Step 3 of 6" */
-  step: string;
+  title: React.ReactNode;
+  /** e.g. "Step 3 of 6" or a ReactNode badge */
+  step?: React.ReactNode;
   /** Subtitle line below the title, OR — when inlineSubtitle is true — inline next to the step badge. */
   subtitle?: React.ReactNode;
   /** CheckoutStep's layout puts the subtitle inline with the title/badge instead of on its own line. */
   inlineSubtitle?: boolean;
   onBack: () => void;
   backAriaLabel: string;
-  maxWidth?: 'max-w-3xl' | 'max-w-4xl';
+  maxWidth?: string;
+  sticky?: boolean;
   /** SeatSelectionStep's right-side "Passenger" info block. */
   rightElement?: React.ReactNode;
   /** MealsSelectionStep's extra filter row rendered below the main header row. */
@@ -37,11 +38,12 @@ export const BookingStepHeader: React.FC<BookingStepHeaderProps> = ({
   onBack,
   backAriaLabel,
   maxWidth = 'max-w-3xl',
+  sticky = false,
   rightElement,
   children,
 }) => {
   return (
-    <header className="relative z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <header className={`${sticky ? 'sticky top-0' : 'relative'} z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs`}>
       <div className={`${maxWidth} mx-auto px-4 py-3.5 flex items-center justify-between gap-4`}>
         <div className="flex items-center gap-3">
           <button
@@ -56,9 +58,11 @@ export const BookingStepHeader: React.FC<BookingStepHeaderProps> = ({
           {inlineSubtitle ? (
             <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
               <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
-              <span className="text-[10px] font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
-                {step}
-              </span>
+              {step && (
+                <span className="text-[10px] font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
+                  {step}
+                </span>
+              )}
               {subtitle && (
                 <span className="text-xs text-slate-500 hidden sm:block border-l border-slate-300 pl-3">
                   {subtitle}
@@ -69,9 +73,11 @@ export const BookingStepHeader: React.FC<BookingStepHeaderProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">{title}</h1>
-                <span className="text-xs font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
-                  {step}
-                </span>
+                {step && (
+                  <span className="text-xs font-bold text-[var(--premium-violet)] bg-violet-50 px-2 py-0.5 rounded-full">
+                    {step}
+                  </span>
+                )}
               </div>
               {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
             </div>

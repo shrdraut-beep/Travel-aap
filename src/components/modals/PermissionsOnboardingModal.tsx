@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, MapPin, Bell, Mic, FileText, X, Check, ShieldAlert } from 'lucide-react';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 
 interface PermissionsOnboardingModalProps {
   isOpen: boolean;

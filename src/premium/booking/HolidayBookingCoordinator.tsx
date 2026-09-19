@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle2, MapPin, Calendar, Star, Navigation, Palmtree, Users } from "lucide-react";
 import { BookingStepHeader } from "./BookingStepHeader";
 import { RazorpayPaymentModal } from "./RazorpayPaymentModal";
+import { packageService, type TourPackage } from "../../services/packages/PackageService";
 
 export interface HolidaySearchParams {
   location: string;
@@ -14,42 +15,6 @@ export interface HolidayBookingCoordinatorProps {
   initialSearchParams: HolidaySearchParams;
   onExit: () => void;
 }
-
-const mockPackages = [
-  {
-    id: "pkg1",
-    name: "Maldives Honeymoon Special",
-    location: "Maldives",
-    duration: "5 Nights, 6 Days",
-    price: 45000,
-    rating: 4.8,
-    reviews: 124,
-    image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=800",
-    includes: ["Flights", "4 Star Hotel", "Meals", "Transfers"]
-  },
-  {
-    id: "pkg2",
-    name: "Bali Adventure & Relax",
-    location: "Bali, Indonesia",
-    duration: "6 Nights, 7 Days",
-    price: 38000,
-    rating: 4.6,
-    reviews: 210,
-    image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=800",
-    includes: ["4 Star Hotel", "Sightseeing", "Meals", "Transfers"]
-  },
-  {
-    id: "pkg3",
-    name: "Dubai Luxury Getaway",
-    location: "Dubai, UAE",
-    duration: "4 Nights, 5 Days",
-    price: 32000,
-    rating: 4.9,
-    reviews: 342,
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800",
-    includes: ["Flights", "5 Star Hotel", "Desert Safari", "Burj Khalifa"]
-  }
-];
 
 export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps> = ({
   initialSearchParams,
@@ -65,6 +30,7 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [step]);
 
+  const [packages, setPackages] = useState<any[]>([]);
   const [selectedPkg, setSelectedPkg] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -73,9 +39,46 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    let isMounted = true;
+    const fetchLivePackages = async () => {
+      setIsLoading(true);
+      try {
+        const live = await packageService.getAll();
+        if (isMounted) {
+          const formatted = live.map((pkg) => ({
+            id: pkg.id,
+            name: pkg.package_name || pkg.title || 'Tour Package',
+            location: pkg.destination ? (pkg.destination.charAt(0).toUpperCase() + pkg.destination.slice(1)) : 'Maharashtra',
+            duration: pkg.duration || `${pkg.duration_days || pkg.days || 3} Days`,
+            price: Number(pkg.price_per_person || pkg.price || 15000),
+            rating: pkg.rating || 4.8,
+            reviews: pkg.reviews || 84,
+            image: pkg.image_url || pkg.imageUrl || pkg.image || 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?auto=format&fit=crop&q=80&w=800',
+            gallery: pkg.gallery_urls || pkg.galleryUrls || [],
+            includes: Array.isArray(pkg.inclusions) && pkg.inclusions.length > 0 ? pkg.inclusions : ["Hotel Stay", "Transport", "Sightseeing", "Meals"]
+          }));
+
+          const searchLoc = initialSearchParams?.location?.trim().toLowerCase();
+          if (searchLoc && searchLoc !== 'all') {
+            const matched = formatted.filter(p => 
+              p.location.toLowerCase().includes(searchLoc) || 
+              p.name.toLowerCase().includes(searchLoc)
+            );
+            setPackages(matched.length > 0 ? matched : formatted);
+          } else {
+            setPackages(formatted);
+          }
+        }
+      } catch (err) {
+        console.warn("Error fetching live packages in HolidayBookingCoordinator:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchLivePackages();
+    return () => { isMounted = false; };
+  }, [initialSearchParams?.location]);
 
   const handleBook = (pkg: any) => {
     setSelectedPkg(pkg);
@@ -148,49 +151,56 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
           </div>
         ) : step === "results" ? (
           <div className="space-y-4">
-            {mockPackages.map((pkg) => (
-              <div key={pkg.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row group">
-                <div className="w-full md:w-64 h-48 md:h-auto relative bg-slate-200 overflow-hidden">
-                  <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-slate-800 flex items-center gap-1">
-                    <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
-                    {pkg.rating} ({pkg.reviews})
-                  </div>
-                </div>
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-sky-600 uppercase tracking-wider mb-1">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {pkg.location}
-                    </div>
-                    <h3 className="text-xl font-black text-slate-900 mb-2">{pkg.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mb-4">
-                      <Calendar className="w-4 h-4 text-slate-400" />
-                      {pkg.duration}
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {pkg.includes.map(inc => (
-                        <span key={inc} className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded-md">
-                          {inc}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
-                    <div>
-                      <div className="text-2xl font-black text-[var(--premium-violet)]">₹{pkg.price}</div>
-                      <div className="text-[10px] text-slate-500 uppercase font-semibold">per person</div>
-                    </div>
-                    <button 
-                      onClick={() => handleBook(pkg)}
-                      className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-colors"
-                    >
-                      View & Book
-                    </button>
-                  </div>
-                </div>
+            {packages.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 border border-slate-200 text-center space-y-2">
+                <p className="text-lg font-bold text-slate-800">No tour packages found</p>
+                <p className="text-sm text-slate-500">There are currently no active holiday packages matching "{initialSearchParams.location}".</p>
               </div>
-            ))}
+            ) : (
+              packages.map((pkg) => (
+                <div key={pkg.id} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row group">
+                  <div className="w-full md:w-64 h-48 md:h-auto relative bg-slate-200 overflow-hidden">
+                    <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-slate-800 flex items-center gap-1">
+                      <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                      {pkg.rating} ({pkg.reviews})
+                    </div>
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-sky-600 uppercase tracking-wider mb-1">
+                        <MapPin className="w-3.5 h-3.5" />
+                        {pkg.location}
+                      </div>
+                      <h3 className="text-xl font-black text-slate-900 mb-2">{pkg.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-slate-600 mb-4">
+                        <Calendar className="w-4 h-4 text-slate-400" />
+                        {pkg.duration}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {pkg.includes.map((inc: string) => (
+                          <span key={inc} className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded-md">
+                            {inc}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                      <div>
+                        <div className="text-2xl font-black text-[var(--premium-violet)]">₹{pkg.price?.toLocaleString('en-IN')}</div>
+                        <div className="text-[10px] text-slate-500 uppercase font-semibold">per person</div>
+                      </div>
+                      <button 
+                        onClick={() => handleBook(pkg)}
+                        className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-colors cursor-pointer"
+                      >
+                        View & Book
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         ) : selectedPkg && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

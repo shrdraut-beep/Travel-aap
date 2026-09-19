@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, UserPlus, Check, Search, BookUser, Plus, Phone, CreditCard } from 'lucide-react';
 import { Member, MasterContact } from '../../types';
 import { getMasterContacts, addMasterContact } from '../../utils/contacts';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 
 interface AddMemberModalProps {
   isOpen: boolean;

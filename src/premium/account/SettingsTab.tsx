@@ -24,6 +24,7 @@ import {
   User,
   Workflow
 } from "lucide-react";
+import { maskEmail } from "../../security/privacyUtils";
 import type { AccountItemId } from "./types";
 import { ListRow, PillButton, SectionHeader } from "./ui";
 import { useTripContext } from "../../context/TripContext";
@@ -121,7 +122,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div>
               <h2 className="text-[16px] font-black text-white">{userName}</h2>
-              <p className="text-[12px] text-slate-400 font-medium">{userEmail}</p>
+              <p className="text-[12px] text-slate-400 font-medium">{maskEmail(userEmail)}</p>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 text-[11px] font-bold border border-sky-500/30">
               Verified

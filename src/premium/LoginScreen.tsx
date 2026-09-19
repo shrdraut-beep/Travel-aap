@@ -279,30 +279,26 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     <img src={acc.iconSrc} alt={acc.label} className="w-5 h-5 object-contain shrink-0 drop-shadow-xs" />
                     <span className="text-[10.5px] font-black text-slate-800 truncate">{acc.label}</span>
                   </div>
-                  <p className="text-[9.5px] font-medium text-slate-500 pt-1 truncate">{acc.email}</p>
+                  <p className="text-[9.5px] font-semibold text-slate-500 pt-1 truncate">{acc.tag}</p>
                 </div>
-                <div className="pt-2 flex flex-col gap-1">
+                <div className="pt-2">
                   <button
                     type="button"
                     onClick={() => handleDemoLogin(acc)}
-                    className={`w-full py-1 text-center text-[10px] font-black rounded-lg ${acc.btnColor} shadow-xs active:scale-95 transition cursor-pointer`}
+                    className={`w-full py-1.5 text-center text-[10px] font-black rounded-lg ${acc.btnColor} shadow-xs active:scale-95 transition cursor-pointer`}
                   >
                     {acc.actionText}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => handleFillDemo(acc, e)}
-                    className="text-[9px] font-bold text-slate-400 hover:text-indigo-600 transition text-center py-0.5"
-                  >
-                    Auto-fill
                   </button>
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-medium px-0.5">
-            <span>Pass: <code className="text-slate-700 font-bold bg-slate-100 px-1 py-0.5 rounded">demo@user123 / vendor123 / admin123</code></span>
-            <span className="text-emerald-600 font-bold">● Ready to test</span>
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
+              <span>Zero-Trust Privacy Protected</span>
+            </span>
+            <span className="text-emerald-600 font-bold">● 1-Click Access</span>
           </div>
         </div>
 

@@ -41,6 +41,20 @@ export function maskPhone(phone: string): string {
 }
 
 /**
+ * Mask Email Address: e.g. ad***@r***.app / u***@***.com
+ */
+export function maskEmail(email: string): string {
+  if (!email || !email.includes('@')) return '******@*******.***';
+  const [local, domain] = email.split('@');
+  const visible = local.length > 2 ? local.slice(0, 2) : local.slice(0, 1);
+  const domainParts = domain.split('.');
+  const domainName = domainParts[0];
+  const tld = domainParts.slice(1).join('.');
+  const maskedDomain = domainName.length > 2 ? `${domainName[0]}***` : '***';
+  return `${visible}***@${maskedDomain}.${tld || 'com'}`;
+}
+
+/**
  * Mask Vehicle Registration: e.g. MH-12-**-****
  */
 export function maskVehicleNumber(regNo: string): string {

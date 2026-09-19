@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. Meilisearch - Self-Hosted Lightning Fast Search Engine
+  # Docs: https://github.com/meilisearch/meilisearch
+  # ---------------------------------------------------------------------------
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: routripo_meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      # Set your production master key in .env or keep this secure default for dev
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey1234567890RoutripoSecure}
+      - MEILI_ENV=${MEILI_ENV:-production}
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MAX_INDEXING_MEMORY=2Gb
+      - MEILI_MAX_INDEXING_THREADS=4
+      - MEILI_HTTP_PAYLOAD_SIZE_LIMIT=104857600 # 100MB batch payload allowance
+    volumes:
+      - meili_data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - routripo_network
+
+  # ---------------------------------------------------------------------------
+  # 2. Komoot Photon - OpenStreetMap Geocoding & City Autocomplete Engine
+  # Docs: https://github.com/komoot/photon
+  # ---------------------------------------------------------------------------
+  photon:
+    image: komoot/photon:latest
+    container_name: routripo_photon
+    ports:
+      - "2322:2322"
+    environment:
+      - JAVA_OPTS=-Xmx2g
+    volumes:
+      - photon_data:/photon/photon_data
+    restart: unless-stopped
+    networks:
+      - routripo_network
+
+volumes:
+  meili_data:
+    name: routripo_meili_data
+  photon_data:
+    name: routripo_photon_data
+
+networks:
+  routripo_network:
+    name: routripo_network
+    driver: bridge

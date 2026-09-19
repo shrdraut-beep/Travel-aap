@@ -37,16 +37,21 @@ const LANGUAGE_NAMES: Record<string, string> = {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem('routripo_language') as Language) || 'mr';
+    const selected = safeStorage.getItem('routripo_language_selected');
+    const stored = safeStorage.getItem('routripo_language');
+    if (selected === 'true' && stored) {
+      return stored as Language;
+    }
+    return 'en';
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('routripo_language', lang);
-    localStorage.setItem('routripo_language_selected', 'true');
+    safeStorage.setItem('routripo_language', lang);
+    safeStorage.setItem('routripo_language_selected', 'true');
   };
 
-  const currentAppLanguage = LANGUAGE_NAMES[language] || 'Marathi';
+  const currentAppLanguage = LANGUAGE_NAMES[language] || 'English (Nawab Mode 🎩)';
 
   const t = (key: string): string => {
     if (!key) return '';

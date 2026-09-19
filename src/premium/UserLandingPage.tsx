@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
@@ -41,6 +41,8 @@ import { HolidayBookingCoordinator } from "./booking/HolidayBookingCoordinator";
 import type { HolidaySearchParams } from "./booking/HolidayBookingCoordinator";
 import { TrainBookingCoordinator } from "./booking/TrainBookingCoordinator";
 import type { TrainSearchParams } from "./booking/TrainBookingCoordinator";
+import { PromotionalAdsRail } from "../components/common/PromotionalAdsRail";
+import { ActiveOfferCouponsGrid } from "../components/common/ActiveOfferCouponsGrid";
 
 export interface UserLandingPageProps {
   hideHeader?: boolean;
@@ -231,6 +233,40 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
         {/* Master Search Card */}
         <div className="px-4">
           <SearchCard mode={mode} onSearch={handleCardSearch} />
+        </div>
+
+        {/* Promotional Ads Rail & Interactive Offer Coupons Grid */}
+        <div className="px-4 space-y-3 pt-1">
+          <PromotionalAdsRail
+            variant="user"
+            onApplyOffer={(code) => {
+              if (onSelectOffer) {
+                onSelectOffer({
+                  id: code,
+                  title: `Special Promo ${code}`,
+                  code,
+                  discount: "Active Discount",
+                  tag: "SPECIAL PROMO",
+                  description: `Instant festive discount code ${code} applied successfully!`
+                } as any);
+              }
+            }}
+          />
+          <ActiveOfferCouponsGrid
+            variant="user"
+            onApplyOffer={(code) => {
+              if (onSelectOffer) {
+                onSelectOffer({
+                  id: code,
+                  title: `Offer Coupon ${code}`,
+                  code,
+                  discount: "Active Code",
+                  tag: "COUPON",
+                  description: `Coupon ${code} copied to clipboard! Ready to apply at checkout.`
+                } as any);
+              }
+            }}
+          />
         </div>
 
         {/* SaaS Travel Factor: Smart Travel Hub */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Bell, LogOut, Siren, Settings, X, CheckCircle, Info, ChevronDown, ChevronRight, ArrowLeft, Ticket } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
+import { maskEmail } from "../../security/privacyUtils";
 
 export function BrandLogo({ className = "text-2xl" }) {
   return (
@@ -247,7 +248,7 @@ export function TopBar({
                 )}
                 <div className="min-w-0">
                   <h4 className="text-xs font-black text-slate-900 truncate">{userName}</h4>
-                  <p className="text-[10px] text-slate-500 font-medium truncate">{userEmail}</p>
+                  <p className="text-[10px] text-slate-500 font-medium truncate">{maskEmail(userEmail)}</p>
                 </div>
               </div>
               

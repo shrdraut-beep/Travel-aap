@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Luggage, ShieldCheck, CalendarClock, ArrowRight, Check } from 'lucide-react';
 import { useCurrency } from './useCurrency';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 
 interface FareSelectionModalProps {
   isOpen: boolean;

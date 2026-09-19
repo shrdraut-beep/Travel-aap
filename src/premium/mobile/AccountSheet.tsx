@@ -26,6 +26,7 @@ import {
   Wallet
 } from "lucide-react";
 import { Sheet } from "./Sheet";
+import { maskEmail } from "../../security/privacyUtils";
 
 export type AccountItemId =
   | "profile"
@@ -280,7 +281,7 @@ export const AccountSheet: React.FC<AccountSheetProps> = ({
           {userName}
         </span>
         <span className="block truncate text-[12px] font-medium text-slate-500 leading-none mt-0">
-          {userEmail}
+          {maskEmail(userEmail)}
         </span>
       </span>
       <ChevronRight className="h-5 w-5 shrink-0 text-slate-400" />

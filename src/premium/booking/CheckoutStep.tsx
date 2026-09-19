@@ -106,6 +106,7 @@ export const CheckoutStep: React.FC<CheckoutStepProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState("");
+  const [pnrNumber, setPnrNumber] = useState("");
 
   const passengerName = `${firstName} ${lastName}`.trim();
 

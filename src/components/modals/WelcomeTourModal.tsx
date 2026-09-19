@@ -1,7 +1,7 @@
 import { safeStorage } from '../../utils/storage';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 import { 
   Compass, 
   MapPin, 

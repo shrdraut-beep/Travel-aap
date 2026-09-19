@@ -43,6 +43,7 @@ import { GroupDecisionPolls } from './components/planning/GroupDecisionPolls';
 import { MemoriesView } from './components/views/MemoriesView';
 import { GroupSplitPaymentModal } from './components/common/GroupSplitPaymentModal';
 import { CancellationRefundModal } from './components/routripo/CancellationRefundModal';
+import { LegalPolicyModal } from './components/legal/LegalPolicyModal';
 import { 
   BargainNewRequestModal, 
   BargainChatModal, 
@@ -57,6 +58,8 @@ import {
   DestinationDetailModal,
   PremiumModalWrapper
 } from './premium/modals/PremiumModals';
+import { WalletFlowPage } from './premium/user/flows/WalletFlowPage';
+import { VouchersOffersFlowPage } from './premium/user/flows/VouchersOffersFlowPage';
 
 // Providers & Stores
 import { useTripContext } from './context/TripContext';
@@ -90,6 +93,7 @@ import { BusSeatMapPage } from './pages/BusSeatMapPage';
 import { CarResultsPage } from './pages/CarResultsPage';
 import { AncillariesFlow } from './pages/AncillariesFlow';
 import { OrderReviewPage } from './pages/OrderReviewPage';
+import { LegalPolicyPage } from './pages/LegalPolicyPage';
 import { BookingFlowCoordinator } from './premium/booking/BookingFlowCoordinator';
 import type { FlightSearchParams } from './premium/booking/FlightResultsStep';
 import { HotelBookingCoordinator } from './premium/booking/HotelBookingCoordinator';
@@ -148,6 +152,8 @@ function MainApp() {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [showFuelCalc, setShowFuelCalc] = useState(false);
   const [isCancellationOpen, setIsCancellationOpen] = useState(false);
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [activeLegalPolicy, setActiveLegalPolicy] = useState<string>('terms');
   const [infoModal, setInfoModal] = useState<{ title: string; subtitle?: string; content: string } | null>(null);
   const [activeFlightSearch, setActiveFlightSearch] = useState<FlightSearchParams | null>(null);
   const [activeHotelSearch, setActiveHotelSearch] = useState<HotelSearchParams | null>(null);
@@ -228,6 +234,13 @@ function MainApp() {
     window.addEventListener("open-kharch-modal", handleOpenKharch);
     window.addEventListener("open-fuel-calculator", handleOpenFuel);
     window.addEventListener("open-add-plan-modal", handleOpenPlan);
+    const handleOpenLegal = (e: any) => {
+      setIsLegalModalOpen(true);
+      if (e.detail?.policyId) {
+        setActiveLegalPolicy(e.detail.policyId);
+      }
+    };
+    window.addEventListener("open-legal-modal", handleOpenLegal);
     const handleConvertEvent = (e: any) => {
       if (e.detail) handleConvertSmartTrip(e.detail);
     };
@@ -237,6 +250,7 @@ function MainApp() {
       window.removeEventListener("open-kharch-modal", handleOpenKharch);
       window.removeEventListener("open-fuel-calculator", handleOpenFuel);
       window.removeEventListener("open-add-plan-modal", handleOpenPlan);
+      window.removeEventListener("open-legal-modal", handleOpenLegal);
       window.removeEventListener("convert-smart-trip", handleConvertEvent);
     };
   }, [addNewTrip]);
@@ -504,6 +518,17 @@ function MainApp() {
       case 'settings-logout':
         handleLogout();
         break;
+      case 'about':
+      case 'settings-about':
+      case 'policies':
+        setIsLegalModalOpen(true);
+        setActiveLegalPolicy('terms');
+        break;
+      case 'privacy':
+      case 'settings-privacy':
+        setIsLegalModalOpen(true);
+        setActiveLegalPolicy('privacy');
+        break;
       case 'delete-account':
         if(window.confirm('Are you sure you want to delete your account?')) {
            handleLogout();
@@ -664,26 +689,23 @@ function MainApp() {
                   setIsVouchersOpen(true);
                 }}
               />
-              <VouchersModal
-                isOpen={isVouchersOpen}
-                onClose={() => setIsVouchersOpen(false)}
-              />
-              <SecretOffersModal
-                isOpen={isSecretOffersOpen}
-                onClose={() => setIsSecretOffersOpen(false)}
-                onOpenChat={() => {
-                  setIsSecretOffersOpen(false);
-                  setIsBargainChatOpen(true);
-                }}
-                onOpenVouchers={() => {
-                  setIsSecretOffersOpen(false);
-                  setIsVouchersOpen(true);
-                }}
-              />
-              <WalletModal
-                isOpen={isWalletOpen}
-                onClose={() => setIsWalletOpen(false)}
-              />
+              {isVouchersOpen && (
+                <VouchersOffersFlowPage
+                  initialTab="passes"
+                  onClose={() => setIsVouchersOpen(false)}
+                />
+              )}
+              {isSecretOffersOpen && (
+                <VouchersOffersFlowPage
+                  initialTab="secret"
+                  onClose={() => setIsSecretOffersOpen(false)}
+                />
+              )}
+              {isWalletOpen && (
+                <WalletFlowPage
+                  onClose={() => setIsWalletOpen(false)}
+                />
+              )}
               <BillScannerModal
                 isOpen={isScannerOpen}
                 onClose={() => setIsScannerOpen(false)}
@@ -722,6 +744,11 @@ function MainApp() {
                 isOpen={isCancellationOpen}
                 onClose={() => setIsCancellationOpen(false)}
                 contract={null}
+              />
+              <LegalPolicyModal
+                isOpen={isLegalModalOpen}
+                onClose={() => setIsLegalModalOpen(false)}
+                initialPolicyId={activeLegalPolicy}
               />
               {showFuelCalc && (
                 <FuelCalculatorModal 
@@ -1012,7 +1039,19 @@ function MainApp() {
 export default function App() {
   const location = useLocation();
   const currentUser = useAuthStore(state => state.currentUser);
-  const isOverlayRoute = Boolean(currentUser) && [
+
+  const isLegalRoute = [
+    '/legal',
+    '/terms',
+    '/privacy',
+    '/cancellation-refund',
+    '/refund-policy',
+    '/dpdp',
+    '/bargaining-policy',
+    '/bargaining'
+  ].includes(location.pathname) || location.pathname.startsWith('/legal/');
+
+  const isOverlayRoute = isLegalRoute || (Boolean(currentUser) && [
     '/checkout', 
     '/stays/results', 
     '/stays/details',
@@ -1029,7 +1068,7 @@ export default function App() {
     '/buses/seatmap',
     '/ancillaries',
     '/order-review'
-  ].includes(location.pathname);
+  ].includes(location.pathname));
 
   return (
     <CurrencyProvider>
@@ -1038,26 +1077,41 @@ export default function App() {
           <div style={{ display: isOverlayRoute ? 'none' : 'block' }}>
             <MainApp />
           </div>
-          {currentUser && (
-            <Routes>
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/stays/results" element={<StaysResultsPage />} />
-              <Route path="/stays/details" element={<StaysDetailsPage />} />
-              <Route path="/stays/checkout" element={<StaysCheckoutPage />} />
-              <Route path="/flights/results" element={<FlightsResultsPage />} />
-              <Route path="/flights/fares" element={<FlightFareSelectionPage />} />
-              <Route path="/flights/passengers" element={<FlightPassengerDetailsPage />} />
-              <Route path="/flights/seats" element={<FlightSeatSelectionPage />} />
-              <Route path="/flights/meals" element={<FlightMealsSelectionPage />} />
-              <Route path="/flights/baggage" element={<FlightBaggageSelectionPage />} />
-              <Route path="/cars/results" element={<CarsResultsPage />} />
-              <Route path="/buses" element={<BusResultsPage />} />
-              <Route path="/buses/seatmap" element={<BusSeatMapPage />} />
-              <Route path="/cars" element={<CarResultsPage />} />
-              <Route path="/ancillaries" element={<AncillariesFlow flightOffer={{}} onComplete={(data) => console.log(data)} />} />
-              <Route path="/order-review" element={<OrderReviewPage />} />
-            </Routes>
-          )}
+
+          <Routes>
+            {/* Public Legal Policies & Compliance Routes */}
+            <Route path="/legal" element={<LegalPolicyPage />} />
+            <Route path="/legal/:policyId" element={<LegalPolicyPage />} />
+            <Route path="/terms" element={<LegalPolicyPage />} />
+            <Route path="/privacy" element={<LegalPolicyPage />} />
+            <Route path="/cancellation-refund" element={<LegalPolicyPage />} />
+            <Route path="/refund-policy" element={<LegalPolicyPage />} />
+            <Route path="/dpdp" element={<LegalPolicyPage />} />
+            <Route path="/bargaining-policy" element={<LegalPolicyPage />} />
+            <Route path="/bargaining" element={<LegalPolicyPage />} />
+
+            {/* Authenticated Checkout & Booking Flow Routes */}
+            {currentUser && (
+              <>
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/stays/results" element={<StaysResultsPage />} />
+                <Route path="/stays/details" element={<StaysDetailsPage />} />
+                <Route path="/stays/checkout" element={<StaysCheckoutPage />} />
+                <Route path="/flights/results" element={<FlightsResultsPage />} />
+                <Route path="/flights/fares" element={<FlightFareSelectionPage />} />
+                <Route path="/flights/passengers" element={<FlightPassengerDetailsPage />} />
+                <Route path="/flights/seats" element={<FlightSeatSelectionPage />} />
+                <Route path="/flights/meals" element={<FlightMealsSelectionPage />} />
+                <Route path="/flights/baggage" element={<FlightBaggageSelectionPage />} />
+                <Route path="/cars/results" element={<CarsResultsPage />} />
+                <Route path="/buses" element={<BusResultsPage />} />
+                <Route path="/buses/seatmap" element={<BusSeatMapPage />} />
+                <Route path="/cars" element={<CarResultsPage />} />
+                <Route path="/ancillaries" element={<AncillariesFlow flightOffer={{}} onComplete={(data) => console.log(data)} />} />
+                <Route path="/order-review" element={<OrderReviewPage />} />
+              </>
+            )}
+          </Routes>
         </div>
       </BookingFlowProvider>
     </CurrencyProvider>

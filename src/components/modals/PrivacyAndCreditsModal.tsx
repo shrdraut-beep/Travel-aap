@@ -82,6 +82,30 @@ export const PrivacyAndCreditsModal: React.FC<PrivacyAndCreditsModalProps> = ({ 
                   : 'Routripo strictly complies with the Digital Personal Data Protection Act, 2023 (DPDPA 2023) of India. We do not process, store, or share any personal data without your explicit prior consent, and respect your right to seek complete erasure of your data at any time.'
                 }
               </p>
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-sky-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'dpdp' } }));
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>{lang === 'mr' ? 'अधिकृत DPDP २०२३ दस्तऐवज' : 'Official DPDP 2023 Policy'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'privacy' } }));
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold border border-sky-300 transition flex items-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5 text-sky-700" />
+                  <span>{lang === 'mr' ? 'संपूर्ण प्रायव्हसी पॉलिसी' : 'Full Privacy Policy'}</span>
+                </button>
+              </div>
             </div>
 
             {/* 1. Information We Collect */}

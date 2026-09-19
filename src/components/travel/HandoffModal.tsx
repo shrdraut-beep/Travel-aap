@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2, ShieldCheck, ExternalLink, Compass as  X } from 'lucide-react';
-import { FullScreenPortal } from '../../common/FullScreenPortal';
+import { FullScreenPortal } from '../common/FullScreenPortal';
 
 interface HandoffModalProps {
   isOpen: boolean;

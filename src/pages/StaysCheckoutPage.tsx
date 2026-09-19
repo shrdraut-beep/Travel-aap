@@ -154,18 +154,31 @@ export const StaysCheckoutPage = () => {
     }
   };
 
+  const nights = 1;
+
   if (paymentStatus) {
      return (
-       <PaymentStatusScreen 
-         status={paymentStatus}
-         origin={hotel?.name || 'Hotel Booking'}
-         destination={hotel?.accommodation?.location?.address?.city_name || 'Hotel Property'}
-         travellerCount={adults + children}
-         tripType="Stay"
-         travelClass={rate?.room?.name || 'Standard Room'}
-         bookingRef={`RTR-HTL-${Math.floor(Math.random() * 900000) + 100000}`}
-         onPrimaryAction={() => navigate('/')}
-       />
+        <PaymentStatusScreen 
+          status={paymentStatus}
+          origin={hotel?.name || 'Hotel Booking'}
+          destination={hotel?.accommodation?.location?.address?.city_name || 'Hotel Property'}
+          travellerCount={adults + children}
+          tripType="Stay"
+          travelClass={rate?.room?.name || 'Standard Room'}
+          bookingRef={`RTR-HTL-${Math.floor(Math.random() * 900000) + 100000}`}
+          bookingDetails={{
+            hotelName: hotel?.name,
+            hotelAddress: hotel?.accommodation?.location?.address?.line_1,
+            roomType: rate?.room?.name,
+            nights,
+            guestName: `${leadGuest.firstName} ${leadGuest.lastName}`,
+            phone: leadGuest.phone,
+            email: leadGuest.email,
+            fare: baseFare,
+            total: grandTotal
+          }}
+          onPrimaryAction={() => navigate('/')}
+        />
      );
   }
 
@@ -345,10 +358,36 @@ export const StaysCheckoutPage = () => {
            total={grandTotal}
         />
         
-        <p className="text-xs text-slate-500 bg-slate-100 p-3 rounded-xl flex gap-2 items-start mt-4">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-slate-500" />
-          By proceeding, you agree to the hotel check-in policies and terms of service.
-        </p>
+        <div className="text-xs text-slate-600 bg-slate-100 p-3 rounded-xl flex gap-2 items-start mt-4">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-sky-600" />
+          <div>
+            By proceeding, you confirm guest details and agree to RoutTripo’s{' '}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'terms' } }))}
+              className="text-sky-600 font-bold underline hover:text-sky-700"
+            >
+              Terms & Conditions
+            </button>
+            ,{' '}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'cancellation-refund' } }))}
+              className="text-sky-600 font-bold underline hover:text-sky-700"
+            >
+              Cancellation & Refund Policy
+            </button>
+            , and{' '}
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'privacy' } }))}
+              className="text-sky-600 font-bold underline hover:text-sky-700"
+            >
+              Privacy Policy
+            </button>
+            .
+          </div>
+        </div>
       </div>
 
       {/* Sticky Bottom Bar */}

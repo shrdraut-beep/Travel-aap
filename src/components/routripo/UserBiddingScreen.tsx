@@ -1276,6 +1276,22 @@ export const UserBiddingScreen: React.FC<UserBiddingScreenProps> = ({
                         ? "⚠️ ऑपरेटरचे लॉक केलेले धोरण: हा करार 100% नॉन-रिफंडेबल आहे. रद्द केल्यास शून्य परतावा मिळेल व पूर्ण एस्क्रो रक्कम ऑपरेटरला दिली जाईल."
                         : "⚠️ Vendor Locked Policy: This booking is strictly 100% Non-Refundable. Cancellation triggers zero refund and full escrow payout to the operator."}
                     </p>
+                    <div className="flex items-center justify-between pt-2 border-t border-rose-200 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'bargaining-bidding' } }))}
+                        className="text-rose-700 font-bold underline hover:text-rose-900"
+                      >
+                        {isMr ? "बार्गेनिंग व एस्क्रो धोरण →" : "Bargaining & Escrow Policy →"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'cancellation-refund' } }))}
+                        className="text-rose-700 font-semibold underline hover:text-rose-900"
+                      >
+                        {isMr ? "परतावा नियम" : "Refund Policy"}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="p-4 bg-premium-sky-soft/90 rounded-[20px] border-2 border-premium-sky-deep space-y-1.5">
@@ -1293,6 +1309,22 @@ export const UserBiddingScreen: React.FC<UserBiddingScreenProps> = ({
                         ? `✓ प्रवासाच्या ${activeContract.refundDeadlineHours || 24} तास आधीपर्यंत मोफत रद्दीकरण व १००% झटपट एस्क्रो परतावा हमी.`
                         : `✓ 100% Free Cancellation & Instant Auto-Refund permitted up to ${activeContract.refundDeadlineHours || 24} hours before departure.`}
                     </p>
+                    <div className="flex items-center justify-between pt-2 border-t border-sky-200 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'bargaining-bidding' } }))}
+                        className="text-sky-700 font-bold underline hover:text-sky-900"
+                      >
+                        {isMr ? "बार्गेनिंग व एस्क्रो धोरण →" : "Bargaining & Escrow Policy →"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'cancellation-refund' } }))}
+                        className="text-sky-700 font-semibold underline hover:text-sky-900"
+                      >
+                        {isMr ? "परतावा नियम" : "Refund Policy"}
+                      </button>
+                    </div>
                   </div>
                 )}
 

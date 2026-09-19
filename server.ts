@@ -8,9 +8,12 @@ import express from "express";
 import cron from "node-cron";
 import * as admin from "firebase-admin";
 import partnerKycRouter from './server/routes/partnerKyc.ts';
+import channelManagerRouter from './server/routes/channelManager.ts';
 import searchRouter from './server/routes/search.ts';
 import biddingRouter from './server/routes/bidding.ts';
 import paymentRouter from './server/routes/payment.ts';
+import documentsRouter from './server/routes/documents.ts';
+import vendorApiKeyRouter from './server/routes/vendorApiKey.ts';
 import { aiAgentOrchestrator } from './server/services/aiAgentOrchestrator.ts';
 import { getCuratedRealItinerary, REAL_DESTINATIONS } from './server/realDestinationsData.ts';
 import path from "path";
@@ -290,7 +293,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://apis.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://cdn.razorpay.com", "https://apis.google.com"],
       connectSrc: ["'self'", "*"],
       imgSrc: ["'self'", "data:", "blob:", "https:"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -752,9 +755,31 @@ app.get("/api/config/exchange-rate", async (req, res) => {
 
 // --- PARTNER KYC & REVERSE BIDDING & PAYMENT ROUTES ---
 app.use('/api/partner', partnerKycRouter);
+app.post('/api/scrape-hotel', (req, res, next) => { req.url = '/scrape-hotel'; partnerKycRouter(req, res, next); });
+app.post('/api/register-hotel', (req, res, next) => { req.url = '/register-hotel'; partnerKycRouter(req, res, next); });
+app.post('/api/register-package', (req, res, next) => { req.url = '/register-package'; partnerKycRouter(req, res, next); });
+app.get('/api/packages', (req, res, next) => { req.url = '/packages'; partnerKycRouter(req, res, next); });
+app.post('/api/register-vendor', (req, res, next) => { req.url = '/register-vendor'; partnerKycRouter(req, res, next); });
+app.post('/api/vendor-kyc', (req, res, next) => { req.url = '/vendor-kyc'; partnerKycRouter(req, res, next); });
+app.post('/api/register-cab', (req, res, next) => { req.url = '/register-cab'; partnerKycRouter(req, res, next); });
+app.post('/api/register-bus', (req, res, next) => { req.url = '/register-bus'; partnerKycRouter(req, res, next); });
+app.get('/api/cabs', (req, res, next) => { req.url = '/cabs'; partnerKycRouter(req, res, next); });
+app.get('/api/buses', (req, res, next) => { req.url = '/buses'; partnerKycRouter(req, res, next); });
 app.use('/api/bids', biddingRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/razorpay', paymentRouter);
+app.use('/api/documents', documentsRouter);
+app.use('/api/vendor', vendorApiKeyRouter);
+app.use('/v1', vendorApiKeyRouter);
+app.use('/api/v1', vendorApiKeyRouter);
+app.use('/api/search', searchRouter);
+app.get('/api/search', (req, res, next) => { req.url = '/'; searchRouter(req, res, next); });
+app.post('/api/sync-search', (req, res, next) => { req.url = '/sync-search'; searchRouter(req, res, next); });
+app.use('/api/channel-manager', channelManagerRouter);
+app.post('/api/channel-manager/webhook', (req, res, next) => { req.url = '/webhook'; channelManagerRouter(req, res, next); });
+app.post('/api/hotels/:id/sync-ical', (req, res, next) => { req.url = `/hotels/${req.params.id}/sync-ical`; channelManagerRouter(req, res, next); });
+app.get('/api/hotels/:id/calendar.ics', (req, res, next) => { req.url = `/calendar/${req.params.id}.ics`; channelManagerRouter(req, res, next); });
+app.get('/api/hotels/:id/blocked-dates', (req, res, next) => { req.url = `/hotels/${req.params.id}/blocked-dates`; channelManagerRouter(req, res, next); });
 
 
 // --- TRIP MANAGER ---
@@ -4455,22 +4480,6 @@ app.post("/api/zuelpay/cars/search", async (req, res) => {
   }
 });
 
-app.post("/api/cars/search", async (req, res) => {
-  try {
-    const { origin, destination, location, pickupDate, dropDate, cabType, vehicleCategory } = req.body;
-    const quotes = await zuelpayService.searchCars({
-      origin: origin || location || "Mumbai",
-      destination: destination || "Pune",
-      pickupDate: pickupDate || new Date().toISOString().split("T")[0],
-      dropDate,
-      cabType,
-      vehicleCategory
-    });
-    return res.status(200).json({ success: true, quotes, results: quotes });
-  } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
 
 // 5. Curated Tour Packages API
 app.post("/api/packages/search", async (req, res) => {

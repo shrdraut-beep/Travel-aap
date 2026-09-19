@@ -11,6 +11,7 @@ import {
   Tag,
   TrendingUp,
   Wallet,
+  KeyRound,
   X
 } from "lucide-react";
 import { PortalBottomNav, type PortalTabItem } from "../shared/PortalBottomNav";
@@ -25,10 +26,12 @@ import {
   OverviewPanel,
   ProfilePanel
 } from "./tabs";
+import { VendorAPIDashboard } from "./VendorAPIDashboard";
 import type { AgentActionId, AgentTabId } from "./types";
 
-export type AgentPrimaryTab = "overview" | "offers" | "inventory" | "earnings" | "workspace";
-export type WorkspaceSubTab = "markups" | "marketing" | "profile" | "support";
+export type AgentPrimaryTab = "overview" | "offers" | "inventory" | "earnings" | "profile";
+export type ProfileSubTab = "profile" | "api_access" | "markups" | "marketing" | "support";
+export type InventorySubTab = "packages" | "fasttrack" | "vehicle" | "bus" | "portal";
 
 export interface AgentScreenProps {
   open: boolean;
@@ -45,7 +48,7 @@ const BOTTOM_TABS: PortalTabItem<AgentPrimaryTab>[] = [
   { id: "offers", label: "Bidding", Icon: Tag, imgSrc: "/icons/make_an_offer.png" },
   { id: "inventory", label: "Inventory", Icon: Package, imgSrc: "/icons/inventory.png" },
   { id: "earnings", label: "Earnings", Icon: Wallet, imgSrc: "/icons/routripo_wallet.png" },
-  { id: "workspace", label: "Workspace", Icon: Settings, imgSrc: "/icons/workspace.png" }
+  { id: "profile", label: "Profile", Icon: Settings, imgSrc: "/icons/admin_users.png" }
 ];
 
 export const AgentScreen: React.FC<AgentScreenProps> = ({
@@ -57,34 +60,37 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
   onAction,
   onClose
 }) => {
-  const resolveInitial = (tabId: AgentTabId): { primary: AgentPrimaryTab; sub: WorkspaceSubTab } => {
+  const resolveInitial = (tabId: AgentTabId): { primary: AgentPrimaryTab; sub: ProfileSubTab; inv?: InventorySubTab } => {
     if (tabId === "overview" || tabId === "bookings") {
-      return { primary: "overview", sub: "markups" };
+      return { primary: "overview", sub: "profile" };
     }
-    if (tabId === "offers") return { primary: "offers", sub: "markups" };
-    if (tabId === "inventory") return { primary: "inventory", sub: "markups" };
-    if (tabId === "earnings") return { primary: "earnings", sub: "markups" };
-    if (tabId === "markups") return { primary: "workspace", sub: "markups" };
-    if (tabId === "marketing") return { primary: "workspace", sub: "marketing" };
-    if (tabId === "support") return { primary: "workspace", sub: "support" };
-    if (tabId === "profile") return { primary: "workspace", sub: "profile" };
-    return { primary: "overview", sub: "markups" };
+    if (tabId === "offers") return { primary: "offers", sub: "profile" };
+    if (tabId === "inventory") return { primary: "inventory", sub: "profile", inv: "packages" };
+    if (tabId === "earnings") return { primary: "earnings", sub: "profile" };
+    if (tabId === "api_access") return { primary: "profile", sub: "api_access" };
+    if (tabId === "markups") return { primary: "profile", sub: "markups" };
+    if (tabId === "marketing") return { primary: "profile", sub: "marketing" };
+    if (tabId === "support") return { primary: "profile", sub: "support" };
+    if (tabId === "profile") return { primary: "profile", sub: "profile" };
+    return { primary: "overview", sub: "profile" };
   };
 
   const initialResolved = resolveInitial(initialTab);
   const [primaryTab, setPrimaryTab] = useState<AgentPrimaryTab>(initialResolved.primary);
-  const [workspaceSub, setWorkspaceSub] = useState<WorkspaceSubTab>(initialResolved.sub);
+  const [profileSub, setProfileSub] = useState<ProfileSubTab>(initialResolved.sub);
+  const [inventorySub, setInventorySub] = useState<InventorySubTab>(initialResolved.inv || "packages");
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: 0 });
-  }, [primaryTab, workspaceSub]);
+  }, [primaryTab, profileSub, inventorySub]);
 
   useEffect(() => {
     if (open) {
       const res = resolveInitial(initialTab);
       setPrimaryTab(res.primary);
-      setWorkspaceSub(res.sub);
+      setProfileSub(res.sub);
+      if (res.inv) setInventorySub(res.inv);
     }
   }, [open, initialTab]);
 
@@ -106,8 +112,20 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
   );
 
   const handleNavigateTab = (primary: string, sub?: string) => {
-    setPrimaryTab(primary as AgentPrimaryTab);
-    if (primary === "workspace" && sub) setWorkspaceSub(sub as WorkspaceSubTab);
+    if (primary === "workspace" || primary === "profile") {
+      setPrimaryTab("profile");
+      if (sub) setProfileSub(sub as ProfileSubTab);
+    } else {
+      setPrimaryTab(primary as AgentPrimaryTab);
+      if (primary === "inventory" && sub) setInventorySub(sub as InventorySubTab);
+    }
+  };
+
+  const handleAgentAction = (action: AgentActionId) => {
+    if (action === "overview-hotel-onboarding") {
+      handleNavigateTab("inventory", "fasttrack");
+    }
+    onAction(action);
   };
 
   return (
@@ -154,102 +172,126 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
               </div>
             </header>
 
-            {/* Dedicated Unmerged Workspace Sub-Navigation Toolbar - BORDERLESS 3D ICONS */}
-            {primaryTab === "workspace" && (
-              <div className="sticky top-0 z-20 bg-white/95 border-b border-slate-100 px-3 py-2.5 backdrop-blur-md shadow-xs flex items-center justify-around">
+            {/* Profile Sub-Navigation Toolbar - BORDERLESS 3D ICONS */}
+            {primaryTab === "profile" && (
+              <div className="sticky top-0 z-20 bg-white/95 border-b border-slate-100 px-2 py-2 backdrop-blur-md shadow-xs flex items-center justify-around overflow-x-auto">
                 <button
                   type="button"
-                  onClick={() => setWorkspaceSub("markups")}
-                  className="flex flex-1 flex-col items-center justify-center gap-1.5 py-1.5 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
+                  onClick={() => setProfileSub("profile")}
+                  className="flex flex-1 min-w-[62px] flex-col items-center justify-center gap-1 py-1 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
                 >
-                  <div className="relative flex h-11 w-11 items-center justify-center">
-                    <img
-                      src="/icons/make_an_offer.png"
-                      alt="Markups"
-                      className={`h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
-                        workspaceSub === "markups" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
-                      }`}
-                    />
-                  </div>
-                  <span className={`text-[11px] tracking-tight uppercase leading-none text-center truncate ${
-                    workspaceSub === "markups" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
-                  }`}>
-                    Markups
-                  </span>
-                  {workspaceSub === "markups" && (
-                    <span className="h-1 w-6 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWorkspaceSub("marketing")}
-                  className="flex flex-1 flex-col items-center justify-center gap-1.5 py-1.5 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
-                >
-                  <div className="relative flex h-11 w-11 items-center justify-center">
-                    <img
-                      src="/icons/admin_operations.png"
-                      alt="Marketing"
-                      className={`h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
-                        workspaceSub === "marketing" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
-                      }`}
-                    />
-                  </div>
-                  <span className={`text-[11px] tracking-tight uppercase leading-none text-center truncate ${
-                    workspaceSub === "marketing" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
-                  }`}>
-                    Marketing
-                  </span>
-                  {workspaceSub === "marketing" && (
-                    <span className="h-1 w-6 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWorkspaceSub("profile")}
-                  className="flex flex-1 flex-col items-center justify-center gap-1.5 py-1.5 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
-                >
-                  <div className="relative flex h-11 w-11 items-center justify-center">
+                  <div className="relative flex h-10 w-10 items-center justify-center">
                     <img
                       src="/icons/admin_users.png"
-                      alt="Profile & KYC"
-                      className={`h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
-                        workspaceSub === "profile" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
+                      alt="Profile"
+                      className={`h-9 w-9 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
+                        profileSub === "profile" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
                       }`}
                     />
                   </div>
-                  <span className={`text-[11px] tracking-tight uppercase leading-none text-center truncate ${
-                    workspaceSub === "profile" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
+                  <span className={`text-[10px] tracking-tight uppercase leading-none text-center truncate ${
+                    profileSub === "profile" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
                   }`}>
                     Profile & KYC
                   </span>
-                  {workspaceSub === "profile" && (
-                    <span className="h-1 w-6 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
+                  {profileSub === "profile" && (
+                    <span className="h-1 w-5 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
                   )}
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setWorkspaceSub("support")}
-                  className="flex flex-1 flex-col items-center justify-center gap-1.5 py-1.5 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
+                  onClick={() => setProfileSub("api_access")}
+                  className="flex flex-1 min-w-[62px] flex-col items-center justify-center gap-1 py-1 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
                 >
-                  <div className="relative flex h-11 w-11 items-center justify-center">
+                  <div className="relative flex h-10 w-10 items-center justify-center">
                     <img
-                      src="/icons/trip_docs.png"
-                      alt="Support"
-                      className={`h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
-                        workspaceSub === "support" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
+                      src="/icons/secret.png"
+                      alt="B2B API"
+                      className={`h-9 w-9 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
+                        profileSub === "api_access" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
                       }`}
                     />
                   </div>
-                  <span className={`text-[11px] tracking-tight uppercase leading-none text-center truncate ${
-                    workspaceSub === "support" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
+                  <span className={`text-[10px] tracking-tight uppercase leading-none text-center truncate ${
+                    profileSub === "api_access" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
+                  }`}>
+                    B2B API
+                  </span>
+                  {profileSub === "api_access" && (
+                    <span className="h-1 w-5 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setProfileSub("markups")}
+                  className="flex flex-1 min-w-[62px] flex-col items-center justify-center gap-1 py-1 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
+                >
+                  <div className="relative flex h-10 w-10 items-center justify-center">
+                    <img
+                      src="/icons/make_an_offer.png"
+                      alt="Markups"
+                      className={`h-9 w-9 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
+                        profileSub === "markups" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
+                      }`}
+                    />
+                  </div>
+                  <span className={`text-[10px] tracking-tight uppercase leading-none text-center truncate ${
+                    profileSub === "markups" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
+                  }`}>
+                    Markups
+                  </span>
+                  {profileSub === "markups" && (
+                    <span className="h-1 w-5 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setProfileSub("marketing")}
+                  className="flex flex-1 min-w-[62px] flex-col items-center justify-center gap-1 py-1 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
+                >
+                  <div className="relative flex h-10 w-10 items-center justify-center">
+                    <img
+                      src="/icons/admin_operations.png"
+                      alt="Marketing"
+                      className={`h-9 w-9 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
+                        profileSub === "marketing" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
+                      }`}
+                    />
+                  </div>
+                  <span className={`text-[10px] tracking-tight uppercase leading-none text-center truncate ${
+                    profileSub === "marketing" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
+                  }`}>
+                    Marketing
+                  </span>
+                  {profileSub === "marketing" && (
+                    <span className="h-1 w-5 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setProfileSub("support")}
+                  className="flex flex-1 min-w-[62px] flex-col items-center justify-center gap-1 py-1 transition-all cursor-pointer group active:scale-95 bg-transparent border-none outline-none"
+                >
+                  <div className="relative flex h-10 w-10 items-center justify-center">
+                    <img
+                      src="/icons/trip_docs.png"
+                      alt="Support"
+                      className={`h-9 w-9 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] transition-transform duration-200 ${
+                        profileSub === "support" ? "scale-115" : "opacity-75 group-hover:opacity-100 group-hover:scale-105"
+                      }`}
+                    />
+                  </div>
+                  <span className={`text-[10px] tracking-tight uppercase leading-none text-center truncate ${
+                    profileSub === "support" ? "text-sky-700 font-black" : "text-slate-600 font-bold"
                   }`}>
                     Support
                   </span>
-                  {workspaceSub === "support" && (
-                    <span className="h-1 w-6 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
+                  {profileSub === "support" && (
+                    <span className="h-1 w-5 rounded-full bg-sky-500 mt-0.5 shadow-sm" />
                   )}
                 </button>
               </div>
@@ -261,18 +303,24 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
               className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-24"
             >
               {primaryTab === "overview" && (
-                <OverviewPanel onAction={onAction} onNavigateTab={handleNavigateTab} />
+                <OverviewPanel onAction={handleAgentAction} onNavigateTab={handleNavigateTab} />
               )}
-              {primaryTab === "offers" && <OffersPanel onAction={onAction} />}
-              {primaryTab === "inventory" && <InventoryPanel onAction={onAction} />}
-              {primaryTab === "earnings" && <EarningsPanel onAction={onAction} />}
-              {primaryTab === "workspace" && workspaceSub === "markups" && <MarkupsPanel onAction={onAction} />}
-              {primaryTab === "workspace" && workspaceSub === "marketing" && <MarketingPanel onAction={onAction} />}
-              {primaryTab === "workspace" && workspaceSub === "profile" && <ProfilePanel onAction={onAction} />}
-              {primaryTab === "workspace" && workspaceSub === "support" && <AgentSupportPanel onAction={onAction} />}
+              {primaryTab === "offers" && <OffersPanel onAction={handleAgentAction} />}
+              {primaryTab === "inventory" && <InventoryPanel onAction={handleAgentAction} initialSubTab={inventorySub} />}
+              {primaryTab === "earnings" && <EarningsPanel onAction={handleAgentAction} />}
+              {primaryTab === "profile" && profileSub === "profile" && <ProfilePanel onAction={onAction} />}
+              {primaryTab === "profile" && profileSub === "api_access" && (
+                <VendorAPIDashboard
+                  vendorId="VEND-1001"
+                  onCompleteKYC={() => setProfileSub("profile")}
+                />
+              )}
+              {primaryTab === "profile" && profileSub === "markups" && <MarkupsPanel onAction={onAction} />}
+              {primaryTab === "profile" && profileSub === "marketing" && <MarketingPanel onAction={onAction} />}
+              {primaryTab === "profile" && profileSub === "support" && <AgentSupportPanel onAction={onAction} />}
             </div>
 
-            {/* Docked Bottom Navigation */}
+            {/* Docked Bottom Navigation - 5 CLEAN TABS */}
             <PortalBottomNav<AgentPrimaryTab>
               tabs={tabsWithBadge}
               active={primaryTab}

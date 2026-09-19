@@ -367,11 +367,20 @@ export const CancellationRefundModal: React.FC<CancellationRefundModalProps> = (
               </div>
 
               {/* Legal Transparency Binding */}
-              <p className="text-[11px] text-slate-400 italic">
-                {isMr
-                  ? "✓ हे रद्दीकरण अपरिवर्तनीय (Irreversible) असून डिजिटल एस्क्रो कराराच्या कायदेशीर अटींनुसार तत्काळ लागू होते."
-                  : "✓ This cancellation is irreversible and executed instantly under IT Act 2000 smart contract escrow terms."}
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px]">
+                <p className="text-slate-400 italic">
+                  {isMr
+                    ? "✓ हे रद्दीकरण अपरिवर्तनीय (Irreversible) असून डिजिटल एस्क्रो कराराच्या कायदेशीर अटींनुसार तत्काळ लागू होते."
+                    : "✓ Executed instantly under IT Act 2000 smart contract escrow terms."}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'cancellation-refund' } }))}
+                  className="text-sky-600 font-bold hover:underline shrink-0 text-left"
+                >
+                  {isMr ? "अधिकृत परतावा नियम वाचा →" : "Read Full Refund Policy →"}
+                </button>
+              </div>
 
               {/* Actions */}
               <div className="grid grid-cols-2 gap-3 pt-2">

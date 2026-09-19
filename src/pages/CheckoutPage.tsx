@@ -909,7 +909,40 @@ export const CheckoutPage: React.FC = () => {
                   className="mt-1 w-4 h-4 rounded text-rose-600 focus:ring-rose-500"
                 />
                 <span className="text-xs text-slate-600 leading-relaxed font-medium">
-                  I confirm that all {totalPax} passenger details match Government IDs, and agree to RoutTripo’s <span className="text-rose-600 font-bold underline">User Agreement</span>, <span className="text-rose-600 font-bold underline">Privacy Policy</span>, and <span className="text-rose-600 font-bold underline">Cancellation & Refund Policy</span>.
+                  I confirm that all {totalPax} passenger details match Government IDs, and agree to RoutTripo’s{' '}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'terms' } }));
+                    }}
+                    className="text-rose-600 font-bold underline hover:text-rose-700"
+                  >
+                    Terms & Conditions
+                  </button>
+                  ,{' '}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'privacy' } }));
+                    }}
+                    className="text-rose-600 font-bold underline hover:text-rose-700"
+                  >
+                    Privacy Policy
+                  </button>
+                  , and{' '}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent('open-legal-modal', { detail: { policyId: 'cancellation-refund' } }));
+                    }}
+                    className="text-rose-600 font-bold underline hover:text-rose-700"
+                  >
+                    Cancellation & Refund Policy
+                  </button>
+                  .
                 </span>
               </label>
               {errors.terms && (

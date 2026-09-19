@@ -31,7 +31,7 @@ import {
 import { getStorage, ref, listAll, deleteObject } from "firebase/storage";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken as getAppCheckToken } from "firebase/app-check";
-import firebaseConfig from '../firebase-applet-config.json';
+import firebaseConfig from './firebaseConfig.ts';
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
