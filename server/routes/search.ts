@@ -22,12 +22,27 @@ const carService = new CarService();
 router.get(['/', '/unified'], async (req: Request, res: Response) => {
   try {
     const q = (req.query.q || req.query.query || '').toString().trim();
-    const index = (req.query.index || 'hotels').toString().toLowerCase();
+    const index = (req.query.index || 'cities').toString().toLowerCase();
     const limit = req.query.limit ? Number(req.query.limit) : 20;
 
-    // Multi-Index Federated Search: Searches Hotels, Airports & Stations simultaneously
+    // Strict 3-Character validation: Do not search or return results below 3 characters
+    if (!q || q.length < 3) {
+      return res.status(200).json({
+        success: true,
+        query: q,
+        cities: [],
+        hotels: [],
+        airports: [],
+        train_stations: [],
+        totalHits: 0,
+        message: 'Minimum 3 characters required for search',
+      });
+    }
+
+    // Multi-Index Federated Search: Searches Master Cities, Hotels, Airports & Stations simultaneously
     if (index === 'all' || index === 'universal') {
-      const [hotels, airports, stations] = await Promise.all([
+      const [cities, hotels, airports, stations] = await Promise.all([
+        meilisearchService.searchCities(q, Math.min(limit, 10)),
         meilisearchService.searchHotels({ q, limit }),
         meilisearchService.searchAirports(q, Math.min(limit, 10)),
         meilisearchService.searchTrainStations(q, Math.min(limit, 10)),
@@ -36,28 +51,34 @@ router.get(['/', '/unified'], async (req: Request, res: Response) => {
       return res.status(200).json({
         success: true,
         query: q,
+        cities: (cities as any)?.hits || [],
         hotels: (hotels as any)?.hits || [],
         airports: (airports as any)?.hits || [],
         train_stations: (stations as any)?.hits || [],
-        totalHits: ((hotels as any)?.totalHits || 0) + ((airports as any)?.totalHits || 0) + ((stations as any)?.totalHits || 0),
-        source: (hotels as any)?.source || 'meilisearch-self-hosted',
+        totalHits: ((cities as any)?.totalHits || 0) + ((hotels as any)?.totalHits || 0) + ((airports as any)?.totalHits || 0) + ((stations as any)?.totalHits || 0),
+        source: (cities as any)?.source || (hotels as any)?.source || 'meilisearch-self-hosted',
       });
     }
 
     // Specific Index Searches
+    if (index === 'cities' || index === 'city') {
+      const results = await meilisearchService.searchCities(q, limit);
+      return res.status(200).json({ success: true, query: q, ...results });
+    }
+
     if (index === 'airports' || index === 'flights') {
       const results = await meilisearchService.searchAirports(q, limit);
-      return res.status(200).json({ success: true, ...results });
+      return res.status(200).json({ success: true, query: q, ...results });
     }
 
     if (index === 'train_stations' || index === 'trains' || index === 'railways') {
       const results = await meilisearchService.searchTrainStations(q, limit);
-      return res.status(200).json({ success: true, ...results });
+      return res.status(200).json({ success: true, query: q, ...results });
     }
 
     if (index === 'locations' || index === 'places') {
       const results = await photonService.searchLocations(q, limit);
-      return res.status(200).json({ success: true, ...results });
+      return res.status(200).json({ success: true, query: q, ...results });
     }
 
     // Default: Hotels Search with full faceted filtering
@@ -234,6 +255,31 @@ router.all('/meili/train-stations', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: err?.message || 'Train station lookup failed',
+    });
+  }
+});
+
+// 4b. Master Cities Search & City ID Lookup
+router.all('/cities', async (req: Request, res: Response) => {
+  try {
+    const params = req.method === 'POST' ? req.body : req.query;
+    const query = (params.q || params.query || params.search || '').toString().trim();
+    const limit = params.limit ? Number(params.limit) : 10;
+
+    if (!query || query.length < 3) {
+      return res.json({ success: true, hits: [], totalHits: 0, message: 'Minimum 3 characters required' });
+    }
+
+    const results = await meilisearchService.searchCities(query, limit);
+    res.json({
+      success: true,
+      ...results,
+    });
+  } catch (err: any) {
+    console.error('[Search] City search error:', err);
+    res.status(500).json({
+      success: false,
+      error: err?.message || 'City lookup failed',
     });
   }
 });

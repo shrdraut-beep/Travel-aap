@@ -289,6 +289,24 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
         </div>
       </div>
 
+      {/* 30 DAYS PERFORMANCE METRICS - MOVED UP AS REQUESTED (khalach table waarti ghe) */}
+      <div className="mx-5 my-3">
+        <div className="flex items-center justify-between pb-1.5">
+          <h3 className="text-[12px] font-black uppercase tracking-wider text-slate-500">
+            {isMr ? "मागील ३० दिवसांची कामगिरी" : "Last 30 Days Performance"}
+          </h3>
+          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+            ● Live
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <StatCard label={isMr ? "लीड्स" : "Leads"} value="64" hint={isMr ? "सक्रिय चौकशी" : "Active inquiries"} tone="sky" />
+          <StatCard label={isMr ? "बुकिंग्ज" : "Bookings"} value="21" hint={isMr ? "पुष्टी केलेले" : "Confirmed"} tone="violet" />
+          <StatCard label={isMr ? "महसूल" : "Revenue"} value="₹4.8L" hint={isMr ? "एकूण उलाढाल" : "Gross volume"} tone="pink" />
+          <StatCard label={isMr ? "सक्रिय लिस्टिंग्ज" : "Listings"} value="12" hint={isMr ? "सक्रिय व सत्यापित" : "Active & verified"} tone="violet" />
+        </div>
+      </div>
+
       {/* TOP PERFORMING INVENTORY & 3-YEAR FINANCIAL DEEP DIVE */}
       <div className="mx-5 my-3">
         <div className="flex items-center justify-between pb-2">
@@ -300,50 +318,52 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
               {isMr ? "३ वर्षांचे उत्पन्न व तपशील पाहण्यासाठी कोणत्याही कार्डवर टॅप करा" : "Tap any asset to inspect 3-Year Financials, Bookings & P&L"}
             </p>
           </div>
-          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 shrink-0">
             3-Year P&L
           </span>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {bestSellers.map((item) => (
             <div
               key={item.id}
               onClick={() => setSelectedFinancialAsset(item)}
-              className="group p-3.5 rounded-2xl bg-white border border-slate-200/90 hover:border-amber-400 hover:shadow-md transition-all cursor-pointer active:scale-98 relative overflow-hidden"
+              className="group p-3 rounded-xl bg-white border border-slate-200/90 hover:border-amber-400 hover:shadow-xs transition-all cursor-pointer active:scale-98 relative overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className={`h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br ${item.accentBg} text-white flex items-center justify-center text-xl shadow-sm`}>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className={`h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br ${item.accentBg} text-white flex items-center justify-center text-lg shadow-xs`}>
                     {item.iconEmoji}
                   </div>
-                  <div className="min-w-0">
-                    <span className="inline-block text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 mb-1">
-                      {item.badge}
-                    </span>
-                    <h4 className="text-[13px] font-bold text-slate-900 truncate group-hover:text-blue-700 transition-colors">
-                      {item.name}
-                    </h4>
-                    <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500 pt-0.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[12px] sm:text-[13px] font-bold text-slate-900 truncate group-hover:text-blue-700 transition-colors">
+                        {item.name}
+                      </h4>
+                      <span className="hidden sm:inline-block shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80">
+                        {item.badge}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-medium text-slate-500 pt-0.5">
                       <span className="flex items-center gap-1 text-amber-600 font-bold">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
                         {item.rating} ({item.reviewsCount})
                       </span>
                       <span>·</span>
-                      <span className="font-bold text-slate-700">
-                        {item.totalBookings} {isMr ? "एकूण बुकिंग्ज" : "Total Bookings"}
+                      <span className="font-semibold text-slate-700">
+                        {item.totalBookings} {isMr ? "बुकिंग्ज" : "Bookings"}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight block">
+                <div className="text-right shrink-0 flex flex-col justify-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight block">
                     {isMr ? "३ वर्षांचे उत्पन्न" : "3-Yr Revenue"}
                   </span>
-                  <span className="text-[14px] font-black text-emerald-700">{item.totalGross}</span>
-                  <span className="text-[10px] text-sky-600 font-bold block pt-1 group-hover:translate-x-0.5 transition-transform">
-                    {isMr ? "तपशील पहा →" : "View P&L →"}
+                  <span className="text-[13px] font-black text-emerald-700 leading-tight">{item.totalGross}</span>
+                  <span className="text-[10px] text-sky-600 font-bold block pt-0.5 group-hover:translate-x-0.5 transition-transform">
+                    {isMr ? "तपशील →" : "View P&L →"}
                   </span>
                 </div>
               </div>
@@ -489,16 +509,6 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
           </div>
         )}
       </ModalSheet>
-
-      <SectionHeader title={isMr ? "मागील ३० दिवसांची कामगिरी" : "Last 30 days"} />
-      <div className="flex gap-3 px-5">
-        <StatCard label={isMr ? "लीड्स" : "Leads"} value="64" hint={isMr ? "सक्रिय चौकशी" : "Active inquiries"} tone="sky" />
-        <StatCard label={isMr ? "बुकिंग्ज" : "Bookings"} value="21" hint={isMr ? "पुष्टी केलेले" : "Confirmed"} tone="violet" />
-      </div>
-      <div className="flex gap-3 px-5 pt-3">
-        <StatCard label={isMr ? "महसूल" : "Revenue"} value="₹4.8L" hint={isMr ? "एकूण उलाढाल" : "Gross volume"} tone="pink" />
-        <StatCard label={isMr ? "सक्रिय लिस्टिंग्ज" : "Listings"} value="12" hint={isMr ? "सक्रिय व सत्यापित" : "Active & verified"} tone="violet" />
-      </div>
     </div>
   );
 };
@@ -789,56 +799,68 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
         {offers.map((offer) => {
           const autoBid = autoBids[offer.id];
           return (
-            <div key={offer.id} className="premium-card px-4 py-4 space-y-2.5 border border-slate-200/80">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-[14px] font-bold text-[var(--premium-ink)]">
-                      {offer.customer}
-                    </p>
-                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-extrabold text-sky-700">
-                      {offer.age}
-                    </span>
-                  </div>
-                  <p className="text-[13px] font-medium text-slate-700 pt-0.5">{offer.request}</p>
-                  <p className="text-[12px] font-semibold text-[var(--premium-muted)]">
-                    {isMr ? "ग्राहक बजेट:" : "Customer budget:"} <span className="text-emerald-700 font-bold">{offer.budget}</span>
+            <div key={offer.id} className="premium-card p-3 sm:p-3.5 space-y-2 border border-slate-200/90 hover:border-indigo-300 transition-all shadow-xs">
+              {/* Row 1: Left: Customer & Time; Right: Budget & Action Button */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <p className="truncate text-[13px] font-bold text-[var(--premium-ink)]">
+                    {offer.customer}
                   </p>
+                  <span className="shrink-0 rounded-md bg-sky-50 px-1.5 py-0.5 text-[10px] font-extrabold text-sky-700 border border-sky-200/60">
+                    {offer.age}
+                  </span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openAutoBidConfig(offer)}
-                  className={`text-[10px] font-black px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 ${
-                    autoBid?.enabled
-                      ? "bg-indigo-50 border-indigo-300 text-indigo-800 hover:bg-indigo-100"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  <Zap className={`w-3.5 h-3.5 ${autoBid?.enabled ? "text-indigo-600 fill-indigo-600" : "text-slate-400"}`} />
-                  <span>
-                    {autoBid?.enabled
-                      ? (isMr ? "ऑटो-पायलट सुरू" : "Auto-Pilot Active")
-                      : (isMr ? "ऑटो-बिड सेट करा" : "Set Auto-Bid")}
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200/60">
+                    {offer.budget}
                   </span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => openAutoBidConfig(offer)}
+                    className={`text-[10px] font-black px-2 py-1 rounded-lg border flex items-center gap-1 transition-all cursor-pointer shadow-2xs active:scale-95 ${
+                      autoBid?.enabled
+                        ? "bg-indigo-50 border-indigo-300 text-indigo-800 hover:bg-indigo-100"
+                        : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <Zap className={`w-3 h-3 ${autoBid?.enabled ? "text-indigo-600 fill-indigo-600" : "text-slate-400"}`} />
+                    <span>
+                      {autoBid?.enabled
+                        ? (isMr ? "ऑटो-पायलट" : "Auto-Pilot Active")
+                        : (isMr ? "ऑटो-बिड" : "Set Auto-Bid")}
+                    </span>
+                  </button>
+                </div>
               </div>
 
-              {/* Active Auto-Bidding Indicator */}
+              {/* Row 2: Request description */}
+              <p className="text-[12px] font-medium text-slate-600 truncate">{offer.request}</p>
+
+              {/* Row 3: Active Auto-Bidding Horizontal Data Strip */}
               {autoBid?.enabled && (
-                <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-[11px] flex items-center justify-between">
-                  <div className="space-y-0.5">
+                <div className="px-2.5 py-1.5 rounded-lg bg-indigo-50/70 border border-indigo-200/80 text-[11px] flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap">
                     <span className="font-bold text-indigo-950 flex items-center gap-1">
-                      <span>🤖</span> {isMr ? "सध्याची लाइव्ह अल्गोरिदम बोली:" : "Live algorithmic bid:"} <strong className="text-emerald-700 text-xs">₹{autoBid.currentCalculatedBid.toLocaleString("en-IN")}</strong>
+                      <span>🤖</span> {isMr ? "थेट बोली:" : "Bid:"} <strong className="text-emerald-700">₹{autoBid.currentCalculatedBid.toLocaleString("en-IN")}</strong>
                     </span>
-                    <p className="text-slate-600 text-[10px]">
-                      {isMr ? "तळ दर (Floor):" : "Floor Price:"} <strong className="text-slate-800">₹{autoBid.floorPrice.toLocaleString("en-IN")}</strong> · {isMr ? "कपात:" : "Step:"} ₹{autoBid.stepDecrement} · {isMr ? "ड्रॉपआऊट संरक्षण:" : "Dropout Protection:"} {autoBid.autoDropout ? (isMr ? "चालू" : "ON") : (isMr ? "बंद" : "OFF")}
-                    </p>
+                    <span className="text-slate-300">·</span>
+                    <span className="text-slate-600 text-[10px]">
+                      {isMr ? "तळ:" : "Floor:"} <strong className="text-slate-800">₹{autoBid.floorPrice.toLocaleString("en-IN")}</strong>
+                    </span>
+                    <span className="text-slate-300">·</span>
+                    <span className="text-slate-600 text-[10px]">
+                      {isMr ? "कपात:" : "Step:"} ₹{autoBid.stepDecrement}
+                    </span>
+                    <span className="text-slate-300">·</span>
+                    <span className="text-[10px] text-slate-500">
+                      {isMr ? "ड्रॉपआऊट:" : "Dropout:"} <strong className="text-slate-700">{autoBid.autoDropout ? (isMr ? "चालू" : "ON") : (isMr ? "बंद" : "OFF")}</strong>
+                    </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => openAutoBidConfig(offer)}
-                    className="text-[10px] font-bold text-indigo-700 underline cursor-pointer hover:text-indigo-900"
+                    className="text-[10px] font-bold text-indigo-700 underline cursor-pointer hover:text-indigo-900 shrink-0"
                   >
                     {isMr ? "बदला" : "Edit"}
                   </button>
@@ -846,27 +868,29 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
               )}
 
               {offer.quoted && !autoBid?.enabled ? (
-                <div className="mt-2 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-[12px] font-bold text-emerald-800">
-                  <CheckCircle2 className="h-4 w-4" /> {isMr ? "बोली पाठवली — ग्राहकाच्या मंजुरीची प्रतीक्षा" : "Quote submitted — awaiting traveller acceptance"}
+                <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {isMr ? "बोली पाठवली — ग्राहकाच्या मंजुरीची प्रतीक्षा" : "Quote submitted — awaiting traveller acceptance"}
                 </div>
               ) : !autoBid?.enabled ? (
-                <div className="mt-2 flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-0.5">
                   <input
                     type="text"
                     placeholder={isMr ? "तुमची बोली (उदा. ₹46,500)" : "Your quote (e.g. ₹46,500)"}
                     value={quotePrice[offer.id] || ""}
                     onChange={(e) => setQuotePrice({ ...quotePrice, [offer.id]: e.target.value })}
-                    className="h-10 flex-1 rounded-xl border border-slate-200 px-3 text-[13px] font-medium text-slate-800 outline-none focus:border-sky-500"
+                    className="h-8 flex-1 rounded-lg border border-slate-200 px-2.5 text-xs font-medium text-slate-800 outline-none focus:border-sky-500"
                   />
-                  <PillButton
-                    label={isMr ? "बोली पाठवा" : "Submit Bid"}
-                    variant="solid"
-                    Icon={Send}
+                  <button
+                    type="button"
                     onClick={() => {
                       handleSendQuote(offer.id);
                       onAction("offer-quote");
                     }}
-                  />
+                    className="h-8 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0 shadow-2xs active:scale-95"
+                  >
+                    <Send className="w-3 h-3" />
+                    <span>{isMr ? "बोली पाठवा" : "Submit Bid"}</span>
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -1607,13 +1631,13 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 <div className="flex items-center gap-2">
                   <Package className="w-5 h-5 text-sky-200" />
                   <h3 className="text-base font-black tracking-tight">
-                    {isMr ? "नवीन टूर पॅकेज तयार करा (Flight-Flow प्रमाणे)" : "Create New Tour Package (Flight-Flow Style)"}
+                    {isMr ? "नवीन टूर पॅकेज तयार करा" : "Create New Tour Package"}
                   </h3>
                 </div>
                 <p className="text-xs text-sky-100 max-w-xl">
                   {isMr
-                    ? "फ्लाईट बुकिंगसारखा ६-टप्प्यांचा सोपा प्रवाह: मार्ग, आयटिनररी, स्टे, जीएसटी व टॅक्सेशन कॅल्क्युलेटर आणि थेट प्रिव्ह्यू."
-                    : "Sequential 6-step flow modeled on flight booking: Route, Itinerary, Stays, GST & Taxation Engine, and Live Preview."}
+                    ? "मार्ग, आयटिनररी, स्टे, जीएसटी व टॅक्सेशन आणि थेट प्रिव्ह्यू सह नवीन पॅकेज तयार करा."
+                    : "Step-by-step package builder: Route, Itinerary, Stays, GST & Taxation Engine, and Live Preview."}
                 </p>
               </div>
               <button
@@ -1622,7 +1646,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 className="px-5 py-2.5 rounded-xl bg-white text-indigo-700 hover:bg-sky-50 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>{isMr ? "पॅकेज फ्लो उघडा" : "Launch Package Flow"}</span>
+                <span>{isMr ? "नवीन पॅकेज जोडा" : "Create Tour Package"}</span>
               </button>
             </div>
           </div>
@@ -1765,7 +1789,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
               <div className="flex items-center gap-2">
                 <Hotel className="w-5 h-5 text-emerald-200" />
                 <h3 className="text-base font-black tracking-tight">
-                  {isMr ? "हॉटेल / रिसॉर्ट प्रॉपर्टी नोंदणी (Flight-Flow प्रमाणे)" : "Register Hotel / Resort Property (Flight-Flow Style)"}
+                  {isMr ? "हॉटेल / रिसॉर्ट प्रॉपर्टी नोंदणी" : "Register Hotel / Resort Property"}
                 </h3>
               </div>
               <p className="text-xs text-emerald-100 max-w-xl">
@@ -1780,7 +1804,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
               className="px-5 py-2.5 rounded-xl bg-white text-teal-800 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>{isMr ? "हॉटेल फ्लो उघडा" : "Launch Hotel Flow"}</span>
+              <span>{isMr ? "हॉटेल नोंदणी सुरू करा" : "Register Hotel Property"}</span>
             </button>
           </div>
 
@@ -1827,7 +1851,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
               <div className="flex items-center gap-2">
                 <Car className="w-5 h-5 text-amber-200" />
                 <h3 className="text-base font-black tracking-tight">
-                  {isMr ? "कॅब व फ्लीट नोंदणी (Flight-Flow प्रमाणे)" : "Register Cab to Live Fleet (Flight-Flow Style)"}
+                  {isMr ? "कॅब व फ्लीट नोंदणी" : "Register Cab to Live Fleet"}
                 </h3>
               </div>
               <p className="text-xs text-amber-100 max-w-xl">
@@ -1842,7 +1866,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
               className="px-5 py-2.5 rounded-xl bg-white text-amber-900 hover:bg-amber-50 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>{isMr ? "कॅब फ्लो उघडा" : "Launch Cab Flow"}</span>
+              <span>{isMr ? "कॅब नोंदणी सुरू करा" : "Register Cab Fleet"}</span>
             </button>
           </div>
 
@@ -1889,7 +1913,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
               <div className="flex items-center gap-2">
                 <Bus className="w-5 h-5 text-purple-200" />
                 <h3 className="text-base font-black tracking-tight">
-                  {isMr ? "आंतरशहर बस रूट जोडा (Flight-Flow प्रमाणे)" : "Add Intercity Bus Route (Flight-Flow Style)"}
+                  {isMr ? "आंतरशहर बस रूट जोडा" : "Add Intercity Bus Route"}
                 </h3>
               </div>
               <p className="text-xs text-purple-100 max-w-xl">
@@ -1904,7 +1928,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
               className="px-5 py-2.5 rounded-xl bg-white text-purple-900 hover:bg-purple-50 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
-              <span>{isMr ? "बस फ्लो उघडा" : "Launch Bus Flow"}</span>
+              <span>{isMr ? "नवीन बस रूट जोडा" : "Add Bus Route"}</span>
             </button>
           </div>
 
@@ -2491,36 +2515,28 @@ export const EarningsPanel: React.FC<PanelProps> = ({ onAction }) => {
               </span>
             </div>
 
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-600 font-medium">{isMr ? "एकूण ग्रॉस बुकिंग मूल्य (Gross Volume):" : "Total Gross Booking Volume:"}</span>
-                <span className="font-black text-slate-900 text-[13px]">₹{fyData.gross.toLocaleString("en-IN")}</span>
+            <div className="grid grid-cols-2 gap-2 text-xs pt-0.5">
+              <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-slate-500 text-[10px] font-bold block">{isMr ? "एकूण ग्रॉस बुकिंग मूल्य:" : "Gross Volume:"}</span>
+                <span className="font-black text-slate-900 text-xs sm:text-[13px]">₹{fyData.gross.toLocaleString("en-IN")}</span>
               </div>
+              <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-slate-500 text-[10px] font-bold block">{isMr ? "प्लॅटफॉर्म कमिशन (5%):" : "Platform Fee (5%):"}</span>
+                <span className="font-bold text-rose-600 text-xs sm:text-[13px]">-₹{fyData.commission.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-slate-500 text-[10px] font-bold block">{isMr ? "TDS कलम 194-O (1%):" : "TDS Sec 194-O (1%):"}</span>
+                <span className="font-bold text-amber-700 text-xs sm:text-[13px]">-₹{fyData.tds194O.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-slate-500 text-[10px] font-bold block">{isMr ? "जीएसटी वजावट (18%):" : "GST on Fee (18%):"}</span>
+                <span className="font-bold text-rose-600 text-xs sm:text-[13px]">-₹{fyData.gst.toLocaleString("en-IN")}</span>
+              </div>
+            </div>
 
-              <div className="flex justify-between items-center py-1 text-slate-600 border-t border-slate-100">
-                <span className="flex items-center gap-1">
-                  <span>{isMr ? "प्लॅटफॉर्म सेवा शुल्क (Platform Commission 5%):" : "Platform Commission (5%):"}</span>
-                </span>
-                <span className="font-bold text-rose-600">-₹{fyData.commission.toLocaleString("en-IN")}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 text-slate-600 border-t border-slate-100">
-                <div>
-                  <span className="font-bold text-slate-800 block">{isMr ? "TDS कलम 194-O (1% E-Commerce TDS):" : "TDS Sec 194-O (1% E-Commerce TDS):"}</span>
-                  <span className="text-[10px] text-slate-400">{isMr ? "उत्पन्न कर विभागाकडे जमा (Form 26AS/AIS मध्ये उपलब्ध)" : "Deposited with Income Tax Dept (Reflected in Form 26AS / AIS)"}</span>
-                </div>
-                <span className="font-bold text-amber-700">-₹{fyData.tds194O.toLocaleString("en-IN")}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 text-slate-600 border-t border-slate-100">
-                <span className="font-medium">{isMr ? "जीएसटी वजावट (GST on Commission 18%):" : "GST on Platform Service Fee (18%):"}</span>
-                <span className="font-bold text-rose-600">-₹{fyData.gst.toLocaleString("en-IN")}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-2 border-t-2 border-slate-200 bg-emerald-50/60 px-3 rounded-xl">
-                <span className="font-black text-emerald-950 text-xs">{isMr ? "बँकेत प्रत्यक्ष जमा झालेली नक्त रक्कम (Net Settled):" : "Net Settlement Credited to Bank Account:"}</span>
-                <span className="font-black text-emerald-800 text-[15px]">₹{fyData.net.toLocaleString("en-IN")}</span>
-              </div>
+            <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-emerald-50/80 border border-emerald-200/80">
+              <span className="font-black text-emerald-950 text-xs">{isMr ? "बँकेत प्रत्यक्ष जमा निव्वळ रक्कम:" : "Net Settlement Credited:"}</span>
+              <span className="font-black text-emerald-800 text-[14px]">₹{fyData.net.toLocaleString("en-IN")}</span>
             </div>
 
             {/* 1-Click Export and Form 16A Request */}
@@ -3092,59 +3108,6 @@ export const ProfilePanel: React.FC<PanelProps> = ({ onAction }) => {
       <SectionHeader title="Profile & Verified KYC" />
       <StatusToast message={toast} />
 
-      {/* 3D Borderless Action Grid */}
-      <div className="px-5 pt-2 mb-3">
-        <div className="grid grid-cols-3 gap-2.5">
-          {/* Button 1: Vendor KYC (One-Time Registration) */}
-          <button
-            type="button"
-            onClick={() => setShowVendorKycModal(true)}
-            className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 text-slate-800 font-bold text-[11px] sm:text-[12px] tracking-tight uppercase active:scale-95 transition-all cursor-pointer group bg-transparent border-none outline-none"
-          >
-            <div className="relative flex h-11 w-11 items-center justify-center">
-              <img
-                src="/icons/routripo_wallet.png"
-                alt="Vendor KYC"
-                className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform"
-              />
-            </div>
-            <span className="truncate text-center w-full">Vendor KYC</span>
-          </button>
-
-          {/* Button 2: Docs Vault */}
-          <button
-            type="button"
-            onClick={() => setShowKycDocs(true)}
-            className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 text-slate-800 font-bold text-[11px] sm:text-[12px] tracking-tight uppercase active:scale-95 transition-all cursor-pointer group bg-transparent border-none outline-none"
-          >
-            <div className="relative flex h-11 w-11 items-center justify-center">
-              <img
-                src="/icons/secret.png"
-                alt="Docs Vault"
-                className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform"
-              />
-            </div>
-            <span className="truncate text-center w-full">Docs Vault</span>
-          </button>
-
-          {/* Button 3: GST & Tax */}
-          <button
-            type="button"
-            onClick={() => setShowGstModal(true)}
-            className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 text-slate-800 font-bold text-[11px] sm:text-[12px] tracking-tight uppercase active:scale-95 transition-all cursor-pointer group bg-transparent border-none outline-none"
-          >
-            <div className="relative flex h-11 w-11 items-center justify-center">
-              <img
-                src="/icons/booking.png"
-                alt="GST Settings"
-                className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform"
-              />
-            </div>
-            <span className="truncate text-center w-full">GST Settings</span>
-          </button>
-        </div>
-      </div>
-
       <div className="mx-5 premium-card px-4 py-4">
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-800">
@@ -3249,6 +3212,12 @@ export const ProfilePanel: React.FC<PanelProps> = ({ onAction }) => {
 
       <SectionHeader title="Documents & Compliance" />
       <div className="mx-5 premium-card divide-y divide-slate-100 py-1">
+        <ListRow
+          imgSrc="/icons/routripo_wallet.png"
+          label="Vendor KYC Registration"
+          caption="One-time business profile, PAN, GST and bank mandate"
+          onClick={() => setShowVendorKycModal(true)}
+        />
         <ListRow
           imgSrc="/icons/secret.png"
           label="KYC documents vault"

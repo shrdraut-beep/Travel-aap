@@ -31,7 +31,7 @@ export const ModalSheet: React.FC<ModalSheetProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900/60 backdrop-blur-sm p-0">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -41,23 +41,28 @@ export const ModalSheet: React.FC<ModalSheetProps> = ({
           />
 
           <motion.div
-            initial={{ y: "100%", opacity: 0.5 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className={`relative flex max-h-[90vh] w-full ${maxWidth} flex-col rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden z-10`}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 320 }}
+            className={`relative flex max-h-[92vh] w-full max-w-[520px] flex-col rounded-t-3xl rounded-b-none bg-white shadow-2xl overflow-hidden z-10`}
           >
+            {/* Native Pull Handle */}
+            <div className="pt-2.5 pb-1 flex justify-center bg-slate-50/90 border-b border-slate-100/50 shrink-0">
+              <div className="w-12 h-1.5 rounded-full bg-slate-300" />
+            </div>
+
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 bg-slate-50/80 backdrop-blur-sm">
-              <div>
-                <h3 className="text-[16px] font-bold tracking-tight text-slate-900">{title}</h3>
-                {subtitle && <p className="text-[12px] font-medium text-slate-500">{subtitle}</p>}
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 bg-slate-50/90 backdrop-blur-sm shrink-0">
+              <div className="min-w-0 flex-1 pr-3">
+                <h3 className="text-[15px] font-bold tracking-tight text-slate-900 truncate">{title}</h3>
+                {subtitle && <p className="text-[11px] font-medium text-slate-500 line-clamp-1">{subtitle}</p>}
               </div>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-700 transition-colors cursor-pointer"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>

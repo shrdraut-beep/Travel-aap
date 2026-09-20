@@ -424,6 +424,7 @@ export const SearchCard: React.FC<SearchCardProps> = ({ mode, onSearch }) => {
       <CitySheet
         open={sheet === "origin"}
         title={stay ? "Where to?" : labels.from}
+        mode={mode}
         onClose={close}
         onSelect={(city) => {
           setOrigin(city);
@@ -434,6 +435,7 @@ export const SearchCard: React.FC<SearchCardProps> = ({ mode, onSearch }) => {
       <CitySheet
         open={sheet === "destination"}
         title={labels.to || "To"}
+        mode={mode}
         onClose={close}
         onSelect={(city) => {
           setDestination(city);
@@ -445,6 +447,7 @@ export const SearchCard: React.FC<SearchCardProps> = ({ mode, onSearch }) => {
       <CitySheet
         open={sheet === "leg-city"}
         title={`Flight ${activeLegIndex + 1}: ${activeLegField === 'origin' ? 'From City' : 'To City'}`}
+        mode="flights"
         onClose={close}
         onSelect={(city) => {
           setLegs(prev => {

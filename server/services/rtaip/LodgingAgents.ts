@@ -229,6 +229,134 @@ const CURATED_DESTINATION_HOTELS: Record<string, LodgingProperty[]> = {
         { id: "rm_aguada_sea", name: "Superior Room Sea View", bed: "1 King Bed", price: 15200, currency: "INR", desc: "Portuguese architecture overlooking Arabian waves", freeCancellation: true, breakfastIncluded: true, provider: "Travelport Stays" }
       ]
     }
+  ],
+  NASHIK: [
+    {
+      id: "htl_radisson_blu_nashik",
+      normalizedId: "radisson-blu-hotel-spa-nashik",
+      name: "Radisson Blu Hotel & Spa, Nashik",
+      canonicalName: "Radisson Blu Hotel & Spa Nashik",
+      rating: 4.8,
+      location: "Pathardi Phata, Nashik",
+      city: "Nashik",
+      address: "Trimbak Road, Pathardi, Nashik, Maharashtra 422010",
+      latitude: 19.9512,
+      longitude: 73.7431,
+      distance: "Trimbakeshwar Road Gateway",
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+        "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80"
+      ],
+      amenities: ["Luxury Spa & Wellness", "Outdoor Pool", "Vineyard View", "Free High-Speed WiFi", "Fine Dining", "Free Parking"],
+      pricePerNight: 7200,
+      currency: "INR",
+      freeCancellation: true,
+      breakfastIncluded: true,
+      sources: ["Radisson Direct", "Verified Local Partner"],
+      rooms: [
+        { id: "rm_radisson_sup", name: "Superior Room Garden View", bed: "1 King Bed", price: 7200, currency: "INR", desc: "Spacious 380 sq.ft room with garden view, rain shower & work desk", freeCancellation: true, breakfastIncluded: true, provider: "Radisson Stays" },
+        { id: "rm_radisson_suite", name: "Executive Suite with Balcony", bed: "1 King Bed + Living Area", price: 11500, currency: "INR", desc: "Panoramic view of Pandavleni caves, high-speed WiFi, lounge access", freeCancellation: true, breakfastIncluded: true, provider: "Radisson Stays" }
+      ]
+    },
+    {
+      id: "htl_gateway_ambad_nashik",
+      normalizedId: "gateway-hotel-ambad-nashik",
+      name: "The Gateway Hotel Ambad Nashik (Taj)",
+      canonicalName: "The Gateway Hotel Ambad Nashik",
+      rating: 4.7,
+      location: "MIDC Ambad, Nashik",
+      city: "Nashik",
+      address: "P-17, MIDC Ambad, Mumbai-Agra Highway, Nashik, Maharashtra 422010",
+      latitude: 19.9388,
+      longitude: 73.7389,
+      distance: "20 Acres of Lush Landscaped Gardens",
+      image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80",
+      images: ["https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&q=80"],
+      amenities: ["Taj Hospitality", "Large Swimming Pool", "Tennis Court", "Ayurvedic Spa", "Free WiFi", "Wine Tours"],
+      pricePerNight: 6800,
+      currency: "INR",
+      freeCancellation: true,
+      breakfastIncluded: true,
+      sources: ["Taj Hotels Direct", "Travelport Stays GDS"],
+      rooms: [
+        { id: "rm_taj_standard", name: "Standard Garden Facing Room", bed: "1 King or 2 Twin Beds", price: 6800, currency: "INR", desc: "Classic Taj hospitality surrounded by 20 acres of tranquil greenery", freeCancellation: true, breakfastIncluded: true, provider: "Taj Stays" }
+      ]
+    },
+    {
+      id: "htl_express_inn_nashik",
+      normalizedId: "express-inn-luxury-hotel-nashik",
+      name: "Express Inn The Business Luxury Hotel",
+      canonicalName: "Express Inn Nashik",
+      rating: 4.6,
+      location: "Prashant Nagar, Pathardi Phata, Nashik",
+      city: "Nashik",
+      address: "Comm. Plot No. 1, Prashant Nagar, Ambad, Nashik 422010",
+      latitude: 19.9542,
+      longitude: 73.7485,
+      distance: "Overlooking Pandavleni Caves",
+      image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
+      images: ["https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80"],
+      amenities: ["Freeda Spa", "Swimming Pool", "Sky Lounge Aster", "24/7 Gym", "Free WiFi"],
+      pricePerNight: 5500,
+      currency: "INR",
+      freeCancellation: true,
+      breakfastIncluded: true,
+      sources: ["Express Inn Direct"],
+      rooms: [
+        { id: "rm_exp_deluxe", name: "Deluxe City View Room", bed: "1 King Bed", price: 5500, currency: "INR", desc: "Contemporary aesthetic with luxury bath fittings and city view", freeCancellation: true, breakfastIncluded: true, provider: "Express Inn Stays" }
+      ]
+    },
+    {
+      id: "htl_courtyard_marriott_nashik",
+      normalizedId: "courtyard-marriott-nashik",
+      name: "Courtyard by Marriott Nashik",
+      canonicalName: "Courtyard by Marriott Nashik",
+      rating: 4.7,
+      location: "Mumbai Naka, Nashik",
+      city: "Nashik",
+      address: "Nirman Viva, Near Mumbai Naka, Nashik 422001",
+      latitude: 19.9882,
+      longitude: 73.7745,
+      distance: "City Center & Shopping Hub",
+      image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80",
+      images: ["https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80"],
+      amenities: ["Marriott Bonvoy Service", "Rooftop Pool", "The Bistro", "24/7 Fitness Center", "Free WiFi"],
+      pricePerNight: 6200,
+      currency: "INR",
+      freeCancellation: true,
+      breakfastIncluded: true,
+      sources: ["Marriott Bonvoy", "Travelport Stays GDS"],
+      rooms: [
+        { id: "rm_marriott_dlx", name: "Deluxe King Room", bed: "1 King Bed", price: 6200, currency: "INR", desc: "Ergonomic work desk, plush mattress, and luxury amenities", freeCancellation: true, breakfastIncluded: true, provider: "Marriott Stays" }
+      ]
+    }
+  ],
+  PUNE: [
+    {
+      id: "htl_jw_marriott_pune",
+      normalizedId: "jw-marriott-hotel-pune",
+      name: "JW Marriott Hotel Pune",
+      canonicalName: "JW Marriott Hotel Pune",
+      rating: 4.9,
+      location: "Senapati Bapat Road, Pune",
+      city: "Pune",
+      address: "Senapati Bapat Rd, Laxmi Society, Model Colony, Shivajinagar, Pune 411016",
+      latitude: 18.5358,
+      longitude: 73.8322,
+      distance: "Senapati Bapat Road Prime Corridor",
+      image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&q=80",
+      images: ["https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&q=80"],
+      amenities: ["Quan Spa", "Rooftop Lounge Paasha", "Outdoor Swimming Pool", "Multiple Restaurants", "Free WiFi"],
+      pricePerNight: 11500,
+      currency: "INR",
+      freeCancellation: true,
+      breakfastIncluded: true,
+      sources: ["Marriott Bonvoy", "Travelport Stays GDS"],
+      rooms: [
+        { id: "rm_jw_pune_deluxe", name: "Deluxe Guest Room", bed: "1 King Bed", price: 11500, currency: "INR", desc: "Floor-to-ceiling windows with panoramic hill or city views", freeCancellation: true, breakfastIncluded: true, provider: "Marriott Stays" }
+      ]
+    }
   ]
 };
 

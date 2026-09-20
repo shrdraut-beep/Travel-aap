@@ -27,18 +27,24 @@ const durationMinutes = (flight: any) => {
   return (h ? parseInt(h[1], 10) : 0) * 60 + (m ? parseInt(m[1], 10) : 0);
 };
 
+const extractAirportCode = (str: string) => {
+  const match = str.match(/\(([A-Z]{3})\)/i);
+  if (match) return match[1].toUpperCase();
+  return str.trim().toUpperCase().slice(0, 3);
+};
+
 export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
   const navigate = useNavigate();
   const isMr = lang === 'mr';
 
-  const [origin, setOrigin] = useState('BOM');
-  const [destination, setDestination] = useState('DEL');
+  const [origin, setOrigin] = useState('Mumbai (BOM)');
+  const [destination, setDestination] = useState('New Delhi (DEL)');
   const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'multicity'>('oneway');
   const [departDate, setDepartDate] = useState(getTomorrowDate(1));
   const [returnDate, setReturnDate] = useState(getTomorrowDate(4));
   const [multiCitySlices, setMultiCitySlices] = useState<MultiCityLeg[]>([
-    { id: '1', origin: 'DEL', destination: 'BOM', date: getTomorrowDate(1) },
-    { id: '2', origin: 'BOM', destination: 'BLR', date: getTomorrowDate(3) }
+    { id: '1', origin: 'New Delhi (DEL)', destination: 'Mumbai (BOM)', date: getTomorrowDate(1) },
+    { id: '2', origin: 'Mumbai (BOM)', destination: 'Bengaluru (BLR)', date: getTomorrowDate(3) }
   ]);
 
   const [adults, setAdults] = useState(1);
@@ -65,13 +71,16 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
   }, [flightData, sortBy, nonStopOnly]);
 
   const handleFlightSearch = async () => {
+    const origCode = extractAirportCode(origin);
+    const destCode = extractAirportCode(destination);
+
     if (tripType === 'oneway') {
-      if (origin.toUpperCase() === destination.toUpperCase()) {
+      if (origCode === destCode) {
         alert(isMr ? "प्रस्थान आणि गंतव्य शहर एकच असू शकत नाही." : "Origin and destination cannot be the same.");
         return;
       }
     } else if (tripType === 'roundtrip') {
-      if (origin.toUpperCase() === destination.toUpperCase()) {
+      if (origCode === destCode) {
         alert(isMr ? "प्रस्थान आणि गंतव्य शहर एकच असू शकत नाही." : "Origin and destination cannot be the same.");
         return;
       }
@@ -86,7 +95,7 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
           alert(isMr ? `कृपया फ्लाईट ${i + 1} साठी शहरे निवडा.` : `Please select cities for Flight ${i + 1}.`);
           return;
         }
-        if (leg.origin.toUpperCase() === leg.destination.toUpperCase()) {
+        if (extractAirportCode(leg.origin) === extractAirportCode(leg.destination)) {
           alert(isMr ? `फ्लाईट ${i + 1} साठी प्रस्थान आणि गंतव्य शहर एकच असू शकत नाही.` : `Origin and destination cannot be identical for Flight ${i + 1}.`);
           return;
         }
@@ -96,16 +105,16 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
     // Prepare slices payload for search
     let formattedSlices: Array<{ origin: string; destination: string; departure_date: string }> = [];
     if (tripType === 'oneway') {
-      formattedSlices = [{ origin: origin.trim().toUpperCase(), destination: destination.trim().toUpperCase(), departure_date: departDate }];
+      formattedSlices = [{ origin: origCode, destination: destCode, departure_date: departDate }];
     } else if (tripType === 'roundtrip') {
       formattedSlices = [
-        { origin: origin.trim().toUpperCase(), destination: destination.trim().toUpperCase(), departure_date: departDate },
-        { origin: destination.trim().toUpperCase(), destination: origin.trim().toUpperCase(), departure_date: returnDate || getTomorrowDate(4) }
+        { origin: origCode, destination: destCode, departure_date: departDate },
+        { origin: destCode, destination: origCode, departure_date: returnDate || getTomorrowDate(4) }
       ];
     } else {
       formattedSlices = multiCitySlices.map(s => ({
-        origin: s.origin.trim().toUpperCase(),
-        destination: s.destination.trim().toUpperCase(),
+        origin: extractAirportCode(s.origin),
+        destination: extractAirportCode(s.destination),
         departure_date: s.date
       }));
     }
@@ -114,6 +123,8 @@ export const FlightSearchTab = ({ lang, currencySymbol, onBookNow, onBack }: any
       tripType: tripType === 'oneway' ? 'oneWay' : tripType === 'roundtrip' ? 'roundTrip' : 'multiCity',
       origin,
       destination,
+      origCode,
+      destCode,
       departDate,
       returnDate: tripType === 'roundtrip' ? returnDate : undefined,
       slices: formattedSlices,

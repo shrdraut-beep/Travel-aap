@@ -1,26 +1,32 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Plane, Train, MapPin, Search, X, Building2, Bus, Car, Check } from 'lucide-react';
+import { Plane, Train, MapPin, Search, X, Building2, Bus, Car, Check, Loader2 } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 import { ALL_AIRPORTS } from '../data/airports';
 import { ALL_RAILWAY_STATIONS } from '../data/railwayStations';
+import { MASTER_CITIES_CLIENT, MasterCityItem } from '../data/masterCities';
 
 export type TransportMode = 'flights' | 'trains' | 'hotels' | 'buses' | 'cars';
 
 export interface LocationItem {
+  id?: string;
   city: string;
   airport?: string;
   station?: string;
   code: string;
   country?: string;
+  state?: string;
   cityMr?: string;
+  airportCode?: string;
+  railwayCode?: string;
+  busTerminal?: string;
   type?: 'city' | 'airport' | 'station' | 'hotel' | 'bus' | 'custom';
 }
 
 interface SearchInputProps {
   label: string;
   placeholder?: string;
-  value: string; // The selected code or city name
-  onChange: (code: string, item?: LocationItem) => void;
+  value: string; // The selected city name or code
+  onChange: (codeOrCity: string, item?: LocationItem) => void;
   mode?: TransportMode;
   onModeChange?: (newMode: TransportMode) => void;
   showModeToggle?: boolean;
@@ -30,102 +36,10 @@ interface SearchInputProps {
   iconType?: 'from' | 'to';
 }
 
-export const POPULAR_CITIES_AND_DESTINATIONS: LocationItem[] = [
-  // Goa Destinations
-  { city: 'Goa', code: 'GOA', country: 'Goa, India', cityMr: 'गोवा', type: 'city' },
-  { city: 'Goa (Dabolim Airport)', airport: 'Dabolim Airport', code: 'GOI', country: 'Goa, India', cityMr: 'गोवा (दाबोळी)', type: 'airport' },
-  { city: 'Goa (Mopa Airport)', airport: 'Manohar International Airport', code: 'GOX', country: 'Goa, India', cityMr: 'गोवा (मोपा)', type: 'airport' },
-  { city: 'Goa (Madgaon Junction)', station: 'Madgaon Junction', code: 'MAO', country: 'Goa, India', cityMr: 'गोवा (मडगाव)', type: 'station' },
-  { city: 'Goa (Vasco da Gama)', station: 'Vasco-da-Gama', code: 'VSG', country: 'Goa, India', cityMr: 'वास्को द गामा', type: 'station' },
-
-  // Maharashtra Hubs & Tourist Spots
-  { city: 'Mumbai', airport: 'Chhatrapati Shivaji Maharaj Intl Airport', code: 'BOM', country: 'Maharashtra, India', cityMr: 'मुंबई', type: 'airport' },
-  { city: 'Mumbai CSMT', station: 'CSMT Mumbai', code: 'CSMT', country: 'Maharashtra, India', cityMr: 'मुंबई सीएसएमटी', type: 'station' },
-  { city: 'Mumbai Central', station: 'Mumbai Central', code: 'MMCT', country: 'Maharashtra, India', cityMr: 'मुंबई सेंट्रल', type: 'station' },
-  { city: 'Pune', airport: 'Pune International Airport', code: 'PNQ', country: 'Maharashtra, India', cityMr: 'पुणे', type: 'airport' },
-  { city: 'Pune Junction', station: 'Pune Junction', code: 'PUNE', country: 'Maharashtra, India', cityMr: 'पुणे जंक्शन', type: 'station' },
-  { city: 'Nagpur', airport: 'Dr. Babasaheb Ambedkar Intl Airport', code: 'NAG', country: 'Maharashtra, India', cityMr: 'नागपूर', type: 'airport' },
-  { city: 'Nashik', code: 'ISK', country: 'Maharashtra, India', cityMr: 'नाशिक', type: 'city' },
-  { city: 'Chhatrapati Sambhajinagar (Aurangabad)', code: 'IXU', country: 'Maharashtra, India', cityMr: 'छत्रपती संभाजीनगर', type: 'city' },
-  { city: 'Shirdi', airport: 'Shirdi International Airport', code: 'SAG', country: 'Maharashtra, India', cityMr: 'शिर्डी', type: 'city' },
-  { city: 'Kolhapur', code: 'KLH', country: 'Maharashtra, India', cityMr: 'कोल्हापूर', type: 'city' },
-  { city: 'Mahabaleshwar', code: 'MHB', country: 'Maharashtra, India', cityMr: 'महाबळेश्वर', type: 'city' },
-  { city: 'Lonavala / Khandala', code: 'LNL', country: 'Maharashtra, India', cityMr: 'लोणावळा / खंडाळा', type: 'city' },
-  { city: 'Alibaug', code: 'ALB', country: 'Maharashtra, India', cityMr: 'अलिबाग', type: 'city' },
-  { city: 'Matheran', code: 'MTH', country: 'Maharashtra, India', cityMr: 'माथेरान', type: 'city' },
-  { city: 'Solapur', code: 'SOP', country: 'Maharashtra, India', cityMr: 'सोलापूर', type: 'city' },
-  { city: 'Amravati', code: 'AMI', country: 'Maharashtra, India', cityMr: 'अमरावती', type: 'city' },
-  { city: 'Nanded', code: 'NDC', country: 'Maharashtra, India', cityMr: 'नांदेड', type: 'city' },
-  { city: 'Ratnagiri', code: 'RN', country: 'Maharashtra, India', cityMr: 'रत्नागिरी', type: 'city' },
-  { city: 'Sindhudurg', code: 'SDW', country: 'Maharashtra, India', cityMr: 'सिंधुदुर्ग', type: 'city' },
-
-  // Major Indian Metros & Travel Destinations
-  { city: 'Delhi', airport: 'Indira Gandhi International Airport', code: 'DEL', country: 'Delhi, India', cityMr: 'दिल्ली', type: 'airport' },
-  { city: 'New Delhi', station: 'New Delhi Railway Station', code: 'NDLS', country: 'Delhi, India', cityMr: 'नवी दिल्ली', type: 'station' },
-  { city: 'Bengaluru', airport: 'Kempegowda International Airport', code: 'BLR', country: 'Karnataka, India', cityMr: 'बेंगळुरू', type: 'airport' },
-  { city: 'Bengaluru City', station: 'KSR Bengaluru', code: 'SBC', country: 'Karnataka, India', cityMr: 'बेंगळुरू सिटी', type: 'station' },
-  { city: 'Hyderabad', airport: 'Rajiv Gandhi International Airport', code: 'HYD', country: 'Telangana, India', cityMr: 'हैदराबाद', type: 'airport' },
-  { city: 'Chennai', airport: 'Chennai International Airport', code: 'MAA', country: 'Tamil Nadu, India', cityMr: 'चेन्नई', type: 'airport' },
-  { city: 'Kolkata', airport: 'Netaji Subhash Chandra Bose Intl Airport', code: 'CCU', country: 'West Bengal, India', cityMr: 'कोलकाता', type: 'airport' },
-  { city: 'Howrah Junction', station: 'Howrah Junction', code: 'HWH', country: 'West Bengal, India', cityMr: 'हावडा', type: 'station' },
-  { city: 'Ahmedabad', airport: 'Sardar Vallabhbhai Patel Intl Airport', code: 'AMD', country: 'Gujarat, India', cityMr: 'अहमदाबाद', type: 'airport' },
-  { city: 'Jaipur', airport: 'Jaipur International Airport', code: 'JAI', country: 'Rajasthan, India', cityMr: 'जयपूर', type: 'city' },
-  { city: 'Udaipur', airport: 'Maharana Pratap Airport', code: 'UDR', country: 'Rajasthan, India', cityMr: 'उदयपूर', type: 'city' },
-  { city: 'Jodhpur', code: 'JDH', country: 'Rajasthan, India', cityMr: 'जोधपूर', type: 'city' },
-  { city: 'Jaisalmer', code: 'JSA', country: 'Rajasthan, India', cityMr: 'जैसलमेर', type: 'city' },
-  { city: 'Varanasi', airport: 'Lal Bahadur Shastri Intl Airport', code: 'VNS', country: 'Uttar Pradesh, India', cityMr: 'वाराणसी', type: 'city' },
-  { city: 'Agra', station: 'Agra Cantt', code: 'AGC', country: 'Uttar Pradesh, India', cityMr: 'आग्रा', type: 'city' },
-  { city: 'Ayodhya', airport: 'Maharishi Valmiki Intl Airport', code: 'AY', country: 'Uttar Pradesh, India', cityMr: 'अयोध्या', type: 'city' },
-  { city: 'Lucknow', airport: 'Chaudhary Charan Singh Intl Airport', code: 'LKO', country: 'Uttar Pradesh, India', cityMr: 'लखनऊ', type: 'city' },
-  { city: 'Mathura / Vrindavan', code: 'MTJ', country: 'Uttar Pradesh, India', cityMr: 'मथुरा / वृंदावन', type: 'city' },
-  { city: 'Manali', code: 'KUU', country: 'Himachal Pradesh, India', cityMr: 'मनाली', type: 'city' },
-  { city: 'Shimla', code: 'SLV', country: 'Himachal Pradesh, India', cityMr: 'शिमला', type: 'city' },
-  { city: 'Dharamshala', code: 'DHM', country: 'Himachal Pradesh, India', cityMr: 'धर्मशाळा', type: 'city' },
-  { city: 'Rishikesh', code: 'RKSH', country: 'Uttarakhand, India', cityMr: 'ऋषिकेश', type: 'city' },
-  { city: 'Haridwar', station: 'Haridwar Junction', code: 'HW', country: 'Uttarakhand, India', cityMr: 'हरिद्वार', type: 'city' },
-  { city: 'Dehradun', airport: 'Jolly Grant Airport', code: 'DED', country: 'Uttarakhand, India', cityMr: 'डेहराडून', type: 'city' },
-  { city: 'Mussoorie', code: 'MSR', country: 'Uttarakhand, India', cityMr: 'मसूरी', type: 'city' },
-  { city: 'Nainital', code: 'NTL', country: 'Uttarakhand, India', cityMr: 'नैनिताल', type: 'city' },
-  { city: 'Amritsar', airport: 'Sri Guru Ram Dass Jee Intl Airport', code: 'ATQ', country: 'Punjab, India', cityMr: 'अमृतसर', type: 'city' },
-  { city: 'Chandigarh', airport: 'Shaheed Bhagat Singh Intl Airport', code: 'IXC', country: 'Chandigarh, India', cityMr: 'चंदीगड', type: 'city' },
-  { city: 'Srinagar', airport: 'Sheikh ul-Alam Intl Airport', code: 'SXR', country: 'Jammu & Kashmir, India', cityMr: 'श्रीनगर', type: 'city' },
-  { city: 'Leh Ladakh', airport: 'Kushok Bakula Rimpochee Airport', code: 'IXL', country: 'Ladakh, India', cityMr: 'लेह लडाख', type: 'city' },
-  { city: 'Kochi (Cochin)', airport: 'Cochin International Airport', code: 'COK', country: 'Kerala, India', cityMr: 'कोची', type: 'city' },
-  { city: 'Munnar', code: 'MNR', country: 'Kerala, India', cityMr: 'मुन्नार', type: 'city' },
-  { city: 'Alleppey (Alappuzha)', code: 'ALLP', country: 'Kerala, India', cityMr: 'अलेप्पी (आलप्पुझा)', type: 'city' },
-  { city: 'Wayanad', code: 'WYD', country: 'Kerala, India', cityMr: 'वायनाड', type: 'city' },
-  { city: 'Ooty', code: 'UAM', country: 'Tamil Nadu, India', cityMr: 'उटी', type: 'city' },
-  { city: 'Kodaikanal', code: 'KQN', country: 'Tamil Nadu, India', cityMr: 'कोडाईकनाल', type: 'city' },
-  { city: 'Mysuru (Mysore)', code: 'MYA', country: 'Karnataka, India', cityMr: 'म्हैसूर', type: 'city' },
-  { city: 'Coorg', code: 'CRG', country: 'Karnataka, India', cityMr: 'कूर्ग', type: 'city' },
-  { city: 'Hampi', code: 'HMP', country: 'Karnataka, India', cityMr: 'हंपी', type: 'city' },
-  { city: 'Gokarna', code: 'GOK', country: 'Karnataka, India', cityMr: 'गोकर्ण', type: 'city' },
-  { city: 'Pondicherry (Puducherry)', code: 'PNY', country: 'Puducherry, India', cityMr: 'पाँडिचेरी', type: 'city' },
-  { city: 'Puri', station: 'Puri Railway Station', code: 'PURI', country: 'Odisha, India', cityMr: 'पुरी', type: 'city' },
-  { city: 'Bhubaneswar', airport: 'Biju Patnaik Intl Airport', code: 'BBI', country: 'Odisha, India', cityMr: 'भुवनेश्वर', type: 'city' },
-  { city: 'Darjeeling', code: 'DAJ', country: 'West Bengal, India', cityMr: 'दार्जिलिंग', type: 'city' },
-  { city: 'Gangtok', code: 'GTK', country: 'Sikkim, India', cityMr: 'गंगटोक', type: 'city' },
-  { city: 'Surat', airport: 'Surat International Airport', code: 'STV', country: 'Gujarat, India', cityMr: 'सुरत', type: 'city' },
-  { city: 'Indore', airport: 'Devi Ahilyabai Holkar Airport', code: 'IDR', country: 'Madhya Pradesh, India', cityMr: 'इंदूर', type: 'city' },
-  { city: 'Bhopal', airport: 'Raja Bhoj Airport', code: 'BHO', country: 'Madhya Pradesh, India', cityMr: 'भोपाळ', type: 'city' },
-  { city: 'Ujjain', code: 'UJN', country: 'Madhya Pradesh, India', cityMr: 'उज्जैन', type: 'city' },
-
-  // International Hubs
-  { city: 'Dubai', airport: 'Dubai International Airport', code: 'DXB', country: 'UAE', cityMr: 'दुबई', type: 'city' },
-  { city: 'Singapore', airport: 'Changi Airport', code: 'SIN', country: 'Singapore', cityMr: 'सिंगापूर', type: 'city' },
-  { city: 'Bangkok', airport: 'Suvarnabhumi Airport', code: 'BKK', country: 'Thailand', cityMr: 'बँकॉग', type: 'city' },
-  { city: 'Phuket', airport: 'Phuket International Airport', code: 'HKT', country: 'Thailand', cityMr: 'फुकेत', type: 'city' },
-  { city: 'Bali', airport: 'Ngurah Rai International Airport', code: 'DPS', country: 'Indonesia', cityMr: 'बाली', type: 'city' },
-  { city: 'London', airport: 'Heathrow Airport', code: 'LHR', country: 'United Kingdom', cityMr: 'लंडन', type: 'city' },
-  { city: 'New York', airport: 'John F. Kennedy Intl Airport', code: 'JFK', country: 'USA', cityMr: 'न्यूयॉर्क', type: 'city' },
-  { city: 'Paris', airport: 'Charles de Gaulle Airport', code: 'CDG', country: 'France', cityMr: 'पॅरिस', type: 'city' },
-  { city: 'Maldives (Male)', airport: 'Velana International Airport', code: 'MLE', country: 'Maldives', cityMr: 'मालदीव', type: 'city' }
-];
-
 export const SearchInput: React.FC<SearchInputProps> = ({
   autoFocus,
   label,
-  placeholder = 'Type city, station or code...',
+  placeholder = 'Type at least 3 letters (e.g. Nashik, Mumbai)...',
   value,
   onChange,
   mode = 'flights',
@@ -135,40 +49,198 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   iconType = 'from',
 }) => {
   const [query, setQuery] = useState(value || '');
-  const debouncedQuery = useDebounce(query, 100);
+  const debouncedQuery = useDebounce(query, 120);
   const [isOpen, setIsOpen] = useState(false);
+  const [isServerLoading, setIsServerLoading] = useState(false);
+  const [serverResults, setServerResults] = useState<LocationItem[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Sync displayed query if value prop changes from outside
   useEffect(() => {
-    if (value && value !== query) {
-      // Find item
-      const item = POPULAR_CITIES_AND_DESTINATIONS.find(
-        (c) => c.code.toLowerCase() === value.toLowerCase() || c.city.toLowerCase() === value.toLowerCase()
-      );
-      if (item) {
-        setQuery(mode === 'hotels' || mode === 'buses' || mode === 'cars' ? item.city : item.code);
-      } else {
-        setQuery(value);
-      }
+    if (value !== undefined && value !== query) {
+      setQuery(value);
     }
-  }, [value, mode]);
+  }, [value]);
 
-  // Build unified dataset for current mode
-  const baseDataset = useMemo<LocationItem[]>(() => {
-    const list: LocationItem[] = POPULAR_CITIES_AND_DESTINATIONS.filter(item => {
-      if (mode === 'flights') return item.type !== 'station';
-      if (mode === 'trains') return item.type !== 'airport';
-      return true;
+  // Fetch from live /api/search when query has at least 3 characters
+  useEffect(() => {
+    const clean = debouncedQuery.trim();
+    if (clean.length < 3) {
+      setServerResults([]);
+      setIsServerLoading(false);
+      return;
+    }
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    setIsServerLoading(true);
+
+    const fetchUrl = `/api/search?q=${encodeURIComponent(clean)}&index=all&limit=15`;
+    fetch(fetchUrl, { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (!data || !data.success) return;
+
+        const items: LocationItem[] = [];
+
+        // 1. Process Master Cities from server
+        if (Array.isArray(data.cities)) {
+          data.cities.forEach((c: any) => {
+            items.push({
+              id: c.id,
+              city: c.name || c.city,
+              cityMr: c.nameMr || c.cityMr,
+              state: c.state,
+              country: c.country || 'India',
+              code: mode === 'flights' ? (c.airportCode || c.id) : mode === 'trains' ? (c.railwayCode || c.id) : c.id,
+              airportCode: c.airportCode,
+              airport: c.airportName,
+              railwayCode: c.railwayCode,
+              station: c.railwayStationName,
+              busTerminal: c.busTerminal,
+              type: 'city',
+            });
+          });
+        }
+
+        // 2. Process Airports from server
+        if (mode === 'flights' && Array.isArray(data.airports)) {
+          data.airports.forEach((a: any) => {
+            items.push({
+              city: a.city,
+              airport: a.airport_name,
+              code: a.iata_code,
+              airportCode: a.iata_code,
+              country: a.country || 'India',
+              type: 'airport',
+            });
+          });
+        }
+
+        // 3. Process Train Stations from server
+        if (mode === 'trains' && Array.isArray(data.train_stations)) {
+          data.train_stations.forEach((s: any) => {
+            items.push({
+              city: s.address ? s.address.split(',')[0] : s.name,
+              station: s.name,
+              code: s.code,
+              railwayCode: s.code,
+              state: s.state,
+              country: 'India',
+              type: 'station',
+            });
+          });
+        }
+
+        // 4. Process Hotels from server (if mode is hotels)
+        if (mode === 'hotels' && Array.isArray(data.hotels)) {
+          data.hotels.forEach((h: any) => {
+            items.push({
+              id: h.id,
+              city: h.city,
+              state: h.state,
+              country: 'India',
+              code: h.city_id || h.id,
+              type: 'hotel',
+            });
+          });
+        }
+
+        setServerResults(items);
+        setIsServerLoading(false);
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setIsServerLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [debouncedQuery, mode]);
+
+  // Instant local Master Cities search (0ms response guarantee)
+  const localMatchedCities = useMemo<LocationItem[]>(() => {
+    const clean = debouncedQuery.trim().toLowerCase();
+    if (clean.length < 3) {
+      return [];
+    }
+
+    const matched = MASTER_CITIES_CLIENT.filter((c) => {
+      return (
+        c.city.toLowerCase().includes(clean) ||
+        (c.cityMr && c.cityMr.includes(clean)) ||
+        c.id.toLowerCase().includes(clean) ||
+        c.state.toLowerCase().includes(clean) ||
+        (c.airportCode && c.airportCode.toLowerCase().includes(clean)) ||
+        (c.railwayCode && c.railwayCode.toLowerCase().includes(clean)) ||
+        c.keywords.some((k) => k.toLowerCase().includes(clean))
+      );
     });
 
+    return matched.map((c) => ({
+      id: c.id,
+      city: c.city,
+      cityMr: c.cityMr,
+      state: c.state,
+      country: c.country,
+      code: mode === 'flights' ? (c.airportCode || c.id) : mode === 'trains' ? (c.railwayCode || c.id) : c.id,
+      airportCode: c.airportCode,
+      airport: c.airportName,
+      railwayCode: c.railwayCode,
+      station: c.railwayStationName,
+      busTerminal: c.busTerminal,
+      type: 'city' as const,
+    }));
+  }, [debouncedQuery, mode]);
+
+  // Combine and rank all results (Local Master Cities + Server API + Mode Datasets)
+  const displayResults = useMemo<LocationItem[]>(() => {
+    const clean = debouncedQuery.trim().toLowerCase();
+    if (clean.length < 3) {
+      return [];
+    }
+
+    const map = new Map<string, LocationItem>();
+
+    // 1. Add local master cities first (reliable, instant)
+    localMatchedCities.forEach((item) => {
+      const key = `${item.city}-${item.code}`.toLowerCase();
+      map.set(key, item);
+    });
+
+    // 2. Merge server results
+    serverResults.forEach((item) => {
+      const key = `${item.city}-${item.code}`.toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, item);
+      }
+    });
+
+    // 3. Fallback to Mode-specific auxiliary lists
     if (mode === 'flights') {
-      ALL_AIRPORTS.forEach((a) => {
-        if (!list.some((existing) => existing.code === a.code)) {
-          list.push({
+      ALL_AIRPORTS.filter(
+        (a) =>
+          a.city.toLowerCase().includes(clean) ||
+          a.code.toLowerCase().includes(clean) ||
+          a.airport.toLowerCase().includes(clean)
+      ).slice(0, 5).forEach((a) => {
+        const key = `${a.city}-${a.code}`.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, {
             city: a.city,
             airport: a.airport,
             code: a.code,
+            airportCode: a.code,
             country: a.country,
             cityMr: a.cityMr,
             type: 'airport',
@@ -176,12 +248,19 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         }
       });
     } else if (mode === 'trains') {
-      ALL_RAILWAY_STATIONS.forEach((s) => {
-        if (!list.some((existing) => existing.code === s.code)) {
-          list.push({
+      ALL_RAILWAY_STATIONS.filter(
+        (s) =>
+          s.city.toLowerCase().includes(clean) ||
+          s.code.toLowerCase().includes(clean) ||
+          s.station.toLowerCase().includes(clean)
+      ).slice(0, 5).forEach((s) => {
+        const key = `${s.city}-${s.code}`.toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, {
             city: s.city,
             station: s.station,
             code: s.code,
+            railwayCode: s.code,
             country: 'India',
             type: 'station',
           });
@@ -189,58 +268,28 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       });
     }
 
-    return list;
-  }, [mode]);
+    const list = Array.from(map.values());
 
-  // Filter items based on user input
-  const filteredResults = useMemo<LocationItem[]>(() => {
-    const cleanQuery = debouncedQuery.trim().toLowerCase();
-    
-    if (cleanQuery.length < 3) {
-      return [];
-    }
+    // Sort by exact city match > prefix match
+    list.sort((a, b) => {
+      const aCity = (a.city || '').toLowerCase();
+      const bCity = (b.city || '').toLowerCase();
+      const aCode = (a.code || '').toLowerCase();
+      const bCode = (b.code || '').toLowerCase();
+      const aId = (a.id || '').toLowerCase();
+      const bId = (b.id || '').toLowerCase();
 
-    const matched = baseDataset.filter((item) => {
-      if (!item) return false;
-      const city = (item.city || '').toLowerCase();
-      const code = (item.code || '').toLowerCase();
-      const country = (item.country || '').toLowerCase();
-      const airport = (item.airport || '').toLowerCase();
-      const station = (item.station || '').toLowerCase();
-      const cityMr = (item.cityMr || '').toLowerCase();
+      const aExact = aCity === clean || aCode === clean || aId === clean ? 100 : 0;
+      const bExact = bCity === clean || bCode === clean || bId === clean ? 100 : 0;
 
-      return (
-        city.includes(cleanQuery) ||
-        code.includes(cleanQuery) ||
-        country.includes(cleanQuery) ||
-        airport.includes(cleanQuery) ||
-        station.includes(cleanQuery) ||
-        cityMr.includes(cleanQuery)
-      );
-    });
-
-    // Score & Rank: exact prefix matches first
-    matched.sort((a, b) => {
-      const aCity = a.city.toLowerCase();
-      const bCity = b.city.toLowerCase();
-      const aCode = a.code.toLowerCase();
-      const bCode = b.code.toLowerCase();
-
-      const aExact = aCity === cleanQuery || aCode === cleanQuery ? 100 : 0;
-      const bExact = bCity === cleanQuery || bCode === cleanQuery ? 100 : 0;
-
-      const aStarts = aCity.startsWith(cleanQuery) || aCode.startsWith(cleanQuery) ? 50 : 0;
-      const bStarts = bCity.startsWith(cleanQuery) || bCode.startsWith(cleanQuery) ? 50 : 0;
+      const aStarts = aCity.startsWith(clean) || aCode.startsWith(clean) ? 50 : 0;
+      const bStarts = bCity.startsWith(clean) || bCode.startsWith(clean) ? 50 : 0;
 
       return (bExact + bStarts) - (aExact + aStarts);
     });
 
-    return matched.slice(0, 10);
-  }, [debouncedQuery, baseDataset]);
-
-  const displayResults = useMemo<LocationItem[]>(() => {
-    return filteredResults.slice(0, 15);
-  }, [filteredResults]);
+    return list.slice(0, 15);
+  }, [debouncedQuery, localMatchedCities, serverResults, mode]);
 
   // Click outside listener to close dropdown
   useEffect(() => {
@@ -254,16 +303,26 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   }, []);
 
   const handleSelect = (item: LocationItem) => {
-    const selectedText = (mode === 'hotels' || mode === 'buses' || mode === 'cars') 
-      ? item.city.split(' (')[0] // Clean "Goa" from "Goa (Dabolim Airport)"
-      : item.code;
+    let displayText = item.city;
+    let emitValue = item.city;
 
-    const displayText = (mode === 'hotels' || mode === 'buses' || mode === 'cars')
-      ? item.city
-      : item.code;
+    if (mode === 'hotels' || mode === 'buses' || mode === 'cars') {
+      // For Hotels, Buses, Cars: strictly use the real city name
+      displayText = item.city;
+      emitValue = item.city;
+    } else if (mode === 'flights') {
+      const airportCode = item.airportCode || item.code;
+      displayText = `${item.city} (${airportCode})`;
+      emitValue = `${item.city} (${airportCode})`;
+    } else if (mode === 'trains') {
+      const stationName = item.station || item.city;
+      const stationCode = item.railwayCode || item.code;
+      displayText = `${stationName} (${stationCode})`;
+      emitValue = `${stationName} (${stationCode})`;
+    }
 
     setQuery(displayText);
-    onChange(selectedText, item);
+    onChange(emitValue, item);
     setIsOpen(false);
   };
 
@@ -271,10 +330,11 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     if (!customText.trim()) return;
     const clean = customText.trim();
     const item: LocationItem = {
+      id: `CUSTOM-${clean.toUpperCase().slice(0, 4)}`,
       city: clean,
       code: clean.toUpperCase().slice(0, 4),
       country: 'Custom Location',
-      type: 'custom'
+      type: 'custom',
     };
     setQuery(clean);
     onChange(clean, item);
@@ -283,8 +343,9 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
   const handleClear = () => {
     setQuery('');
+    setServerResults([]);
     onChange('');
-    setIsOpen(true);
+    setIsOpen(false);
   };
 
   const getModeIcon = () => {
@@ -292,13 +353,13 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       case 'flights':
         return <Plane className={`w-4 h-4 ${iconType === 'from' ? 'text-rose-500' : 'text-purple-500'}`} />;
       case 'trains':
-        return <Train className="w-4 h-4 text-premium-pink" />;
+        return <Train className="w-4 h-4 text-amber-600" />;
       case 'hotels':
         return <Building2 className="w-4 h-4 text-rose-500" />;
       case 'buses':
-        return <Bus className="w-4 h-4 text-premium-sky-deep" />;
+        return <Bus className="w-4 h-4 text-sky-600" />;
       case 'cars':
-        return <Car className="w-4 h-4 text-premium-violet" />;
+        return <Car className="w-4 h-4 text-indigo-600" />;
       default:
         return <MapPin className="w-4 h-4 text-slate-400" />;
     }
@@ -331,7 +392,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
               onClick={() => onModeChange('trains')}
               className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
                 mode === 'trains'
-                  ? 'bg-[var(--premium-pink)] text-white shadow-xs'
+                  ? 'bg-amber-600 text-white shadow-xs'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -353,17 +414,24 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            setIsOpen(true);
+            // Strictly require >= 3 characters before opening dropdown
+            if (e.target.value.trim().length >= 3) {
+              setIsOpen(true);
+            } else {
+              setIsOpen(false);
+            }
           }}
           onFocus={() => {
-            setIsOpen(true);
+            if (query.trim().length >= 3) {
+              setIsOpen(true);
+            }
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              if (filteredResults.length > 0) {
-                handleSelect(filteredResults[0]);
-              } else if (query.trim()) {
+              if (displayResults.length > 0) {
+                handleSelect(displayResults[0]);
+              } else if (query.trim().length >= 3) {
                 handleSelectCustom(query.trim());
               }
             }
@@ -372,6 +440,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           autoFocus={autoFocus}
           className="w-full bg-transparent font-extrabold text-sm text-slate-900 placeholder-slate-400 outline-none"
         />
+
+        {isServerLoading && (
+          <Loader2 className="w-3.5 h-3.5 text-slate-400 animate-spin shrink-0" />
+        )}
 
         {query && (
           <button
@@ -384,90 +456,113 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         )}
       </div>
 
-      {/* Autocomplete Dropdown List */}
+      {/* 
+        Autocomplete Dropdown List:
+        STRICT REQUIREMENT: query.trim().length >= 3 must be satisfied before any results or dropdown appear!
+      */}
       {isOpen && query.trim().length >= 3 && (
         <div className="absolute left-0 right-0 top-full mt-2 bg-white/98 backdrop-blur-md border border-slate-200 rounded-[20px] shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 max-h-80 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-150">
           {/* Header indicator */}
-          <div className="px-3.5 py-2 bg-transparent/90 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+          <div className="px-3.5 py-2 bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
             <span>
-              {mode === 'flights' ? 'Airport & City Matches' : 
-               mode === 'hotels' ? 'Hotel & City Destinations' : 
-               mode === 'buses' ? 'Bus Stations & Routes' :
-               mode === 'cars' ? 'Cab Pick-up & City Locations' :
-               'Railway Stations & Cities'}
+              {mode === 'hotels' ? 'Master City & Hotel Destinations' :
+               mode === 'buses' ? 'Bus Terminals & Cities' :
+               mode === 'cars' ? 'City Pick-up & Cab Hubs' :
+               mode === 'flights' ? 'Airports & Flight Routes' :
+               'Railway Stations & Indian Railways Hubs'}
             </span>
             <span className="text-premium-pink font-mono font-bold">
-              {displayResults.length} options
+              {displayResults.length} matches
             </span>
           </div>
 
           {/* Quick select custom query if typed */}
-          {query.trim().length >= 3 && (
-            <button
-              type="button"
-              onClick={() => handleSelectCustom(query.trim())}
-              className="w-full text-left px-4 py-2.5 bg-premium-pink-soft/60 hover:bg-[var(--premium-pink-soft)] transition-colors flex items-center justify-between group border-b border-orange-100"
-            >
-              <div className="flex items-center gap-2 min-w-0 pr-2">
-                <MapPin className="w-4 h-4 text-premium-pink shrink-0" />
-                <span className="text-xs font-black text-slate-900 truncate">
-                  Use &quot;<span className="text-premium-pink font-extrabold">{query.trim()}</span>&quot; as {label.toLowerCase()}
-                </span>
-              </div>
-              <span className="shrink-0 text-[10px] font-black uppercase text-premium-pink bg-[var(--premium-pink-soft)] px-2 py-0.5 rounded-md">
-                Select
+          <button
+            type="button"
+            onClick={() => handleSelectCustom(query.trim())}
+            className="w-full text-left px-4 py-2.5 bg-rose-50/70 hover:bg-rose-100/70 transition-colors flex items-center justify-between group border-b border-rose-100"
+          >
+            <div className="flex items-center gap-2 min-w-0 pr-2">
+              <MapPin className="w-4 h-4 text-rose-600 shrink-0" />
+              <span className="text-xs font-black text-slate-900 truncate">
+                Use &quot;<span className="text-rose-600 font-extrabold">{query.trim()}</span>&quot; as {label.toLowerCase()}
               </span>
-            </button>
-          )}
+            </div>
+            <span className="shrink-0 text-[10px] font-black uppercase text-rose-600 bg-rose-200/60 px-2 py-0.5 rounded-md">
+              Select
+            </span>
+          </button>
 
           {displayResults.length > 0 ? (
-            displayResults.map((item, index) => (
-              <button
-                key={`${item.code}-${item.city}-${index}`}
-                type="button"
-                onClick={() => handleSelect(item)}
-                className="w-full text-left px-4 py-3 hover:bg-premium-pink-soft/80 transition-colors flex items-center justify-between group"
-              >
-                <div className="min-w-0 pr-3">
-                  {/* City Name & Code */}
-                  <div className="font-extrabold text-slate-900 text-sm group-hover:text-premium-pink flex items-center gap-2">
-                    <span className="truncate">{item.city}</span>
-                    {item.code && (
-                      <span className="font-black text-premium-pink font-mono text-xs shrink-0">({item.code})</span>
-                    )}
-                    {item.cityMr && (
-                      <span className="text-slate-400 font-bold text-xs truncate">[{item.cityMr}]</span>
-                    )}
+            displayResults.map((item, index) => {
+              // Determine badge and badge color
+              const badgeText = 
+                (mode === 'hotels' || mode === 'buses' || mode === 'cars')
+                  ? (item.id || item.code || 'CITY')
+                  : mode === 'flights'
+                  ? (item.airportCode || item.code)
+                  : (item.railwayCode || item.code);
+
+              return (
+                <button
+                  key={`${item.id || item.code}-${item.city}-${index}`}
+                  type="button"
+                  onClick={() => handleSelect(item)}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors flex items-center justify-between group"
+                >
+                  <div className="min-w-0 pr-3">
+                    {/* City Name & Multi-Lingual Details */}
+                    <div className="font-extrabold text-slate-900 text-sm group-hover:text-rose-600 flex items-center gap-2 flex-wrap">
+                      <span className="truncate">{item.city}</span>
+                      {item.cityMr && (
+                        <span className="text-slate-400 font-bold text-xs truncate">[{item.cityMr}]</span>
+                      )}
+                      {mode === 'flights' && item.airportCode && (
+                        <span className="text-rose-600 font-mono font-black text-xs">({item.airportCode})</span>
+                      )}
+                      {mode === 'trains' && item.railwayCode && (
+                        <span className="text-amber-600 font-mono font-black text-xs">({item.railwayCode})</span>
+                      )}
+                    </div>
+
+                    {/* Subtext description */}
+                    <div className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+                      {mode === 'hotels' ? (
+                        <span>{item.state ? `${item.state}, ` : ''}{item.country || 'India'} • Master City ID: <strong className="font-mono text-slate-700">{item.id || 'CITY'}</strong></span>
+                      ) : mode === 'buses' ? (
+                        <span>{item.busTerminal || `${item.city} Central Bus Stand`}, {item.state || 'India'}</span>
+                      ) : mode === 'cars' ? (
+                        <span>Doorstep Pickup & Cab Service • {item.state || 'India'}</span>
+                      ) : mode === 'flights' ? (
+                        <span>{item.airport || 'Airport'}, {item.state || item.country || 'India'}</span>
+                      ) : (
+                        <span>{item.station || 'Railway Station'}, {item.state || 'Indian Railways'}</span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Subtext */}
-                  <div className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
-                    {mode === 'flights' ? (
-                      <span>{item.airport || 'Airport'}, {item.country || 'India'}</span>
-                    ) : mode === 'hotels' ? (
-                      <span>{item.country || 'Top Hotel & Travel Destination'}</span>
-                    ) : mode === 'buses' ? (
-                      <span>{item.country || 'Major Bus Terminal & Hub'}</span>
-                    ) : mode === 'cars' ? (
-                      <span>{item.country || 'Doorstep Pickup & City Service'}</span>
-                    ) : (
-                      <span>{item.station || 'Railway Station'}, {item.country || 'Indian Railways'}</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Badge */}
-                {item.code && (
-                  <div className="shrink-0 bg-orange-100 group-hover:bg-orange-200 text-premium-pink font-mono font-black text-xs px-2.5 py-1 rounded-[16px] border border-premium-pink/80 shadow-2xs">
-                    {item.code}
-                  </div>
-                )}
-              </button>
-            ))
+                  {/* Badge */}
+                  {badgeText && (
+                    <div className={`shrink-0 font-mono font-black text-xs px-2.5 py-1 rounded-[12px] border shadow-2xs ${
+                      mode === 'hotels' || mode === 'buses' || mode === 'cars'
+                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                        : mode === 'flights'
+                        ? 'bg-rose-50 text-rose-600 border-rose-200'
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                    }`}>
+                      {badgeText}
+                    </div>
+                  )}
+                </button>
+              );
+            })
           ) : (
             <div className="p-4 text-center">
               <p className="text-xs font-bold text-slate-600">
-                Click above to use &quot;<span className="text-premium-pink">{query}</span>&quot;
+                No matching destinations found for &quot;<span className="text-rose-600">{query}</span>&quot;.
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Click above to use &quot;{query}&quot; as a custom location.
               </p>
             </div>
           )}
@@ -476,4 +571,3 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     </div>
   );
 };
-

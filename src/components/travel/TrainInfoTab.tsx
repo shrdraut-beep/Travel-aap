@@ -26,10 +26,16 @@ const durationToMinutes = (duration: string) => {
   return (h ? parseInt(h[1], 10) : 0) * 60 + (m ? parseInt(m[1], 10) : 0);
 };
 
+const extractStationQuery = (str: string) => {
+  const match = str.match(/\(([A-Z0-9]{2,5})\)/i);
+  if (match) return match[1].toUpperCase();
+  return str.trim();
+};
+
 export const TrainInfoTab = ({ lang, currencySymbol, onBookNow, onBack }: any) => {
   const isMr = lang === 'mr';
-  const [origin, setOrigin] = useState('');
-  const [destination, setDestination] = useState('');
+  const [origin, setOrigin] = useState('Mumbai CSMT (CSMT)');
+  const [destination, setDestination] = useState('Nasik Road (NK)');
   const [departDate, setDepartDate] = useState(getTomorrowDate());
   const [passengers, setPassengers] = useState(1);
   const [classType, setClassType] = useState('SL');
@@ -53,14 +59,17 @@ export const TrainInfoTab = ({ lang, currencySymbol, onBookNow, onBack }: any) =
       : trainData;
 
     return [...list].sort((a, b) => {
+      if (sortBy === 'departure') return toMinutes(a.departureTime || a.departure_time) - toMinutes(b.departureTime || b.departure_time);
       if (sortBy === 'duration') return durationToMinutes(a.duration) - durationToMinutes(b.duration);
-      if (sortBy === 'price') return (a.price || 0) - (b.price || 0);
-      return toMinutes(a.departureTime) - toMinutes(b.departureTime);
+      return (a.price || 0) - (b.price || 0);
     });
   }, [trainData, sortBy, acOnly]);
 
   const handleTrainSearch = async () => {
-    if (origin.trim().toUpperCase() === destination.trim().toUpperCase() && origin.trim() !== '') {
+    const origCode = extractStationQuery(origin);
+    const destCode = extractStationQuery(destination);
+
+    if (origCode.toUpperCase() === destCode.toUpperCase() && origCode !== '') {
       alert(isMr ? "प्रस्थान आणि आगमन ठिकाण एक असू शकत नाही." : "Origin and destination cannot be the same.");
       return;
     }
@@ -68,8 +77,8 @@ export const TrainInfoTab = ({ lang, currencySymbol, onBookNow, onBack }: any) =
     setHasSearched(true);
     try {
       const data = await zuelpayClient.searchTrains({
-        origin: origin || 'Mumbai',
-        destination: destination || 'Delhi',
+        origin: origCode || 'CSMT',
+        destination: destCode || 'NK',
         date: departDate,
         quota,
         classType

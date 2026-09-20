@@ -2,10 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
 import { Meilisearch, Index } from 'meilisearch';
+import { MASTER_CITIES, searchMasterCities, type MasterCity } from '../data/masterCities.ts';
 
 export const MEILI_INDEX_HOTELS = 'hotels';
 export const MEILI_INDEX_AIRPORTS = 'airports';
 export const MEILI_INDEX_TRAIN_STATIONS = 'train_stations';
+export const MEILI_INDEX_CITIES = 'cities';
+export type { MasterCity };
 
 export interface MeiliHotelDoc {
   id: string;
@@ -287,6 +290,15 @@ class MeilisearchService {
       rankingRules: ['exactness', 'words', 'typo', 'proximity', 'attribute', 'sort'],
     });
 
+    // 4. Cities Index Setup (Master City IDs, English & Marathi names, linked hubs)
+    const citiesIndex = client.index(MEILI_INDEX_CITIES);
+    await citiesIndex.updateSettings({
+      searchableAttributes: ['name', 'nameMr', 'id', 'state', 'airportCode', 'railwayCode', 'busTerminal', 'keywords'],
+      filterableAttributes: ['state', 'country', 'popular', 'tier', 'id'],
+      sortableAttributes: ['name', 'tier'],
+      rankingRules: ['exactness', 'words', 'typo', 'proximity', 'attribute', 'sort'],
+    });
+
     this.isInitialized = true;
   }
 
@@ -448,11 +460,15 @@ class MeilisearchService {
           a.iata_code.toLowerCase() === qLower ||
           a.iata_code.toLowerCase().includes(qLower) ||
           a.airport_name.toLowerCase().includes(qLower) ||
-          a.city.toLowerCase().includes(qLower)
+          a.city.toLowerCase().includes(qLower) ||
+          (a.municipality && a.municipality.toLowerCase().includes(qLower)) ||
+          (a.keywords && a.keywords.toLowerCase().includes(qLower))
       )
       .sort((a, b) => {
         if (a.iata_code === qUpper && b.iata_code !== qUpper) return -1;
         if (b.iata_code === qUpper && a.iata_code !== qUpper) return 1;
+        if (a.city.toLowerCase() === qLower && b.city.toLowerCase() !== qLower) return -1;
+        if (b.city.toLowerCase() === qLower && a.city.toLowerCase() !== qLower) return 1;
         return 0;
       })
       .slice(0, limit);
@@ -467,13 +483,31 @@ class MeilisearchService {
 
   private loadLocalAirports() {
     try {
+      const airports: MeiliAirportDoc[] = [];
+      const seen = new Set<string>();
+
+      // Seed from MASTER_CITIES first to guarantee all Indian commercial airports exist (e.g. Nashik ISK, Shirdi SAG)
+      for (const city of MASTER_CITIES) {
+        if (city.airportCode && !seen.has(city.airportCode)) {
+          seen.add(city.airportCode);
+          airports.push({
+            id: city.airportCode,
+            iata_code: city.airportCode,
+            airport_name: city.airportName || `${city.name} Airport`,
+            city: city.name,
+            municipality: city.name,
+            iso_country: 'IN',
+            country: 'India',
+            keywords: `${city.keywords.join(' ')} ${city.nameMr} ${city.state}`,
+          });
+        }
+      }
+
       const csvPath = path.join(process.cwd(), 'public', 'data', 'airports.csv');
       if (fs.existsSync(csvPath)) {
         const raw = fs.readFileSync(csvPath, 'utf8');
         const parsed = Papa.parse(raw, { header: true, skipEmptyLines: true });
         const rows: any[] = parsed.data as any[];
-        const airports: MeiliAirportDoc[] = [];
-        const seen = new Set<string>();
 
         for (const row of rows) {
           const iata = (row.iata_code || '').trim().toUpperCase();
@@ -493,8 +527,8 @@ class MeilisearchService {
             });
           }
         }
-        this.cachedAirports = airports;
       }
+      this.cachedAirports = airports;
     } catch (e) {
       this.cachedAirports = [];
     }
@@ -535,11 +569,16 @@ class MeilisearchService {
           s.code.toLowerCase() === qLower ||
           s.code.toLowerCase().includes(qLower) ||
           s.name.toLowerCase().includes(qLower) ||
-          (s.state && s.state.toLowerCase().includes(qLower))
+          (s.state && s.state.toLowerCase().includes(qLower)) ||
+          (s.address && s.address.toLowerCase().includes(qLower))
       )
       .sort((a, b) => {
         if (a.code === qUpper && b.code !== qUpper) return -1;
         if (b.code === qUpper && a.code !== qUpper) return 1;
+        const aMatchesAddress = a.address && a.address.toLowerCase().startsWith(qLower);
+        const bMatchesAddress = b.address && b.address.toLowerCase().startsWith(qLower);
+        if (aMatchesAddress && !bMatchesAddress) return -1;
+        if (bMatchesAddress && !aMatchesAddress) return 1;
         return 0;
       })
       .slice(0, limit);
@@ -552,15 +591,65 @@ class MeilisearchService {
     };
   }
 
+  /**
+   * Master Cities search / autocomplete with 3-character threshold, multi-lingual support, and Master City IDs
+   */
+  public async searchCities(query: string, limit: number = 10) {
+    if (!query || query.trim().length < 3) {
+      return { hits: [], totalHits: 0, source: 'threshold-guarded' };
+    }
+    const safeLimit = Math.min(Math.max(limit, 1), 30);
+
+    try {
+      const client = this.getClient();
+      const index = client.index<MasterCity>(MEILI_INDEX_CITIES);
+      const results = await index.search(query.trim(), {
+        limit: safeLimit,
+        attributesToHighlight: ['name', 'nameMr', 'state', 'airportCode', 'railwayCode'],
+      });
+      if (results.hits && results.hits.length > 0) {
+        return {
+          ...results,
+          source: 'meilisearch-self-hosted',
+        };
+      }
+    } catch (err) {
+      // Meilisearch offline, fallback to master cities dataset
+    }
+
+    const hits = searchMasterCities(query, safeLimit);
+    return {
+      hits,
+      totalHits: hits.length,
+      limit: safeLimit,
+      source: 'master-cities-dataset',
+    };
+  }
+
   private loadLocalTrainStations() {
     try {
+      const stations: MeiliStationDoc[] = [];
+      const seen = new Set<string>();
+
+      // Seed from MASTER_CITIES first to guarantee all Indian city primary railway stations exist (e.g. Nasik Road NK)
+      for (const city of MASTER_CITIES) {
+        if (city.railwayCode && !seen.has(city.railwayCode)) {
+          seen.add(city.railwayCode);
+          stations.push({
+            id: city.railwayCode,
+            code: city.railwayCode,
+            name: city.railwayStationName || `${city.name} Railway Station`,
+            state: city.state,
+            address: `${city.name}, ${city.state}, India`,
+          });
+        }
+      }
+
       const jsonPath = path.join(process.cwd(), 'public', 'data', 'stations.json');
       if (fs.existsSync(jsonPath)) {
         const raw = fs.readFileSync(jsonPath, 'utf8');
         const geojson = JSON.parse(raw);
         const features = Array.isArray(geojson.features) ? geojson.features : [];
-        const stations: MeiliStationDoc[] = [];
-        const seen = new Set<string>();
 
         for (const feat of features) {
           const props = feat.properties || {};
@@ -579,8 +668,8 @@ class MeilisearchService {
             });
           }
         }
-        this.cachedStations = stations;
       }
+      this.cachedStations = stations;
     } catch (e) {
       this.cachedStations = [];
     }
@@ -687,12 +776,32 @@ export async function syncAllVerticalsToMeilisearch(db?: any) {
       await meilisearchService.addDocumentsInBatches(MEILI_INDEX_TRAIN_STATIONS, trains, 1000);
     }
 
-    console.log('Successfully synced all verticals to Meilisearch indexes!');
+    // 4. Master Cities Index Sync
+    let cities: any[] = [];
+    if (db) {
+      try {
+        const snap = await db.collection('master_cities').get();
+        if (!snap.empty) {
+          cities = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        }
+      } catch (e) {
+        /* fallback */
+      }
+    }
+    if (cities.length === 0) {
+      cities = MASTER_CITIES;
+    }
+    if (cities.length > 0) {
+      await meilisearchService.addDocumentsInBatches(MEILI_INDEX_CITIES, cities, 500);
+    }
+
+    console.log('Successfully synced all verticals (Hotels, Airports, Trains, Cities) to Meilisearch indexes!');
     return {
       success: true,
       hotels: hotels.length,
       airports: airports.length,
       train_stations: trains.length,
+      cities: cities.length,
     };
   } catch (error) {
     console.error('Error syncing to Meilisearch:', error);
