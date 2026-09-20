@@ -24,7 +24,10 @@ export function isTestKeyRejectedInProd(key: string | undefined): boolean {
 export function verifyRazorpayWebhookSignature(rawBody: string | Buffer, signature: string, secret: string): boolean {
   if (!signature || !secret) return false;
   const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(signature, "utf8"), Buffer.from(expected, "utf8"));
+  const sigBuf = Buffer.from(signature, "utf8");
+  const expBuf = Buffer.from(expected, "utf8");
+  if (sigBuf.length !== expBuf.length) return false;
+  return crypto.timingSafeEqual(sigBuf, expBuf);
 }
 
 export function verifyStripeWebhookSignature(rawBody: string | Buffer, header: string, secret: string): boolean {
@@ -50,8 +53,11 @@ export function verifyStripeWebhookSignature(rawBody: string | Buffer, header: s
 
     const signedPayload = `${timestamp}.${rawBody.toString()}`;
     const expected = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex");
+    const sigBuf = Buffer.from(signature, "utf8");
+    const expBuf = Buffer.from(expected, "utf8");
+    if (sigBuf.length !== expBuf.length) return false;
 
-    return crypto.timingSafeEqual(Buffer.from(signature, "utf8"), Buffer.from(expected, "utf8"));
+    return crypto.timingSafeEqual(sigBuf, expBuf);
   } catch (err) {
     secureLogger.error("[Stripe Webhook] Verification error:", err);
     return false;
