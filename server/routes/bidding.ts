@@ -7,7 +7,41 @@ import { geocodeLandmark, findVendorsInRadius, sendTargetedAlerts } from '../ser
 import { validateTripBudget } from '../../src/utils/budgetValidator';
 import { evaluateCancellationEligibility, executeAutoRefundEscrow } from '../payment/escrowManager';
 
+import { getApps } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import type { NextFunction } from 'express';
+
 const router = Router();
+
+/**
+ * Authentication middleware for bidding operations
+ */
+async function verifyFirebaseToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const isDev = process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "staging";
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) {
+    if (isDev) {
+      (req as any).authenticatedUser = { uid: "dev-bidding-user", email: "user@routripo.app" };
+      return next();
+    }
+    res.status(401).json({ success: false, error: 'Authentication required. Please provide a valid Bearer token.' });
+    return;
+  }
+  try {
+    if (getApps().length > 0) {
+      const decoded = await getAuth().verifyIdToken(token);
+      (req as any).authenticatedUser = decoded;
+    }
+    next();
+  } catch {
+    if (isDev) {
+      (req as any).authenticatedUser = { uid: "dev-bidding-user", email: "user@routripo.app" };
+      return next();
+    }
+    res.status(401).json({ success: false, error: 'Invalid or expired authentication token.' });
+  }
+}
 
 // In-Memory Storage for Demo Purposes
 const tripRequests: TripBidRequest[] = [];
@@ -26,15 +60,17 @@ router.get('/unlock-status/:reqId', (req: Request, res: Response) => {
 });
 
 // POST /api/bids/unlock-request
-router.post('/unlock-request', (req: Request, res: Response) => {
+router.post('/unlock-request', verifyFirebaseToken, (req: Request, res: Response) => {
   const { tripRequestId, paymentId } = req.body;
-  // Assume payment verified if paymentId exists
-  if (paymentId) {
+  if (!tripRequestId) {
+    return res.status(400).json({ success: false, error: 'tripRequestId is required' });
+  }
+  // Validate paymentId format to prevent arbitrary string bypass
+  if (paymentId && typeof paymentId === 'string' && paymentId.startsWith('pay_')) {
     unlockRequests[tripRequestId] = 'vendor_pending';
-    
-    // Scenario B: Offline Direct Dealing Monetization
-    // Platform captures 100% of the ₹49 fee as profit from offline leaks.
     console.log(`[Monetization] Scenario B: Captured ₹49 Unlock Fee for trip ${tripRequestId}. Payment ID: ${paymentId}. 100% platform profit.`);
+  } else if (!paymentId) {
+    return res.status(400).json({ success: false, error: 'Valid payment ID is required to unlock contact details' });
   }
   res.json({ success: true, status: unlockRequests[tripRequestId] });
 });
@@ -54,7 +90,7 @@ router.post('/unlock-resolve', (req: Request, res: Response) => {
 });
 
 // POST /api/bids/request
-router.post('/request', async (req: Request, res: Response) => {
+router.post('/request', verifyFirebaseToken, async (req: Request, res: Response) => {
   const {
     userId, userName, userPhone, origin, destination, startDate,
     endDate, paxCount, tripCategory, customBudget, notes
@@ -170,8 +206,16 @@ router.post('/submit', (req: Request, res: Response) => {
 });
 
 // GET /api/bids/offers/:reqId
-router.get('/offers/:reqId', (req: Request, res: Response) => {
+router.get('/offers/:reqId', verifyFirebaseToken, (req: Request, res: Response) => {
   const { reqId } = req.params;
+  const authedUser = (req as any).authenticatedUser;
+  const request = tripRequests.find(r => r.id === reqId);
+  if (request && authedUser && !authedUser.admin) {
+    // Only trip owner or registered users can inspect offers
+    if (request.userId && request.userId !== authedUser.uid && authedUser.uid !== "dev-bidding-user") {
+      return res.status(403).json({ success: false, error: 'Unauthorized to view offers for this trip request' });
+    }
+  }
   const offers = bidOffers.filter(o => o.tripRequestId === reqId);
   res.json({ success: true, offers: offers.reverse() });
 });
@@ -185,7 +229,8 @@ router.post('/evaluate-cancellation', (req: Request, res: Response) => {
     return res.status(404).json({ success: false, error: 'Contract not found' });
   }
 
-  const nowDate = simulatedNow ? new Date(simulatedNow) : new Date();
+  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+  const nowDate = (!isProd && simulatedNow) ? new Date(simulatedNow) : new Date();
   const evaluation = evaluateCancellationEligibility(contract, contract.startDate, nowDate);
 
   res.json({
@@ -196,7 +241,7 @@ router.post('/evaluate-cancellation', (req: Request, res: Response) => {
 });
 
 // POST /api/bids/cancel-and-refund
-router.post('/cancel-and-refund', async (req: Request, res: Response) => {
+router.post('/cancel-and-refund', verifyFirebaseToken, async (req: Request, res: Response) => {
   const { contractId, userReason, simulatedNow } = req.body;
   const contract = contracts.find(c => c.contractId === contractId);
 
@@ -204,7 +249,8 @@ router.post('/cancel-and-refund', async (req: Request, res: Response) => {
     return res.status(404).json({ success: false, error: 'Contract not found' });
   }
 
-  const nowDate = simulatedNow ? new Date(simulatedNow) : new Date();
+  const isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+  const nowDate = (!isProd && simulatedNow) ? new Date(simulatedNow) : new Date();
   const result = await executeAutoRefundEscrow(contract, userReason, contract.startDate, nowDate);
 
   // Also update corresponding TripBidRequest status if present
@@ -220,7 +266,7 @@ router.post('/cancel-and-refund', async (req: Request, res: Response) => {
 // POST /api/bids/accept
 
 // Task 2: Double Handshake - User Accepts (Stage 1)
-router.post('/accept', async (req: Request, res: Response) => {
+router.post('/accept', verifyFirebaseToken, async (req: Request, res: Response) => {
   const { tripRequestId, bidOfferId, userId, userDeviceFp } = req.body;
   const request = tripRequests.find(r => r.id === tripRequestId);
   const offer = bidOffers.find(o => o.id === bidOfferId);

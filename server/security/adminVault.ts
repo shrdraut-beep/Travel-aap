@@ -50,9 +50,7 @@ export async function exportUserDataForLegalHandler(
   }
 
   // 2. Fetch expected master token
-  const expectedMasterToken = process.env.ADMIN_MASTER_TOKEN || (
-    process.env.NODE_ENV === "production" ? null : "routripo-master-legal-vault-token-2026"
-  );
+  const expectedMasterToken = process.env.ADMIN_MASTER_TOKEN;
 
   if (!expectedMasterToken) {
     secureLogger.error("ADMIN_MASTER_TOKEN is not configured on server.");

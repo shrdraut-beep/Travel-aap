@@ -112,16 +112,16 @@ export function registerPaymentRoutes(deps: PaymentModuleDeps): void {
 
     res.json({ ...order, keyId: razorpayKeyId, key: razorpayKeyId });
   } catch (error: any) {
-    console.error("Error creating Razorpay order", error);
-    const errorMessage = error?.error?.description || error.message || "Failed to create order";
-    res.status(500).json({ error: errorMessage });
+    secureLogger.error("Error creating Razorpay order", error?.message || error);
+    res.status(500).json({ error: "Failed to initiate payment. Please try again later." });
   }
   });
 
   // --- POST /api/checkout/validate-promo ---
-  app.post("/api/checkout/validate-promo", async (req, res) => {
+  app.post("/api/checkout/validate-promo", requireAuth, async (req: AuthedRequest, res) => {
   try {
-    const { promoCode, amount, deviceId, userId } = req.body;
+    const { promoCode, amount, deviceId } = req.body;
+    const verifiedUserId = req.user?.uid;
     if (!promoCode || typeof promoCode !== 'string') {
       return res.status(400).json({ success: false, valid: false, error: "Promo code is required" });
     }
@@ -179,10 +179,10 @@ export function registerPaymentRoutes(deps: PaymentModuleDeps): void {
           });
         }
 
-        // Also check if userId has previous completed bookings
-        if (userId) {
+        // Also check if authenticated user has previous completed bookings
+        if (verifiedUserId) {
           const userBookingSnap = await db.collection("bookings")
-            .where("userId", "==", userId)
+            .where("userId", "==", verifiedUserId)
             .where("status", "in", ["CONFIRMED", "COMPLETED"])
             .limit(1)
             .get();

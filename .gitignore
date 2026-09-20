@@ -6,6 +6,7 @@ coverage/
 # Standard package manager: npm (package-lock.json is tracked)
 .env*
 !.env.example
+firebase-applet-config.json
 *.zip
 *.tar.gz
 binaries/

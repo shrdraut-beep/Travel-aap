@@ -10,6 +10,18 @@ interface HandoffModalProps {
   lang?: string;
 }
 
+function getSafePartnerUrl(url?: string): string {
+  const fallback = 'https://bitli.in/1HdfW4l';
+  if (!url || url === '#' || typeof url !== 'string') return fallback;
+  try {
+    const parsed = new URL(url.trim());
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return fallback;
+    return parsed.href;
+  } catch {
+    return fallback;
+  }
+}
+
 export const HandoffModal: React.FC<HandoffModalProps> = ({
   isOpen,
   onClose,
@@ -18,6 +30,7 @@ export const HandoffModal: React.FC<HandoffModalProps> = ({
   lang = 'mr',
 }) => {
   const [countdown, setCountdown] = useState(2);
+  const safeUrl = getSafePartnerUrl(partnerUrl);
 
   useEffect(() => {
     if (!isOpen) {
@@ -30,8 +43,7 @@ export const HandoffModal: React.FC<HandoffModalProps> = ({
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          const destinationUrl = partnerUrl && partnerUrl !== '#' ? partnerUrl : 'https://bitli.in/1HdfW4l';
-          window.open(destinationUrl, '_blank', 'noopener,noreferrer');
+          window.open(safeUrl, '_blank', 'noopener,noreferrer');
           setTimeout(() => onClose(), 300);
           return 0;
         }
@@ -40,10 +52,10 @@ export const HandoffModal: React.FC<HandoffModalProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isOpen, partnerUrl, onClose]);
+  }, [isOpen, safeUrl, onClose]);
 
 
-  const targetUrl = partnerUrl && partnerUrl !== '#' ? partnerUrl : 'https://bitli.in/1HdfW4l';
+  const targetUrl = safeUrl;
 
   return (
     <FullScreenPortal isOpen={isOpen} layer="modal" onBackdropClick={onClose} backdropClassName="flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">

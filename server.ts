@@ -82,8 +82,8 @@ const app = express();
 const PORT = 3000;
 
 app.get(["/download-project-zip", "/api/download-zip", "/routripo-project.zip"], (req, res) => {
-  if (process.env.NODE_ENV === "production") {
-    return res.status(403).json({ error: "Access denied. Source code download is strictly restricted in production." });
+  if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "staging" || process.env.DISABLE_ZIP_DOWNLOAD === "true") {
+    return res.status(403).json({ error: "Access denied. Source code download is strictly restricted." });
   }
   const zipPath = path.join(process.cwd(), "public", "routripo-project.zip");
   if (fs.existsSync(zipPath)) {
@@ -231,7 +231,7 @@ interface AuthedRequest extends express.Request {
 
 // Verifies the Firebase ID token in `Authorization: Bearer <token>`.
 async function requireAuth(req: AuthedRequest, res: express.Response, next: express.NextFunction) {
-  const isDev = process.env.NODE_ENV !== "production";
+  const isDev = process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "staging" && process.env.DISABLE_DEV_AUTH !== "true";
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   if (!token) {
@@ -293,7 +293,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://cdn.razorpay.com", "https://apis.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", ...(isProduction ? [] : ["'unsafe-eval'"]), "https://checkout.razorpay.com", "https://cdn.razorpay.com", "https://apis.google.com"],
       connectSrc: ["'self'", "*"],
       imgSrc: ["'self'", "data:", "blob:", "https:"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -357,6 +357,11 @@ const DEV_ALLOWED_ORIGINS = [
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Explicitly reject null origin to prevent sandboxed iframe/file:// origin bypass
+    if (origin === 'null') {
+      return callback(new Error("CORS policy violation: null origin not permitted"));
+    }
+
     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
 
@@ -424,10 +429,30 @@ for (const aiRoute of [
   app.use(aiRoute, aiLimiter);
 }
 
-// 4. Body Parsing
-app.use(express.json({ limit: "50mb" }));
+// D. Specialized Booking & Search Rate Limiter (protects against scraping and inventory locks)
+const bookingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Booking search limit reached. Please retry in a few minutes." },
+  validate: { xForwardedForHeader: false, forwardedHeader: false },
+});
+
+for (const bookingRoute of [
+  "/api/hotels/search",
+  "/api/hotels/book",
+  "/api/lodging/book",
+  "/api/flights/search",
+  "/api/cars/search",
+]) {
+  app.use(bookingRoute, bookingLimiter);
+}
+
+// 4. Body Parsing (capped to 5MB to prevent memory exhaustion DoS)
+app.use(express.json({ limit: "5mb" }));
 app.use(sanitizeMiddleware);
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 
 // 5. Anti-Injection Validation Middleware (Zod)
 export function validateBody(schema: z.ZodSchema) {
@@ -457,8 +482,13 @@ const chatBodySchema = z.object({
 });
 
 const scanReceiptSchema = z.object({
-  image: z.string(),
-  lang: z.string().max(5).optional(),
+  image: z.string().max(7_000_000, "Image payload exceeds 5MB limit"),
+  lang: z.string().max(10).optional(),
+});
+
+const parseBookingTextSchema = z.object({
+  text: z.string().min(1).max(2000, "Text exceeds maximum 2000 characters"),
+  lang: z.string().max(10).optional(),
 });
 
 // 6. Firebase App Check Verification Middleware
@@ -1172,17 +1202,14 @@ async function evaluateTripFeasibility(lang: string,
   const avgHotelRatePerNight = 2000; // STRICT BASELINE: Minimum ₹2000 per day, per room
   const totalHotelCost = roomsNeeded * nights * avgHotelRatePerNight;
   const hotelDetail = lang === "mr" ? `हॉटेल/होमस्टे भाडे (कमाल ३ व्यक्ती/रूम): ${roomsNeeded} खोल्या x ${nights} रात्री x ₹${avgHotelRatePerNight} = ₹${totalHotelCost}` : `Hotel/Homestay (max 3 persons/room): ${roomsNeeded} rooms x ${nights} nights x ₹${avgHotelRatePerNight} = ₹${totalHotelCost}`;
-  console.log(`DEBUG HOTEL: Rooms: ${roomsNeeded}, Nights: ${nights}, Rate: ${avgHotelRatePerNight}, Total: ${totalHotelCost}`);
 
   // STRICT BASELINE: Dining/Food Minimum ₹1000 per person, per day
   const dailyFoodPerPerson = 1000; // budget meal rate minimum
   const dailySightseeingPerPerson = 200; // entry tickets & local transport/parking
   const totalFoodAndSightseeing = (dailyFoodPerPerson + dailySightseeingPerPerson) * numMembers * totalDays;
   const foodDetail = lang === "mr" ? `जेवण व पर्यटन: (₹१००० + ₹२००) x ${numMembers} व्यक्ती x ${totalDays} दिवस = ₹${totalFoodAndSightseeing}` : `Food & Sightseeing: (₹1000 + ₹200) x ${numMembers} persons x ${totalDays} days = ₹${totalFoodAndSightseeing}`;
-  console.log(`DEBUG FOOD: FoodPerPerson: ${dailyFoodPerPerson}, Sightseeing: ${dailySightseeingPerPerson}, Total: ${totalFoodAndSightseeing}`);
 
   const totalRealisticBudget = Math.round(transitCost + totalHotelCost + totalFoodAndSightseeing);
-  console.log(`DEBUG BUDGET FINAL: Transit: ${transitCost}, Hotel: ${totalHotelCost}, Food/Sight: ${totalFoodAndSightseeing}, Total: ${totalRealisticBudget}`);
 
   // 60% / Practical Budget Rule:
   // Is user budget too low (e.g. <= 200) or is realistic cost > 1.5x of user budget?
@@ -2344,7 +2371,7 @@ You must respond ONLY with a valid JSON object matching this exact schema:
     res.json({ success: true, data: fallbackPlanData, fallback: true });
   } catch (err: any) {
     console.error("FATAL ERROR IN generate-future-trip-plan:", err);
-    res.json({ success: false, error: "Failed to generate smart plan: " + err.message + "\nStack: " + err.stack });
+    res.status(500).json({ success: false, error: "Failed to generate smart plan. Please try again later." });
   }
 });
 
@@ -2352,7 +2379,7 @@ You must respond ONLY with a valid JSON object matching this exact schema:
 app.post("/api/generate-destination-templates", async (req, res) => {
   try {
     const { destination, lang } = req.body;
-    const destName = destination || "Maharashtra";
+    const destName = (destination || "Maharashtra").toString().trim().slice(0, 100).replace(/[^\w\s\-,.]/gi, "") || "Maharashtra";
 
     const prompt = `
       Create 3 distinct curated trip template packages for destination: ${destName}.
@@ -2411,14 +2438,19 @@ app.post("/api/generate-destination-templates", async (req, res) => {
 
 
 // 6. Parse Booking SMS/Text Endpoint
-app.post("/api/parse-booking-text", async (req, res) => {
+app.post("/api/parse-booking-text", validateBody(parseBookingTextSchema), async (req, res) => {
   try {
     const { text, lang } = req.body;
     if (!text) return res.status(400).json({ error: "No text provided" });
 
+    const sanitizedText = text
+      .replace(/[\r\n\t]+/g, " ")
+      .replace(/(ignore\s+(all\s+)?previous\s+instructions|system\s+prompt|roleplay|as\s+an\s+ai)/gi, "[REDACTED]")
+      .slice(0, 1000);
+
     const prompt = `
       Parse this travel confirmation SMS/Email text:
-      "${text}"
+      "${sanitizedText}"
 
       Extract into JSON:
       {
@@ -2524,7 +2556,8 @@ registerBusRoutes(app);
 app.post("/api/hotels/search", async (req, res) => {
   try {
     const { destination, location, city, searchQuery, checkIn, checkInDate, checkOut, checkOutDate, rooms, adults, children, currency } = req.body || {};
-    const dest = (destination || location || city || searchQuery || req.query.destination || req.query.location || "Mumbai").toString().trim();
+    const rawDest = (destination || location || city || searchQuery || req.query.destination || req.query.location || "Mumbai").toString().trim();
+    const dest = rawDest.slice(0, 100).replace(/[^\w\s\-,.]/gi, "") || "Mumbai";
     const cIn = checkIn || checkInDate;
     const cOut = checkOut || checkOutDate;
     
@@ -2558,12 +2591,12 @@ app.post("/api/hotels/search", async (req, res) => {
     });
   } catch (error: any) {
     console.error("[API Endpoint Error]:", error?.response?.data || error?.message || error);
-    return res.status(500).json({ success: false, error: error?.message || "Internal server error" });
+    return res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
 
 // RTAIP Lodging Booking API
-app.post(["/api/hotels/book", "/api/lodging/book"], async (req, res) => {
+app.post(["/api/hotels/book", "/api/lodging/book"], requireAuth, async (req, res) => {
   try {
     const {
       propertyId,
@@ -2716,11 +2749,12 @@ app.post("/api/tax/calculate-server-tax", async (req, res) => {
 
 app.post("/api/cars/search", async (req, res) => {
   try {
-    const { location, pickupDate, dropDate } = req.body;
-    const cars = carService.searchCars({ location, pickupDate, dropDate });
+    const { location, pickupDate, dropDate } = req.body || {};
+    const safeLocation = (location || "Mumbai").toString().trim().slice(0, 100).replace(/[^\w\s\-,.]/gi, "") || "Mumbai";
+    const cars = carService.searchCars({ location: safeLocation, pickupDate, dropDate });
     return res.status(200).json({ success: true, results: cars });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: "Car search failed" });
   }
 });
 
@@ -2742,8 +2776,8 @@ app.post("/api/live-station", async (req, res) => {
 app.post("/api/transit-schedules", async (req, res) => {
   try {
     const { source, destination } = req.body || {};
-    const src = (source || "Mumbai").trim();
-    const dest = (destination || "Pune").trim();
+    const src = (source || "Mumbai").toString().trim().slice(0, 100).replace(/[^\w\s\-,.]/gi, "") || "Mumbai";
+    const dest = (destination || "Pune").toString().trim().slice(0, 100).replace(/[^\w\s\-,.]/gi, "") || "Pune";
 
     const prompt = `
       You are a Transit Schedule API. Provide realistic trains, flights, and buses between "${src}" and "${dest}".
@@ -2865,6 +2899,10 @@ const MARATHI_TO_ENGLISH_CITY: Record<string, string> = {
   "ताम्हिणी": "TAMHINI",
   "आंबोली घाट": "AMBOLI"
 };
+
+// Memory protection: cap dynamically cached geocoded coordinates to prevent memory exhaustion DoS
+const MAX_DYNAMIC_COORDS = 500;
+let dynamicCoordsCount = 0;
 
 const CITY_COORDINATES: Record<string, { lat: number; lng: number; spots: string[]; defaultHalt?: string }> = {
   "MUMBAI": { lat: 18.922, lng: 72.834, spots: ["Gateway of India", "Marine Drive", "Elephanta Caves", "Siddhivinayak Temple", "Colaba Causeway"] },
@@ -3189,14 +3227,15 @@ async function validateRealWorldLocation(placeRaw: string): Promise<GeocodingVal
         ) {
           // Extra confidence check: ensure coordinate ranges are valid on Earth
           if (top.latitude >= -90 && top.latitude <= 90 && top.longitude >= -180 && top.longitude <= 180) {
-            // Cache into CITY_COORDINATES dynamically for downstream routing
+            // Cache into CITY_COORDINATES dynamically for downstream routing (bounded)
             const normKey = normalizeCityName(clean);
-            if (!CITY_COORDINATES[normKey]) {
+            if (!CITY_COORDINATES[normKey] && dynamicCoordsCount < MAX_DYNAMIC_COORDS) {
               CITY_COORDINATES[normKey] = {
                 lat: top.latitude,
                 lng: top.longitude,
                 spots: [top.name]
               };
+              dynamicCoordsCount++;
             }
             return {
               isValid: true,
@@ -3228,12 +3267,13 @@ async function validateRealWorldLocation(placeRaw: string): Promise<GeocodingVal
         const lon = parseFloat(topNom.lon);
         if (!isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
           const normKey = normalizeCityName(clean);
-          if (!CITY_COORDINATES[normKey]) {
+          if (!CITY_COORDINATES[normKey] && dynamicCoordsCount < MAX_DYNAMIC_COORDS) {
             CITY_COORDINATES[normKey] = {
               lat,
               lng: lon,
               spots: [clean]
             };
+            dynamicCoordsCount++;
           }
           return {
             isValid: true,

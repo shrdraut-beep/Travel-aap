@@ -129,7 +129,10 @@ export async function openDocumentPreview(params: {
   const html = await fetchDocumentHTML(docData, params.type);
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
+  const win = window.open(url, '_blank', 'noopener,noreferrer');
+  if (win) {
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
 }
 
 /**
