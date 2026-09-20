@@ -173,13 +173,19 @@ export function decryptPII(ciphertextWithTag: string | null | undefined, dek: Bu
     const ciphertext = Buffer.from(parts[1], "base64");
     const authTag = Buffer.from(parts[2], "base64");
 
+    // AES-256-GCM requires exactly 16-byte (128-bit) authentication tag
+    if (iv.length !== IV_LENGTH || authTag.length !== AUTH_TAG_LENGTH) {
+      console.warn("[decryptPII] Invalid IV or auth tag length — possible tamper or truncation.");
+      return "[DECRYPTION_ERROR]";
+    }
+
     const decipher = crypto.createDecipheriv(ALGORITHM, dek, iv);
     decipher.setAuthTag(authTag);
 
     const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
     return decrypted.toString("utf8");
   } catch (err) {
-    console.warn("[decryptPII] Decryption failed, may be corrupted or wrong key:", err);
+    console.warn("[decryptPII] Decryption failed — corrupted ciphertext or wrong key.");
     return "[DECRYPTION_ERROR]";
   }
 }
