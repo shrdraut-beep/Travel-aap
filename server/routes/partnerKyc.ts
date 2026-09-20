@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import express, { Request, Response } from 'express';
@@ -14,10 +15,9 @@ import {
 
 const router = express.Router();
 
-// --- Configuration & Stubs ---
-// In a real production environment, use Redis for OTP storage.
-// For this implementation, we use a simple in-memory store.
-const otpStore = new Map<string, { otp: string; expiresAt: number }>();
+// --- OTP Store with brute-force protection ---
+const otpStore = new Map<string, { otp: string; expiresAt: number; attempts: number }>();
+const OTP_MAX_ATTEMPTS = 5;  // max wrong attempts before OTP is invalidated
 
 // Configure Nodemailer transporter (ensure you have environment variables set)
 const transporter = nodemailer.createTransport({
@@ -62,13 +62,14 @@ router.post('/send-email-otp', async (req: Request, res: Response): Promise<void
   try {
     const { email } = SendOtpSchema.parse(req.body);
 
-    // Generate a 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // SEC-04: Use cryptographically secure random integer (not Math.random)
+    const otp = crypto.randomInt(100000, 1000000).toString();
     
-    // Store OTP with a 10-minute expiration
+    // Store OTP with a 10-minute expiration and zero attempt count
     otpStore.set(email, {
       otp,
       expiresAt: Date.now() + 10 * 60 * 1000,
+      attempts: 0,
     });
 
     const mailOptions = {
@@ -120,8 +121,21 @@ router.post('/verify-email-otp', async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    // SEC-03: Brute-force protection — max 5 wrong attempts
+    if (record.attempts >= OTP_MAX_ATTEMPTS) {
+      otpStore.delete(email);
+      res.status(429).json({ success: false, message: 'Too many failed attempts. Please request a new OTP.' });
+      return;
+    }
+
     if (record.otp !== otp) {
-      res.status(400).json({ success: false, message: 'Invalid OTP.' });
+      record.attempts += 1;
+      if (record.attempts >= OTP_MAX_ATTEMPTS) {
+        otpStore.delete(email);
+        res.status(429).json({ success: false, message: 'Too many failed attempts. OTP invalidated. Please request a new one.' });
+      } else {
+        res.status(400).json({ success: false, message: `Invalid OTP. ${OTP_MAX_ATTEMPTS - record.attempts} attempt(s) remaining.` });
+      }
       return;
     }
 

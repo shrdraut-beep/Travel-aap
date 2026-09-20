@@ -2,6 +2,7 @@ import ical from 'node-ical';
 import icalGenerator, { ICalCalendarMethod } from 'ical-generator';
 import { getApps } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { lookup } from 'node:dns/promises';
 
 /**
  * Free iCal Calendar Sync Service for RouTripO OTA
@@ -54,6 +55,74 @@ function getDateRangeArray(startDate: Date, endDate: Date): string[] {
 }
 
 /**
+ * SSRF Guard: Validates that an iCal URL is safe to fetch.
+ * Only allows https:// scheme and blocks private/reserved IP ranges.
+ * Permitted OTA domains are allowlisted; arbitrary hostnames are blocked unless hostname resolves
+ * to a public unicast IP address.
+ */
+const ALLOWED_ICAL_DOMAINS = new Set([
+  'airbnb.com', 'www.airbnb.com',
+  'booking.com', 'www.booking.com',
+  'agoda.com', 'www.agoda.com',
+  'vrbo.com', 'www.vrbo.com',
+  'expedia.com', 'www.expedia.com',
+  'hotels.com', 'www.hotels.com',
+  'makemytrip.com', 'www.makemytrip.com',
+  'goibibo.com', 'www.goibibo.com',
+  'cleartrip.com', 'www.cleartrip.com',
+]);
+
+// RFC 1918 / loopback / link-local ranges (simplified check)
+function isPrivateIp(ip: string): boolean {
+  return (
+    ip === '127.0.0.1' ||
+    ip.startsWith('10.') ||
+    ip.startsWith('192.168.') ||
+    ip.startsWith('172.16.') || ip.startsWith('172.17.') || ip.startsWith('172.18.') ||
+    ip.startsWith('172.19.') || ip.startsWith('172.2') || ip.startsWith('172.30.') || ip.startsWith('172.31.') ||
+    ip.startsWith('169.254.') ||
+    ip.startsWith('::1') ||
+    ip.startsWith('fc') || ip.startsWith('fd')  // IPv6 ULA
+  );
+}
+
+async function assertSafeIcalUrl(rawUrl: string): Promise<URL> {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    throw new Error('[SSRF-Guard] Invalid iCal URL format.');
+  }
+
+  if (url.protocol !== 'https:') {
+    throw new Error('[SSRF-Guard] Only https:// iCal URLs are permitted.');
+  }
+
+  const hostname = url.hostname.toLowerCase();
+
+  // Allow known OTA domains without extra DNS lookup
+  const isKnownOta = ALLOWED_ICAL_DOMAINS.has(hostname) ||
+    [...ALLOWED_ICAL_DOMAINS].some(d => hostname.endsWith('.' + d));
+
+  if (!isKnownOta) {
+    // For unknown hostnames, resolve DNS and ensure all IPs are public
+    try {
+      const addrs = await lookup(hostname, { all: true });
+      for (const a of addrs) {
+        if (isPrivateIp(a.address)) {
+          throw new Error(`[SSRF-Guard] iCal hostname ${hostname} resolves to private/reserved IP: ${a.address}`);
+        }
+      }
+    } catch (dnsErr: any) {
+      if (dnsErr.message.startsWith('[SSRF-Guard]')) throw dnsErr;
+      throw new Error(`[SSRF-Guard] Could not resolve iCal hostname: ${hostname}`);
+    }
+  }
+
+  return url;
+}
+
+/**
  * 1. Read external iCal link and block dates in Firebase Firestore & local cache
  */
 export async function syncAndBlockDatesFromICal(hotelId: string, icalUrl: string): Promise<ICalSyncResult> {
@@ -62,8 +131,11 @@ export async function syncAndBlockDatesFromICal(hotelId: string, icalUrl: string
     throw new Error('Hotel ID and iCal URL are required for synchronization');
   }
 
+  // SSRF Protection: Validate URL before fetching
+  await assertSafeIcalUrl(icalUrl);
+
   try {
-    console.log(`[iCalSync] Fetching external calendar for Hotel ${hotelId} from: ${icalUrl}`);
+    console.log(`[iCalSync] Fetching external calendar for Hotel ${hotelId}`);
     
     // Fetch and parse the .ics file using node-ical
     const events = await ical.async.fromURL(icalUrl);

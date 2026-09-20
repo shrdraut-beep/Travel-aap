@@ -123,7 +123,7 @@ router.post('/create-order', express.json(), async (req, res) => {
       };
     }
 
-    // ५. ॲपला Order ID, Key ID आणि ब्रेकअप परत पाठवणे
+    // Return order details — never expose internal pricing logic or secret keys
     return res.json({
       success: true,
       keyId: currentKeyId,
@@ -138,12 +138,12 @@ router.post('/create-order', express.json(), async (req, res) => {
     });
 
   } catch (error: any) {
-    const errorMsg = error?.error?.description || error?.message || "Error creating Razorpay order";
-    console.error("[Razorpay create-order error]:", errorMsg);
-    return res.status(400).json({ 
-      success: false, 
-      error: errorMsg,
-      details: error?.error || error?.message 
+    // SEC-09: Log full error server-side; return only a generic message to the client
+    const internalMsg = error?.error?.description || error?.message || 'Unknown error';
+    console.error('[Razorpay create-order error]:', internalMsg, error?.error || '');
+    return res.status(400).json({
+      success: false,
+      error: 'Order creation failed. Please try again or contact support.'
     });
   }
 });
@@ -160,13 +160,26 @@ router.post('/verify', express.json(), async (req, res) => {
     });
   }
 
-  // Sandbox orders or mock signatures verify successfully in dev
-  if (
-    razorpay_order_id.startsWith("order_sandbox_") ||
-    razorpay_payment_id.startsWith("pay_sandbox_") ||
-    razorpay_signature === "sig_mock_verified" ||
-    secret === "MockSecretKey12345"
-  ) {
+  // SEC-05: CRITICAL — In production, sandbox/mock bypasses are BLOCKED
+  // Attacker using order_sandbox_ prefix or sig_mock_verified would get a free booking in prod
+  const isProduction = process.env.NODE_ENV === 'production' ||
+    (secret !== 'MockSecretKey12345' && !secret.includes('dummy') && !secret.includes('Mock'));
+
+  const isSandboxAttempt =
+    razorpay_order_id?.startsWith('order_sandbox_') ||
+    razorpay_payment_id?.startsWith('pay_sandbox_') ||
+    razorpay_signature === 'sig_mock_verified';
+
+  if (isSandboxAttempt && isProduction) {
+    console.warn('[Payment] SECURITY ALERT: Sandbox bypass attempt blocked in production mode.');
+    return res.status(400).json({
+      success: false,
+      error: 'Payment verification failed. Invalid transaction parameters.'
+    });
+  }
+
+  // Allow sandbox through in genuine dev/test mode
+  if (isSandboxAttempt && !isProduction) {
     return res.json({ success: true, verified: true, bookingId });
   }
 

@@ -1,5 +1,49 @@
 import express from 'express';
 import { GoogleGenAI, Type } from '@google/genai';
+import { z } from 'zod';
+
+// SEC-11: Zod schemas to enforce input size limits (prevent DoS via huge payloads)
+const ExpenseSchema = z.object({
+  amount: z.number().min(0).max(10_000_000).optional(),
+}).passthrough();
+
+const ItineraryItemSchema = z.object({
+  title: z.string().max(500).optional(),
+}).passthrough();
+
+const TripInputSchema = z.object({
+  name: z.string().max(200).optional(),
+  startDate: z.string().max(30).optional(),
+  endDate: z.string().max(30).optional(),
+  totalBudget: z.number().min(0).max(100_000_000).optional(),
+  expenses: z.array(ExpenseSchema).max(500).optional(),
+  itinerary: z.array(ItineraryItemSchema).max(200).optional(),
+  members: z.array(z.any()).max(100).optional(),
+}).passthrough();
+
+// SEC-08: Strips common LLM prompt-injection patterns from user messages
+const INJECTION_PATTERNS = [
+  /ignore (all |previous |prior |above |your )?(instructions?|prompts?|rules?|context|guidelines?)/gi,
+  /you are now (a |an )?(?!helpful|travel|trip)/gi,
+  /forget (everything|all|your|previous|prior|the above)/gi,
+  /disregard (all |previous |prior |above |your )?/gi,
+  /act as (a |an )?(?!helpful|travel|trip)/gi,
+  /jailbreak/gi,
+  /\[SYSTEM\]/gi,
+  /<\/?system>/gi,
+  /###\s*INSTRUCTION/gi,
+];
+
+function sanitizeChatMessage(message: string): string {
+  if (typeof message !== 'string') return '';
+  // Hard cap at 2000 characters
+  let clean = message.slice(0, 2000);
+  // Strip injection patterns
+  for (const pattern of INJECTION_PATTERNS) {
+    clean = clean.replace(pattern, '[filtered]');
+  }
+  return clean.trim();
+}
 
 const router = express.Router();
 
@@ -197,7 +241,10 @@ function getFallbackChatResponse(lang: string) {
 // 1. Suggestions Endpoint
 router.post('/trip-manager-suggestions', async (req, res) => {
   try {
-    const { trip, weather, lang, currentDateTime } = req.body;
+    // SEC-11: Validate + cap input size
+    const parseResult = TripInputSchema.safeParse(req.body?.trip);
+    const trip = parseResult.success ? parseResult.data : (req.body?.trip || {});
+    const { weather, lang, currentDateTime } = req.body;
     
     // 1. Compute stats
     const expenses = trip?.expenses || [];
@@ -355,7 +402,17 @@ Keep the tone professional yet friendly.`;
 // 3. Chat Endpoint
 router.post('/trip-manager-chat', async (req, res) => {
   try {
-    const { message, trip, history, lang } = req.body;
+    const rawMessage = req.body?.message || '';
+    // SEC-08: Sanitize user message before sending to LLM
+    const message = sanitizeChatMessage(rawMessage);
+    if (!message) {
+      return res.status(400).json({ success: false, text: 'Message cannot be empty.' });
+    }
+
+    // SEC-11: Validate trip input
+    const tripParseResult = TripInputSchema.safeParse(req.body?.trip);
+    const trip = tripParseResult.success ? tripParseResult.data : (req.body?.trip || {});
+    const { history, lang } = req.body;
     
     const expenses = trip?.expenses || [];
     const totalSpent = expenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0);

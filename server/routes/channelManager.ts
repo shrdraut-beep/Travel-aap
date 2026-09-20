@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import crypto from 'crypto';
 import { getApps } from 'firebase-admin/app';
 import { getFirestore, FieldValue, type Firestore, type DocumentReference } from 'firebase-admin/firestore';
 import { UniversalIdGenerator } from '../services/universalIdService.ts';
@@ -10,6 +11,34 @@ const router = express.Router();
 const memoryWebhookLogs = new Set<string>();
 
 /**
+ * SEC-10: Optional HMAC-SHA256 Signature Verification for Channel Manager webhooks.
+ * If CHANNEL_MANAGER_WEBHOOK_SECRET env var is set, the X-CM-Signature header is validated.
+ * Backward-compatible: if secret is not configured, webhook passes through with a warning.
+ */
+function verifyChannelManagerSignature(req: Request, rawBody: string): boolean {
+  const secret = process.env.CHANNEL_MANAGER_WEBHOOK_SECRET;
+  if (!secret) {
+    // Secret not configured — warn but allow (backward compat for existing partners)
+    console.warn('[ChannelManager] CHANNEL_MANAGER_WEBHOOK_SECRET not set. Signature verification skipped. Configure this env var for full security.');
+    return true;
+  }
+  const providedSig = req.headers['x-cm-signature'] as string | undefined;
+  if (!providedSig) {
+    console.warn('[ChannelManager] X-CM-Signature header missing. Rejecting unsigned webhook.');
+    return false;
+  }
+  const expectedSig = 'sha256=' + crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  try {
+    const expectedBuf = Buffer.from(expectedSig, 'utf8');
+    const providedBuf = Buffer.from(providedSig, 'utf8');
+    if (expectedBuf.length !== providedBuf.length) return false;
+    return crypto.timingSafeEqual(expectedBuf, providedBuf);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * CHANNEL MANAGER WEBHOOK ENDPOINT (ARI & Bookings)
  * Route: POST /api/channel-manager/webhook
  * Strictly enforces X-Idempotency-Key validation to prevent duplicate processing
@@ -19,6 +48,13 @@ router.post(['/webhook', '/'], async (req: Request, res: Response): Promise<void
     const rawKey = req.header('x-idempotency-key') || (req.headers['x-idempotency-key'] as string);
     const idempotencyKey = rawKey ? rawKey.trim() : '';
     const payload = req.body || {};
+
+    // SEC-10: Verify HMAC signature if secret is configured
+    const rawBody = (req as any).rawBody || JSON.stringify(payload);
+    if (!verifyChannelManagerSignature(req, rawBody)) {
+      res.status(401).json({ error: 'Invalid webhook signature. Check X-CM-Signature header.' });
+      return;
+    }
 
     if (!idempotencyKey) {
       res.status(400).json({ error: 'Missing Idempotency Key' });
