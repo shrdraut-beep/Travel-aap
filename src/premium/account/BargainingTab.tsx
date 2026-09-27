@@ -12,12 +12,20 @@ import {
   PhoneCall,
   Plus,
   RefreshCw,
+  Shield,
   ShieldCheck,
   Sparkles,
   Ticket,
   TrendingDown,
   X,
-  Zap
+  Zap,
+  Tag,
+  QrCode,
+  Copy,
+  Star,
+  MapPin,
+  Eye,
+  Handshake
 } from "lucide-react";
 import type { AccountItemId } from "./types";
 import {
@@ -46,7 +54,63 @@ const LIVE_ACTIVITY_MESSAGES = [
   "⚡ Verified Partner #403 is adjusting their quote downwards...",
   "🔥 Best quote dropped by ₹1,500 in the last 2 minutes!",
   "👀 2 new transport partners joined the bidding pool for Pune → Goa",
-  "🛡️ RoutTripo Escrow Anti-Leakage Shield is active for all sealed bids"
+  "🛡️ RouTripo Escrow Anti-Leakage Shield is active for all sealed bids"
+];
+
+// Featured verified deals from Google Stitch design
+const STITCH_FEATURED_DEALS = [
+  {
+    id: "deal-goa",
+    title: "Goa 5-Star Luxury Weekend Sale",
+    subtitle: "Taj & W Partner Stays · Private Pool Villa",
+    imgUrl: "https://lh3.googleusercontent.com/aida/AEtjO1W0v5lZ_vEwehbjuekaRy9VncrASccD9ZrrzAgGIRmJNy1dUC7scfmb2wG_bWJZu-ppDd_aduqcttpArYu8Kht0gZMi8PwGZH900PXGpeodhI70FO_1-CZlIDPaqr1I_TqzaE-ylXEelhrRwZBCPaVg0rmMn6v6ry4FKTSxqJnT_O6Fjhx2L7yz-xUsH07D_cbW_0BiAK2rmvKT6anVSRdF3snVPWrDpWEnfqibIThRSeoNTt8NgdDqNw",
+    badge: "FLASH DEAL • 45% OFF",
+    rating: "4.9",
+    escrowBadge: "Verified Escrow",
+    price: "₹26,400",
+    originalPrice: "₹48,000",
+    period: "/ 2 Nights",
+    dest: "Goa"
+  },
+  {
+    id: "deal-kashmir",
+    title: "Kashmir Paradise Houseboat & Gondola Retreat",
+    subtitle: "Dal Lake Luxury Houseboat & Gulmarg Cable Car",
+    imgUrl: "https://lh3.googleusercontent.com/aida/AEtjO1XL853S3QWZyG4l-WU7dZI7Y8ejQ_kYNdqmAVqfgmvFzjFzNB4LtK4ky9o7mgPCQJE-XEvfVUd0zODlxk9oFdXYaWmWMPxCo4A9GNxINLcpnhYTA2kvW-jub2f2k5iZ5u4yHWll9HQfuewM2W71gq9eFZOmezPki3TJrzOhfyjjTu-zb9lb_Q6i4qip_hTSJo6cQeR8s6JhthmG3o7zHJ0Jy9Ncc5sCocrk7IvUa5RMs-gPnEEBI405rQ",
+    badge: "ENDS IN 3H",
+    rating: "4.85",
+    escrowBadge: "100% Escrow",
+    price: "₹11,400",
+    originalPrice: "₹18,000",
+    period: "/ Person",
+    dest: "Kashmir"
+  },
+  {
+    id: "deal-jaipur",
+    title: "Jaipur Heritage Fort & Palace Stay",
+    subtitle: "Amer Lake Palace View · Royal Dining Included",
+    imgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCDe_t71VpsniPABXqq_YoIsMY2mJkjXPvBcUztvQOzT87_bkJ2QC7kvAaR-8mZGK9kkNzq41RTg4qgtJDvJwscyzn_HmJnR-0gQhWhi4ONdUAf61jxC3Pjv530Ma0M5ldjsyTbtGo9HrQ23aHKwhZW5IjFq2CAhe8Bt6Rudv4J6uk7Dg714cS2O2WuGZFr0MS5eoPJZTxsJ_hnXWKAk9KoC-GwuuRk6w6I_Sn7PM7MrbjyOssidkLi",
+    badge: "HERITAGE SPECIAL • 40% OFF",
+    rating: "4.95",
+    escrowBadge: "Royal Escrow",
+    price: "₹14,800",
+    originalPrice: "₹24,500",
+    period: "/ 2 Nights",
+    dest: "Jaipur"
+  },
+  {
+    id: "deal-munnar",
+    title: "Munnar Mist & Tea Plantation Villa",
+    subtitle: "Munnar Valley Hills · Infinity Tea Garden View",
+    imgUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCHyRjv-vu_CeqP84Y2-4ejFD7lVaZ6FrzJJr5zWouV9bguseJyzA_I5aQXKHgP9jmGFWgwINl6F-TMwKfbBPE3KSCQ28SGvloDL52Tx64LH_etawYX5aNPLS8ypsY9IA8ai8g-_6S4p332mUaqwvq5nLjkdJzEtT4MBmD7z-5nZ2fyNV5faW4zxBBBesJf8ZxdOYXEa8ULQAZWIr0_u8BjvQL1r5GbhtMpb8DT5DGK7k9ORzVvR50y",
+    badge: "WEEKEND GETAWAY • 30% OFF",
+    rating: "4.9",
+    escrowBadge: "Instant Confirm",
+    price: "₹8,999",
+    originalPrice: "₹12,999",
+    period: "/ Couple",
+    dest: "Munnar"
+  }
 ];
 
 export const BargainingTab: React.FC<{
@@ -59,13 +123,13 @@ export const BargainingTab: React.FC<{
         const saved = localStorage.getItem("routripo_user_bids");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
       } catch (e) {
         console.error("Failed to load user bids", e);
       }
     }
-    return [];
+    return INITIAL_REQUESTS;
   });
 
   const [bidsMap, setBidsMap] = useState<Record<string, VendorBid[]>>(() => {
@@ -74,13 +138,13 @@ export const BargainingTab: React.FC<{
         const saved = localStorage.getItem("routripo_user_bid_offers");
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (typeof parsed === "object" && parsed !== null) return parsed;
+          if (typeof parsed === "object" && parsed !== null && Object.keys(parsed).length > 0) return parsed;
         }
       } catch (e) {
         console.error("Failed to load bid offers", e);
       }
     }
-    return {};
+    return INITIAL_VENDOR_BIDS;
   });
 
   useEffect(() => {
@@ -105,25 +169,28 @@ export const BargainingTab: React.FC<{
 
   const [filter, setFilter] = useState<"Bargaining" | "Open" | "Confirmed">("Bargaining");
 
+  // Interactive Quick Action Panels (from Google Stitch)
+  const [activeQuickPanel, setActiveQuickPanel] = useState<"none" | "secret" | "otp">("none");
+
   // View state transitions
   const [viewingOffersRequest, setViewingOffersRequest] = useState<BargainingRequest | null>(null);
   const [acceptingBid, setAcceptingBid] = useState<{ request: BargainingRequest; bid: VendorBid } | null>(null);
   const [chattingBid, setChattingBid] = useState<{ request: BargainingRequest; bid: VendorBid } | null>(null);
 
-  // Change Target Budget Modal State (Requirement 2)
+  // Change Target Budget Modal State
   const [changeBudgetReq, setChangeBudgetReq] = useState<BargainingRequest | null>(null);
   const [newBudgetInput, setNewBudgetInput] = useState<number>(40000);
 
-  // Requirement 8: 15-Minute Auction Loop & 3-Minute Window Timers
-  const [secondsRemaining, setSecondsRemaining] = useState<number>(780); // 13 mins left
+  // 15-Minute Auction Loop & 3-Minute Window Timers
+  const [secondsRemaining, setSecondsRemaining] = useState<number>(765); // ~12m 45s
   const [isThreeMinWindow, setIsThreeMinWindow] = useState<boolean>(true);
   const [showOfflineUnlockModal, setShowOfflineUnlockModal] = useState<boolean>(false);
   const [isOfflineUnlocked, setIsOfflineUnlocked] = useState<boolean>(false);
   const [isSecretOffersOpen, setIsSecretOffersOpen] = useState<boolean>(false);
   const [showRateLimitModal, setShowRateLimitModal] = useState<boolean>(false);
-  const rateLimitAllowance = checkCustomBiddingAllowance();
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Requirement 10: Live Activity Indicator cycling
+  // Live Activity Indicator cycling
   const [activityIndex, setActivityIndex] = useState<number>(0);
 
   useEffect(() => {
@@ -143,6 +210,11 @@ export const BargainingTab: React.FC<{
       clearInterval(activityTimer);
     };
   }, []);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const formatTimer = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
@@ -192,9 +264,10 @@ export const BargainingTab: React.FC<{
       )
     );
     setChangeBudgetReq(null);
+    showToast("Target budget updated successfully!");
   };
 
-  // 1. If currently in Full-Screen Chat (Priority 1)
+  // 1. If currently in Full-Screen Chat
   if (chattingBid) {
     return (
       <FullScreenBargainChat
@@ -210,7 +283,7 @@ export const BargainingTab: React.FC<{
     );
   }
 
-  // 2. If currently in Accept & Lock Comparison Flow (Priority 2)
+  // 2. If currently in Accept & Lock Comparison Flow
   if (acceptingBid) {
     return (
       <AcceptAndLockComparisonView
@@ -223,7 +296,7 @@ export const BargainingTab: React.FC<{
     );
   }
 
-  // 3. If currently in Full-Page Offers View (Priority 3)
+  // 3. If currently in Full-Page Offers View
   if (viewingOffersRequest) {
     const bidsForThisReq = bidsMap[viewingOffersRequest.id] || [];
     return (
@@ -250,18 +323,25 @@ export const BargainingTab: React.FC<{
 
   return (
     <div className="pb-28">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-slate-900/95 text-white text-[13px] font-bold rounded-2xl shadow-xl backdrop-blur-md flex items-center gap-2 border border-white/20 animate-in fade-in slide-in-from-top-2">
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* 
         ========================================================================
-        HEADER ACTIONS: TRIP REQUIREMENT | SECRET | START OTP
-        Exact same shape (1:1:1 grid), Premium App Theme colors (NO BLACK)
+        GOOGLE STITCH: TOP 3 QUICK ACTIONS (1:1:1 GRID WITH INTERACTIVE PANELS)
         ========================================================================
       */}
-      <div className="px-5 pt-4">
-        <div className="grid grid-cols-3 gap-2.5">
+      <div className="px-4 pt-3">
+        <section className="grid grid-cols-3 gap-2.5">
           {/* Button 1: MAKE AN OFFER */}
           <button
             type="button"
             onClick={() => {
+              setActiveQuickPanel("none");
               const allowance = checkCustomBiddingAllowance();
               if (!allowance.allowed) {
                 setShowRateLimitModal(true);
@@ -269,42 +349,252 @@ export const BargainingTab: React.FC<{
                 onSelect("bargain-new-request");
               }
             }}
-            className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 text-slate-800 font-bold text-[11px] sm:text-[12px] tracking-tight uppercase active:scale-95 transition-all cursor-pointer group bg-transparent border-none outline-none"
+            className={`flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-sm active:scale-95 transition-all text-center group border cursor-pointer ${
+              activeQuickPanel === "none"
+                ? "border-2 border-sky-500 bg-gradient-to-b from-sky-50 to-white shadow-md"
+                : "border-slate-200 hover:border-sky-300"
+            }`}
           >
-            <div className="relative flex h-11 w-11 items-center justify-center">
-              <img src="/icons/make_an_offer.png" alt="Make an Offer" className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform" />
+            <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center text-white mb-1.5 shadow-sm transition-transform group-hover:scale-105">
+              <Tag className="w-4.5 h-4.5" />
             </div>
-            <span className="truncate">Make an Offer</span>
+            <span className="text-[10px] font-extrabold text-sky-700 tracking-tight leading-tight">
+              MAKE AN OFFER
+            </span>
+            <span className="text-[8.5px] text-sky-600 font-semibold">Reverse Bid</span>
           </button>
 
           {/* Button 2: SECRET */}
           <button
             type="button"
-            onClick={() => setIsSecretOffersOpen(true)}
-            className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 text-slate-800 font-bold text-[11px] sm:text-[12px] tracking-wide uppercase active:scale-95 transition-all cursor-pointer group bg-transparent border-none outline-none"
+            onClick={() => {
+              setActiveQuickPanel((prev) => (prev === "secret" ? "none" : "secret"));
+            }}
+            className={`flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-sm active:scale-95 transition-all text-center group border cursor-pointer ${
+              activeQuickPanel === "secret"
+                ? "border-2 border-amber-500 bg-gradient-to-b from-amber-50 to-white shadow-md"
+                : "border-slate-200 hover:border-amber-400"
+            }`}
           >
-            <div className="relative flex h-11 w-11 items-center justify-center">
-              <img src="/icons/secret.png" alt="Secret" className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform" />
+            <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 mb-1.5 shadow-sm group-hover:bg-amber-500 group-hover:text-white transition-colors">
+              <Lock className="w-4.5 h-4.5" />
             </div>
-            <span className="truncate">Secret</span>
+            <span className="text-[10px] font-extrabold text-slate-800 tracking-tight leading-tight">
+              SECRET
+            </span>
+            <span className="text-[8.5px] text-amber-600 font-semibold">Vault Deals</span>
           </button>
 
           {/* Button 3: START OTP */}
           <button
             type="button"
-            onClick={() => onSelect("bargain-vouchers")}
-            className="flex flex-col items-center justify-center gap-1.5 py-2 px-1 text-slate-800 font-bold text-[11px] sm:text-[12px] tracking-wide uppercase active:scale-95 transition-all cursor-pointer group bg-transparent border-none outline-none"
+            onClick={() => {
+              setActiveQuickPanel((prev) => (prev === "otp" ? "none" : "otp"));
+            }}
+            className={`flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-sm active:scale-95 transition-all text-center group border cursor-pointer ${
+              activeQuickPanel === "otp"
+                ? "border-2 border-emerald-500 bg-gradient-to-b from-emerald-50 to-white shadow-md"
+                : "border-slate-200 hover:border-emerald-500"
+            }`}
           >
-            <div className="relative flex h-11 w-11 items-center justify-center">
-              <img src="/icons/start_otp.png" alt="Start OTP" className="h-10 w-10 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.18)] group-hover:scale-110 transition-transform" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 mb-1.5 shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <QrCode className="w-4.5 h-4.5" />
             </div>
-            <span className="truncate">Start OTP</span>
+            <span className="text-[10px] font-extrabold text-slate-800 tracking-tight leading-tight">
+              START OTP
+            </span>
+            <span className="text-[8.5px] text-emerald-600 font-semibold">Handshake</span>
           </button>
+        </section>
+
+        {/* 
+          GOOGLE STITCH: INTERACTIVE SECRET VAULT PANEL 
+        */}
+        {activeQuickPanel === "secret" && (
+          <div className="mt-3 bg-white border border-amber-200 rounded-2xl p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-amber-100 pb-2.5">
+              <div className="flex items-center space-x-2">
+                <Lock className="w-5 h-5 text-amber-600" />
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Confidential Secret Vault</h4>
+                  <p className="text-[10px] text-slate-500">Non-public off-market exclusive deals</p>
+                </div>
+              </div>
+              <span className="bg-amber-100 text-amber-800 text-[9px] font-extrabold px-2 py-0.5 rounded-full">
+                VIP ACCESS
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="bg-amber-500 text-white text-[8.5px] font-bold px-1.5 py-0.5 rounded">
+                      SECRET COUPON
+                    </span>
+                    <span className="font-mono font-bold text-xs text-amber-900 tracking-wider">
+                      VAULT-VIP50
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-700 mt-1 font-medium">
+                    Extra ₹5,000 off luxury 5-star villas
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    showToast("Coupon VAULT-VIP50 applied to your account!");
+                    setIsSecretOffersOpen(true);
+                  }}
+                  className="px-2.5 py-1.5 bg-amber-500 text-white text-[10px] font-bold rounded-lg shadow-sm hover:bg-amber-600 active:scale-95 cursor-pointer"
+                >
+                  Apply
+                </button>
+              </div>
+
+              <div className="border border-dashed border-slate-300 rounded-xl p-2.5 text-center bg-slate-50">
+                <span className="text-[10.5px] text-slate-600 block">
+                  100% Confidential Ledger: Vendors cannot see your name or phone number until booking escrow is locked.
+                </span>
+                <span className="text-[10px] font-bold text-emerald-600 mt-0.5 inline-block">
+                  Zero-Spam Guarantee
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 
+          GOOGLE STITCH: INTERACTIVE START OTP HANDSHAKE PANEL
+        */}
+        {activeQuickPanel === "otp" && (
+          <div className="mt-3 bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-emerald-100 pb-2.5">
+              <div className="flex items-center space-x-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Trip Start OTP & Escrow Release</h4>
+                  <p className="text-[10px] text-slate-500">Share OTP only after vendor arrival</p>
+                </div>
+              </div>
+              <span className="bg-emerald-100 text-emerald-800 text-[9px] font-extrabold px-2 py-0.5 rounded-full">
+                SECURE
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center justify-center p-3 bg-emerald-50/60 border border-emerald-200/70 rounded-xl text-center space-y-2">
+              <span className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">
+                Trip Handshake Code
+              </span>
+              <div className="flex space-x-2">
+                {["7", "2", "9", "4"].map((digit, i) => (
+                  <span
+                    key={i}
+                    className="w-9 h-11 bg-white border border-emerald-300 rounded-lg flex items-center justify-center text-lg font-black text-slate-900 shadow-sm font-mono"
+                  >
+                    {digit}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[9.5px] text-slate-500 font-medium">
+                Show QR or recite code to Driver / Front Desk to initiate insured ride/check-in.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 
+        ========================================================================
+        GOOGLE STITCH: COMPACT COUPON / VOUCHER PROMO RAIL
+        ========================================================================
+      */}
+      <div className="px-4 pt-3.5">
+        <div className="flex items-center justify-between mb-1.5 px-0.5">
+          <div className="flex items-center space-x-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <h3 className="text-xs font-black text-slate-900 tracking-wider uppercase">
+              Top Verified Escrow Deals
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => onSelect("bargain-vouchers")}
+            className="text-[10px] font-bold text-sky-600 hover:underline cursor-pointer"
+          >
+            View All
+          </button>
+        </div>
+
+        <div className="flex space-x-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
+          {/* Promo 1 */}
+          <div className="flex-shrink-0 w-[180px] bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200/80 rounded-xl p-2 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="bg-sky-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded tracking-wide uppercase">
+                FLIGHT + STAY
+              </span>
+              <Copy className="w-3.5 h-3.5 text-sky-500 cursor-pointer" onClick={() => showToast("Copied ROUT500")} />
+            </div>
+            <div className="my-1">
+              <span className="text-[11px] font-extrabold text-slate-900 block leading-tight">Flat ₹500 OFF</span>
+              <span className="text-[9px] text-slate-500 font-medium">On combo bookings</span>
+            </div>
+            <div className="border-t border-dashed border-sky-200 pt-1 flex items-center justify-between">
+              <span className="font-mono text-[9px] font-bold text-sky-800 bg-white px-1.5 py-0.5 rounded border border-sky-200">
+                ROUT500
+              </span>
+              <span className="text-[8px] text-emerald-600 font-bold">Verified</span>
+            </div>
+          </div>
+
+          {/* Promo 2 */}
+          <div className="flex-shrink-0 w-[180px] bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-xl p-2 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="bg-emerald-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded tracking-wide uppercase">
+                ESCROW CASHBACK
+              </span>
+              <Copy className="w-3.5 h-3.5 text-emerald-600 cursor-pointer" onClick={() => showToast("Copied ESCROW10")} />
+            </div>
+            <div className="my-1">
+              <span className="text-[11px] font-extrabold text-slate-900 block leading-tight">10% Extra Cashback</span>
+              <span className="text-[9px] text-slate-500 font-medium">Direct into Vault</span>
+            </div>
+            <div className="border-t border-dashed border-emerald-200 pt-1 flex items-center justify-between">
+              <span className="font-mono text-[9px] font-bold text-emerald-800 bg-white px-1.5 py-0.5 rounded border border-emerald-200">
+                ESCROW10
+              </span>
+              <span className="text-[8px] text-emerald-600 font-bold">Instant</span>
+            </div>
+          </div>
+
+          {/* Promo 3 */}
+          <div className="flex-shrink-0 w-[180px] bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-xl p-2 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="bg-amber-500 text-slate-950 text-[8px] font-black px-1.5 py-0.5 rounded tracking-wide uppercase">
+                FREE CAB
+              </span>
+              <Copy className="w-3.5 h-3.5 text-amber-600 cursor-pointer" onClick={() => showToast("Copied CABFREE")} />
+            </div>
+            <div className="my-1">
+              <span className="text-[11px] font-extrabold text-slate-900 block leading-tight">Free Airport Transfer</span>
+              <span className="text-[9px] text-slate-500 font-medium">On villa reservations</span>
+            </div>
+            <div className="border-t border-dashed border-amber-200 pt-1 flex items-center justify-between">
+              <span className="font-mono text-[9px] font-bold text-amber-900 bg-white px-1.5 py-0.5 rounded border border-amber-200">
+                CABFREE
+              </span>
+              <span className="text-[8px] text-amber-600 font-bold">Free Ride</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 px-5 pt-4">
+      {/* 
+        ========================================================================
+        FILTER TABS: BARGAINING (COUNT) | OPEN (COUNT) | CONFIRMED (COUNT)
+        ========================================================================
+      */}
+      <div className="flex gap-2 px-4 pt-3">
         {(["Bargaining", "Open", "Confirmed"] as const).map((tab) => {
           const count =
             tab === "Bargaining"
@@ -319,8 +609,8 @@ export const BargainingTab: React.FC<{
               onClick={() => setFilter(tab)}
               className={`h-9 flex-1 rounded-full text-[12px] font-black transition-all cursor-pointer active:scale-95 ${
                 filter === tab
-                  ? "btn-3d-primary text-white shadow-[0_4px_12px_rgba(2,132,199,0.3)]"
-                  : "bg-white border border-slate-200/90 text-slate-700 shadow-xs hover:bg-slate-50 hover:border-sky-300"
+                  ? "bg-sky-500 text-white shadow-[0_4px_12px_rgba(14,165,233,0.35)]"
+                  : "bg-white border border-slate-200 text-slate-700 shadow-2xs hover:bg-slate-50"
               }`}
             >
               {tab} ({count})
@@ -331,13 +621,11 @@ export const BargainingTab: React.FC<{
 
       {/* 
         ========================================================================
-        REQUIREMENT 8: AUCTION TIMERS & MONETIZATION
-        Wire 3-minute bid-lowering window and 15-minute maximum auction loop.
-        If 15 minutes expire without an accepted offer, allow paying platform fee.
+        LIVE AUCTION LOOP BANNER (3-MIN POWER HOUR & MONOSPACE TIMER)
         ========================================================================
       */}
       {requestsList.some((r) => r.status === "Bargaining") && (
-        <div className="px-5 pt-3">
+        <div className="px-4 pt-3">
           {isAuctionExpired ? (
             <div className="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl flex items-center justify-between gap-3">
               <div className="space-y-0.5">
@@ -396,8 +684,8 @@ export const BargainingTab: React.FC<{
               
               <div className="bg-white/10 rounded-xl px-3 py-2 flex items-center gap-2">
                 <div className="flex h-1.5 w-1.5 relative shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-pink-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-pink-500" />
                 </div>
                 <p className="text-[10px] font-medium text-sky-100 truncate flex-1">
                   {LIVE_ACTIVITY_MESSAGES[activityIndex]}
@@ -410,12 +698,11 @@ export const BargainingTab: React.FC<{
 
       {/* 
         ========================================================================
-        REQUIREMENT 2: BARGAINING CARD RESTRUCTURE
-        Distribute "TARGET BUDGET", "LOWEST QUOTE", and "OFFERS" equally & horizontally.
-        Place ONLY TWO buttons at the bottom horizontally: "ACCEPT" and "CHANGE".
+        BARGAINING REQUEST CARDS (TARGET BUDGET | LOWEST QUOTE | OFFERS)
+        WITH EXACT 2 BUTTONS: ACCEPT & CHANGE
         ========================================================================
       */}
-      <div className="space-y-3 px-5 pt-4">
+      <div className="space-y-3 px-4 pt-3.5">
         {filteredRequests.length === 0 ? (
           <div className="bg-white rounded-3xl p-6 text-center space-y-2 border border-slate-200">
             <p className="text-[14px] font-bold text-slate-700">
@@ -435,19 +722,17 @@ export const BargainingTab: React.FC<{
               <article
                 key={request.id}
                 onClick={() => setViewingOffersRequest(request)}
-                className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-xs hover:border-sky-300 hover:shadow-md transition-all cursor-pointer"
+                className="bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-2xs hover:border-sky-300 hover:shadow-md transition-all cursor-pointer"
               >
-                {/* Header Row of the Card */}
+                {/* Header Row */}
                 <div className="flex items-start gap-3 px-4 pt-4">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 font-bold">
                     <Gavel className="h-5 w-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <p className="truncate text-[15px] font-black text-slate-900">
-                        {request.title}
-                      </p>
-                    </div>
+                    <p className="truncate text-[15px] font-black text-slate-900">
+                      {request.title}
+                    </p>
                     <p className="truncate text-[12px] font-medium text-slate-500">
                       {request.id} · {request.route}
                     </p>
@@ -459,12 +744,8 @@ export const BargainingTab: React.FC<{
                   </span>
                 </div>
 
-                {/* 
-                  EQUAL & HORIZONTAL DISTRIBUTION: 
-                  "TARGET BUDGET" | "LOWEST QUOTE" | "OFFERS" (Requirement 2) 
-                */}
-                <div className="mx-4 mt-3 bg-slate-50/80 rounded-2xl border border-slate-200/80 p-3 grid grid-cols-3 divide-x divide-slate-200 text-center">
-                  {/* Column 1: TARGET BUDGET */}
+                {/* 3-Column Equal Stats Panel */}
+                <div className="mx-4 mt-3 bg-slate-50/90 rounded-2xl border border-slate-200/80 p-3 grid grid-cols-3 divide-x divide-slate-200 text-center">
                   <div className="px-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       Target Budget
@@ -474,7 +755,6 @@ export const BargainingTab: React.FC<{
                     </p>
                   </div>
 
-                  {/* Column 2: LOWEST QUOTE */}
                   <div className="px-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       Lowest Quote
@@ -484,7 +764,6 @@ export const BargainingTab: React.FC<{
                     </p>
                   </div>
 
-                  {/* Column 3: OFFERS */}
                   <div className="px-1">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                       Offers
@@ -508,15 +787,11 @@ export const BargainingTab: React.FC<{
                   </div>
                 )}
 
-                {/* 
-                  BOTTOM ACTIONS (Requirement 2):
-                  Place ONLY TWO buttons at the bottom horizontally: "ACCEPT" and "CHANGE"
-                */}
+                {/* EXACT 2 BUTTONS AT BOTTOM: ACCEPT & CHANGE */}
                 <div
                   className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 px-4 py-3 bg-slate-50/90"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Button 1: ACCEPT */}
                   <button
                     type="button"
                     onClick={() => {
@@ -526,20 +801,19 @@ export const BargainingTab: React.FC<{
                         setViewingOffersRequest(request);
                       }
                     }}
-                    className="btn-3d-primary h-11 rounded-xl text-white font-black text-[13px] shadow-[0_4px_14px_rgba(2,132,199,0.35)] flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                    className="h-11 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-black text-[13px] shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                     <span>Accept</span>
                   </button>
 
-                  {/* Button 2: CHANGE */}
                   <button
                     type="button"
                     onClick={() => {
                       setChangeBudgetReq(request);
                       setNewBudgetInput(request.targetBudget);
                     }}
-                    className="h-11 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-[13px] flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-xs cursor-pointer"
+                    className="h-11 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-[13px] flex items-center justify-center gap-1.5 active:scale-95 transition-all shadow-2xs cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5 text-sky-600 stroke-[2.5]" />
                     <span>Change</span>
@@ -549,6 +823,98 @@ export const BargainingTab: React.FC<{
             );
           })
         )}
+      </div>
+
+      {/* 
+        ========================================================================
+        GOOGLE STITCH: FEATURED VERIFIED ESCROW DEALS (STUNNING REAL IMAGES)
+        ========================================================================
+      */}
+      <div className="px-4 pt-5">
+        <div className="flex items-center justify-between mb-2 px-0.5">
+          <div className="flex items-center space-x-1.5">
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <h3 className="text-xs font-black text-slate-900 tracking-wider uppercase">
+              Exclusive Escrow Drops
+            </h3>
+          </div>
+          <span className="text-[10px] font-bold text-sky-600">30%–45% OFF</span>
+        </div>
+
+        <div className="space-y-3">
+          {STITCH_FEATURED_DEALS.map((deal) => (
+            <article
+              key={deal.id}
+              className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs hover:shadow-md transition-all"
+            >
+              <div className="relative h-36 w-full overflow-hidden bg-slate-900">
+                <img
+                  src={deal.imgUrl}
+                  alt={deal.title}
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/icons/cab_hotel_package_v1.png";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-black/20 to-black/30" />
+                <div className="absolute top-2 left-2 flex items-center space-x-1.5">
+                  <span className="bg-amber-500 text-slate-950 text-[8.5px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+                    {deal.badge}
+                  </span>
+                  <span className="bg-white/90 backdrop-blur-sm text-slate-900 text-[8.5px] font-extrabold px-1.5 py-0.5 rounded-full shadow-xs flex items-center gap-0.5">
+                    <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" /> {deal.rating}
+                  </span>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <span className="bg-emerald-600/95 text-white backdrop-blur-sm text-[8.5px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/40 flex items-center space-x-1">
+                    <ShieldCheck className="w-2.5 h-2.5" />
+                    <span>{deal.escrowBadge}</span>
+                  </span>
+                </div>
+                <div className="absolute bottom-2 left-2.5 right-2.5">
+                  <h4 className="text-[14px] font-black text-white leading-tight drop-shadow-sm">
+                    {deal.title}
+                  </h4>
+                  <p className="text-[10px] text-slate-200 font-medium flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3 text-amber-300 shrink-0" />
+                    <span className="truncate">{deal.subtitle}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-2.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline space-x-1.5">
+                    <span className="text-[15px] font-black text-emerald-700 font-mono">
+                      {deal.price}
+                    </span>
+                    <span className="text-[9.5px] text-slate-400 line-through font-medium font-mono">
+                      {deal.originalPrice}
+                    </span>
+                    <span className="text-[9.5px] text-slate-500 font-medium">
+                      {deal.period}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    Escrow Protected
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelect("bargain-new-request");
+                    showToast(`Bargaining initiated for ${deal.title}`);
+                  }}
+                  className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer"
+                >
+                  <Handshake className="w-3.5 h-3.5" />
+                  <span>Claim Deal / Bargain</span>
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
 
       {/* Change Budget Modal */}
@@ -563,7 +929,7 @@ export const BargainingTab: React.FC<{
               <button
                 type="button"
                 onClick={() => setChangeBudgetReq(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600"
+                className="p-1.5 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -577,7 +943,7 @@ export const BargainingTab: React.FC<{
                 <button
                   type="button"
                   onClick={() => setNewBudgetInput((p) => Math.max(p - 1000, 10000))}
-                  className="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black text-slate-800 text-xl active:scale-95 transition-all"
+                  className="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black text-slate-800 text-xl active:scale-95 transition-all cursor-pointer"
                 >
                   -
                 </button>
@@ -587,7 +953,7 @@ export const BargainingTab: React.FC<{
                 <button
                   type="button"
                   onClick={() => setNewBudgetInput((p) => p + 1000)}
-                  className="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black text-slate-800 text-xl active:scale-95 transition-all"
+                  className="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black text-slate-800 text-xl active:scale-95 transition-all cursor-pointer"
                 >
                   +
                 </button>
@@ -598,14 +964,14 @@ export const BargainingTab: React.FC<{
               <button
                 type="button"
                 onClick={handleSaveChangedBudget}
-                className="flex-1 py-3 bg-gradient-to-r from-sky-500 via-sky-600 to-pink-500 hover:opacity-95 text-white font-bold text-[14px] rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold text-[14px] rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer"
               >
                 Save New Budget
               </button>
               <button
                 type="button"
                 onClick={() => setChangeBudgetReq(null)}
-                className="px-4 py-3 bg-slate-100 text-slate-700 font-bold text-[13px] rounded-2xl hover:bg-slate-200"
+                className="px-4 py-3 bg-slate-100 text-slate-700 font-bold text-[13px] rounded-2xl hover:bg-slate-200 cursor-pointer"
               >
                 Cancel
               </button>
@@ -614,7 +980,7 @@ export const BargainingTab: React.FC<{
         </div>
       )}
 
-      {/* Offline Direct Contact Unlock Modal (Requirement 8) */}
+      {/* Offline Direct Contact Unlock Modal */}
       {showOfflineUnlockModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
           <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4 text-center">
@@ -655,7 +1021,7 @@ export const BargainingTab: React.FC<{
             <button
               type="button"
               onClick={() => setShowOfflineUnlockModal(false)}
-              className="text-[12px] text-slate-400 hover:text-slate-600 font-bold block mx-auto"
+              className="text-[12px] text-slate-400 hover:text-slate-600 font-bold block mx-auto cursor-pointer"
             >
               Close
             </button>
@@ -663,7 +1029,7 @@ export const BargainingTab: React.FC<{
         </div>
       )}
 
-      {/* Secret Vendor Offers Modal (Restored) */}
+      {/* Secret Vendor Offers Modal */}
       <SecretOffersModal
         isOpen={isSecretOffersOpen}
         onClose={() => setIsSecretOffersOpen(false)}
@@ -681,7 +1047,7 @@ export const BargainingTab: React.FC<{
         }}
       />
 
-      {/* Requirement 1: 4th Custom Request Rate Limit Paywall Modal */}
+      {/* 4th Custom Request Rate Limit Paywall Modal */}
       <BargainingPaywallModal
         isOpen={showRateLimitModal}
         onClose={() => setShowRateLimitModal(false)}
