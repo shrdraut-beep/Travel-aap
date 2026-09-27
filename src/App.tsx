@@ -542,6 +542,26 @@ function MainApp() {
 
   const activeTripForDashboard = activeTrip || trips[0] || { id: 'temp', title: 'New Trip', destination: 'Select a destination', duration: 1, type: 'leisure', members: [] };
 
+  const handleSocialLogin = async (provider: string) => {
+    if (provider === 'google') {
+      try {
+        const user = await useAuthStore.getState().login();
+        if (user) {
+          setRole('user');
+          setPhase('app');
+          return;
+        }
+      } catch (err) {
+        console.warn("Real Google Sign-In notice:", err);
+      }
+    }
+    handleLoginSubmit({
+      identifier: `user@${provider}.com`,
+      name: provider === 'google' ? 'Google Traveler' : 'Travel Enthusiast',
+      role: 'user'
+    });
+  };
+
   return (
     <CrashlyticsErrorBoundary>
       <MusicPlayerProvider>
@@ -553,7 +573,7 @@ function MainApp() {
               brandName="RouTripo"
               onSubmit={handleLoginSubmit}
               onTruecaller={(tcUser) => handleLoginSubmit({ identifier: tcUser.phone, name: `${tcUser.name} (Truecaller)`, role: tcUser.role || 'user' })}
-              onSocial={(provider) => handleLoginSubmit({ identifier: `user@${provider}.com`, name: 'Travel Enthusiast', role: 'user' })}
+              onSocial={handleSocialLogin}
               onForgotPassword={(id) => alert(`Password reset instructions sent to ${id || 'your email'}`)}
               onContinueAsGuest={() => handleLoginSubmit({ identifier: 'guest@routripo.app', name: 'Guest Traveller', role: 'user' })}
             />
