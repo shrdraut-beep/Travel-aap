@@ -955,8 +955,10 @@ export const BargainingTab: React.FC<{
 
       {/* Change Budget Modal */}
       {changeBudgetReq && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-white rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-white rounded-t-[32px] sm:rounded-t-[36px] p-5 pb-8 shadow-2xl border-t border-slate-100 space-y-4 animate-in slide-in-from-bottom duration-300">
+            {/* Top Swipe / Grab Bar */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto -mt-1 mb-2" />
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-black text-[16px] text-slate-900">Change Target Budget</h3>
@@ -1018,8 +1020,10 @@ export const BargainingTab: React.FC<{
 
       {/* Offline Direct Contact Unlock Modal */}
       {showOfflineUnlockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4 text-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-white rounded-t-[32px] sm:rounded-t-[36px] p-6 pb-9 shadow-2xl border-t border-slate-100 space-y-4 text-center animate-in slide-in-from-bottom duration-300">
+            {/* Top Swipe / Grab Bar */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto -mt-2 mb-2" />
             <div className="w-12 h-12 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center mx-auto">
               <PhoneCall className="w-6 h-6" />
             </div>

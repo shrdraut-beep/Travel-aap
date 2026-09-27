@@ -311,8 +311,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       {/* TRUECALLER 1-TAP VERIFICATION POPUP (MATCHING DESIGN)                     */}
       {/* ========================================================================= */}
       {isTruecallerSheetOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-[400px] rounded-t-[28px] sm:rounded-2xl bg-white shadow-2xl border border-slate-100 p-5 animate-in slide-in-from-bottom duration-300">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-xs p-0 animate-in fade-in duration-200">
+          <div className="w-full max-w-[440px] rounded-t-[32px] bg-white shadow-2xl border-t border-slate-100 p-5 pb-8 animate-in slide-in-from-bottom duration-300">
+            {/* Top Grab Bar */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto -mt-2 mb-3" />
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-[#0087FF] flex items-center justify-center text-white">
