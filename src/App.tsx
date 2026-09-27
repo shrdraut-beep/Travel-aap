@@ -550,7 +550,9 @@ function MainApp() {
           
           {(phase === "login" || !currentUser) && phase !== "splash" && (
             <LoginScreen 
+              brandName="RouTripo"
               onSubmit={handleLoginSubmit}
+              onTruecaller={(tcUser) => handleLoginSubmit({ identifier: tcUser.phone, name: `${tcUser.name} (Truecaller)`, role: tcUser.role || 'user' })}
               onSocial={(provider) => handleLoginSubmit({ identifier: `user@${provider}.com`, name: 'Travel Enthusiast', role: 'user' })}
               onForgotPassword={(id) => alert(`Password reset instructions sent to ${id || 'your email'}`)}
               onContinueAsGuest={() => handleLoginSubmit({ identifier: 'guest@routripo.app', name: 'Guest Traveller', role: 'user' })}

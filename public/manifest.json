@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "प्रवास वाटाघाटी (Pravas Wataghati)",
-  "short_name": "प्रवास वाटाघाटी",
-  "description": "सहलीचे नियोजन आणि हिशोब व्यवस्थापन ॲप (Pravas Wataghati Trip Planner & Expense Manager).",
+  "name": "RouTripo - प्रवास वाटाघाटी",
+  "short_name": "RouTripo",
+  "description": "RouTripo - ऑल-इन-वन ट्रॅव्हल बुकिंग आणि ग्रुप ट्रिप मॅनेजर (Trip Planner & Expense Manager).",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
