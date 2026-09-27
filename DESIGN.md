@@ -1,3 +1,108 @@
+---
+name: RouTripo
+colors:
+  surface: '#f6faff'
+  surface-dim: '#d6dae0'
+  surface-bright: '#f6faff'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#f0f4fa'
+  surface-container: '#eaeef4'
+  surface-container-high: '#e4e8ee'
+  surface-container-highest: '#dee3e9'
+  on-surface: '#171c20'
+  on-surface-variant: '#3e4850'
+  inverse-surface: '#2c3135'
+  inverse-on-surface: '#edf1f7'
+  outline: '#6e7881'
+  outline-variant: '#bec8d2'
+  surface-tint: '#006591'
+  primary: '#006591'
+  on-primary: '#ffffff'
+  primary-container: '#0ea5e9'
+  on-primary-container: '#003751'
+  inverse-primary: '#89ceff'
+  secondary: '#006c49'
+  on-secondary: '#ffffff'
+  secondary-container: '#6cf8bb'
+  on-secondary-container: '#00714d'
+  tertiary: '#8a5100'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#de8712'
+  on-tertiary-container: '#4d2b00'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#c9e6ff'
+  primary-fixed-dim: '#89ceff'
+  on-primary-fixed: '#001e2f'
+  on-primary-fixed-variant: '#004c6e'
+  secondary-fixed: '#6ffbbe'
+  secondary-fixed-dim: '#4edea3'
+  on-secondary-fixed: '#002113'
+  on-secondary-fixed-variant: '#005236'
+  tertiary-fixed: '#ffdcbd'
+  tertiary-fixed-dim: '#ffb86e'
+  on-tertiary-fixed: '#2c1600'
+  on-tertiary-fixed-variant: '#693c00'
+  background: '#f6faff'
+  on-background: '#171c20'
+  surface-variant: '#dee3e9'
+  admin-violet: '#8B5CF6'
+  canvas-bg: '#F8FAFC'
+  surface-bg: '#FFFFFF'
+  text-primary: '#0F172A'
+  text-secondary: '#475569'
+  text-muted: '#94A3B8'
+  border-color: '#E2E8F0'
+typography:
+  headline-lg:
+    fontFamily: Outfit
+    fontSize: 1.875rem
+    fontWeight: '800'
+    lineHeight: 2.25rem
+  headline-md:
+    fontFamily: Outfit
+    fontSize: 1.5rem
+    fontWeight: '700'
+    lineHeight: 2rem
+  headline-sm:
+    fontFamily: Outfit
+    fontSize: 1.25rem
+    fontWeight: '700'
+    lineHeight: 1.75rem
+  body-md:
+    fontFamily: Outfit
+    fontSize: 1rem
+    fontWeight: '400'
+    lineHeight: '1.6'
+  body-sm:
+    fontFamily: Outfit
+    fontSize: 0.875rem
+    fontWeight: '400'
+    lineHeight: '1.5'
+  label-md:
+    fontFamily: JetBrains Mono
+    fontSize: 0.75rem
+    fontWeight: '500'
+    lineHeight: 1rem
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  gutter: 1rem
+  margin: 1.5rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 1rem
+  space-lg: 1.5rem
+  space-xl: 2rem
+---
+
 # RouTripo Design System Specification (DESIGN.md)
 
 **Brand Identity**: **RouTripo** (All-in-One Travel & Group Planning Platform)  

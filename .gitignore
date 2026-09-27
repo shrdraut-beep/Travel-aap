@@ -27,4 +27,5 @@ app_screenshots/
 graphify-out/cache/
 graphify-out/20*/
 *.tmp
-
+.playwright-mcp/
+stitch_profile_preview.html

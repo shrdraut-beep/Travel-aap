@@ -45,35 +45,37 @@ export const Sheet: React.FC<SheetProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
-          className="fixed inset-0 z-[60] flex flex-col justify-end bg-slate-900/40 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[60] flex flex-col justify-end bg-slate-950/60 backdrop-blur-[3px]"
           onClick={onClose}
         >
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 32, stiffness: 320 }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
             onClick={(event) => event.stopPropagation()}
-            className={`mx-auto flex w-full max-w-[520px] flex-col overflow-hidden bg-white ${
+            className={`mx-auto flex w-full max-w-[520px] flex-col overflow-hidden bg-white shadow-2xl ${
               variant === "full"
                 ? "h-full"
-                : "max-h-[88vh] rounded-t-[28px] pb-[env(safe-area-inset-bottom)]"
+                : "max-h-[88vh] rounded-t-[32px] pb-[env(safe-area-inset-bottom)]"
             }`}
           >
-            <div className="relative flex shrink-0 items-center justify-center border-b border-slate-100 px-4 py-3.5">
-              {variant === "bottom" ? (
-                <span className="absolute top-1.5 h-1 w-10 rounded-full bg-slate-200" />
-              ) : null}
-              <p className="text-[15px] font-bold tracking-tight text-slate-900">
+            {variant === "bottom" && (
+              <div className="pt-2.5 pb-1 flex justify-center">
+                <span className="h-1.5 w-12 rounded-full bg-slate-200" />
+              </div>
+            )}
+            <div className="relative flex shrink-0 items-center justify-between border-b border-slate-100/80 px-5 py-3">
+              <p className="text-[17px] font-extrabold tracking-tight text-slate-900 font-['Outfit',sans-serif]">
                 {title}
               </p>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-3 flex h-9 w-9 items-center justify-center rounded-full text-slate-500 active:bg-slate-100"
+                className="flex size-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 active:scale-95 transition-all cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 

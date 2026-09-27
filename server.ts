@@ -563,6 +563,119 @@ function getRealStats(endpoint: string, fallbackLatency: string = 'N/A') {
 import { registerAdminRoutes } from "./server/modules/admin/routes.ts";
 registerAdminRoutes({ app, adminDb, requireAdmin, getRealStats, secureLogger });
 
+// --- MODULAR ROUTERS MOUNTING ---
+app.use('/api/bids', biddingRouter);
+app.use('/api/partner-kyc', partnerKycRouter);
+app.use('/api/channel-manager', channelManagerRouter);
+app.use('/api/search', searchRouter);
+app.use('/api/payment', paymentRouter);
+app.use('/api/documents', documentsRouter);
+app.use('/api/vendor-api-key', vendorApiKeyRouter);
+
+// --- DYNAMIC LIVE REVERSE-BIDDING FEED ---
+app.get('/api/bids/live-feed', (req, res) => {
+  const routes = [
+    { from: "BOM (Mumbai)", to: "GOI (Goa)", airline: "6E", name: "IndiGo", originalPrice: 4200, winningBid: 3150, discount: "25% OFF" },
+    { from: "DEL (Delhi)", to: "BLR (Bengaluru)", airline: "AI", name: "Air India", originalPrice: 6500, winningBid: 4850, discount: "26% OFF" },
+    { from: "PNQ (Pune)", to: "DEL (Delhi)", airline: "QP", name: "Akasa Air", originalPrice: 4900, winningBid: 3700, discount: "24% OFF" },
+    { from: "BOM (Mumbai)", to: "JAI (Jaipur)", airline: "SG", name: "SpiceJet", originalPrice: 3800, winningBid: 2900, discount: "24% OFF" },
+    { from: "CCU (Kolkata)", to: "BOM (Mumbai)", airline: "6E", name: "IndiGo", originalPrice: 7200, winningBid: 5400, discount: "25% OFF" }
+  ];
+  const activeBidders = 12 + Math.floor(Math.sin(Date.now() / 15000) * 4) + Math.floor(Math.random() * 3);
+  res.json({
+    success: true,
+    activeBidders: Math.max(activeBidders, 14),
+    routes,
+    recentCount: 14 + Math.floor(Math.random() * 5),
+    timestamp: Date.now()
+  });
+});
+
+// --- VENDOR FEATURED HOLIDAY PACKAGES & ADS ---
+app.get('/api/packages/featured', (req, res) => {
+  res.json({
+    success: true,
+    packages: [
+      {
+        id: "pkg-goa",
+        title: "Goa Luxury Beach Resort & Cruise",
+        destination: "Goa",
+        duration: "4N / 5D",
+        rating: 4.9,
+        reviewsCount: 142,
+        price: 18500,
+        originalPrice: 24000,
+        image: "https://lh3.googleusercontent.com/aida/AEtjO1W0v5lZ_vEwehbjuekaRy9VncrASccD9ZrrzAgGIRmJNy1dUC7scfmb2wG_bWJZu-ppDd_aduqcttpArYu8Kht0gZMi8PwGZH900PXGpeodhI70FO_1-CZlIDPaqr1I_TqzaE-ylXEelhrRwZBCPaVg0rmMn6v6ry4FKTSxqJnT_O6Fjhx2L7yz-xUsH07D_cbW_0BiAK2rmvKT6anVSRdF3snVPWrDpWEnfqibIThRSeoNTt8NgdDqNw",
+        inclusions: "North & South Goa • 4 Star Hotel Included",
+        vendor: "Coastal Breeze Travels (Verified Vendor)",
+        isAdPromoted: true
+      },
+      {
+        id: "pkg-manali",
+        title: "Manali Winter Snow Vacation",
+        destination: "Manali",
+        duration: "5N / 6D",
+        rating: 4.8,
+        reviewsCount: 98,
+        price: 22400,
+        originalPrice: 28500,
+        image: "https://lh3.googleusercontent.com/aida/AEtjO1XL853S3QWZyG4l-WU7dZI7Y8ejQ_kYNdqmAVqfgmvFzjFzNB4LtK4ky9o7mgPCQJE-XEvfVUd0zODlxk9oFdXYaWmWMPxCo4A9GNxINLcpnhYTA2kvW-jub2f2k5iZ5u4yHWll9HQfuewM2W71gq9eFZOmezPki3TJrzOhfyjjTu-zb9lb_Q6i4qip_hTSJo6cQeR8s6JhthmG3o7zHJ0Jy9Ncc5sCocrk7IvUa5RMs-gPnEEBI405rQ",
+        inclusions: "Solang Valley • Campfire & Sightseeing",
+        vendor: "Himalayan Explorers (Verified Vendor)",
+        isAdPromoted: true
+      },
+      {
+        id: "pkg-konkan",
+        title: "Konkan Coastal Escape & Forts",
+        destination: "Konkan",
+        duration: "3N / 4D",
+        rating: 4.7,
+        reviewsCount: 84,
+        price: 14500,
+        originalPrice: 19000,
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAf4rWIKsbNuusSHkUp21rZnQzu6OTecs4854MvMuYjOIiBM62h-IPeQ4a1_a1aX6nWzW22O-OXHeUwQeHj5gHZGSX0Fk8-fNk73xxwvnKZH8DUb3U94SVesbQgla63AyKI9oddc6tbEk-FZnT2zwFuW2QGi0DxBWNs9fQp8mI24kbhuEvgGDydktdHXn1UhE-5jeWintpXB3gyLBw_7qOM3Msva29MscgS9es7b9u2PpdQFU2ZH4QL",
+        inclusions: "Tarkarli • Scuba Diving & Beach Stay",
+        vendor: "Sahyadri Heritage Tours (Verified Vendor)",
+        isAdPromoted: true
+      }
+    ]
+  });
+});
+
+// --- ADMIN COUPONS & ACTIVE PROMOTIONAL ADS ---
+app.get('/api/coupons/active', (req, res) => {
+  res.json({
+    success: true,
+    coupons: [
+      {
+        code: "ROUFLY2026",
+        discountPercent: 20,
+        discountType: "PERCENTAGE",
+        title: "FLAT 20% OFF",
+        subtitle: "Seasonal Flight & Hotel Flash Deals • Min booking ₹3,500",
+        minBookingAmount: 3500,
+        expiresAt: "31 OCT 2026",
+        verified: true,
+        tag: "BOARDING VOUCHER",
+        category: "FLIGHT_HOTEL",
+        adBannerUrl: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        code: "HOLIDAY15",
+        discountPercent: 15,
+        discountType: "PERCENTAGE",
+        title: "FLAT 15% OFF",
+        subtitle: "Vendor Holiday Packages Special",
+        minBookingAmount: 10000,
+        expiresAt: "15 NOV 2026",
+        verified: true,
+        tag: "FESTIVE PROMO",
+        category: "HOLIDAYS"
+      }
+    ]
+  });
+});
+
 
 // NOTE: the source-archive download route that used to live here was removed.
 // It served the full application source tree to any unauthenticated caller and had

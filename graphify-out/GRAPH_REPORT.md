@@ -1,30 +1,30 @@
 # Graph Report - group-travel-planner-splitter-8  (2026-09-27)
 
 ## Corpus Check
-- 609 files · ~1,493,707 words
+- 611 files · ~1,913,470 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3433 nodes · 6643 edges · 255 communities (198 shown, 40 thin omitted)
+- 3449 nodes · 6645 edges · 248 communities (190 shown, 41 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 20 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c7dd28d`
+- Built from commit: `fc79ae5a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- TripsScreen.tsx
+- ExpensesTab.tsx
 - useLanguage
-- react-router-dom
-- framer-motion
+- react
+- TripsScreen.tsx
 - documentTemplateEngine.ts
 - src/types.ts
 - terms-and-conditions.md
 - test_pdf_security_measures.ts
 - server.ts
-- CreateTripModal.tsx
+- ExpensesTabContainer.tsx
 - CheckoutPage.tsx
 - dependencies
 - firebase.ts
@@ -32,14 +32,14 @@
 - AccountScreen.tsx
 - bidding.ts
 - server/services/travelport.service.ts
-- FullScreenChatView.tsx
+- useVendorStore.ts
 - UserLandingPage.tsx
 - legal/LegalPolicyModal.tsx
 - LodgingAgents.ts
 - SmartDayPlanner.tsx
 - useAuthStore
-- ExpensesView.tsx
-- meilisearchService
+- TourPackageUploadForm.tsx
+- react-i18next
 - PackageCheckoutAgent.ts
 - icalSyncService.ts
 - booking/FlightCard.tsx
@@ -49,47 +49,46 @@
 - crashlytics.ts
 - travelportService
 - partnerKyc.ts
-- ScrollView.tsx
+- CreateTripModal.tsx
 - MyTicketsView.tsx
-- ManageContactsModal.tsx
+- UserBiddingScreen.tsx
 - SharedUI.tsx
 - BargainingPaywallModal.tsx
-- VouchersOffersFlowPage.tsx
-- RazorpayCheckoutModal.tsx
+- CommonFlowHeader.tsx
+- BiddingChatModal.tsx
 - privacy-policy.md
-- react-dom
-- ItineraryCard.tsx
+- RouTripo Design System Specification (DESIGN.md)
+- TripPlan
 - FuelCalculatorModal.tsx
 - rasp.ts
-- BookingFunnelLayout.tsx
+- primitives.tsx
 - agent/tabs.tsx
-- server/services/zuelpay.service.ts
+- search.ts
 - travelCacheService.ts
 - channelManager.ts
 - KharchScreen.tsx
-- LanguageOnboardingModal.tsx
-- BusSearchTab.tsx
+- FlightSeatSelectionPage.tsx
+- contractGenerator.ts
 - push.ts
-- buses/routes.ts
-- StaysCheckoutPage.tsx
+- escrowManager.ts
+- travel/OrderReviewPage.tsx
 - vendorApiKey.ts
-- TripRecap.tsx
-- razorpay.ts
+- AppBar.tsx
+- bookingService
 - scripts
-- travel/FlightSearchWidget.tsx
-- NearbyUtilitiesModal.tsx
+- hotelService
+- budgetValidator.ts
 - BookingFlowCoordinator.tsx
 - OperationType
-- BargainingChatObfuscator.ts
+- FullScreenBargainChat.tsx
 - dataLoader.ts
 - sanitization.ts
 - aiAgentOrchestrator
 - bargaining-and-bidding-policy.md
 - localSearchService.ts
-- SharedBookingWidget.tsx
-- rtaip/routes.ts
+- SmartPlanLoadingOverlay.tsx
+- TravelportWorkflowConsole.tsx
 - WeatherWidget.tsx
-- flightService
 - trainService
 - Ponytail: Lazy Senior Dev Rules
 - Ponytail
@@ -99,7 +98,7 @@
 - api.ts
 - What You Must Do When Invoked
 - travelAIService.ts
-- payments/routes.ts
+- express
 - Implementation Tasks
 - What You Must Do When Invoked
 - rtaip/types.ts
@@ -107,23 +106,21 @@
 - FlightsResultsPage.tsx
 - TrainInfoTab.tsx
 - FutureTripModal.tsx
-- FlightSearchTab.tsx
 - BargainingTab.tsx
 - admin/tabs.tsx
-- FlightPriceCalendarModal.tsx
-- FullScreenPortal.tsx
-- CouponWidget.tsx
+- ManageContactsModal.tsx
+- VendorAdCreatorModal.tsx
 - accountStore.ts
-- react
+- lucide-react
 - compilerOptions
-- DocumentService.ts
+- StaysCheckoutPage.tsx
 - manifest.json
 - apiClient.ts
-- security.ts
+- framer-motion
 - aiFallbackCircuitBreaker
 - PlanningWorkspace.tsx
 - Feature Specification: Dynamic PDF Ticket & Tax Invoice Engine
-- premium/preview.tsx
+- LoginScreen.tsx
 - main.tsx
 - CrashlyticsService
 - Technical Plan: Planning Workspace
@@ -135,7 +132,6 @@
 - Implementation Plan: Dynamic PDF Ticket & Tax Invoice Engine
 - zuelpayService
 - 2. Detailed Functional Requirements
-- VendorAdCreatorModal.tsx
 - parse-flights.ts
 - 008-dynamic-pdf-ticket-invoice/tasks.md
 - notifications.ts
@@ -162,7 +158,7 @@
 - Specification: Full-Page Trip Forms & Solo Trip Option
 - Feature Specification: Premium Login Screen & 4-Tab User Account Screen
 - 005 — Technical plan
-- express
+- payment.ts
 - inventoryDeduplication.ts
 - taxationConfigService
 - services/BusService.ts
@@ -218,14 +214,13 @@
 - graphify reference: transcribe video and audio
 - graphify reference: GitHub clone and cross-repo merge
 - graphify reference: transcribe video and audio
-- TransportOptions.tsx
+- BookingFunnelLayout.tsx
 - Run and deploy your AI Studio app
 - CurrencyWidget.tsx
 - RoutTripo — Phase 1 Implementation Guide
 - meilisearchService.ts
 - Task Checklist: Authentic Razorpay Payment Integration
 - youtubeService.ts
-- src/theme/tokens.ts
 - vite-env.d.ts
 - CLAUDE.md
 - .claude/CLAUDE.md
@@ -250,13 +245,11 @@
 - 004-premium-login-account/tasks.md
 - 005-premium-admin-agent/tasks.md
 - offlineOtpVault.ts
-- PortalShell.tsx
-- search.ts
 - TripMap.tsx
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 273 edges
-2. `lucide-react` - 232 edges
+1. `react` - 274 edges
+2. `lucide-react` - 230 edges
 3. `framer-motion` - 75 edges
 4. `travelportService` - 59 edges
 5. `useLanguage()` - 49 edges
@@ -267,37 +260,37 @@
 10. `zuelpayService` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `CancellationProcessResult` --references--> `BiddingContract`  [EXTRACTED]
+  server/payment/escrowManager.ts → src/types.ts
 - `startServer()` --calls--> `encryptPII()`  [EXTRACTED]
   server.ts → server/security/zeroTrustCrypto.ts
 - `startServer()` --calls--> `getOrCreateUserDEK()`  [EXTRACTED]
   server.ts → server/security/zeroTrustCrypto.ts
-- `CancellationProcessResult` --references--> `BiddingContract`  [EXTRACTED]
-  server/payment/escrowManager.ts → src/types.ts
-- `handleRazorpayWebhook()` --calls--> `sendCustomerInvoiceEmail()`  [EXTRACTED]
-  server/security/paymentWebhook.ts → src/NotificationService.ts
 - `runSecurityAudit()` --calls--> `isTestKeyRejectedInProd()`  [EXTRACTED]
+  scripts/test_pdf_security_measures.ts → server/security/paymentWebhook.ts
+- `runSecurityAudit()` --calls--> `verifyRazorpayWebhookSignature()`  [EXTRACTED]
   scripts/test_pdf_security_measures.ts → server/security/paymentWebhook.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (255 total, 40 thin omitted)
+## Communities (248 total, 41 thin omitted)
 
-### Community 0 - "TripsScreen.tsx"
-Cohesion: 0.09
-Nodes (27): NewTripScreen(), NewTripScreenProps, Card(), useScrolled(), SocialScreen(), SocialScreenProps, UserBiddingScreen(), MemoriesView() (+19 more)
+### Community 0 - "ExpensesTab.tsx"
+Cohesion: 0.18
+Nodes (14): AllTripsScreen(), useTripContext(), Category, DEFAULT_CATEGORIES, ExpenseItem, ExpensesTab(), inr(), GlobalTripsTab() (+6 more)
 
 ### Community 1 - "useLanguage"
-Cohesion: 0.06
-Nodes (41): InitialLanguageModal(), InitialLanguageModalProps, GroupDecisionPolls(), GroupDecisionPollsProps, GroupSplitCalculator(), GroupSplitCalculatorProps, LiveFlightTrackerWidget(), LiveFlightTrackerWidgetProps (+33 more)
-
-### Community 2 - "react-router-dom"
-Cohesion: 0.07
-Nodes (31): react-router-dom, SortFilterSheet(), BrandHeader(), BrandHeaderProps, LogoName(), DebugErrorAlert(), BusSeatMapPage(), CarResultsPage() (+23 more)
-
-### Community 3 - "framer-motion"
 Cohesion: 0.08
-Nodes (15): framer-motion, AirplaneLoadingAnimationProps, DateRangePickerProps, ReelStyle, TripRecapReelModal(), TripRecapReelModalProps, LoadingStep, SmartPlanLoadingOverlayProps (+7 more)
+Nodes (35): InitialLanguageModal(), LanguageOnboardingModal(), GroupDecisionPolls(), GroupDecisionPollsProps, GroupSplitCalculator(), GroupSplitCalculatorProps, LiveFlightTrackerWidget(), LiveFlightTrackerWidgetProps (+27 more)
+
+### Community 2 - "react"
+Cohesion: 0.14
+Nodes (13): react, react-router-dom, SortFilterSheet(), OfflineBanner(), DebugErrorAlert(), useNetworkStatus(), CustomCarQuoteCard(), HotelCard() (+5 more)
+
+### Community 3 - "TripsScreen.tsx"
+Cohesion: 0.10
+Nodes (21): FlightTrackerProps, FlightTrackerWidget(), ReelStyle, TripRecapReelModal(), TripRecapReelModalProps, LANGUAGE_OPTIONS, QuirkyLanguageSelector(), useScrolled() (+13 more)
 
 ### Community 4 - "documentTemplateEngine.ts"
 Cohesion: 0.11
@@ -305,59 +298,59 @@ Nodes (22): documentsRouter, BookingDocumentAmounts, BookingDocumentBrand, Booki
 
 ### Community 5 - "src/types.ts"
 Cohesion: 0.10
-Nodes (24): BiddingChatModal(), BiddingChatModalProps, BiddingCategory, BiddingChatMessage, BidOfferStatus, DialogConfig, EscrowStatus, ItineraryDay (+16 more)
+Nodes (18): PollsCardProps, BiddingCategory, BidOfferStatus, DialogConfig, EscrowStatus, ItineraryDay, ItinerarySlot, OfferTabContext (+10 more)
 
 ### Community 6 - "terms-and-conditions.md"
 Cohesion: 0.08
 Nodes (23): 10. Bargaining & Bidding Feature, 11. Pricing, Fees, and Payment, 12. Cancellations, Amendments, and Refunds, 13. User Conduct and Prohibited Activities, 14. Agents and Partners, 15. User-Generated Content and Reviews, 16. Intellectual Property, 17. Disclaimers and Limitation of Liability (+15 more)
 
 ### Community 7 - "test_pdf_security_measures.ts"
-Cohesion: 0.17
-Nodes (23): assert(), results, runSecurityAudit(), TestResult, exportUserDataForLegalHandler(), verifySecretTokenConstantTime(), handleRazorpayWebhook(), isTestKeyRejectedInProd() (+15 more)
+Cohesion: 0.18
+Nodes (21): assert(), results, runSecurityAudit(), TestResult, exportUserDataForLegalHandler(), verifySecretTokenConstantTime(), isTestKeyRejectedInProd(), verifyRazorpayWebhookSignature() (+13 more)
 
 ### Community 8 - "server.ts"
 Cohesion: 0.04
 Nodes (74): ADMIN_EMAILS, adminDb(), aiLimiter, apiFailures, apiStats, app, AuthedRequest, BLOCKED_FILE_PATTERNS (+66 more)
 
-### Community 9 - "CreateTripModal.tsx"
-Cohesion: 0.12
-Nodes (20): exceljs, recharts, PrimaryButton(), PrimaryButtonProps, CATEGORY_META, ExpensePieChart(), ExpensePieChartProps, CreateTripModalProps (+12 more)
+### Community 9 - "ExpensesTabContainer.tsx"
+Cohesion: 0.08
+Nodes (31): recharts, CATEGORY_META, ExpensePieChart(), ExpensePieChartProps, BudgetDashboardModal(), BudgetDashboardModalProps, CATEGORY_LABELS, CreateTripModalProps (+23 more)
 
 ### Community 10 - "CheckoutPage.tsx"
-Cohesion: 0.17
-Nodes (19): html2canvas, BillingForm(), ContactFormData, PassengerDetailsWizard(), PassengerDetailsWizardProps, PassengerFormData, TicketSuccess(), TicketSuccessProps (+11 more)
+Cohesion: 0.10
+Nodes (23): BillingForm(), ContactFormData, PassengerDetailsWizard(), PassengerDetailsWizardProps, PassengerFormData, TicketSuccess(), TicketSuccessProps, BrandHeader() (+15 more)
 
 ### Community 11 - "dependencies"
 Cohesion: 0.02
 Nodes (82): dependencies, @anthropic-ai/sdk, autoprefixer, axios, bcrypt, browser-image-compression, @capacitor/android, @capacitor/cli (+74 more)
 
 ### Community 12 - "firebase.ts"
-Cohesion: 0.15
-Nodes (9): app, appCheck, deleteUserAccount, FirestoreErrorInfo, googleProvider, requestAndSaveFCMToken(), saveFcmToken(), TRIP_FIELD_DENYLIST (+1 more)
+Cohesion: 0.14
+Nodes (10): app, appCheck, deleteUserAccount, FirestoreErrorInfo, googleProvider, requestAndSaveFCMToken(), saveFcmToken(), TRIP_FIELD_DENYLIST (+2 more)
 
 ### Community 13 - "FlightAgents.ts"
 Cohesion: 0.17
 Nodes (13): FlightBookAgent, FlightPriceAgent, FlightSearchAgent, Agent, AgentResponse, FlightBookInput, FlightBookOutput, FlightPriceInput (+5 more)
 
 ### Community 14 - "AccountScreen.tsx"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (16): AccountScreen(), AccountScreenProps, TABS, BookingCard, BookingFilter, BookingTab(), KIND_ICON, KIND_IMG (+8 more)
 
 ### Community 15 - "bidding.ts"
-Cohesion: 0.07
-Nodes (37): CancellationEvaluationResult, CancellationProcessResult, evaluateCancellationEligibility(), executeAutoRefundEscrow(), bidOffers, chatMessages, contracts, router (+29 more)
+Cohesion: 0.15
+Nodes (14): bidOffers, chatMessages, contracts, router, shadowBans, tripRequests, unlockRequests, userStrikes (+6 more)
 
 ### Community 16 - "server/services/travelport.service.ts"
 Cohesion: 0.16
 Nodes (15): registerTravelportRoutes(), LodgingBookAgent, LodgingSearchAgent, LodgingBookInput, LodgingBookOutput, LodgingSearchInput, LodgingSearchOutput, flightBookAgent (+7 more)
 
-### Community 17 - "FullScreenChatView.tsx"
-Cohesion: 0.18
-Nodes (11): AcceptLockFlowViewProps, INITIAL_BARGAINING_TRIPS, SAMPLE_VENDOR_OFFERS, FullScreenChatViewProps, TripRequirementModalProps, BargainingCategory, BargainingTrip, ChatMessage (+3 more)
+### Community 17 - "useVendorStore.ts"
+Cohesion: 0.12
+Nodes (21): BusRegistrationForm(), CarRegistrationForm(), CarRegistrationFormProps, VEHICLE_PRESETS, CabFlowStep, CabRegistrationFlowCoordinator(), CabRegistrationFlowCoordinatorProps, VEHICLE_PRESETS (+13 more)
 
 ### Community 18 - "UserLandingPage.tsx"
-Cohesion: 0.05
-Nodes (48): i18next, i18next-browser-languagedetector, react-i18next, BookingFlowCoordinator(), BusBookingCoordinator(), BusBookingCoordinatorProps, BusSearchParams, FALLBACK_BUSES (+40 more)
+Cohesion: 0.08
+Nodes (33): BookingFlowCoordinator(), BusBookingCoordinator(), BusBookingCoordinatorProps, BusSearchParams, FALLBACK_BUSES, CarBookingCoordinator(), CarBookingCoordinatorProps, CarSearchParams (+25 more)
 
 ### Community 19 - "legal/LegalPolicyModal.tsx"
 Cohesion: 0.20
@@ -372,12 +365,16 @@ Cohesion: 0.15
 Nodes (12): SmartDayPlannerProps, ActivityChip(), ActivityChipProps, CostBreakdown(), CostBreakdownProps, DayTabNavigator(), DayTabNavigatorProps, TimeSlotPicker() (+4 more)
 
 ### Community 22 - "useAuthStore"
-Cohesion: 0.22
-Nodes (13): AuthModal(), AuthModalProps, getAuthSafe(), signInWithGoogle(), signOutUser(), ContactFormData, FlightPassengerDetailsPage(), PassengerFormData (+5 more)
+Cohesion: 0.27
+Nodes (11): AuthModal(), AuthModalProps, getAuthSafe(), signInWithGoogle(), signOutUser(), FlightPassengerDetailsPage(), AuthState, getStoredUser() (+3 more)
 
-### Community 23 - "ExpensesView.tsx"
+### Community 23 - "TourPackageUploadForm.tsx"
 Cohesion: 0.17
-Nodes (12): BudgetDashboardModal(), BudgetDashboardModalProps, CATEGORY_LABELS, SmartExpenseScannerModal(), SmartExpenseScannerModalProps, categoryColors, categoryIcons, ExpensesView() (+4 more)
+Nodes (12): browser-image-compression, TourFlowStep, TourPackageFlowCoordinator(), TourPackageFlowCoordinatorProps, TourPackageUploadForm(), TourPackageUploadFormProps, storage, DayItinerary (+4 more)
+
+### Community 24 - "react-i18next"
+Cohesion: 0.12
+Nodes (12): i18next, i18next-browser-languagedetector, react-i18next, DEFAULT_DESTINATIONS, DestinationRail(), DestinationRailProps, inr(), VIBES (+4 more)
 
 ### Community 25 - "PackageCheckoutAgent.ts"
 Cohesion: 0.22
@@ -388,16 +385,16 @@ Cohesion: 0.18
 Nodes (11): RFC-1918, ical-generator, node-ical, ALLOWED_ICAL_DOMAINS, assertSafeIcalUrl(), getDateRangeArray(), ICalSyncResult, isPrivateIp() (+3 more)
 
 ### Community 27 - "booking/FlightCard.tsx"
-Cohesion: 0.21
-Nodes (11): AIRLINE_LOGOS, AIRPORT_MAP, FlightCard(), FlightCardProps, formatDuration(), formatTime(), getAirportInfo(), FareTierPlan (+3 more)
+Cohesion: 0.13
+Nodes (18): FareSelectionModal(), FareSelectionModalProps, AIRLINE_LOGOS, AIRPORT_MAP, FlightCard(), FlightCardProps, formatDuration(), formatTime() (+10 more)
 
 ### Community 28 - "BookingFlowModal.tsx"
 Cohesion: 0.08
 Nodes (42): BaggageOption, BaggageSelection(), BaggageSelectionProps, DEFAULT_BAGGAGE_OPTIONS, BillingAndFareBreakup(), BillingAndFareBreakupProps, BookingFlowModal(), DEFAULT_FARE_TIERS() (+34 more)
 
 ### Community 29 - "App.tsx"
-Cohesion: 0.11
-Nodes (27): MainApp(), FareSelectionModal(), FareSelectionModalProps, CurrencyContext, CurrencyContextType, CurrencyProvider(), useCurrency(), AncillariesFlow() (+19 more)
+Cohesion: 0.09
+Nodes (29): qrcode, MainApp(), GroupSplitPaymentModal(), GroupSplitPaymentModalProps, BusResultsPage(), BusSeatMapPage(), CarResultsPage(), CarsResultsPage() (+21 more)
 
 ### Community 30 - "dpdp-compliance-policy.md"
 Cohesion: 0.11
@@ -408,140 +405,132 @@ Cohesion: 0.15
 Nodes (7): CrashlyticsErrorBoundary, Props, State, db, Breadcrumb, crashlytics, CrashReport
 
 ### Community 33 - "partnerKyc.ts"
-Cohesion: 0.08
-Nodes (20): zod, BUSES_STORE_FILE, CABS_STORE_FILE, DEFAULT_PACKAGES, FastTrackImportSchema, otpStore, PACKAGES_STORE_FILE, ReleaseEscrowSchema (+12 more)
+Cohesion: 0.06
+Nodes (22): nodemailer, zod, BUSES_STORE_FILE, CABS_STORE_FILE, DEFAULT_PACKAGES, FastTrackImportSchema, otpStore, PACKAGES_STORE_FILE (+14 more)
 
-### Community 34 - "ScrollView.tsx"
-Cohesion: 0.21
-Nodes (10): FlightTrackerProps, FlightTrackerWidget(), FlightData, generateFallbackRadarData(), LiveRadarModal(), LiveRadarModalProps, ScrollView(), ScrollViewProps (+2 more)
+### Community 34 - "CreateTripModal.tsx"
+Cohesion: 0.15
+Nodes (9): PrimaryButton(), PrimaryButtonProps, CreateTripModal(), MusicSearchModal(), SmartBudgetModal(), SmartBudgetModalProps, sanitizeObject(), sanitizeString() (+1 more)
 
 ### Community 35 - "MyTicketsView.tsx"
 Cohesion: 0.22
 Nodes (10): react-barcode, react-qr-code, TopBar(), getSafeDate(), MyTicketsView(), TicketDetailView(), getSafeDate(), MyTicketsView() (+2 more)
 
-### Community 36 - "ManageContactsModal.tsx"
-Cohesion: 0.37
-Nodes (11): AddMemberModal(), PRESET_COLORS, ManageContactsModal(), ManageContactsModalProps, PRESET_COLORS, MasterContact, addMasterContact(), deleteMasterContact() (+3 more)
+### Community 36 - "UserBiddingScreen.tsx"
+Cohesion: 0.27
+Nodes (9): BookingVoucherModal(), BookingVoucherModalProps, CancellationRefundModal(), CancellationRefundModalProps, UserBiddingScreenProps, BiddingContract, cabsMatrix, hotelsMatrix (+1 more)
 
 ### Community 37 - "SharedUI.tsx"
 Cohesion: 0.15
 Nodes (5): BrandLogo(), DropdownProps, SectionTitle(), TextInputProps, Splash()
 
 ### Community 38 - "BargainingPaywallModal.tsx"
-Cohesion: 0.25
-Nodes (12): BargainingPaywallModal(), BargainingPaywallModalProps, checkCustomBiddingAllowance(), CUSTOM_BID_UNLOCK_FEE_INR, CustomBiddingLimitState, formatBiddingResetCountdown(), FREE_DAILY_CUSTOM_BID_LIMIT, getCustomBiddingRateLimit() (+4 more)
+Cohesion: 0.27
+Nodes (11): BargainingPaywallModal(), BargainingPaywallModalProps, checkCustomBiddingAllowance(), CUSTOM_BID_UNLOCK_FEE_INR, CustomBiddingLimitState, formatBiddingResetCountdown(), FREE_DAILY_CUSTOM_BID_LIMIT, getCustomBiddingRateLimit() (+3 more)
 
-### Community 39 - "VouchersOffersFlowPage.tsx"
-Cohesion: 0.18
-Nodes (10): ActiveOfferCouponsGrid(), ActiveOfferCouponsGridProps, OfferCouponItem, PromotionalAdItem, PromotionalAdsRail(), PromotionalAdsRailProps, VouchersOffersFlowPage(), VouchersOffersFlowPageProps (+2 more)
+### Community 39 - "CommonFlowHeader.tsx"
+Cohesion: 0.13
+Nodes (15): ActiveOfferCouponsGrid(), ActiveOfferCouponsGridProps, OfferCouponItem, CommonFlowHeader(), CommonFlowHeaderProps, PromotionalAdItem, PromotionalAdsRail(), PromotionalAdsRailProps (+7 more)
 
-### Community 40 - "RazorpayCheckoutModal.tsx"
-Cohesion: 0.15
-Nodes (7): jspdf, qrcode, GroupSplitPaymentModal(), GroupSplitPaymentModalProps, PaymentTab, RazorpayCheckoutModalProps, HotelVoucherData
+### Community 40 - "BiddingChatModal.tsx"
+Cohesion: 0.31
+Nodes (8): dompurify, BiddingChatModal(), BiddingChatModalProps, BiddingChatMessage, SanitizationResult, initiateContactUnlockPayment(), checkChatAntiLeakage(), sanitizeInput()
 
 ### Community 41 - "privacy-policy.md"
 Cohesion: 0.13
 Nodes (14): 10. Children's Privacy, 11. Grievance Officer and Contact, 12. Changes to This Privacy Policy, 1. Introduction, 2.1 Information you provide directly, 2.2 Information collected automatically, 2.3 Information from third parties, 3. How We Use Your Information (Purpose and Legal Basis) (+6 more)
 
-### Community 42 - "react-dom"
-Cohesion: 0.18
-Nodes (5): react-dom, PrivacyAndCreditsModalProps, FastTrackHotelOnboardingModalProps, IntentPaymentModalProps, privacyTranslations
+### Community 42 - "RouTripo Design System Specification (DESIGN.md)"
+Cohesion: 0.22
+Nodes (8): 1.1 USER APP PORTAL (Soft Sky Blue), 1.2 VENDOR PARTNER PORTAL (Fresh Mint Green), 1.3 ADMIN DASHBOARD PORTAL (Soft Lavender / Violet), 1. 3-Tier Portal Color Architecture, 2. Core Neutrals & Backgrounds, 3. Typography, 4. UI Geometry & Radii, RouTripo Design System Specification (DESIGN.md)
 
-### Community 43 - "ItineraryCard.tsx"
-Cohesion: 0.26
-Nodes (9): react-markdown, DynamicTripImage(), DynamicTripImageProps, imageCache, ItineraryCard(), ItineraryCardProps, fetchLocationImage(), UnsplashImage (+1 more)
+### Community 43 - "TripPlan"
+Cohesion: 0.11
+Nodes (17): react-markdown, DynamicTripImage(), DynamicTripImageProps, imageCache, ItineraryCard(), ItineraryCardProps, OptimizeRouteButtonProps, CalendarView() (+9 more)
 
 ### Community 44 - "FuelCalculatorModal.tsx"
-Cohesion: 0.32
-Nodes (9): FuelCalculatorModal(), FuelCalculatorModalProps, OptimizeRouteButton(), OptimizeRouteButtonProps, fetchOptimizedRoute(), geocodeCache, geocodePlace(), getFallbackRoute() (+1 more)
+Cohesion: 0.36
+Nodes (8): FuelCalculatorModal(), FuelCalculatorModalProps, OptimizeRouteButton(), fetchOptimizedRoute(), geocodeCache, geocodePlace(), getFallbackRoute(), RouteResult
 
 ### Community 45 - "rasp.ts"
 Cohesion: 0.23
 Nodes (9): SecurityThreatModal(), SecurityThreatModalProps, checkDebuggerTiming(), checkRootAndJailbreak(), KNOWN_SUSPICIOUS_GLOBAL_OBJECTS, KNOWN_SUSPICIOUS_PATHS, performRaspSecurityCheck(), SecurityStatus (+1 more)
 
-### Community 46 - "BookingFunnelLayout.tsx"
-Cohesion: 0.23
-Nodes (9): BookingFunnelLayout(), BookingFunnelLayoutProps, MultiCityLeg, CarSearchTab(), getTomorrowDate(), CURRENCIES, CurrencyCode, CurrencyState (+1 more)
+### Community 46 - "primitives.tsx"
+Cohesion: 0.29
+Nodes (5): BUTTON_SIZES, BUTTON_VARIANTS, ButtonSize, ButtonVariant, PremiumButtonProps
 
 ### Community 47 - "agent/tabs.tsx"
-Cohesion: 0.06
-Nodes (48): AVAILABLE_AMENITIES, BusRegistrationForm(), DAYS_OF_WEEK, CarRegistrationForm(), CarRegistrationFormProps, VEHICLE_PRESETS, BusRegistrationFlowCoordinator(), CabFlowStep (+40 more)
+Cohesion: 0.11
+Nodes (24): AgentPrimaryTab, AgentScreenProps, BOTTOM_TABS, InventorySubTab, ProfileSubTab, AgentSupportPanel(), AutoBidRule, BestSellerAsset (+16 more)
 
-### Community 48 - "server/services/zuelpay.service.ts"
-Cohesion: 0.12
-Nodes (12): carService, CarDetails, carService, ZuelpayBus, ZuelpayBusBlockSeatInput, ZuelpayBusSearchInput, ZuelpayBusSeat, ZuelpayCarQuote (+4 more)
+### Community 48 - "search.ts"
+Cohesion: 0.06
+Nodes (25): axios, getVendorMatchingBuses(), registerBusRoutes(), registerPublicApiRoutes(), carService, carService, router, busLookupService (+17 more)
 
 ### Community 49 - "travelCacheService.ts"
 Cohesion: 0.31
 Nodes (10): getCachedRealName(), getOrFetchRealTrainName(), loadLocalStorageCache(), loadLocalStorageNamesCache(), memoryCache, namesMemoryCache, saveCachedRealName(), saveLocalStorageCache() (+2 more)
 
 ### Community 50 - "channelManager.ts"
-Cohesion: 0.22
-Nodes (5): memoryWebhookLogs, router, RFC-5545, MEILI_INDEX_HOTELS, UniversalIdGenerator
+Cohesion: 0.25
+Nodes (4): memoryWebhookLogs, router, RFC-5545, UniversalIdGenerator
 
 ### Community 51 - "KharchScreen.tsx"
-Cohesion: 0.10
-Nodes (22): AddMemberModalProps, KharchScreen(), KharchScreenProps, DashboardCard, DashboardGridItem, TabDashboardLayout(), TabDashboardLayoutProps, TripAwardsBanner() (+14 more)
+Cohesion: 0.11
+Nodes (23): AddMemberModalProps, KharchScreen(), KharchScreenProps, TripAwardsBanner(), TripAwardsBannerProps, UpiQrModal(), UpiQrModalProps, BalancesView() (+15 more)
 
-### Community 52 - "LanguageOnboardingModal.tsx"
-Cohesion: 0.24
-Nodes (6): LANGUAGE_LIST, LanguageOnboardingModal(), LanguageOnboardingModalProps, WelcomeTourModalProps, safeSession, safeStorage
+### Community 52 - "FlightSeatSelectionPage.tsx"
+Cohesion: 0.40
+Nodes (5): FlightSeatSelectionPage(), generateAircraftSeatMap(), SeatCell, SeatStatus, SelectedSeatInfo
 
-### Community 53 - "BusSearchTab.tsx"
-Cohesion: 0.24
-Nodes (5): BusSearchTab(), getTomorrowDate(), BusPassenger, BusSearchParams, searchBuses()
+### Community 53 - "contractGenerator.ts"
+Cohesion: 0.47
+Nodes (4): BidOffer, TripBidRequest, generateBiddingContract(), getDeviceFingerprint()
 
 ### Community 54 - "push.ts"
-Cohesion: 0.36
-Nodes (7): @capacitor/push-notifications, enablePushNotifications(), initNativePushListeners(), isNativePush(), PushResult, registerNative(), registerWeb()
+Cohesion: 0.21
+Nodes (8): @capacitor/core, @capacitor/push-notifications, enablePushNotifications(), initNativePushListeners(), isNativePush(), PushResult, registerNative(), registerWeb()
 
-### Community 55 - "buses/routes.ts"
-Cohesion: 0.31
-Nodes (5): getVendorMatchingBuses(), registerBusRoutes(), busLookupService, POPULAR_OPERATORS, VerifiedBus
+### Community 55 - "escrowManager.ts"
+Cohesion: 0.50
+Nodes (4): CancellationEvaluationResult, CancellationProcessResult, evaluateCancellationEligibility(), executeAutoRefundEscrow()
 
-### Community 56 - "StaysCheckoutPage.tsx"
-Cohesion: 0.33
-Nodes (5): BillingDetailsSection(), FareBreakupCard(), CfarCard(), TravelProtectionCard(), StaysCheckoutPage()
+### Community 56 - "travel/OrderReviewPage.tsx"
+Cohesion: 0.50
+Nodes (3): BookingFlowModalProps, OrderReviewPageProps, BookingItemPayload
 
 ### Community 57 - "vendorApiKey.ts"
 Cohesion: 0.29
 Nodes (5): authenticateB2BKey(), getStoredJson(), router, VENDOR_PROFILES_FILE, VENDORS_STORE_FILE
 
-### Community 58 - "TripRecap.tsx"
-Cohesion: 0.39
-Nodes (6): TripRecap(), TripRecapProps, TripMemory, getBaseUrl(), getWhatsAppShareMessage(), shareAppOnWhatsApp()
-
 ### Community 60 - "scripts"
 Cohesion: 0.29
 Nodes (7): scripts, build, dev, lint, prebuild, start, zip
 
-### Community 61 - "travel/FlightSearchWidget.tsx"
-Cohesion: 0.38
-Nodes (5): CABIN_CLASSES, FlightSearchWidget(), FlightSearchWidgetProps, getTomorrowDate(), TripSlice
-
-### Community 62 - "NearbyUtilitiesModal.tsx"
-Cohesion: 0.48
-Nodes (5): NearbyUtilitiesModal(), NearbyUtilitiesModalProps, fetchNearbyUtilities(), getDistanceFromLatLonInKm(), OSMPlace
+### Community 62 - "budgetValidator.ts"
+Cohesion: 0.50
+Nodes (4): BudgetValidationRequest, BudgetValidationResult, calculateDays(), validateTripBudget()
 
 ### Community 63 - "BookingFlowCoordinator.tsx"
-Cohesion: 0.12
-Nodes (29): BAGGAGE_OPTIONS, BaggageSelectionStep(), BaggageSelectionStepProps, SelectedBaggageItem, BookingFlowCoordinatorProps, BookingStep, BookingStepHeader(), BookingStepHeaderProps (+21 more)
+Cohesion: 0.07
+Nodes (40): AcceptLockFlowViewProps, INITIAL_BARGAINING_TRIPS, SAMPLE_VENDOR_OFFERS, FullScreenChatViewProps, TripRequirementModalProps, BargainingCategory, BargainingTrip, ChatMessage (+32 more)
 
 ### Community 64 - "OperationType"
 Cohesion: 0.29
 Nodes (7): OperationType, CREATE, DELETE, GET, LIST, UPDATE, WRITE
 
-### Community 65 - "BargainingChatObfuscator.ts"
-Cohesion: 0.29
-Nodes (6): ALL_NUMBER_WORDS, BLOCKED_TAG, ENGLISH_NUMBER_WORDS, HINDI_NUMBER_WORDS, MARATHI_NUMBER_WORDS, ObfuscationResult
+### Community 65 - "FullScreenBargainChat.tsx"
+Cohesion: 0.18
+Nodes (12): ALL_NUMBER_WORDS, BLOCKED_TAG, ENGLISH_NUMBER_WORDS, HINDI_NUMBER_WORDS, MARATHI_NUMBER_WORDS, obfuscateBargainChatText(), ObfuscationResult, renderObfuscatedMessageContent() (+4 more)
 
 ### Community 66 - "dataLoader.ts"
 Cohesion: 0.48
 Nodes (6): cache, fallbackFetchCSV(), fallbackFetchJSON(), fetchCSV(), fetchJSON(), loadLocalData()
 
 ### Community 67 - "sanitization.ts"
-Cohesion: 0.47
-Nodes (5): dompurify, jsdom, sanitizeInput(), sanitizeMiddleware(), sanitizeString()
+Cohesion: 0.60
+Nodes (4): jsdom, sanitizeInput(), sanitizeMiddleware(), sanitizeString()
 
 ### Community 69 - "bargaining-and-bidding-policy.md"
 Cohesion: 0.15
@@ -550,14 +539,6 @@ Nodes (12): 10. Prohibited Conduct, 11. Relationship of the Parties, 12. Relatio
 ### Community 70 - "localSearchService.ts"
 Cohesion: 0.26
 Nodes (16): AIRLINE_LOGOS, LocalBusResult, LocalFlightResult, LocalTrainResult, matchStationAlias(), searchLocalBuses(), searchLocalFlights(), searchLocalTrains() (+8 more)
-
-### Community 71 - "SharedBookingWidget.tsx"
-Cohesion: 0.47
-Nodes (3): SharedBookingWidgetProps, getTomorrowDate(), HotelSearchTab()
-
-### Community 72 - "rtaip/routes.ts"
-Cohesion: 0.50
-Nodes (4): razorpay, parseRtaipJsonSafe(), registerRtaipRoutes(), RtaipModuleDeps
 
 ### Community 73 - "WeatherWidget.tsx"
 Cohesion: 0.60
@@ -577,7 +558,7 @@ Nodes (12): 10. How to Request a Cancellation, 11. Refund Processing, 12. Force 
 
 ### Community 85 - "BaseService"
 Cohesion: 0.12
-Nodes (5): BaseService, busService, cabService, carService, hotelService
+Nodes (5): BaseService, busService, cabService, carService, flightService
 
 ### Community 97 - "travelTimeService.ts"
 Cohesion: 0.13
@@ -595,9 +576,9 @@ Nodes (26): For /graphify add and --watch, For /graphify query, For the commit h
 Cohesion: 0.14
 Nodes (19): TransitSchedule, TransitSchedules(), fetchTransitSchedules(), cacheLiveTravelData(), fetchLiveBuses(), fetchLiveFlights(), fetchLiveTrains(), getTravelCacheKey() (+11 more)
 
-### Community 208 - "payments/routes.ts"
-Cohesion: 0.10
-Nodes (17): nodemailer, pdf-lib, pdfkit, AuthedRequest, PaymentModuleDeps, registerPaymentRoutes(), IdempotencyEngine, IdempotencyRecord (+9 more)
+### Community 208 - "express"
+Cohesion: 0.08
+Nodes (24): express, pdf-lib, pdfkit, razorpay, AuthedRequest, PaymentModuleDeps, registerPaymentRoutes(), parseRtaipJsonSafe() (+16 more)
 
 ### Community 209 - "Implementation Tasks"
 Cohesion: 0.08
@@ -616,68 +597,60 @@ Cohesion: 0.08
 Nodes (21): @firebase/rules-unit-testing, firebase-tools, description, devDependencies, firebase, @firebase/rules-unit-testing, firebase-tools, firebase (+13 more)
 
 ### Community 245 - "FlightsResultsPage.tsx"
-Cohesion: 0.19
-Nodes (15): FilterState, FlightFilterSortModal(), FlightFilterSortModalProps, SortOption, FlightResultsLoader(), FlightResultsLoaderProps, FlightsResultsPage(), CachedSearchResults (+7 more)
+Cohesion: 0.09
+Nodes (30): DateFareStrip(), DateFareStripProps, FilterState, FlightFilterSortModal(), FlightFilterSortModalProps, SortOption, FlightPriceCalendarModal(), FlightPriceCalendarModalProps (+22 more)
 
 ### Community 256 - "TrainInfoTab.tsx"
-Cohesion: 0.22
-Nodes (11): AC_CLASSES, durationToMinutes(), extractStationQuery(), getTomorrowDate(), QUOTAS, toMinutes(), TrainInfoTab(), BusSearchParams (+3 more)
+Cohesion: 0.15
+Nodes (15): SearchResultsToolbar(), SearchResultsToolbarProps, SortOption, ToolbarToggle, AC_CLASSES, durationToMinutes(), extractStationQuery(), getTomorrowDate() (+7 more)
 
 ### Community 261 - "FutureTripModal.tsx"
 Cohesion: 0.06
-Nodes (33): leaflet, react-leaflet, MapViewProps, getMarkerIcon(), MapMarkerItem, RouteMapData, TripPlannerMapView(), TripPlannerMapViewProps (+25 more)
-
-### Community 262 - "FlightSearchTab.tsx"
-Cohesion: 0.24
-Nodes (10): CABIN_CLASSES, departureMinutes(), durationMinutes(), extractAirportCode(), FlightSearchTab(), getTomorrowDate(), SearchResultsToolbar(), SearchResultsToolbarProps (+2 more)
+Nodes (34): leaflet, react-leaflet, MapViewProps, getMarkerIcon(), MapMarkerItem, RouteMapData, TripPlannerMapView(), TripPlannerMapViewProps (+26 more)
 
 ### Community 263 - "BargainingTab.tsx"
-Cohesion: 0.16
-Nodes (22): AcceptAndLockComparisonView(), AcceptAndLockComparisonViewProps, obfuscateBargainChatText(), renderObfuscatedMessageContent(), CAB_INVENTORY_401, CAB_INVENTORY_402, CAB_INVENTORY_403, generateDemandComparison() (+14 more)
+Cohesion: 0.17
+Nodes (20): AcceptAndLockComparisonView(), AcceptAndLockComparisonViewProps, CAB_INVENTORY_401, CAB_INVENTORY_402, CAB_INVENTORY_403, generateDemandComparison(), HOTEL_INVENTORY_501, INITIAL_REQUESTS (+12 more)
 
 ### Community 282 - "admin/tabs.tsx"
 Cohesion: 0.14
-Nodes (18): AdminPrimaryTab, AdminScreenProps, BOTTOM_TABS, OperationsSubTab, SystemSubTab, AdsPanel(), AnalyticsPanel(), ApisPanel() (+10 more)
+Nodes (21): AdminPrimaryTab, AdminScreenProps, BOTTOM_TABS, OperationsSubTab, SystemSubTab, PendingPayoutsQueueFlowPage(), PendingPayoutsQueueFlowPageProps, AdsPanel() (+13 more)
 
-### Community 305 - "FlightPriceCalendarModal.tsx"
-Cohesion: 0.28
-Nodes (10): DateFareStrip(), DateFareStripProps, FlightPriceCalendarModal(), FlightPriceCalendarModalProps, clientFareCache, DailyPriceInfo, fetchApiFareCalendar(), getDailyFlightPrices() (+2 more)
+### Community 306 - "ManageContactsModal.tsx"
+Cohesion: 0.10
+Nodes (25): FullScreenPortal(), FullScreenPortalProps, Z_VAR, ZLayer, AddMemberModal(), PRESET_COLORS, AmenityCategory, DEFAULT_CATEGORIES (+17 more)
 
-### Community 306 - "FullScreenPortal.tsx"
-Cohesion: 0.15
-Nodes (11): FullScreenPortal(), FullScreenPortalProps, Z_VAR, ZLayer, AmenityCategory, DEFAULT_CATEGORIES, Props, PermissionsOnboardingModalProps (+3 more)
-
-### Community 307 - "CouponWidget.tsx"
-Cohesion: 0.23
-Nodes (10): CouponWidget(), CouponWidgetProps, ACTIVE_COUPONS, Coupon, CouponService, CouponValidationResult, CouponStoreState, getInitialCoupons() (+2 more)
+### Community 307 - "VendorAdCreatorModal.tsx"
+Cohesion: 0.10
+Nodes (22): zustand, CouponWidget(), CouponWidgetProps, PRESET_AD_IMAGES, VendorAdCreatorModal(), VendorAdCreatorModalProps, ACTIVE_COUPONS, Coupon (+14 more)
 
 ### Community 308 - "accountStore.ts"
 Cohesion: 0.14
 Nodes (27): AdminModuleDeps, registerAdminRoutes(), AccountPayout, AccountTicket, AccountUser, AccountVendor, cachedStore, DATA_DIR (+19 more)
 
-### Community 309 - "react"
+### Community 309 - "lucide-react"
 Cohesion: 0.04
-Nodes (23): lucide-react, react, GuestCounts, Props, BookingFlowModalProps, FareLockTimerProps, MaskedSensitiveTextProps, PriceDropAlertModalProps (+15 more)
+Nodes (21): lucide-react, GuestCounts, Props, AirplaneLoadingAnimationProps, DateRangePickerProps, FareLockTimerProps, MaskedSensitiveTextProps, PriceDropAlertModalProps (+13 more)
 
 ### Community 310 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, allowJs, esModuleInterop, experimentalDecorators, isolatedModules, jsx, lib (+11 more)
 
-### Community 328 - "DocumentService.ts"
-Cohesion: 0.42
-Nodes (9): PaymentStatusScreen(), downloadInvoicePDF(), downloadTicketPDF(), DynamicDocumentResponse, exportHTMLStringToPDF(), fetchBookingDocumentData(), fetchDocumentHTML(), openDocumentPreview() (+1 more)
+### Community 328 - "StaysCheckoutPage.tsx"
+Cohesion: 0.19
+Nodes (14): BillingDetailsSection(), FareBreakupCard(), PaymentStatusScreen(), CfarCard(), TravelProtectionCard(), StaysCheckoutPage(), downloadInvoicePDF(), downloadTicketPDF() (+6 more)
 
 ### Community 337 - "manifest.json"
 Cohesion: 0.12
 Nodes (16): background_color, categories, description, display, display_override, icons, id, lang (+8 more)
 
 ### Community 338 - "apiClient.ts"
-Cohesion: 0.21
-Nodes (16): idb, addToSyncQueue(), clearSyncQueue(), createDBPromise(), deleteTripOffline(), getSyncDB(), getSyncQueue(), getTripsOffline() (+8 more)
+Cohesion: 0.23
+Nodes (15): idb, addToSyncQueue(), clearSyncQueue(), createDBPromise(), deleteTripOffline(), getSyncDB(), getSyncQueue(), getTripsOffline() (+7 more)
 
-### Community 339 - "security.ts"
-Cohesion: 0.14
-Nodes (14): CreateTripModal(), MusicSearchModal(), MusicSearchModalProps, MusicPlayerBar(), MusicPlayerBarProps, MusicPlayerContext, MusicPlayerContextType, MusicPlayerProvider() (+6 more)
+### Community 339 - "framer-motion"
+Cohesion: 0.07
+Nodes (31): framer-motion, react-dom, PaymentTab, RazorpayCheckoutModalProps, InitialLanguageModalProps, LANGUAGE_LIST, LanguageOnboardingModalProps, FlightData (+23 more)
 
 ### Community 353 - "aiFallbackCircuitBreaker"
 Cohesion: 0.12
@@ -691,9 +664,9 @@ Nodes (18): AiItineraryGenerator(), AiItineraryGeneratorProps, FormData, Plannin
 Cohesion: 0.25
 Nodes (7): 1. Executive Summary & Problem Statement, 2.1 Dynamic Data Contract (`BookingDocumentData`), 2.2 Template & Visual Requirements, 2. Functional Requirements, 3. Scope Boundaries, Critical Directives:, Feature Specification: Dynamic PDF Ticket & Tax Invoice Engine
 
-### Community 359 - "premium/preview.tsx"
-Cohesion: 0.18
-Nodes (10): AdminScreen(), AgentScreen(), LoginMode, LoginPayload, LoginScreen(), LoginScreenProps, SocialProvider, SOCIALS (+2 more)
+### Community 359 - "LoginScreen.tsx"
+Cohesion: 0.12
+Nodes (13): AdminScreen(), AgentScreen(), LoginPayload, LoginScreen(), LoginScreenProps, SocialProvider, TruecallerUser, container (+5 more)
 
 ### Community 363 - "main.tsx"
 Cohesion: 0.13
@@ -730,10 +703,6 @@ Nodes (6): 1. Technical Architecture, 2.1 Backend Services, 2.2 Frontend Integra
 ### Community 400 - "2. Detailed Functional Requirements"
 Cohesion: 0.22
 Nodes (8): 1. Executive Summary & Context, 2.1 Universal ID Generator (`UniversalIdGenerator`), 2.2 Channel Manager Webhook (`POST /api/channel-manager/webhook`), 2.3 Multi-Index Sync API & Background Sync, 2.4 Unified Search Route (`GET /api/search`), 2.5 Code Cleanup in `server.ts`, 2. Detailed Functional Requirements, Feature Specification: Unified Multi-Vertical Search, Channel Manager Webhook & Universal ID Architecture
-
-### Community 401 - "VendorAdCreatorModal.tsx"
-Cohesion: 0.18
-Nodes (12): zustand, PRESET_AD_IMAGES, VendorAdCreatorModal(), VendorAdCreatorModalProps, BookingStoreState, useBookingStore, DEFAULT_OFFERS, getInitialOffers() (+4 more)
 
 ### Community 402 - "parse-flights.ts"
 Cohesion: 0.25
@@ -800,16 +769,16 @@ Cohesion: 0.11
 Nodes (15): AIRLINE_METADATA, CITY_TO_IATA, flightLookupService, RawSchedule, VerifiedFlight, FullWorkflowExecutionResult, TravelportAncillarySelection, TravelportFlightOffer (+7 more)
 
 ### Community 447 - "AccountSheet.tsx"
-Cohesion: 0.17
-Nodes (14): BookingsPanel(), AccountGroup, AccountItem, AccountItemId, AccountSheet(), AccountSheetProps, GROUPS, generateKycHash() (+6 more)
+Cohesion: 0.19
+Nodes (13): AccountGroup, AccountItem, AccountItemId, AccountSheet(), AccountSheetProps, GROUPS, generateKycHash(), getMaskedIdentity() (+5 more)
 
 ### Community 448 - "2. Component Structure & Modular Breakdown"
 Cohesion: 0.17
 Nodes (11): 1. Architectural Architecture & Design Pattern, 2.1 Core Shared Component, 2.2 Vendor Multi-Step Flow Coordinators, 2.3 Vendor Modals Converted to Dedicated Flows, 2.4 User Modals Converted to Dedicated Flows, 2.5 Admin Modals Converted to Dedicated Flows, 2.6 Main Page Ads & Offer Coupons Components, 2. Component Structure & Modular Breakdown (+3 more)
 
 ### Community 453 - "exportUtils.ts"
-Cohesion: 0.18
-Nodes (16): html2canvas-pro, html2pdf.js, StoryExport(), StoryExportProps, convertColorToRgb, convertImagesToBase64(), convertOklchToRgb, ensureContainerImagesReady (+8 more)
+Cohesion: 0.09
+Nodes (28): html2canvas, html2canvas-pro, html2pdf.js, jspdf, StoryExport(), StoryExportProps, convertColorToRgb, convertImagesToBase64() (+20 more)
 
 ### Community 454 - "capture_all_screens.cjs"
 Cohesion: 0.06
@@ -831,17 +800,17 @@ Nodes (7): 1. Overview & Objectives, 2. Requirements & Scope, 3. Non-Functional 
 Cohesion: 0.25
 Nodes (7): 005 — Technical plan, Contracts, Files, Preview wiring, Shared foundations, Stack, Verification
 
-### Community 462 - "express"
-Cohesion: 0.13
-Nodes (16): axios, dotenv, express, content, firebaseConfig, swPath, registerPublicApiRoutes(), getKeyId() (+8 more)
+### Community 462 - "payment.ts"
+Cohesion: 0.16
+Nodes (13): dotenv, content, firebaseConfig, swPath, getKeyId(), getKeySecret(), getRazorpayClient(), router (+5 more)
 
 ### Community 463 - "inventoryDeduplication.ts"
 Cohesion: 0.39
 Nodes (7): calculateDistanceMeters(), calculateNameSimilarity(), InventoryItem, isDuplicateInventory(), mergeAndDeduplicateInventory(), normalizeName(), SmartMergeResult
 
 ### Community 466 - "taxationConfigService"
-Cohesion: 0.06
-Nodes (39): browser-image-compression, crypto-js, CommonFlowHeader(), CommonFlowHeaderProps, CompressedPhoto, HotelPartnerOnboardingForm(), HotelPartnerOnboardingFormProps, RoomCategory (+31 more)
+Cohesion: 0.09
+Nodes (22): CompressedPhoto, HotelPartnerOnboardingFormProps, RoomCategory, AVAILABLE_AMENITIES, BusRegistrationFormProps, DAYS_OF_WEEK, BusFlowStep, BusRegistrationFlowCoordinator() (+14 more)
 
 ### Community 474 - "services/BusService.ts"
 Cohesion: 0.29
@@ -957,7 +926,7 @@ Nodes (5): 007 — Admin & Agent/Vendor Bottom Navigation & Full Backend Wiring,
 
 ### Community 543 - "package.json"
 Cohesion: 0.04
-Nodes (48): config, firebase, name, private, type, version, @anthropic-ai/sdk, autoprefixer (+40 more)
+Nodes (50): config, firebase, name, private, type, version, @anthropic-ai/sdk, autoprefixer (+42 more)
 
 ### Community 544 - "src/lib/convertDurationToString.ts"
 Cohesion: 0.60
@@ -968,8 +937,8 @@ Cohesion: 0.50
 Nodes (4): BiddingAuditPayload, generateBlockSha256Hash(), StoredAuditBlock, verifyAuditChainIntegrity()
 
 ### Community 546 - "SearchCard.tsx"
-Cohesion: 0.05
-Nodes (52): LocationItem, SearchInput(), SearchInputProps, TransportMode, MASTER_CITIES_CLIENT, MasterCityItem, ALL_RAILWAY_STATIONS, RailwayStationItem (+44 more)
+Cohesion: 0.06
+Nodes (47): LocationItem, SearchInput(), SearchInputProps, TransportMode, MASTER_CITIES_CLIENT, MasterCityItem, ALL_RAILWAY_STATIONS, RailwayStationItem (+39 more)
 
 ### Community 573 - "gradlew"
 Cohesion: 0.83
@@ -1031,9 +1000,9 @@ Nodes (4): FastImage(), FastImageProps, inMemoryCache, optimizeImageUrl()
 Cohesion: 0.40
 Nodes (4): FlightSearchParams, HotelSearchParams, otaipService, rtaipService
 
-### Community 611 - "TransportOptions.tsx"
-Cohesion: 0.21
-Nodes (11): FUN_FACTS, FunFactsLoader(), ICONS, addDurationToTime(), AVAILABILITY_STATES, buildTrainClasses(), CLASS_BASE_FARE, safeFormat12Hour() (+3 more)
+### Community 611 - "BookingFunnelLayout.tsx"
+Cohesion: 0.07
+Nodes (35): FUN_FACTS, FunFactsLoader(), ICONS, LogoName(), SharedBookingWidgetProps, BookingFunnelLayout(), BookingFunnelLayoutProps, MultiCityLeg (+27 more)
 
 ### Community 616 - "CurrencyWidget.tsx"
 Cohesion: 0.60
@@ -1044,8 +1013,8 @@ Cohesion: 0.22
 Nodes (8): 0. Install dependencies, 1. CI Dependency & Security Scanning, 2. Secrets Management (Google Secret Manager), 3. DPDP Compliance Endpoints, 4. Observability (Sentry), Rollout order (recommended), RoutTripo — Phase 1 Implementation Guide, Security & Compliance Hardening (CI Scanning + Secrets + DPDP + Observability)
 
 ### Community 619 - "meilisearchService.ts"
-Cohesion: 0.16
-Nodes (17): meilisearch, papaparse, getAdminFirestoreInstance(), runSynchronization(), syncAirports(), syncHotels(), syncTrainStations(), MASTER_CITIES (+9 more)
+Cohesion: 0.09
+Nodes (20): meilisearch, papaparse, getAdminFirestoreInstance(), runSynchronization(), syncAirports(), syncHotels(), syncTrainStations(), MASTER_CITIES (+12 more)
 
 ### Community 647 - "phase2/loadtest/k6-search-endpoints.js"
 Cohesion: 0.18
@@ -1060,40 +1029,32 @@ Cohesion: 0.29
 Nodes (6): Already Solid (keep as-is), Phase 0 — This Week (Critical, blocking), Phase 1 — 1–2 Months: Security & Compliance Hardening, Phase 2 — 3–6 Months: Infra & Scale, Phase 3 — 6–12 Months: Global Product Readiness, RoutTripo — Security & Global-Readiness Roadmap
 
 ### Community 697 - "offlineOtpVault.ts"
-Cohesion: 0.21
-Nodes (8): @capacitor/core, base64ToBuffer(), bufferToBase64(), DecryptedOtpData, deriveEncryptionKey(), EncryptedOtpVaultPayload, getDecryptedOtpOffline(), storeEncryptedOtpOffline()
-
-### Community 701 - "PortalShell.tsx"
-Cohesion: 0.43
-Nodes (4): PortalShellProps, TabDescriptor, TabStrip(), TabStripProps
-
-### Community 716 - "search.ts"
-Cohesion: 0.22
-Nodes (6): carService, router, HotelSearchFilters, PhotonLocationResult, photonService, TOP_INDIAN_DESTINATIONS
+Cohesion: 0.39
+Nodes (7): base64ToBuffer(), bufferToBase64(), DecryptedOtpData, deriveEncryptionKey(), EncryptedOtpVaultPayload, getDecryptedOtpOffline(), storeEncryptedOtpOffline()
 
 ### Community 719 - "TripMap.tsx"
 Cohesion: 0.24
 Nodes (9): calculateDistance(), createItineraryIcon(), createMemberIcon(), createSearchedIcon(), createSosIcon(), QueueItem, TripMap(), TripMapProps (+1 more)
 
 ## Knowledge Gaps
-- **1276 isolated node(s):** `config`, `name`, `private`, `version`, `type` (+1271 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1608 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **40 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1283 isolated node(s):** `config`, `name`, `private`, `version`, `type` (+1278 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1622 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `TripsScreen.tsx`, `useLanguage`, `react-router-dom`, `framer-motion`, `TrainInfoTab.tsx`, `FutureTripModal.tsx`, `src/types.ts`, `FlightSearchTab.tsx`, `BargainingTab.tsx`, `CreateTripModal.tsx`, `CheckoutPage.tsx`, `AccountScreen.tsx`, `bidding.ts`, `VendorAdCreatorModal.tsx`, `FullScreenChatView.tsx`, `legal/LegalPolicyModal.tsx`, `UserLandingPage.tsx`, `notifications.ts`, `useAuthStore`, `ExpensesView.tsx`, `SmartDayPlanner.tsx`, `admin/tabs.tsx`, `booking/FlightCard.tsx`, `BookingFlowModal.tsx`, `App.tsx`, `crashlytics.ts`, `package.json`, `ScrollView.tsx`, `SavedTravellersSelector.tsx`, `ManageContactsModal.tsx`, `SharedUI.tsx`, `SearchCard.tsx`, `VouchersOffersFlowPage.tsx`, `RazorpayCheckoutModal.tsx`, `MyTicketsView.tsx`, `react-dom`, `ItineraryCard.tsx`, `FuelCalculatorModal.tsx`, `rasp.ts`, `BookingFunnelLayout.tsx`, `agent/tabs.tsx`, `FlightPriceCalendarModal.tsx`, `FullScreenPortal.tsx`, `CouponWidget.tsx`, `LanguageOnboardingModal.tsx`, `KharchScreen.tsx`, `BusSearchTab.tsx`, `StaysCheckoutPage.tsx`, `offlineOtpVault.ts`, `TripRecap.tsx`, `travelAIService.ts`, `travel/FlightSearchWidget.tsx`, `NearbyUtilitiesModal.tsx`, `BookingFlowCoordinator.tsx`, `BargainingPaywallModal.tsx`, `BargainingChatObfuscator.ts`, `AccountSheet.tsx`, `PortalShell.tsx`, `exportUtils.ts`, `SharedBookingWidget.tsx`, `DocumentService.ts`, `WeatherWidget.tsx`, `TripMap.tsx`, `FastImage.tsx`, `taxationConfigService`, `security.ts`, `HolidayAlertWidget.tsx`, `WikipediaSnippet.tsx`, `TransportOptions.tsx`, `PlanningWorkspace.tsx`, `premium/preview.tsx`, `CurrencyWidget.tsx`, `main.tsx`, `FlightsResultsPage.tsx`, `WalletService`, `icons.tsx`?**
-  _High betweenness centrality (0.215) - this node is a cross-community bridge._
-- **Why does `lucide-react` connect `react` to `TripsScreen.tsx`, `useLanguage`, `react-router-dom`, `framer-motion`, `TrainInfoTab.tsx`, `FutureTripModal.tsx`, `src/types.ts`, `FlightSearchTab.tsx`, `BargainingTab.tsx`, `CreateTripModal.tsx`, `CheckoutPage.tsx`, `AccountScreen.tsx`, `bidding.ts`, `VendorAdCreatorModal.tsx`, `FullScreenChatView.tsx`, `legal/LegalPolicyModal.tsx`, `UserLandingPage.tsx`, `notifications.ts`, `useAuthStore`, `ExpensesView.tsx`, `admin/tabs.tsx`, `booking/FlightCard.tsx`, `BookingFlowModal.tsx`, `App.tsx`, `crashlytics.ts`, `package.json`, `ScrollView.tsx`, `SavedTravellersSelector.tsx`, `ManageContactsModal.tsx`, `SharedUI.tsx`, `SearchCard.tsx`, `VouchersOffersFlowPage.tsx`, `RazorpayCheckoutModal.tsx`, `MyTicketsView.tsx`, `react-dom`, `ItineraryCard.tsx`, `FuelCalculatorModal.tsx`, `rasp.ts`, `BookingFunnelLayout.tsx`, `agent/tabs.tsx`, `FlightPriceCalendarModal.tsx`, `FullScreenPortal.tsx`, `CouponWidget.tsx`, `LanguageOnboardingModal.tsx`, `KharchScreen.tsx`, `BusSearchTab.tsx`, `StaysCheckoutPage.tsx`, `TripRecap.tsx`, `travelAIService.ts`, `travel/FlightSearchWidget.tsx`, `NearbyUtilitiesModal.tsx`, `BookingFlowCoordinator.tsx`, `BargainingPaywallModal.tsx`, `AccountSheet.tsx`, `PortalShell.tsx`, `exportUtils.ts`, `SharedBookingWidget.tsx`, `DocumentService.ts`, `WeatherWidget.tsx`, `TripMap.tsx`, `FastImage.tsx`, `taxationConfigService`, `security.ts`, `HolidayAlertWidget.tsx`, `WikipediaSnippet.tsx`, `TransportOptions.tsx`, `PlanningWorkspace.tsx`, `premium/preview.tsx`, `CurrencyWidget.tsx`, `main.tsx`, `FlightsResultsPage.tsx`, `WalletService`, `icons.tsx`?**
-  _High betweenness centrality (0.136) - this node is a cross-community bridge._
-- **Why does `express` connect `express` to `aiFallbackCircuitBreaker`, `partnerKyc.ts`, `sanitization.ts`, `documentTemplateEngine.ts`, `test_pdf_security_measures.ts`, `server.ts`, `rtaip/routes.ts`, `search.ts`, `bidding.ts`, `payments/routes.ts`, `server/services/travelport.service.ts`, `server/services/zuelpay.service.ts`, `channelManager.ts`, `accountStore.ts`, `buses/routes.ts`, `vendorApiKey.ts`, `package.json`?**
+- **Why does `react` connect `react` to `ExpensesTab.tsx`, `useLanguage`, `TrainInfoTab.tsx`, `TripsScreen.tsx`, `FutureTripModal.tsx`, `src/types.ts`, `BargainingTab.tsx`, `ExpensesTabContainer.tsx`, `CheckoutPage.tsx`, `AccountScreen.tsx`, `useVendorStore.ts`, `UserLandingPage.tsx`, `legal/LegalPolicyModal.tsx`, `notifications.ts`, `useAuthStore`, `SmartDayPlanner.tsx`, `TourPackageUploadForm.tsx`, `react-i18next`, `admin/tabs.tsx`, `booking/FlightCard.tsx`, `BookingFlowModal.tsx`, `App.tsx`, `crashlytics.ts`, `package.json`, `CreateTripModal.tsx`, `SavedTravellersSelector.tsx`, `UserBiddingScreen.tsx`, `SharedUI.tsx`, `SearchCard.tsx`, `CommonFlowHeader.tsx`, `BiddingChatModal.tsx`, `MyTicketsView.tsx`, `BargainingPaywallModal.tsx`, `TripPlan`, `FuelCalculatorModal.tsx`, `rasp.ts`, `primitives.tsx`, `agent/tabs.tsx`, `ManageContactsModal.tsx`, `VendorAdCreatorModal.tsx`, `KharchScreen.tsx`, `lucide-react`, `FlightSeatSelectionPage.tsx`, `push.ts`, `travel/OrderReviewPage.tsx`, `AppBar.tsx`, `travelAIService.ts`, `BookingFlowCoordinator.tsx`, `AccountSheet.tsx`, `FullScreenBargainChat.tsx`, `exportUtils.ts`, `SmartPlanLoadingOverlay.tsx`, `StaysCheckoutPage.tsx`, `TravelportWorkflowConsole.tsx`, `WeatherWidget.tsx`, `TripMap.tsx`, `FastImage.tsx`, `taxationConfigService`, `framer-motion`, `HolidayAlertWidget.tsx`, `WikipediaSnippet.tsx`, `BookingFunnelLayout.tsx`, `PlanningWorkspace.tsx`, `LoginScreen.tsx`, `CurrencyWidget.tsx`, `main.tsx`, `FlightsResultsPage.tsx`, `WalletService`, `icons.tsx`?**
+  _High betweenness centrality (0.232) - this node is a cross-community bridge._
+- **Why does `lucide-react` connect `lucide-react` to `ExpensesTab.tsx`, `useLanguage`, `react`, `TripsScreen.tsx`, `TrainInfoTab.tsx`, `FutureTripModal.tsx`, `src/types.ts`, `BargainingTab.tsx`, `ExpensesTabContainer.tsx`, `CheckoutPage.tsx`, `AccountScreen.tsx`, `useVendorStore.ts`, `UserLandingPage.tsx`, `legal/LegalPolicyModal.tsx`, `notifications.ts`, `useAuthStore`, `TourPackageUploadForm.tsx`, `react-i18next`, `admin/tabs.tsx`, `booking/FlightCard.tsx`, `BookingFlowModal.tsx`, `App.tsx`, `crashlytics.ts`, `package.json`, `CreateTripModal.tsx`, `SavedTravellersSelector.tsx`, `UserBiddingScreen.tsx`, `SharedUI.tsx`, `SearchCard.tsx`, `CommonFlowHeader.tsx`, `BiddingChatModal.tsx`, `MyTicketsView.tsx`, `BargainingPaywallModal.tsx`, `TripPlan`, `FuelCalculatorModal.tsx`, `rasp.ts`, `agent/tabs.tsx`, `ManageContactsModal.tsx`, `VendorAdCreatorModal.tsx`, `KharchScreen.tsx`, `FlightSeatSelectionPage.tsx`, `travel/OrderReviewPage.tsx`, `AppBar.tsx`, `travelAIService.ts`, `BookingFlowCoordinator.tsx`, `AccountSheet.tsx`, `FullScreenBargainChat.tsx`, `exportUtils.ts`, `SmartPlanLoadingOverlay.tsx`, `StaysCheckoutPage.tsx`, `TravelportWorkflowConsole.tsx`, `WeatherWidget.tsx`, `TripMap.tsx`, `FastImage.tsx`, `taxationConfigService`, `framer-motion`, `HolidayAlertWidget.tsx`, `WikipediaSnippet.tsx`, `BookingFunnelLayout.tsx`, `PlanningWorkspace.tsx`, `LoginScreen.tsx`, `CurrencyWidget.tsx`, `main.tsx`, `FlightsResultsPage.tsx`, `WalletService`, `icons.tsx`?**
+  _High betweenness centrality (0.140) - this node is a cross-community bridge._
+- **Why does `express` connect `express` to `aiFallbackCircuitBreaker`, `partnerKyc.ts`, `sanitization.ts`, `documentTemplateEngine.ts`, `test_pdf_security_measures.ts`, `server.ts`, `payment.ts`, `bidding.ts`, `search.ts`, `server/services/travelport.service.ts`, `channelManager.ts`, `accountStore.ts`, `vendorApiKey.ts`, `package.json`?**
   _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **What connects `config`, `name`, `private` to the rest of the system?**
-  _1276 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `TripsScreen.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.08502024291497975 - nodes in this community are weakly interconnected._
+  _1283 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `useLanguage` be split into smaller, more focused modules?**
-  _Cohesion score 0.06394230769230769 - nodes in this community are weakly interconnected._
-- **Should `react-router-dom` be split into smaller, more focused modules?**
-  _Cohesion score 0.07373737373737374 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08489795918367347 - nodes in this community are weakly interconnected._
+- **Should `react` be split into smaller, more focused modules?**
+  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
+- **Should `TripsScreen.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.0960591133004926 - nodes in this community are weakly interconnected._

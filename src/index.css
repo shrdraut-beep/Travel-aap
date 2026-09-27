@@ -102,8 +102,20 @@ h4, h5, h6 {
 @theme {
   --font-sans: "D-DIN", "Open Sans", "Inter", "Poppins", "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-din: "D-DIN", "Outfit", sans-serif;
   --color-coral: #FF5A5F;
   --color-pink: #ec4899;
+  --color-admin-violet: #8B5CF6;
+  --color-admin-violet-deep: #7C3AED;
+  --color-canvas-bg: #F8FAFC;
+  --color-surface-bg: #FFFFFF;
+  --color-primary-container: #0ea5e9;
+  --color-primary-fixed: #c9e6ff;
+  --color-on-primary-fixed: #001e2f;
+  --color-border-color: #E2E8F0;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
 }
 
 /* Ensure secondary text has high contrast & is easy to read */

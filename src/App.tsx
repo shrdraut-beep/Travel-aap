@@ -609,11 +609,12 @@ function MainApp() {
                       avatarChar={(currentUser?.name || "T").charAt(0).toUpperCase()}
                       activeTab={globalTab}
                       onChangeTab={setGlobalTab}
+                      hideHeader={globalTab === "settings" || globalTab === "booking"}
                       tabs={[
-                        { id: "bargaining", label: "Bargaining", Icon: Gavel, imgSrc: "/icons/bargaining.png" },
-                        { id: "trips", label: "My Trips", Icon: Briefcase, imgSrc: "/icons/my_trips.png" },
-                        { id: "booking", label: "Booking", Icon: Compass, imgSrc: "/icons/booking.png" },
-                        { id: "settings", label: "Profile", Icon: User, imgSrc: "/icons/profile.png" }
+                        { id: "bargaining", label: "Bargaining", Icon: Gavel, stitchIcon: "toll", imgSrc: "/icons/bargaining.png" },
+                        { id: "trips", label: "My Trips", Icon: Briefcase, stitchIcon: "luggage", imgSrc: "/icons/my_trips.png" },
+                        { id: "booking", label: "Booking", Icon: Compass, stitchIcon: "airplane_ticket", imgSrc: "/icons/booking.png" },
+                        { id: "settings", label: "Profile", Icon: User, stitchIcon: "account_circle", imgSrc: "/icons/profile.png" }
                       ]}
                     >
                       {globalTab === "bargaining" && <BargainingTab onSelect={handleAccountSelect} />}
@@ -629,16 +630,15 @@ function MainApp() {
                          />
                       )}
                       {globalTab === "settings" && (
-                        <div className="p-5 pb-24">
-                          <SettingsTab
-                            userName={currentUser?.name || "Traveller"}
-                            userEmail={currentUser?.email || ""}
-                            language={lang === 'mr' ? 'मराठी' : 'English'}
-                            currency={currency || 'INR'}
-                            userRole={role}
-                            onSelect={handleAccountSelect}
-                          />
-                        </div>
+                        <SettingsTab
+                          userName={currentUser?.name || "Cara Sharma"}
+                          userEmail={currentUser?.email || "cara.sharma@routtripo.com"}
+                          language={lang === 'mr' ? 'मराठी' : 'English'}
+                          currency={currency || 'INR'}
+                          userRole={role}
+                          onSelect={handleAccountSelect}
+                          onBack={() => setGlobalTab('booking')}
+                        />
                       )}
                     </PremiumShell>
                   ) : (
