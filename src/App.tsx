@@ -374,11 +374,14 @@ function MainApp() {
   const handleAccountSelect = (item: string) => {
     switch (item) {
       case 'bargain-new-request':
-        setIsBargainNewOpen(true);
+        setGlobalTab('bargaining');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('open-make-an-offer'));
+        }, 50);
         break;
       case 'bargain-chat':
       case 'bargain-requests':
-        setIsBargainChatOpen(true);
+        setGlobalTab('bargaining');
         break;
       case 'bargain-vouchers':
         setIsVouchersOpen(true);

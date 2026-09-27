@@ -42,6 +42,7 @@ import { FullScreenBargainChat } from "./bargaining/FullScreenBargainChat";
 import { SecretOffersModal } from "../modals/PremiumModals";
 import { checkCustomBiddingAllowance } from "./bargaining/BargainingRateLimiter";
 import { BargainingPaywallModal } from "./bargaining/BargainingPaywallModal";
+import { MakeAnOfferModal } from "./bargaining/MakeAnOfferModal";
 
 const STATUS_TONE: Record<BargainingRequest["status"], string> = {
   Open: "bg-sky-100 text-sky-800",
@@ -181,6 +182,25 @@ export const BargainingTab: React.FC<{
   const [changeBudgetReq, setChangeBudgetReq] = useState<BargainingRequest | null>(null);
   const [newBudgetInput, setNewBudgetInput] = useState<number>(40000);
 
+  // Make An Offer Modal State
+  const [isMakeAnOfferOpen, setIsMakeAnOfferOpen] = useState<boolean>(false);
+  const [presetOfferDetails, setPresetOfferDetails] = useState<{
+    category?: 'Cabs' | 'Hotels' | 'Packages';
+    origin?: string;
+    destination?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleOpenOfferEvent = (e: any) => {
+      if (e.detail) {
+        setPresetOfferDetails(e.detail);
+      }
+      setIsMakeAnOfferOpen(true);
+    };
+    window.addEventListener('open-make-an-offer', handleOpenOfferEvent);
+    return () => window.removeEventListener('open-make-an-offer', handleOpenOfferEvent);
+  }, []);
+
   // 15-Minute Auction Loop & 3-Minute Window Timers
   const [secondsRemaining, setSecondsRemaining] = useState<number>(765); // ~12m 45s
   const [isThreeMinWindow, setIsThreeMinWindow] = useState<boolean>(true);
@@ -267,6 +287,17 @@ export const BargainingTab: React.FC<{
     showToast("Target budget updated successfully!");
   };
 
+  const handleMakeOfferSubmit = (newReq: BargainingRequest, initialBids: VendorBid[]) => {
+    setRequestsList((prev) => [newReq, ...prev]);
+    setBidsMap((prev) => ({
+      ...prev,
+      [newReq.id]: initialBids
+    }));
+    setFilter("Bargaining");
+    setViewingOffersRequest(newReq);
+    showToast(`Offer for ${newReq.title} dispatched to verified operators!`);
+  };
+
   // 1. If currently in Full-Screen Chat
   if (chattingBid) {
     return (
@@ -346,7 +377,8 @@ export const BargainingTab: React.FC<{
               if (!allowance.allowed) {
                 setShowRateLimitModal(true);
               } else {
-                onSelect("bargain-new-request");
+                setPresetOfferDetails(null);
+                setIsMakeAnOfferOpen(true);
               }
             }}
             className={`flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-sm active:scale-95 transition-all text-center group border cursor-pointer ${
@@ -903,8 +935,12 @@ export const BargainingTab: React.FC<{
                 <button
                   type="button"
                   onClick={() => {
-                    onSelect("bargain-new-request");
-                    showToast(`Bargaining initiated for ${deal.title}`);
+                    setPresetOfferDetails({
+                      destination: deal.dest,
+                      origin: "Mumbai",
+                      category: deal.id.includes("goa") || deal.id.includes("jaipur") || deal.id.includes("munnar") ? "Hotels" : "Packages"
+                    });
+                    setIsMakeAnOfferOpen(true);
                   }}
                   className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer"
                 >
@@ -1053,8 +1089,18 @@ export const BargainingTab: React.FC<{
         onClose={() => setShowRateLimitModal(false)}
         onUnlocked={() => {
           setShowRateLimitModal(false);
-          onSelect("bargain-new-request");
+          setIsMakeAnOfferOpen(true);
         }}
+      />
+
+      {/* Make An Offer Flow Modal (Google Stitch Exact Layout) */}
+      <MakeAnOfferModal
+        isOpen={isMakeAnOfferOpen}
+        onClose={() => setIsMakeAnOfferOpen(false)}
+        onSubmit={handleMakeOfferSubmit}
+        initialCategory={presetOfferDetails?.category || "Cabs"}
+        initialOrigin={presetOfferDetails?.origin || "Mumbai"}
+        initialDestination={presetOfferDetails?.destination || "Goa"}
       />
     </div>
   );
