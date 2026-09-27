@@ -72,8 +72,7 @@ function createZip(outputPath) {
         'graphify-out/**',
         'scratch/**',
         'staging_new_folder/**',
-        'app_screenshots/**',
-        'duffel-components/duffel-components-main/.yarn/**'
+        'app_screenshots/**'
       ]
     });
 

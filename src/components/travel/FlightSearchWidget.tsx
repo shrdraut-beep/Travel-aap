@@ -238,14 +238,14 @@ export const FlightSearchWidget: React.FC<FlightSearchWidgetProps> = ({
       }
     }
 
-    // Task 3 Duffel Payload Mapping:
+    // Flight Payload Mapping:
     // One Way: Send [slices[0]].
     // Round Trip: Send 2 slices: [{ origin: slices[0].origin, destination: slices[0].destination, departure_date: slices[0].date }, { origin: slices[0].destination, destination: slices[0].origin, departure_date: returnDate }].
     // Multi-City: Send the entire mapped slices array.
-    let duffelSlicesPayload: Array<{ origin: string; destination: string; departure_date: string }> = [];
+    let flightSlicesPayload: Array<{ origin: string; destination: string; departure_date: string }> = [];
 
     if (tripType === 'oneWay') {
-      duffelSlicesPayload = [
+      flightSlicesPayload = [
         {
           origin: slices[0].origin.trim().toUpperCase(),
           destination: slices[0].destination.trim().toUpperCase(),
@@ -253,7 +253,7 @@ export const FlightSearchWidget: React.FC<FlightSearchWidgetProps> = ({
         }
       ];
     } else if (tripType === 'roundTrip') {
-      duffelSlicesPayload = [
+      flightSlicesPayload = [
         {
           origin: slices[0].origin.trim().toUpperCase(),
           destination: slices[0].destination.trim().toUpperCase(),
@@ -266,7 +266,7 @@ export const FlightSearchWidget: React.FC<FlightSearchWidgetProps> = ({
         }
       ];
     } else if (tripType === 'multiCity') {
-      duffelSlicesPayload = slices.map(s => ({
+      flightSlicesPayload = slices.map(s => ({
         origin: s.origin.trim().toUpperCase(),
         destination: s.destination.trim().toUpperCase(),
         departure_date: s.date
@@ -275,10 +275,10 @@ export const FlightSearchWidget: React.FC<FlightSearchWidgetProps> = ({
 
     const searchParams = {
       tripType,
-      slices: duffelSlicesPayload,
-      origin: duffelSlicesPayload[0]?.origin || 'BOM',
-      destination: duffelSlicesPayload[0]?.destination || 'DEL',
-      departDate: duffelSlicesPayload[0]?.departure_date || getTomorrowDate(1),
+      slices: flightSlicesPayload,
+      origin: flightSlicesPayload[0]?.origin || 'BOM',
+      destination: flightSlicesPayload[0]?.destination || 'DEL',
+      departDate: flightSlicesPayload[0]?.departure_date || getTomorrowDate(1),
       returnDate: tripType === 'roundTrip' ? returnDate : undefined,
       adults,
       children,
