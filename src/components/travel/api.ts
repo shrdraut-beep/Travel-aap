@@ -4,10 +4,6 @@
 // Strict real API integration - zero mock data fallbacks
 // ============================================================================
 
-import { fetchDuffelFlights } from '../../services/duffelFlightService';
-export { fetchDuffelFlights as fetchCachedFlights } from '../../services/duffelFlightService';
-import { fetchFoursquareHotels } from '../../services/foursquareHotelService';
-export { fetchFoursquareHotels };
 import { searchLocalFlights, searchLocalTrainStatus } from '../../services/localSearchService';
 import { calculateLiveTrainStatus, getCodesForCityOrInput } from '../../services/travelTimeService';
 

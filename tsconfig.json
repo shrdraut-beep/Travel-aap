@@ -36,10 +36,6 @@
     "node_modules",
     ".gradle",
     "android",
-    "dist",
-    "routtripo-booking",
-    "duffel-components",
-    "agency-agents",
-    "scratch"
+    "dist"
   ]
 }
