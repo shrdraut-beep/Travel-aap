@@ -38,7 +38,7 @@ export const TripProtectionCard: React.FC<TripProtectionCardProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <span>RoutTripo Trip Assurance & Refund Shield</span>
+              <span>ROUTRIPO Trip Assurance & Refund Shield</span>
               <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
                 RECOMMENDED
               </span>
@@ -90,7 +90,7 @@ export const TripProtectionCard: React.FC<TripProtectionCardProps> = ({
             </div>
             <div>
               <span className="text-xs font-bold text-slate-900 block">
-                Yes, protect my travel with RoutTripo Shield (+₹{totalPrice.toLocaleString('en-IN')})
+                Yes, protect my travel with ROUTRIPO Shield (+₹{totalPrice.toLocaleString('en-IN')})
               </span>
               <span className="text-[11px] text-emerald-700 font-semibold">
                 87% of smart travellers choose protection for complete peace of mind.

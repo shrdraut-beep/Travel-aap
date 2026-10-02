@@ -94,6 +94,7 @@ import { CarResultsPage } from './pages/CarResultsPage';
 import { AncillariesFlow } from './pages/AncillariesFlow';
 import { OrderReviewPage } from './pages/OrderReviewPage';
 import { LegalPolicyPage } from './pages/LegalPolicyPage';
+import { ArchitecturePage } from './pages/ArchitecturePage';
 import { BookingFlowCoordinator } from './premium/booking/BookingFlowCoordinator';
 import type { FlightSearchParams } from './premium/booking/FlightResultsStep';
 import { HotelBookingCoordinator } from './premium/booking/HotelBookingCoordinator';
@@ -609,7 +610,7 @@ function MainApp() {
                       avatarChar={(currentUser?.name || "T").charAt(0).toUpperCase()}
                       activeTab={globalTab}
                       onChangeTab={setGlobalTab}
-                      hideHeader={globalTab === "settings" || globalTab === "booking"}
+                      hideHeader={true}
                       tabs={[
                         { id: "bargaining", label: "Bargaining", Icon: Gavel, stitchIcon: "toll", imgSrc: "/icons/bargaining.png" },
                         { id: "trips", label: "My Trips", Icon: Briefcase, stitchIcon: "luggage", imgSrc: "/icons/my_trips.png" },
@@ -618,12 +619,21 @@ function MainApp() {
                       ]}
                     >
                       {globalTab === "bargaining" && <BargainingTab onSelect={handleAccountSelect} />}
-                      {globalTab === "trips" && <GlobalTripsTab onCreateTrip={() => setIsCreateTripOpen(true)} onOpenAiPlanner={() => setIsAiPlannerOpen(true)} onEnterTrip={() => { setIsTripLevel(true); setTripTab("plan"); }} />}
+                      {globalTab === "trips" && (
+                        <GlobalTripsTab 
+                          onCreateTrip={() => setIsCreateTripOpen(true)} 
+                          onOpenAiPlanner={() => setIsAiPlannerOpen(true)} 
+                          onEnterTrip={() => { setIsTripLevel(true); setTripTab("plan"); }}
+                          onOpenProfile={() => setGlobalTab('settings')}
+                          onOpenSos={() => setIsSosOpen(true)}
+                        />
+                      )}
                       {globalTab === "booking" && (
                          <UserLandingPage 
-                           hideHeader={true} 
+                           hideHeader={false} 
                            onNavigate={() => {}} 
                            onOpenAccount={() => setGlobalTab('settings')}
+                           onNotifications={() => setIsSosOpen(true)}
                            onSelectDestination={(d) => setSelectedDestination(d as any)}
                            onSelectOffer={(o) => setSelectedOffer(o as any)}
                            onSearch={handleSearch}
@@ -1076,7 +1086,7 @@ export default function App() {
     '/bargaining'
   ].includes(location.pathname) || location.pathname.startsWith('/legal/');
 
-  const isOverlayRoute = isLegalRoute || (Boolean(currentUser) && [
+  const isOverlayRoute = isLegalRoute || location.pathname === '/architecture' || (Boolean(currentUser) && [
     '/checkout', 
     '/stays/results', 
     '/stays/details',
@@ -1104,6 +1114,9 @@ export default function App() {
           </div>
 
           <Routes>
+            {/* System Architecture Diagram */}
+            <Route path="/architecture" element={<ArchitecturePage />} />
+
             {/* Public Legal Policies & Compliance Routes */}
             <Route path="/legal" element={<LegalPolicyPage />} />
             <Route path="/legal/:policyId" element={<LegalPolicyPage />} />

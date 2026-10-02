@@ -25,7 +25,7 @@ export const AppBar: React.FC<AppBarProps> = ({
 
       <div className="flex flex-1 items-center gap-2">
         <img src="/routripo_header_logo.svg" alt="" aria-hidden="true" className="h-7 w-7 rounded-lg bg-white/95 p-1" />
-        <span className="text-[17px] font-bold tracking-tight text-white">RoutTripo</span>
+        <span className="text-[17px] font-bold tracking-tight text-white">ROUTRIPO</span>
       </div>
 
       <LanguageSwitcher />

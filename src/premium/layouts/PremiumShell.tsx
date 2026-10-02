@@ -18,6 +18,7 @@ const DEFAULT_STITCH_ICONS: Record<string, string> = {
   home: "home",
   trips: "luggage",
   booking: "explore",
+  tickets: "confirmation_number",
   explore: "explore",
   bargaining: "local_offer",
   offers: "local_offer",
@@ -115,6 +116,7 @@ export const PremiumShell: React.FC<PremiumShellProps> = ({
             id === "bargaining" ? "text-sky-500" :
             id === "trips" ? "text-emerald-600" :
             id === "booking" ? "text-amber-500" :
+            id === "tickets" ? "text-purple-600" :
             "text-sky-600";
 
           return (

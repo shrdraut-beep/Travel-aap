@@ -87,7 +87,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       onSubmit?.({
         mode: "login",
         identifier: "user@routripo.app",
-        name: "Aditi Sharma (Traveller)",
+        name: "Aditi Sharma",
         role: "user",
         remember: true,
         provider: "demo"
@@ -180,9 +180,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             <section className="mb-7 text-center mt-6" data-purpose="welcome-headline">
               <div className="enter-logo">
                 <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 select-none">
-                  <span className="text-[#2563EB] inline-block transition-transform duration-300 hover:-translate-y-0.5">Rou</span>
+                  <span className="text-[#2563EB] inline-block transition-transform duration-300 hover:-translate-y-0.5">ROU</span>
                   <span className="text-[#F97316] inline-block transition-transform duration-300 hover:-translate-y-0.5">T</span>
-                  <span className="text-[#EC4899] inline-block transition-transform duration-300 hover:-translate-y-0.5">ripo</span>
+                  <span className="text-[#EC4899] inline-block transition-transform duration-300 hover:-translate-y-0.5">RIPO</span>
                 </h2>
               </div>
               <p className="mt-1.5 text-sm font-medium text-slate-500 enter-tagline">
@@ -297,9 +297,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <footer className="pt-6 text-center text-xs text-slate-400 enter-footer" data-purpose="screen-footer">
             <p className="font-medium text-slate-400/80">
               <span className="font-bold">
-                <span className="text-[#2563EB]">Rou</span>
+                <span className="text-[#2563EB]">ROU</span>
                 <span className="text-[#F97316]">T</span>
-                <span className="text-[#EC4899]">ripo</span>
+                <span className="text-[#EC4899]">RIPO</span>
               </span> Travel Experience
             </p>
           </footer>

@@ -19,6 +19,7 @@ import type { HolidaySearchParams } from "./booking/HolidayBookingCoordinator";
 import { TrainBookingCoordinator } from "./booking/TrainBookingCoordinator";
 import type { TrainSearchParams } from "./booking/TrainBookingCoordinator";
 import type { AccountItemId } from "./account/types";
+import { GlobalBrandHeader } from "../components/common/GlobalBrandHeader";
 
 export interface UserLandingPageProps {
   hideHeader?: boolean;
@@ -350,49 +351,20 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
       )}
 
       {/* 1. Signature RouTripo Curved Brand Header */}
-      <header className="bg-gradient-to-b from-[#e8f4fc] via-[#f4f9fd] to-white shadow-sm rounded-b-[24px] px-4 pt-3.5 pb-4 border-b border-[#bae6fd]/50 sticky top-0 z-30">
-        <div className="flex items-center justify-between gap-3 mb-1">
-          <div className="flex flex-col">
-            <div className="flex items-center tracking-tight select-none">
-              <span className="text-2xl font-extrabold text-[#0ea5e9] tracking-tight font-['Outfit',sans-serif]">Rou</span>
-              <span className="bg-[#ef4444] text-white px-2 py-0.5 rounded-lg font-bold inline-block mx-0.5 text-xs shadow-sm">T</span>
-              <span className="text-2xl font-extrabold text-[#ec4899] font-['Outfit',sans-serif]">ripo</span>
-            </div>
-            <p className="text-[11px] font-semibold text-slate-600 mt-0.5 font-['Outfit',sans-serif]">
-              Seamless Travel &amp; Instant Savings
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                if (onNotifications) {
-                  onNotifications();
-                } else {
-                  showToast("No new alerts. Your travel bookings are on schedule!");
-                }
-              }}
-              aria-label="Notifications"
-              className="size-9 flex items-center justify-center text-slate-700 active:scale-95 transition-all relative rounded-full hover:bg-slate-100 cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-xl text-slate-700">notifications</span>
-              <span className="absolute top-1.5 right-1.5 size-2 bg-rose-500 rounded-full ring-2 ring-white animate-pulse" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenAccount?.()}
-              aria-label="Profile"
-              className="size-9 rounded-xl overflow-hidden ring-2 ring-white active:scale-95 transition-all bg-slate-100 flex items-center justify-center shadow-sm cursor-pointer"
-            >
-              <img
-                className="size-full object-cover"
-                alt="User Avatar"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrpoo9TS_6cmaVeLdwULdoIxXnqUc7kiMjcogApxX8bK9Bxf6FS43lVapLEMAX-Gsw4Wb69nVWicYBN-c2w16eNsvsPhoDogdM6JsWDcpUGbk_2Yk01BKYyqw5WIyeOhL6pIxaJxufKw7Ro6KxjMMtH-Rz97Eqz89d30FI94qlM4Cg9eeDzFJHnAwFLspLn3x_Q1ACItDJF_TJbybwgnVs-ZNtN549TXpwingObAtkbKfNy7nZhGwF"
-              />
-            </button>
-          </div>
-        </div>
-      </header>
+      {!hideHeader && (
+        <GlobalBrandHeader
+          subtitle="Seamless Travel & Instant Savings"
+          theme="ocean"
+          onNotifications={() => {
+            if (onNotifications) {
+              onNotifications();
+            } else {
+              showToast("No new alerts. Your travel bookings are on schedule!");
+            }
+          }}
+          onOpenProfile={() => onOpenAccount?.()}
+        />
+      )}
 
       {/* Main Screen Content Area (No bulky form on the page - matches screenshot 100%) */}
       <main className="px-4 mt-3 space-y-4">
@@ -718,7 +690,7 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
               </span>
               <div>
                 <h4 className="text-xs font-bold text-slate-900 leading-tight font-['Outfit',sans-serif]">
-                  RouTripo Travel Protection Shield
+                  ROUTRIPO Travel Protection Shield
                 </h4>
                 <p className="text-[10px] text-slate-500">
                   100% Verified Partners &amp; Instant Refund Guarantee
@@ -776,8 +748,26 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
           </div>
         </section>
 
-        <p className="px-4 pb-6 pt-4 text-center text-[11px] font-medium text-slate-400">
-          © 2026 RoutTripo · Made for travellers, in India.
+        <div className="flex flex-wrap items-center justify-center gap-2.5 text-[11px] font-semibold text-slate-500 pt-3 pb-1">
+          <a
+            href="/architecture"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors shadow-xs active:scale-95 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[15px]">account_tree</span>
+            <span>View Architecture Diagram</span>
+          </a>
+          <a
+            href="/download-architecture"
+            download="routripo_architecture.html"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition-colors shadow-xs active:scale-95 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[15px]">download</span>
+            <span>Download HTML File</span>
+          </a>
+        </div>
+
+        <p className="px-4 pb-6 pt-2 text-center text-[11px] font-medium text-slate-400">
+          © 2026 ROUTRIPO · Made for travellers, in India.
         </p>
       </main>
 

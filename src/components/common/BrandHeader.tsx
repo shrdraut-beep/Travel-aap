@@ -48,9 +48,9 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
               {showLogo && (
                 <div className="inline-flex items-center px-2 py-0.5 rounded-lg bg-white/20 backdrop-blur-xs border border-white/30 shadow-2xs shrink-0">
                   <span className="font-black text-xs font-[Poppins] tracking-wide text-white flex items-center">
-                    <span className="text-white drop-shadow-xs">Rout</span>
+                    <span className="text-white drop-shadow-xs">ROU</span>
                     <span className="bg-white text-premium-violet px-1 py-0.2 mx-0.5 rounded-sm font-black text-[10px]">T</span>
-                    <span className="text-pink-100 drop-shadow-xs">ripo</span>
+                    <span className="text-pink-100 drop-shadow-xs">RIPO</span>
                   </span>
                 </div>
               )}

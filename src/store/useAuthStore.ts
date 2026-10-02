@@ -9,6 +9,12 @@ export interface User {
   email: string;
   avatar: string;
   role?: 'user' | 'agent' | 'admin' | 'vendor';
+  phone?: string;
+  departureCity?: string;
+  dietaryPreference?: string;
+  seatPreference?: string;
+  loyaltyProgram?: string;
+  tier?: string;
 }
 
 interface AuthState {
@@ -18,6 +24,7 @@ interface AuthState {
   
   login: () => Promise<User | null>;
   loginWithUser: (user: User) => void;
+  updateUserProfile: (updates: Partial<User>) => void;
   logout: () => void;
   openAuthModal: (callback?: () => void) => void;
   closeAuthModal: () => void;
@@ -59,6 +66,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (action) {
       action();
       set({ pendingAction: null });
+    }
+  },
+
+  updateUserProfile: (updates: Partial<User>) => {
+    const current = get().currentUser || {
+      id: 'usr_' + Date.now(),
+      name: 'Aditi Sharma',
+      email: 'user@routripo.app',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCrpoo9TS_6cmaVeLdwULdoIxXnqUc7kiMjcogApxX8bK9Bxf6FS43lVapLEMAX-Gsw4Wb69nVWicYBN-c2w16eNsvsPhoDogdM6JsWDcpUGbk_2Yk01BKYyqw5WIyeOhL6pIxaJxufKw7Ro6KxjMMtH-Rz97Eqz89d30FI94qlM4Cg9eeDzFJHnAwFLspLn3x_Q1ACItDJF_TJbybwgnVs-ZNtN549TXpwingObAtkbKfNy7nZhGwF',
+      role: 'user'
+    };
+    const updated = { ...current, ...updates };
+    set({ currentUser: updated });
+    saveStoredUser(updated);
+    try {
+      localStorage.setItem('routripo_user_preferences', JSON.stringify({
+        departureCity: updated.departureCity,
+        dietaryPreference: updated.dietaryPreference,
+        seatPreference: updated.seatPreference,
+        loyaltyProgram: updated.loyaltyProgram,
+        phone: updated.phone,
+        name: updated.name,
+        email: updated.email,
+        avatar: updated.avatar
+      }));
+    } catch (e) {
+      console.warn("Could not save preferences to localStorage", e);
     }
   },
 

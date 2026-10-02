@@ -6,9 +6,9 @@ import { maskEmail } from "../../security/privacyUtils";
 export function BrandLogo({ className = "text-2xl" }) {
   return (
     <div className={`font-bold font-[Poppins] flex items-center ${className}`}>
-      <span className="text-red-600">Rout</span>
+      <span className="text-red-600">ROU</span>
       <span className="bg-red-500 text-white px-1.5 mx-[1px] rounded-md shadow-sm">T</span>
-      <span className="text-pink-500">ripo</span>
+      <span className="text-pink-500">RIPO</span>
     </div>
   );
 }
@@ -16,9 +16,9 @@ export function BrandLogo({ className = "text-2xl" }) {
 export function LogoName({ className = "" }: { className?: string }) {
   return (
     <span className={`font-bold font-[Poppins] ${className}`}>
-      <span className="text-red-500">Rout</span>
+      <span className="text-red-500">ROU</span>
       <span className="text-white bg-red-500 px-1 mx-0.5 rounded">T</span>
-      <span className="text-pink-500">ripo</span>
+      <span className="text-pink-500">RIPO</span>
     </span>
   );
 }

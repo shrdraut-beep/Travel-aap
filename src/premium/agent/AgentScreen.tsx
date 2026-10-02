@@ -15,6 +15,7 @@ import {
   X
 } from "lucide-react";
 import { PortalBottomNav, type PortalTabItem } from "../shared/PortalBottomNav";
+import { GlobalBrandHeader } from "../../components/common/GlobalBrandHeader";
 import {
   AgentSupportPanel,
   BookingsPanel,
@@ -145,32 +146,24 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
             transition={{ type: "spring", damping: 32, stiffness: 320 }}
             className="mx-auto flex h-full w-full max-w-[520px] flex-col bg-[var(--premium-page)] shadow-2xl relative"
           >
-            {/* Compressed Header with Sky Gradient */}
-            <header className="premium-sky-panel shrink-0 px-4 py-2.5">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <span className="premium-gradient-pink flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white text-[15px] font-bold text-white shadow-sm">
-                    {agencyName.trim().charAt(0).toUpperCase()}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[15px] font-bold leading-tight text-white">
-                      {agencyName}
-                    </p>
-                    <p className="truncate text-[11px] font-medium text-white/80">
-                      {agentEmail}
-                    </p>
-                  </div>
-                </div>
+            {/* Signature RouTripo Curved Brand Header (Vendor Orange) */}
+            <GlobalBrandHeader
+              subtitle={`${agencyName} · Partner Vendor`}
+              theme="orange"
+              badge="VENDOR"
+              onNotifications={() => alert("Partner alerts: All bidding feeds & inventory active!")}
+              onOpenProfile={() => setPrimaryTab("profile")}
+              actionButton={
                 <button
                   type="button"
                   aria-label="Close"
                   onClick={onClose}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 text-white transition-colors cursor-pointer"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/90 hover:bg-white border border-orange-200/80 text-orange-800 transition-colors cursor-pointer shadow-xs active:scale-95"
                 >
                   <X className="h-4 w-4" />
                 </button>
-              </div>
-            </header>
+              }
+            />
 
             {/* Profile Sub-Navigation Toolbar - BORDERLESS 3D ICONS */}
             {primaryTab === "profile" && (

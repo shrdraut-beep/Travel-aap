@@ -99,6 +99,17 @@ app.get(["/download-project-zip", "/api/download-zip", "/routripo-project.zip"],
   }
 });
 
+// Architecture diagram HTML download route
+app.get(["/download-architecture", "/api/download/architecture"], (_req, res) => {
+  const filePath = path.join(process.cwd(), "public", "architecture.html");
+  if (fs.existsSync(filePath)) {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="routripo_architecture.html"');
+    return res.sendFile(filePath);
+  }
+  return res.status(404).send("Architecture diagram not found.");
+});
+
 
 // Read config safely
 let firebaseConfig: any = {};

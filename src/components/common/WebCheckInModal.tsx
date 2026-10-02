@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { X, CheckCircle, ExternalLink, ShieldCheck, Plane, ArrowRight, AlertCircle } from 'lucide-react';
 
 interface WebCheckInModalProps {

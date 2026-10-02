@@ -43,6 +43,7 @@ import { SecretOffersModal } from "../modals/PremiumModals";
 import { checkCustomBiddingAllowance } from "./bargaining/BargainingRateLimiter";
 import { BargainingPaywallModal } from "./bargaining/BargainingPaywallModal";
 import { MakeAnOfferModal } from "./bargaining/MakeAnOfferModal";
+import { GlobalBrandHeader } from "../../components/common/GlobalBrandHeader";
 
 const STATUS_TONE: Record<BargainingRequest["status"], string> = {
   Open: "bg-sky-100 text-sky-800",
@@ -360,6 +361,14 @@ export const BargainingTab: React.FC<{
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* 1. Signature RouTripo Curved Brand Header */}
+      <GlobalBrandHeader
+        subtitle="Bargaining Engine & Live Bids"
+        theme="ocean"
+        onNotifications={() => onSelect?.("sos")}
+        onOpenProfile={() => onSelect?.("settings-profile" as any)}
+      />
 
       {/* 
         ========================================================================

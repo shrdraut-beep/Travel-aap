@@ -2,14 +2,30 @@ import React from "react";
 import { Plus, Briefcase, MapPin, Calendar, Users, ArrowRight , Wallet, HeadphonesIcon} from "lucide-react";
 import { useTripContext } from "../../context/TripContext";
 import { ListRow, PillButton, SectionHeader } from "./ui";
+import { GlobalBrandHeader } from "../../components/common/GlobalBrandHeader";
 
-export const GlobalTripsTab: React.FC<{ onCreateTrip: () => void, onEnterTrip?: () => void, onOpenAiPlanner?: () => void }> = ({ onCreateTrip, onEnterTrip, onOpenAiPlanner }) => {
+export const GlobalTripsTab: React.FC<{ 
+  onCreateTrip: () => void; 
+  onEnterTrip?: () => void; 
+  onOpenAiPlanner?: () => void;
+  onOpenProfile?: () => void;
+  onOpenSos?: () => void;
+}> = ({ onCreateTrip, onEnterTrip, onOpenAiPlanner, onOpenProfile, onOpenSos }) => {
   const { trips, selectTripById } = useTripContext();
 
   return (
-    <div className="p-2 pb-24 space-y-1.5">
-      {/* Quick Tools Section */}
-      <div className="pt-2">
+    <div className="pb-24">
+      {/* 1. Signature RouTripo Curved Brand Header */}
+      <GlobalBrandHeader
+        subtitle="My Trips & Travel Vault"
+        theme="ocean"
+        onNotifications={onOpenSos}
+        onOpenProfile={onOpenProfile}
+      />
+
+      <div className="p-2 space-y-1.5">
+        {/* Quick Tools Section */}
+        <div className="pt-2">
         <div className="grid grid-cols-2 gap-3">
           {/* AI Trip Planner Button */}
           <button
@@ -143,5 +159,6 @@ export const GlobalTripsTab: React.FC<{ onCreateTrip: () => void, onEnterTrip?: 
         </div>
       </div>
     </div>
+  </div>
   );
 };

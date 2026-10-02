@@ -453,9 +453,9 @@ export function HotelPartnerOnboardingForm({
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div style={{ fontFamily: 'Arial, sans-serif', fontSize: '24px', fontWeight: 900, letterSpacing: '0.5px' }}>
-            <span style={{ color: '#e3000f' }}>Rou</span>
+            <span style={{ color: '#e3000f' }}>ROU</span>
             <span style={{ backgroundColor: '#f92a35', color: 'white', padding: '1px 6px', borderRadius: '6px', margin: '0 2px' }}>T</span>
-            <span style={{ color: '#ed2893' }}>ripo</span>
+            <span style={{ color: '#ed2893' }}>RIPO</span>
           </div>
           <span className="text-xs font-black bg-blue-50 text-blue-800 px-2.5 py-1 rounded-full uppercase tracking-wider">
             Partner Portal

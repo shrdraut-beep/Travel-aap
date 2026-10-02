@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "RouTripo – System Architecture",
+    "subtitle": "Interactive architecture & data-flow diagram for RouTripo travel planner, reverse-bidding & expense management",
+    "output": "routripo.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "client_web",
+      "type": "frontend",
+      "label": "Web Client",
+      "sublabel": "React 18 + Vite SPA",
+      "pos": [40, 240],
+      "size": [140, 64],
+      "tag": "Tailwind + Router"
+    },
+    {
+      "id": "client_app",
+      "type": "frontend",
+      "label": "Mobile App",
+      "sublabel": "Capacitor Android APK",
+      "pos": [40, 360],
+      "size": [140, 64],
+      "tag": "Native Plugins"
+    },
+    {
+      "id": "auth_firebase",
+      "type": "security",
+      "label": "Firebase Auth",
+      "sublabel": "JWT & Identity",
+      "pos": [40, 100],
+      "size": [140, 64],
+      "tag": "OAuth / Phone OTP"
+    },
+    {
+      "id": "express_server",
+      "type": "backend",
+      "label": "Express API Server",
+      "sublabel": "Node.js (server.ts :3000)",
+      "pos": [260, 290],
+      "size": [160, 70],
+      "tag": "Rate Limit + CSP"
+    },
+    {
+      "id": "gemini_ai",
+      "type": "external",
+      "label": "Google Gemini AI",
+      "sublabel": "Receipt OCR & Itinerary",
+      "pos": [510, 110],
+      "size": [150, 64],
+      "tag": "Gemini 2.5 Flash"
+    },
+    {
+      "id": "firestore_db",
+      "type": "database",
+      "label": "Cloud Firestore",
+      "sublabel": "Trips & Bargains",
+      "pos": [510, 230],
+      "size": [150, 64],
+      "tag": "Realtime Sync"
+    },
+    {
+      "id": "razorpay_gw",
+      "type": "security",
+      "label": "Razorpay Escrow",
+      "sublabel": "Checkout & Webhooks",
+      "pos": [510, 350],
+      "size": [150, 64],
+      "tag": "100% Escrow Shield"
+    },
+    {
+      "id": "travel_apis",
+      "type": "external",
+      "label": "Travel GDS APIs",
+      "sublabel": "Flights, Stays, Bus, Cab",
+      "pos": [510, 470],
+      "size": [150, 64],
+      "tag": "Duffel / Amadeus"
+    },
+    {
+      "id": "search_engine",
+      "type": "database",
+      "label": "Meilisearch",
+      "sublabel": "Instant Search Index",
+      "pos": [740, 230],
+      "size": [140, 64],
+      "tag": "Fast Typo-Tolerance"
+    },
+    {
+      "id": "fcm_messaging",
+      "type": "messagebus",
+      "label": "Cloud Messaging",
+      "sublabel": "FCM Push Notifications",
+      "pos": [740, 350],
+      "size": [140, 64],
+      "tag": "Service Worker"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Client Layer",
+      "wraps": ["client_web", "client_app"]
+    },
+    {
+      "kind": "region",
+      "label": "RouTripo Cloud Infrastructure",
+      "wraps": ["express_server", "firestore_db", "search_engine", "fcm_messaging"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "web-to-server",
+      "from": "client_web",
+      "to": "express_server",
+      "label": "REST / JSON",
+      "variant": "emphasis"
+    },
+    {
+      "id": "mobile-to-server",
+      "from": "client_app",
+      "to": "express_server",
+      "label": "HTTPS API"
+    },
+    {
+      "id": "auth-tokens",
+      "from": "auth_firebase",
+      "to": "client_web",
+      "label": "ID Tokens",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "server-to-ai",
+      "from": "express_server",
+      "to": "gemini_ai",
+      "label": "Gemini API",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "server-to-firestore",
+      "from": "express_server",
+      "to": "firestore_db",
+      "label": "Admin SDK"
+    },
+    {
+      "id": "server-to-razorpay",
+      "from": "express_server",
+      "to": "razorpay_gw",
+      "label": "Orders / Verify",
+      "variant": "security"
+    },
+    {
+      "id": "server-to-travel",
+      "from": "express_server",
+      "to": "travel_apis",
+      "label": "Live Inventory",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "firestore-to-search",
+      "from": "firestore_db",
+      "to": "search_engine",
+      "label": "Sync Index",
+      "variant": "dashed"
+    },
+    {
+      "id": "server-to-fcm",
+      "from": "express_server",
+      "to": "fcm_messaging",
+      "label": "Bid Alerts",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Client Experience",
+      "items": [
+        "Responsive React 18 SPA + Capacitor Android native shell",
+        "Zustand state store, offline caching, and PWA capabilities",
+        "Multilingual interface with dynamic INR / USD currency converter"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Core Backend & Intelligence",
+      "items": [
+        "Node.js Express API with rate limiting, Helmet CSP, and SSR proxies",
+        "Google Gemini AI for OCR bill scanning and smart group itinerary generation",
+        "Meilisearch for typo-tolerant fast destination and hotel discovery"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Security & Escrow Guarantee",
+      "items": [
+        "Firebase Auth token verification with encrypted user sessions",
+        "Razorpay payment gateway with 100% verified escrow protection shield",
+        "Zero sensitive data retention and strict GDPR / DPDP compliance"
+      ]
+    }
+  ]
+}

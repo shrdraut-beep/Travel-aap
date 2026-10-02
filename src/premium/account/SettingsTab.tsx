@@ -1,6 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { AccountItemId } from "./types";
 import { useTripContext } from "../../context/TripContext";
+import { GlobalBrandHeader, DEFAULT_USER_AVATAR } from "../../components/common/GlobalBrandHeader";
+import { EditProfileModal, type ProfileFormData } from "./EditProfileModal";
+import { useAuthStore } from "../../store/useAuthStore";
+import { ClosedWalletModal } from "./ClosedWalletModal";
+import { ClosedWalletService, type ClosedWalletAccount } from "../../services/ClosedWalletService";
+import { MasterPassengerModal } from "./MasterPassengerModal";
+import { MasterPassengerService } from "../../services/MasterPassengerService";
+import { SecurityAuthModal } from "./SecurityAuthModal";
+import { TravelPreferencesModal } from "./TravelPreferencesModal";
+import { SosModal } from "../../components/modals/SosModal";
+import { SupportDrawerModal, type SupportTopic } from "./SupportDrawerModal";
 
 export interface SettingsTabProps {
   userName?: string;
@@ -30,6 +41,98 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 }) => {
   const [locationBeacon, setLocationBeacon] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isPassengerModalOpen, setIsPassengerModalOpen] = useState(false);
+  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
+  const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
+  const [isSosModalOpen, setIsSosModalOpen] = useState(false);
+  const [supportDrawerTopic, setSupportDrawerTopic] = useState<SupportTopic | null>(null);
+  const [walletAccount, setWalletAccount] = useState<ClosedWalletAccount>(ClosedWalletService.getAccount());
+  const [passengerCount, setPassengerCount] = useState<number>(MasterPassengerService.getPassengers().length);
+
+  useEffect(() => {
+    const unsubWallet = ClosedWalletService.subscribe((updated) => {
+      setWalletAccount(updated);
+    });
+    const unsubPassengers = MasterPassengerService.subscribe((list) => {
+      setPassengerCount(list.length);
+    });
+    return () => {
+      unsubWallet();
+      unsubPassengers();
+    };
+  }, []);
+
+  // Strip any "(Traveller)", "(Traveler)" or role from user name
+  const cleanName = (rawName: string) => {
+    if (!rawName) return "Aditi Sharma";
+    return rawName
+      .replace(/\s*\((.*?)\)/g, "")
+      .replace(/\s*-\s*Travell?er/gi, "")
+      .replace(/\s+Travell?er/gi, "")
+      .trim();
+  };
+
+  // Mask Phone: e.g. +91 98765 •••••
+  const maskPhone = (phone: string) => {
+    if (!phone) return "+91 98765 •••••";
+    if (phone.includes("•") || phone.includes("*")) return phone;
+    const trimmed = phone.trim();
+    if (trimmed.length >= 10) {
+      return trimmed.slice(0, 8) + " •••••";
+    }
+    return trimmed;
+  };
+
+  // Mask Email: e.g. u•••••p@routripo.app
+  const maskEmail = (email: string) => {
+    if (!email) return "u•••••p@routripo.app";
+    if (email.includes("•") || email.includes("*")) return email;
+    const parts = email.split("@");
+    if (parts.length === 2) {
+      const name = parts[0];
+      const domain = parts[1];
+      if (name.length <= 2) return `${name.charAt(0)}••@${domain}`;
+      return `${name.charAt(0)}•••••${name.charAt(name.length - 1)}@${domain}`;
+    }
+    return email;
+  };
+
+  const [profileData, setProfileData] = useState<ProfileFormData>(() => {
+    try {
+      const saved = localStorage.getItem("routripo_user_preferences");
+      if (saved) {
+        const parsedSaved = JSON.parse(saved);
+        return {
+          name: cleanName(parsedSaved.name || userName || "Aditi Sharma"),
+          tag: "Traveller",
+          phone: parsedSaved.phone || "+91 98765 43210",
+          email: parsedSaved.email || userEmail || "user@routripo.app",
+          avatar: parsedSaved.avatar || DEFAULT_USER_AVATAR,
+          departureCity: parsedSaved.departureCity || "Mumbai (BOM)",
+          dietaryPreference: parsedSaved.dietaryPreference || "Veg Meal",
+          seatPreference: parsedSaved.seatPreference || "Window Seat",
+          loyaltyProgram: parsedSaved.loyaltyProgram || "6E Rewards Linked",
+          tier: parsedSaved.tier || "Gold VIP Voyager"
+        };
+      }
+    } catch (e) {
+      console.warn("Failed to load profile preferences", e);
+    }
+    return {
+      name: cleanName(userName || "Aditi Sharma"),
+      tag: "Traveller",
+      phone: "+91 98765 43210",
+      email: userEmail || "user@routripo.app",
+      avatar: DEFAULT_USER_AVATAR,
+      departureCity: "Mumbai (BOM)",
+      dietaryPreference: "Veg Meal",
+      seatPreference: "Window Seat",
+      loyaltyProgram: "6E Rewards Linked",
+      tier: "Gold VIP Voyager"
+    };
+  });
 
   const tripContext = useTripContext?.();
   const tripsCount = tripContext?.trips?.length || 18;
@@ -37,6 +140,35 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleSaveProfile = (updated: ProfileFormData) => {
+    // Preserve system-assigned badges (Traveler Tag & Gold VIP Voyager)
+    const sanitized: ProfileFormData = {
+      ...updated,
+      name: cleanName(updated.name),
+      tag: profileData.tag || "Traveller",
+      tier: profileData.tier || "Gold VIP Voyager"
+    };
+    setProfileData(sanitized);
+    try {
+      localStorage.setItem("routripo_user_preferences", JSON.stringify(sanitized));
+    } catch (e) {
+      console.warn("Could not save to localStorage", e);
+    }
+    // Update global auth store
+    useAuthStore.getState().updateUserProfile({
+      name: sanitized.name,
+      email: sanitized.email,
+      phone: sanitized.phone,
+      avatar: sanitized.avatar,
+      departureCity: sanitized.departureCity,
+      dietaryPreference: sanitized.dietaryPreference,
+      seatPreference: sanitized.seatPreference,
+      loyaltyProgram: sanitized.loyaltyProgram,
+      tier: sanitized.tier
+    });
+    showToast("Profile updated successfully! All preferences saved.");
   };
 
   return (
@@ -51,299 +183,186 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         </div>
       )}
 
-      {/* 1. Signature RouTripo Curved Brand Header */}
-      <header className="w-full bg-gradient-to-r from-sky-100 via-sky-50 to-blue-100 border-b border-sky-200/80 px-4 pt-4 pb-4 rounded-b-[24px] shadow-sm sticky top-0 z-40">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onBack ? onBack() : onSelect("booking-upcoming")}
-              aria-label="Go Back"
-              className="w-9 h-9 rounded-full bg-white/80 border border-sky-200/80 flex items-center justify-center text-slate-700 hover:bg-white active:scale-95 transition-all shadow-sm cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-            </button>
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center tracking-tight text-[1.3rem] font-extrabold leading-none">
-                <span className="text-[#0284C7]">Rou</span>
-                <span className="bg-[#FF5722] text-white text-[0.95rem] px-1.5 py-0.5 rounded-md mx-0.5 font-black leading-none shadow-sm">
-                  T
-                </span>
-                <span className="text-[#EC4899]">ripo</span>
-              </div>
-              <span className="text-[0.68rem] font-semibold text-sky-800 tracking-wide mt-1 flex items-center gap-1">
-                Profile &amp; Account Hub
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onSelect("sos")}
-              aria-label="Emergency SOS and Notifications"
-              className="relative w-9 h-9 rounded-full bg-white/90 border border-rose-200 flex items-center justify-center text-rose-600 hover:bg-rose-50 active:scale-95 transition-all shadow-sm cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[20px] text-rose-600">notifications_active</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* 1. Signature RouTripo Curved Brand Header (Soft Ocean Mist) */}
+      <GlobalBrandHeader
+        subtitle="Profile & Account Hub"
+        theme="ocean"
+        avatarSrc={profileData.avatar}
+        onNotifications={() => onSelect("sos")}
+        onOpenProfile={() => {
+          setIsEditModalOpen(true);
+        }}
+      />
 
       {/* Content Canvas */}
       <div className="px-4 pt-2 space-y-4 flex-1">
-        {/* 2. User Profile Hero Section */}
-        <section className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-36 h-36 bg-sky-500/5 rounded-full pointer-events-none blur-2xl" />
+        {/* 2. User Profile Hero Section (Compact & Sleek) */}
+        <section className="bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 shadow-2xs relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-sky-500/5 rounded-full pointer-events-none blur-2xl" />
           
-          <div className="flex items-start gap-4">
-            {/* Avatar with Edit Badge */}
-            <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-2xl p-0.5 bg-gradient-to-tr from-[#006591] via-[#0ea5e9] to-[#8B5CF6] shadow-sm overflow-hidden flex items-center justify-center bg-slate-100">
-                <img
-                  alt={`${userName} avatar`}
-                  className="w-full h-full object-cover rounded-[14px]"
-                  src="https://lh3.googleusercontent.com/aida/AEtjO1UE5X8wPfMbASxWvI1WI_HWi6F8q003jMkmn6Ts8DFb566-VfgdDxQS0VqORfV64luM0AAe2aeku_Q2MSYA7fewW9MPGXKmJqbY-DAZNnNild8iEh2hV9LVTMHhXkO9dMoDAujXROSRw6lS1Ox7QH2If7d7LppHgCbjEKpae9NEUUnAp5IpfHEfxC3rElDVTXrfE6jeapUmIltUxcOCFlP7AcqiXGwE19KELxU5otl3sOnp2iQtX5K3AnU"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => onSelect("profile")}
-                aria-label="Edit Profile"
-                className="absolute -bottom-1 -right-1 px-2 py-0.5 bg-white border border-sky-600/40 rounded-full flex items-center gap-1 text-sky-700 shadow-sm hover:bg-sky-50 active:scale-95 transition-all cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[13px]">edit</span>
-                <span className="font-mono text-[11px] font-bold">Edit</span>
-              </button>
-            </div>
+          <div className="flex items-center gap-3.5">
+            {/* Left Column: Avatar Photo */}
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(true)}
+              aria-label="Edit Profile"
+              className="w-16 h-16 rounded-2xl p-0.5 bg-gradient-to-tr from-sky-500 via-indigo-500 to-pink-500 shadow-2xs overflow-hidden flex items-center justify-center bg-slate-100 hover:opacity-95 transition-opacity cursor-pointer shrink-0"
+            >
+              <img
+                alt={`${profileData.name} avatar`}
+                className="w-full h-full object-cover rounded-[14px]"
+                src={profileData.avatar || DEFAULT_USER_AVATAR}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = DEFAULT_USER_AVATAR;
+                }}
+              />
+            </button>
 
-            {/* User Details */}
+            {/* Right Column: Name & Details on Left, Badges & Ticks on the Far Right */}
             <div className="flex-1 min-w-0">
-              <div className="mb-2">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-[1.25rem] font-bold text-slate-900 truncate leading-tight">
-                    {userName}
-                  </h2>
+              {/* Row 1: Clean Name on Left, Blue Verified Tick + Gold VIP Badge on Far Right */}
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <h2 className="text-[1.05rem] sm:text-[1.15rem] font-black text-slate-900 leading-tight truncate">
+                  {cleanName(profileData.name)}
+                </h2>
+
+                {/* Badges and Ticks pinned to the right side of the screen */}
+                <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+                  {/* Blue Verified Tick */}
                   <span
-                    className="material-symbols-outlined text-[#0ea5e9] text-[19px] shrink-0"
+                    className="material-symbols-outlined text-[#0ea5e9] text-[18px] shrink-0"
                     style={{ fontVariationSettings: "'FILL' 1" }}
+                    title="Verified Traveler"
                   >
                     verified
                   </span>
-                </div>
-                <div className="mt-1 flex items-center gap-1.5">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-mono text-[10px] font-bold tracking-wide uppercase shadow-xs">
+                  {/* Gold VIP Badge Icon */}
+                  <span
+                    className="w-5 h-5 rounded-full bg-amber-50 border border-amber-200/90 flex items-center justify-center text-amber-600 shadow-2xs shrink-0"
+                    title="Gold VIP Voyager"
+                  >
                     <span
-                      className="material-symbols-outlined text-[12px] text-amber-600"
+                      className="material-symbols-outlined text-[13px]"
                       style={{ fontVariationSettings: "'FILL' 1" }}
                     >
                       workspace_premium
                     </span>
-                    Gold VIP Voyager
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    Tier 2
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-[0.875rem] text-slate-600 flex items-center gap-1.5 truncate">
-                  <span className="material-symbols-outlined text-[#006591] text-[15px]">call</span>
-                  <span>+91 98765 •••••</span>
-                  <span className="text-[11px] font-mono text-emerald-600 font-semibold ml-1 inline-flex items-center gap-0.5">
-                    <span
-                      className="material-symbols-outlined text-[12px]"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      check_circle
-                    </span>
-                    Verified
+              {/* Contact details with Text on Left and Verified Green Ticks on Far Right */}
+              <div className="mt-1 space-y-1">
+                {/* Masked Phone with Tick on Far Right */}
+                <div className="flex items-center justify-between text-xs text-slate-600 gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0 truncate">
+                    <span className="material-symbols-outlined text-sky-600 text-[14px] shrink-0">call</span>
+                    <span className="font-mono font-medium truncate">{maskPhone(profileData.phone)}</span>
+                  </div>
+                  <span
+                    className="material-symbols-outlined text-emerald-600 text-[16px] shrink-0 ml-auto"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                    title="Verified Phone"
+                  >
+                    check_circle
                   </span>
-                </p>
-                <p className="text-[0.875rem] text-slate-500 flex items-center gap-1.5 truncate">
-                  <span className="material-symbols-outlined text-[#006591] text-[15px]">mail</span>
-                  <span>{userEmail}</span>
-                  <span className="text-[11px] font-mono text-emerald-600 font-semibold ml-1 inline-flex items-center gap-0.5">
-                    <span
-                      className="material-symbols-outlined text-[12px]"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      check_circle
-                    </span>
-                    Verified
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
+                </div>
 
-          {/* Travel Defaults Pills */}
-          <div className="pt-2 mt-3 border-t border-slate-200 flex flex-col space-y-1.5">
-            <span className="font-mono text-[11px] text-slate-700 font-bold tracking-wider uppercase">
-              Default Travel Preferences
-            </span>
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
-              <div className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 font-mono text-[12px] font-semibold">
-                <span className="material-symbols-outlined text-[14px]">flight_takeoff</span>
-                BOM (Mumbai)
-              </div>
-              <div className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[12px] font-semibold">
-                <span className="material-symbols-outlined text-[14px] text-emerald-600">restaurant</span>
-                Veg Meal
-              </div>
-              <div className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-mono text-[12px]">
-                <span className="material-symbols-outlined text-[14px] text-[#006591]">airline_seat_recline_extra</span>
-                Window Seat
-              </div>
-              <div className="flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200 font-mono text-[12px] font-semibold">
-                <span className="material-symbols-outlined text-[14px] text-purple-600">stars</span>
-                6E Rewards Linked
+                {/* Masked Email with Tick on Far Right */}
+                <div className="flex items-center justify-between text-xs text-slate-600 gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0 truncate">
+                    <span className="material-symbols-outlined text-sky-600 text-[14px] shrink-0">mail</span>
+                    <span className="font-mono font-medium truncate">{maskEmail(profileData.email)}</span>
+                  </div>
+                  <span
+                    className="material-symbols-outlined text-emerald-600 text-[16px] shrink-0 ml-auto"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                    title="Verified Email"
+                  >
+                    check_circle
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 3. Numerical Stats Grid (2x2) */}
-        <section className="grid grid-cols-2 gap-2">
+        {/* Quick Wallet Header right under Profile Card */}
+        <div className="flex items-center justify-between px-1 pt-0.5">
+          <h3 className="font-mono text-[11px] text-slate-400 font-bold tracking-wider uppercase">
+            Quick Wallet
+          </h3>
+          <span className="font-mono text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+            Live Sync
+          </span>
+        </div>
+
+        {/* 3. Numerical Stats Grid (3 Columns: Completed, Savings, Wallet) with Center-Aligned Bigger Numbers */}
+        <section className="grid grid-cols-3 gap-2">
           {/* Stat 1: Completed Trips */}
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[0.875rem] text-slate-600 font-medium">Completed Trips</span>
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[17px]">luggage</span>
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between items-center text-center">
+            <div className="flex items-center justify-between w-full mb-1">
+              <span className="text-[11px] sm:text-[12px] text-slate-600 font-medium truncate">Completed</span>
+              <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[15px]">luggage</span>
               </div>
             </div>
-            <span className="text-[1.5rem] font-bold text-blue-700 tracking-tight">
-              {tripsCount}
-            </span>
-            <span className="font-mono text-[12px] text-blue-600 font-semibold mt-1">
+            <div className="my-1.5 flex flex-col items-center justify-center">
+              <span className="text-[1.65rem] sm:text-[1.85rem] font-black text-blue-700 tracking-tight leading-none text-center">
+                {tripsCount || 18}
+              </span>
+            </div>
+            <span className="font-mono text-[10px] text-blue-600 font-bold truncate text-center w-full">
               +3 this season
             </span>
           </div>
 
           {/* Stat 2: Bargain Savings */}
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[0.875rem] text-slate-600 font-medium">Bargain Savings</span>
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[17px]">payments</span>
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between items-center text-center">
+            <div className="flex items-center justify-between w-full mb-1">
+              <span className="text-[11px] sm:text-[12px] text-slate-600 font-medium truncate">Savings</span>
+              <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[15px]">payments</span>
               </div>
             </div>
-            <span className="text-[1.5rem] font-bold text-emerald-600 tracking-tight">
-              ₹24,850
-            </span>
-            <span className="font-mono text-[12px] text-emerald-700 font-semibold mt-1">
-              Direct wallet credit
-            </span>
-          </div>
-
-          {/* Stat 3: RouTripo Coins */}
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[0.875rem] text-slate-600 font-medium">RouTripo Coins</span>
-              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[17px]">toll</span>
-              </div>
-            </div>
-            <span className="text-[1.5rem] font-bold text-amber-600 tracking-tight">
-              3,420
-            </span>
-            <span className="font-mono text-[12px] text-amber-700 font-semibold mt-1">
-              ₹342 redeemable
-            </span>
-          </div>
-
-          {/* Stat 4: Traveler Rating */}
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[0.875rem] text-slate-600 font-medium">Traveler Rating</span>
-              <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                <span
-                  className="material-symbols-outlined text-[17px] text-purple-600"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  star
-                </span>
-              </div>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[1.5rem] font-bold text-purple-800 tracking-tight">
-                4.95
-              </span>
-              <span
-                className="material-symbols-outlined text-amber-500 text-[16px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                star
+            <div className="my-1.5 flex flex-col items-center justify-center">
+              <span className="text-[1.45rem] sm:text-[1.65rem] font-black text-emerald-600 tracking-tight leading-none text-center">
+                ₹24,850
               </span>
             </div>
-            <span className="font-mono text-[12px] text-slate-400 font-medium mt-1">
-              From 42 verified hosts
+            <span className="font-mono text-[10px] text-emerald-700 font-bold truncate text-center w-full">
+              Direct credit
             </span>
           </div>
+
+          {/* Stat 3: Wallet (Closed-Loop Travel Wallet with Merged Coins) */}
+          <button
+            type="button"
+            onClick={() => setIsWalletModalOpen(true)}
+            className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between items-center text-center hover:border-indigo-300 hover:shadow-md transition-all active:scale-98 cursor-pointer group"
+          >
+            <div className="flex items-center justify-between w-full mb-1">
+              <span className="text-[11px] sm:text-[12px] text-slate-600 font-medium group-hover:text-indigo-600 transition-colors truncate">
+                Wallet
+              </span>
+              <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
+                <span className="material-symbols-outlined text-[15px]">account_balance_wallet</span>
+              </div>
+            </div>
+            <div className="my-1.5 flex flex-col items-center justify-center">
+              <span className="text-[1.45rem] sm:text-[1.65rem] font-black text-indigo-700 tracking-tight leading-none text-center">
+                ₹{walletAccount.totalBalance.toLocaleString('en-IN')}
+              </span>
+            </div>
+            <div className="flex items-center justify-center w-full">
+              <span className="font-mono text-[9.5px] text-indigo-700 font-bold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200 truncate text-center">
+                ₹{walletAccount.coinValueInRupees} Coins
+              </span>
+            </div>
+          </button>
         </section>
 
-        {/* 4. Quick Feature Action Chips */}
-        <section className="space-y-1.5">
-          <h3 className="font-mono text-[11px] text-slate-400 font-bold tracking-wider uppercase">
-            Quick Wallet &amp; Bids
-          </h3>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            {/* Live Bids */}
-            <button
-              type="button"
-              onClick={() => onSelect("bargain-requests")}
-              className="shrink-0 flex items-center gap-2 px-3 py-1.5 bg-white border border-[#0ea5e9]/40 rounded-full hover:bg-slate-50 active:scale-95 transition-all shadow-sm cursor-pointer"
-            >
-              <div className="w-6 h-6 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[14px]">gavel</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[12px] text-slate-900 font-bold">Live Bids</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-sky-100 text-sky-700 font-mono text-[10px] font-bold">
-                  2 active
-                </span>
-              </div>
-            </button>
-
-            {/* Saved Places */}
-            <button
-              type="button"
-              onClick={() => {
-                onSelect("wishlist");
-                showToast("Opening Saved Places & Wishlist...");
-              }}
-              className="shrink-0 flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 active:scale-95 transition-all shadow-sm cursor-pointer"
-            >
-              <div className="w-6 h-6 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[14px]">bookmark</span>
-              </div>
-              <span className="font-mono text-[12px] text-slate-900 font-semibold">Saved Places</span>
-            </button>
-
-            {/* Travel Budget */}
-            <button
-              type="button"
-              onClick={() => onSelect("wallet")}
-              className="shrink-0 flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full hover:bg-slate-50 active:scale-95 transition-all shadow-sm cursor-pointer"
-            >
-              <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[14px]">account_balance_wallet</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[12px] text-slate-900 font-semibold">Travel Budget</span>
-                <span className="px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[10px] font-bold">
-                  ₹45,000
-                </span>
-              </div>
-            </button>
-          </div>
-        </section>
-
-        {/* 5. Account Settings Groups */}
+        {/* 4. Account Settings Groups */}
 
         {/* Group 1: Account & Security */}
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -356,7 +375,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Item 1: Master Passenger List */}
             <button
               type="button"
-              onClick={() => onSelect("profile")}
+              onClick={() => setIsPassengerModalOpen(true)}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -367,49 +386,19 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   <div className="flex items-center gap-1.5">
                     <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Master Passenger List</p>
                     <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-mono text-[11px] font-bold border border-blue-200">
-                      5 Saved
+                      {passengerCount} Saved
                     </span>
                   </div>
-                  <p className="text-[13px] text-slate-500 mt-0.5">5 Co-Travellers • 1-Click Instant Booking</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Co-Travellers • 1-Click Instant Booking</p>
                 </div>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
             </button>
 
-            {/* Item 2: DigiLocker Vault */}
+            {/* Item 2: Security & 2-Factor Auth */}
             <button
               type="button"
-              onClick={() => onSelect("legal-vault")}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                  <span
-                    className="material-symbols-outlined text-[20px]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    shield_with_heart
-                  </span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-[1rem] text-slate-900 font-semibold leading-tight">DigiLocker Vault</p>
-                    <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono text-[11px] font-bold border border-emerald-200">
-                      Verified
-                    </span>
-                  </div>
-                  <p className="text-[13px] text-slate-500 mt-0.5">Aadhaar (XXXX-8921) &amp; Passport linked</p>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
-            </button>
-
-            {/* Item 3: Security & 2-Factor Auth */}
-            <button
-              type="button"
-              onClick={() => {
-                showToast("Biometric FaceID & 2FA is active and secured");
-              }}
+              onClick={() => setIsSecurityModalOpen(true)}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -418,7 +407,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
                 <div>
                   <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Security &amp; 2-Factor Auth</p>
-                  <p className="text-[13px] text-slate-500 mt-0.5">Biometric FaceID &amp; SMS OTP Enabled</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Biometric FaceID, SMS 2FA &amp; Active Sessions</p>
                 </div>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
@@ -437,7 +426,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Item 1: Travel Preferences */}
             <button
               type="button"
-              onClick={() => onSelect("currency")}
+              onClick={() => setIsPreferencesModalOpen(true)}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -446,7 +435,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
                 <div>
                   <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Travel Preferences</p>
-                  <p className="text-[13px] text-slate-500 mt-0.5">Seat: Window, Meal: Veg, Currency: {currency} (₹)</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Seat: {profileData.seatPreference}, Meal: {profileData.dietaryPreference}, City: {profileData.departureCity.split(' ')[0]}</p>
                 </div>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
@@ -483,7 +472,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Item 1: Guardian SOS Network */}
             <button
               type="button"
-              onClick={() => onSelect("sos")}
+              onClick={() => setIsSosModalOpen(true)}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -495,15 +484,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                     <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Guardian SOS Network</p>
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <p className="text-[13px] text-slate-500 mt-0.5">3 Family emergency contacts synced &amp; active</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Emergency SOS, Live GPS Broadcast &amp; Siren</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[11px] font-medium border border-slate-200">
-                  3 Synced
-                </span>
-                <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
-              </div>
+              <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
             </button>
 
             {/* Item 2: Live Trip Location Beacon */}
@@ -533,7 +517,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
         </section>
 
-        {/* Group 4: Support & Essentials (Expanded) */}
+        {/* Group 4: Support & Essentials (Expanded with Dedicated Specific Drawers) */}
         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200">
             <h3 className="font-mono text-[11px] text-slate-500 font-bold tracking-wider uppercase">
@@ -544,7 +528,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Item 1: About RouTripo Guarantee */}
             <button
               type="button"
-              onClick={() => onSelect("about")}
+              onClick={() => setSupportDrawerTopic('guarantee')}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -552,7 +536,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   <span className="material-symbols-outlined text-[20px]">verified_user</span>
                 </div>
                 <div>
-                  <p className="text-[1rem] text-slate-900 font-semibold leading-tight">About RouTripo Guarantee</p>
+                  <p className="text-[1rem] text-slate-900 font-semibold leading-tight">About ROUTRIPO Guarantee</p>
                   <p className="text-[13px] text-slate-500 mt-0.5">100% Escrow &amp; instant refund terms</p>
                 </div>
               </div>
@@ -562,7 +546,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Item 2: Terms & Conditions */}
             <button
               type="button"
-              onClick={() => onSelect("about")}
+              onClick={() => setSupportDrawerTopic('terms')}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -571,7 +555,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
                 <div>
                   <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Terms &amp; Conditions</p>
-                  <p className="text-[13px] text-slate-500 mt-0.5">Platform usage, ticketing &amp; cancellation policy</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Platform usage, ticketing &amp; carriage agreements</p>
                 </div>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
@@ -580,7 +564,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             {/* Item 3: Privacy Policy */}
             <button
               type="button"
-              onClick={() => onSelect("privacy")}
+              onClick={() => setSupportDrawerTopic('privacy')}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -588,17 +572,53 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                   <span className="material-symbols-outlined text-[20px]">policy</span>
                 </div>
                 <div>
-                  <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Privacy Policy</p>
+                  <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Privacy Policy &amp; DPDP Act</p>
                   <p className="text-[13px] text-slate-500 mt-0.5">DPDP Act compliant, consent management &amp; encryption</p>
                 </div>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
             </button>
 
-            {/* Item 4: Customer Helpdesk & FAQs */}
+            {/* Item 4: Cancellation & Refund Policy (Added from pop-up types) */}
             <button
               type="button"
-              onClick={() => onSelect("support")}
+              onClick={() => setSupportDrawerTopic('cancellation')}
+              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <span className="material-symbols-outlined text-[20px]">replay</span>
+                </div>
+                <div>
+                  <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Cancellation &amp; Refund Policy</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Instant wallet refunds, airline &amp; hotel cancellation tiers</p>
+                </div>
+              </div>
+              <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
+            </button>
+
+            {/* Item 5: Bargain & Bidding Fair-Play Rules (Added from pop-up types) */}
+            <button
+              type="button"
+              onClick={() => setSupportDrawerTopic('bargaining')}
+              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <span className="material-symbols-outlined text-[20px]">handshake</span>
+                </div>
+                <div>
+                  <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Bargaining &amp; Bidding Fair-Play Rules</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">Dynamic bidding, escrow hold &amp; anti-sniping protection</p>
+                </div>
+              </div>
+              <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
+            </button>
+
+            {/* Item 6: Customer Helpdesk & Account FAQs */}
+            <button
+              type="button"
+              onClick={() => setSupportDrawerTopic('faq')}
               className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50/70 transition-colors cursor-pointer text-left active:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
@@ -607,7 +627,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
                 </div>
                 <div>
                   <p className="text-[1rem] text-slate-900 font-semibold leading-tight">Customer Helpdesk &amp; FAQs</p>
-                  <p className="text-[13px] text-slate-500 mt-0.5">24x7 travel assistance &amp; instant dispute chat</p>
+                  <p className="text-[13px] text-slate-500 mt-0.5">User account Q&amp;A, 24x7 travel assistance &amp; dispute chat</p>
                 </div>
               </div>
               <span className="material-symbols-outlined text-slate-400 text-[20px]">chevron_right</span>
@@ -665,7 +685,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
           <div className="py-2">
             <p className="font-mono text-[12px] text-slate-400">
-              RouTripo v2.4.0 (Build 890)
+              ROUTRIPO v2.4.0 (Build 890)
             </p>
             <p className="font-mono text-[11px] text-slate-300 mt-0.5">
               Crafted for Indian Voyagers • Bharat
@@ -673,6 +693,60 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           </div>
         </section>
       </div>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialData={profileData}
+        onSave={handleSaveProfile}
+      />
+
+      {/* RouTripo Closed Travel Wallet Modal (RBI PPI Compliant) */}
+      <ClosedWalletModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+        isMr={language === 'मराठी'}
+      />
+
+      {/* Master Passenger List Modal (Backed by MasterPassengerService) */}
+      <MasterPassengerModal
+        isOpen={isPassengerModalOpen}
+        onClose={() => setIsPassengerModalOpen(false)}
+        isMr={language === 'मराठी'}
+      />
+
+      {/* Security & 2-Factor Authentication Modal (Backed by SecurityAuthService) */}
+      <SecurityAuthModal
+        isOpen={isSecurityModalOpen}
+        onClose={() => setIsSecurityModalOpen(false)}
+        isMr={language === 'मराठी'}
+      />
+
+      {/* Travel Preferences Modal */}
+      <TravelPreferencesModal
+        isOpen={isPreferencesModalOpen}
+        onClose={() => setIsPreferencesModalOpen(false)}
+        initialData={profileData}
+        onSave={handleSaveProfile}
+        isMr={language === 'मराठी'}
+      />
+
+      {/* Emergency Guardian SOS Modal */}
+      <SosModal
+        isOpen={isSosModalOpen}
+        onClose={() => setIsSosModalOpen(false)}
+        lang={language === 'मराठी' ? 'mr' : 'en'}
+        userName={profileData.name}
+      />
+
+      {/* Support & Essentials Specific Drawer (Bottom-Sheet "khalun warti yenara") */}
+      <SupportDrawerModal
+        isOpen={Boolean(supportDrawerTopic)}
+        onClose={() => setSupportDrawerTopic(null)}
+        topic={supportDrawerTopic || 'faq'}
+        isMr={language === 'मराठी'}
+      />
     </div>
   );
 };

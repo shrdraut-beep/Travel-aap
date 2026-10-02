@@ -152,7 +152,7 @@ export const LegalPolicyPage: React.FC = () => {
                 R
               </div>
               <div>
-                <span className="text-base sm:text-lg font-black tracking-tight text-slate-900">RoutTripo</span>
+                <span className="text-base sm:text-lg font-black tracking-tight text-slate-900">ROUTRIPO</span>
                 <span className="hidden sm:inline text-xs font-medium text-slate-500 ml-1.5 border-l border-slate-300 pl-2">
                   Legal & Compliance Hub
                 </span>
