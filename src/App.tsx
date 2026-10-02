@@ -644,6 +644,9 @@ function MainApp() {
                         <MyTicketsView 
                           hideHeader={false} 
                           isMr={lang === 'mr'} 
+                          onOpenProfile={() => setGlobalTab('settings')}
+                          onNotifications={() => setIsSosOpen(true)}
+                          avatarSrc={currentUser?.avatar}
                         />
                       )}
                       {globalTab === "settings" && (

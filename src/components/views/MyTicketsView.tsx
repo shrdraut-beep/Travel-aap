@@ -30,21 +30,27 @@ import {
   type CancellationDetails 
 } from '../../services/TicketService';
 import QRCode from 'react-qr-code';
+import { GlobalBrandHeader, DEFAULT_USER_AVATAR } from '../common/GlobalBrandHeader';
 
 interface MyTicketsViewProps {
   onBack?: () => void;
   hideHeader?: boolean;
   isMr?: boolean;
+  onOpenProfile?: () => void;
+  onNotifications?: () => void;
+  avatarSrc?: string;
 }
 
 export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
   onBack,
   hideHeader = false,
-  isMr = false
+  isMr = false,
+  onOpenProfile,
+  onNotifications,
+  avatarSrc
 }) => {
   const [tickets, setTickets] = useState<BookingTicket[]>(TicketService.getTickets());
   const [statusFilter, setStatusFilter] = useState<'Upcoming' | 'Completed' | 'Cancelled'>('Upcoming');
-  const [categoryFilter, setCategoryFilter] = useState<string>('All');
   
   // Modals state
   const [selectedTicket, setSelectedTicket] = useState<BookingTicket | null>(null);
@@ -92,9 +98,7 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
   };
 
   const filteredTickets = tickets.filter((t) => {
-    if (statusFilter !== t.status) return false;
-    if (categoryFilter !== 'All' && t.vertical !== categoryFilter) return false;
-    return true;
+    return t.status === statusFilter;
   });
 
   const handleConfirmCancel = () => {
@@ -152,80 +156,62 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
         </div>
       )}
 
-      {/* Header */}
+      {/* 1. Signature RouTripo Curved Brand Header (Same as all other tabs) */}
       {!hideHeader && (
-        <div className="bg-white border-b border-slate-200 px-4 py-3.5 sticky top-0 z-30 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
-              <Ticket className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-black text-slate-900 leading-tight">
-                {isMr ? 'माझी तिकिटे आणि बुकिंग्ज' : 'My Tickets & Bookings'}
-              </h2>
-              <p className="text-[11px] text-slate-500 font-medium">
-                {isMr ? 'फ्लाईट्स, ट्रेन्स, हॉटेल्स आणि बसेस' : 'Flights, Trains, Hotels, Buses & Cabs'}
-              </p>
-            </div>
-          </div>
-          <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
-            {tickets.length} {isMr ? 'बुकिंग्ज' : 'Total'}
-          </span>
-        </div>
+        <GlobalBrandHeader
+          subtitle={isMr ? "तिकीट व बुकिंग व्यवस्थापन हब" : "Tickets & Bookings Hub"}
+          theme="ocean"
+          badge={isMr ? `${tickets.length} बुकिंग्ज` : `${tickets.length} BOOKINGS`}
+          avatarSrc={avatarSrc || DEFAULT_USER_AVATAR}
+          onNotifications={onNotifications}
+          onOpenProfile={onOpenProfile}
+        />
       )}
 
-      {/* Top Controls: Status Sorting & Category Pills */}
-      <div className="bg-white border-b border-slate-200 shadow-2xs sticky top-[61px] z-20 px-4 py-2.5 space-y-2">
-        {/* Status Filter Tabs (Upcoming, Completed, Cancelled) */}
-        <div className="flex bg-slate-100/80 p-1 rounded-xl">
+      {/* 2. Status Sorting Tabs: ONLY Upcoming, Completed, Cancelled */}
+      <div className="px-4 pt-3 pb-1 sticky top-[60px] z-20 bg-slate-50/90 backdrop-blur-md">
+        <div className="flex bg-slate-200/80 p-1.5 rounded-2xl border border-slate-300/70 gap-1.5 shadow-2xs">
           {[
-            { id: 'Upcoming', label: isMr ? 'आगामी (Upcoming)' : 'Upcoming', count: tickets.filter(t => t.status === 'Upcoming').length },
-            { id: 'Completed', label: isMr ? 'पूर्ण (Completed)' : 'Completed', count: tickets.filter(t => t.status === 'Completed').length },
-            { id: 'Cancelled', label: isMr ? 'रद्द (Cancelled)' : 'Cancelled', count: tickets.filter(t => t.status === 'Cancelled').length }
-          ].map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setStatusFilter(s.id as any)}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                statusFilter === s.id
-                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <span>{s.label}</span>
-              <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full ${
-                statusFilter === s.id ? 'bg-purple-100 text-purple-700' : 'bg-slate-200 text-slate-600'
-              }`}>
-                {s.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Category Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
-          {[
-            { id: 'All', label: isMr ? 'सर्व' : 'All' },
-            { id: 'flight', label: isMr ? 'फ्लाईट्स' : 'Flights' },
-            { id: 'train', label: isMr ? 'ट्रेन्स' : 'Trains' },
-            { id: 'hotel', label: isMr ? 'हॉटेल्स' : 'Hotels' },
-            { id: 'bus', label: isMr ? 'बसेस' : 'Buses' },
-            { id: 'cab', label: isMr ? 'कॅब्स' : 'Cabs' }
-          ].map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setCategoryFilter(cat.id)}
-              className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer border ${
-                categoryFilter === cat.id
-                  ? 'bg-purple-600 text-white border-purple-600 shadow-2xs'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+            { 
+              id: 'Upcoming', 
+              label: isMr ? 'आगामी' : 'Upcoming', 
+              count: tickets.filter(t => t.status === 'Upcoming').length,
+              badgeActive: 'bg-sky-100 text-sky-800 border-sky-300' 
+            },
+            { 
+              id: 'Completed', 
+              label: isMr ? 'पूर्ण' : 'Completed', 
+              count: tickets.filter(t => t.status === 'Completed').length,
+              badgeActive: 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+            },
+            { 
+              id: 'Cancelled', 
+              label: isMr ? 'रद्द' : 'Cancelled', 
+              count: tickets.filter(t => t.status === 'Cancelled').length,
+              badgeActive: 'bg-rose-100 text-rose-800 border-rose-300' 
+            }
+          ].map((s) => {
+            const isActive = statusFilter === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setStatusFilter(s.id as any)}
+                className={`flex-1 py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
+                  isActive
+                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200 font-extrabold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
+                }`}
+              >
+                <span>{s.label}</span>
+                <span className={`text-[10px] font-mono font-black px-1.5 py-0.5 rounded-full border ${
+                  isActive ? s.badgeActive : 'bg-slate-300/70 text-slate-700 border-transparent'
+                }`}>
+                  {s.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
