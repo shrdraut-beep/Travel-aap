@@ -1,0 +1,338 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_stack" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { 'colors': { 'on-secondary-fixed-variant': '#005236', 'inverse-primary': '#89ceff', 'text-muted': '#94A3B8', 'on-primary-fixed': '#001e2f', 'secondary': '#006c49', 'surface-variant': '#dee3e9', 'text-primary': '#0F172A', 'on-error': '#ffffff', 'on-tertiary-container': '#4d2b00', 'canvas-bg': '#F8FAFC', 'on-primary-fixed-variant': '#004c6e', 'text-secondary': '#475569', 'primary': '#006591', 'on-surface': '#171c20', 'secondary-container': '#6cf8bb', 'inverse-on-surface': '#edf1f7', 'on-secondary': '#ffffff', 'border-color': '#E2E8F0', 'tertiary-fixed': '#ffdcbd', 'secondary-fixed': '#6ffbbe', 'error-container': '#ffdad6', 'tertiary-container': '#de8712', 'surface-tint': '#006591', 'on-tertiary-fixed-variant': '#693c00', 'surface-container': '#eaeef4', 'surface-bg': '#FFFFFF', 'surface-bright': '#f6faff', 'surface-container-lowest': '#ffffff', 'tertiary-fixed-dim': '#ffb86e', 'inverse-surface': '#2c3135', 'error': '#ba1a1a', 'primary-fixed-dim': '#89ceff', 'surface-container-high': '#e4e8ee', 'surface-container-highest': '#dee3e9', 'surface': '#f6faff', 'surface-container-low': '#f0f4fa', 'secondary-fixed-dim': '#4edea3', 'on-tertiary-fixed': '#2c1600', 'on-primary-container': '#003751', 'on-secondary-container': '#00714d', 'on-primary': '#ffffff', 'tertiary': '#8a5100', 'primary-container': '#0ea5e9', 'on-background': '#171c20', 'outline': '#6e7881', 'background': '#f6faff', 'on-error-container': '#93000a', 'on-surface-variant': '#3e4850', 'on-secondary-fixed': '#002113', 'surface-dim': '#d6dae0', 'outline-variant': '#bec8d2', 'on-tertiary': '#ffffff', 'admin-violet': '#8B5CF6', 'primary-fixed': '#c9e6ff' }, 'borderRadius': { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, 'spacing': { 'space-sm': '0.5rem', 'space-xl': '2rem', 'space-lg': '1.5rem', 'gutter': '1rem', 'space-md': '1rem', 'margin': '1.5rem', 'space-xs': '0.25rem' }, 'fontFamily': { 'body-md': ['Outfit'], 'headline-lg': ['Outfit'], 'headline-sm': ['Outfit'], 'body-sm': ['Outfit'], 'headline-md': ['Outfit'], 'label-md': ['JetBrains Mono'] }, 'fontSize': { 'body-md': ['1rem', { 'lineHeight': '1.6', 'fontWeight': '400' }], 'headline-lg': ['1.875rem', { 'lineHeight': '2.25rem', 'fontWeight': '800' }], 'headline-sm': ['1.25rem', { 'lineHeight': '1.75rem', 'fontWeight': '700' }], 'body-sm': ['0.875rem', { 'lineHeight': '1.5', 'fontWeight': '400' }], 'headline-md': ['1.5rem', { 'lineHeight': '2rem', 'fontWeight': '700' }], 'label-md': ['0.75rem', { 'lineHeight': '1rem', 'fontWeight': '500' }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-canvas-bg font-body-md text-body-md text-text-primary flex flex-col min-h-screen" style="background: linear-gradient(rgb(224, 242, 254) 0%, rgb(240, 249, 255) 25%, rgb(248, 250, 252) 100%); min-height: 100vh;"><header class="fixed top-0 w-full z-50 pt-safe bg-primary-container rounded-b-2xl shadow-[0_4px_15px_rgba(14,165,233,0.18)]"><div class="h-24 px-gutter flex flex-col justify-between py-space-xs"><div class="flex items-center justify-between gap-space-sm"><div class="flex items-center justify-center min-w-[44px] min-h-[44px]"><button aria-label="Go back" class="w-7 h-7 rounded-full bg-white/20 text-on-primary flex items-center justify-center backdrop-blur-md transition-colors hover:bg-white/30" onclick="history.back()"><span class="material-symbols-outlined text-[18px]">arrow_back</span></button></div><div class="flex flex-col items-center justify-center text-center flex-1 px-space-xs"><div class="flex items-center justify-center gap-space-xs text-on-primary font-headline-sm text-body-sm font-bold leading-tight"><span class="">Mumbai (BOM)</span><span class="material-symbols-outlined text-[16px] leading-none">flight_takeoff</span><span class="">Goa (GOI)</span></div><div class="text-white/90 font-label-md text-label-md tracking-tight leading-normal">15 Oct • 2 Travellers • Economy</div></div><div class="flex items-center justify-center min-w-[44px] min-h-[44px]"><button aria-label="Close booking" class="w-7 h-7 rounded-full bg-white/20 text-on-primary flex items-center justify-center backdrop-blur-md transition-colors hover:bg-white/30" onclick="window.location.href='#'"><span class="material-symbols-outlined text-[18px]">close</span></button></div></div><div class="flex flex-col gap-1 px-space-xs pb-1"><div class="flex items-center justify-between text-white/90 font-label-md text-label-md"><span class="tracking-wider uppercase font-semibold">STEP 3 OF 6: SEAT SELECTION</span><span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[14px]">timer</span><span class="">14:45 left</span></span></div><div class="w-full h-1 bg-white/30 rounded-full overflow-hidden"><div class="h-full bg-white rounded-full transition-all duration-300 w-1/2"></div></div></div></div></header><main class="flex flex-col relative w-full pt-24 pb-safe bg-canvas-bg min-h-screen"><div class="flex flex-col w-full">
+<div class="px-space-md pt-space-sm pb-space-xs flex flex-col gap-space-sm">
+<div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">airlines</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5 font-headline-sm text-body-sm text-text-primary">
+<span class="">BOM</span>
+<span class="text-text-muted font-body-sm text-[12px]">06:15</span>
+<span class="material-symbols-outlined text-[14px] text-primary">arrow_forward</span>
+<span class="">GOI</span>
+<span class="text-text-muted font-body-sm text-[12px]">07:30</span>
+</div>
+<span class="text-text-muted font-label-md text-label-md">Airbus A320neo • 1h 15m</span>
+</div>
+</div>
+<div class="bg-secondary-container/30 px-space-xs py-0.5 rounded-full flex items-center gap-1 text-on-secondary-container">
+<span class="material-symbols-outlined text-[13px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-md text-label-md font-semibold whitespace-nowrap">Flexi Plus</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="bg-primary-fixed/30 rounded-lg p-space-xs flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-[11px] shadow-sm">
+          P1
+        </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-sm text-on-primary-fixed truncate">Rohan Sharma</span>
+<span class="font-label-md text-label-md text-primary font-bold">12A • Window</span>
+</div>
+</div>
+<div class="bg-primary-fixed/30 rounded-lg p-space-xs flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-[11px] shadow-sm">
+          P2
+        </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-body-sm text-on-primary-fixed truncate">Pooja Sharma</span>
+<span class="font-label-md text-label-md text-primary font-bold">12B • Middle</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl px-space-sm py-2 flex items-center justify-between shadow-sm overflow-x-auto">
+<div class="flex items-center gap-1.5 flex-shrink-0">
+<div class="w-4 h-4 rounded bg-surface-container-lowest shadow-sm"></div>
+<span class="font-body-sm text-[11px] text-text-secondary whitespace-nowrap">Free</span>
+</div>
+<div class="flex items-center gap-1.5 flex-shrink-0">
+<div class="w-4 h-4 rounded bg-primary-container shadow-sm flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</div>
+<span class="font-body-sm text-[11px] text-primary font-bold whitespace-nowrap">Selected</span>
+</div>
+<div class="flex items-center gap-1.5 flex-shrink-0">
+<div class="w-4 h-4 rounded bg-tertiary-fixed shadow-sm"></div>
+<span class="font-body-sm text-[11px] text-on-tertiary-container whitespace-nowrap">XL Legroom</span>
+</div>
+<div class="flex items-center gap-1.5 flex-shrink-0">
+<div class="w-4 h-4 rounded bg-surface-variant flex items-center justify-center text-text-muted">
+<span class="material-symbols-outlined text-[10px]">close</span>
+</div>
+<span class="font-body-sm text-[11px] text-text-muted whitespace-nowrap">Taken</span>
+</div>
+</div>
+</div>
+<div class="px-space-md py-space-sm w-full flex flex-col items-center">
+<div class="w-full max-w-[370px] bg-surface-container-lowest rounded-t-[140px] rounded-b-2xl shadow-md pt-6 pb-space-md px-3 flex flex-col items-center">
+<div class="w-20 h-10 rounded-t-full bg-surface-container flex items-center justify-center mb-1 text-text-muted">
+<span class="material-symbols-outlined text-[18px]">flight</span>
+</div>
+<div class="w-24 h-1 rounded-full bg-surface-variant mb-4"></div>
+<div class="w-full bg-surface-container-low rounded-lg py-1 px-3 mb-3 flex items-center justify-between">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]">stars</span>
+<span class="font-label-md text-label-md uppercase tracking-wider font-semibold">Front XL Pitch (36")</span>
+</div>
+<span class="font-label-md text-label-md text-tertiary font-bold">From ₹450</span>
+</div>
+<div class="w-full flex flex-col gap-2 mb-4">
+<div class="flex items-center justify-between w-full px-1">
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-text-muted shadow-sm">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+<button class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-container font-headline-sm text-body-sm flex flex-col items-center justify-center shadow-sm">
+<span class="leading-none text-[11px]">1B</span>
+<span class="font-label-md text-[9px] text-tertiary">₹450</span>
+</button>
+</div>
+<span class="font-label-md text-[11px] text-text-muted font-bold">1</span>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-container font-headline-sm text-body-sm flex flex-col items-center justify-center shadow-sm">
+<span class="leading-none text-[11px]">1E</span>
+<span class="font-label-md text-[9px] text-tertiary">₹450</span>
+</button>
+<button class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-text-muted shadow-sm">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between w-full px-1">
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-container font-headline-sm text-body-sm flex flex-col items-center justify-center shadow-sm">
+<span class="leading-none text-[11px]">2A</span>
+<span class="font-label-md text-[9px] text-tertiary">₹450</span>
+</button>
+<button class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-text-muted shadow-sm">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+<span class="font-label-md text-[11px] text-text-muted font-bold">2</span>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-text-muted shadow-sm">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+<button class="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-container font-headline-sm text-body-sm flex flex-col items-center justify-center shadow-sm">
+<span class="leading-none text-[11px]">2F</span>
+<span class="font-label-md text-[9px] text-tertiary">₹450</span>
+</button>
+</div>
+</div>
+</div>
+<div class="w-full bg-surface-container rounded-xl py-2 px-3 my-2 flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-text-secondary">
+<span class="material-symbols-outlined text-[15px]">wc</span>
+<span class="font-label-md text-[10px] uppercase font-semibold tracking-wide">Lavatory</span>
+</div>
+<div class="h-3 w-px bg-surface-variant"></div>
+<div class="flex items-center gap-1 text-text-muted">
+<span class="material-symbols-outlined text-[14px]">swipe_down</span>
+<span class="font-label-md text-[9px] uppercase font-semibold">Exit Doors</span>
+</div>
+<div class="h-3 w-px bg-surface-variant"></div>
+<div class="flex items-center gap-1.5 text-text-secondary">
+<span class="material-symbols-outlined text-[15px]">local_cafe</span>
+<span class="font-label-md text-[10px] uppercase font-semibold tracking-wide">Galley</span>
+</div>
+</div>
+<div class="w-full flex items-center justify-between px-2 py-1.5 mb-1 text-text-muted font-label-md text-[11px] font-bold">
+<div class="flex gap-3 px-1">
+<span class="w-7 text-center">A</span>
+<span class="w-7 text-center">B</span>
+<span class="w-7 text-center">C</span>
+</div>
+<span class="text-[10px] text-text-muted tracking-tight">AISLE</span>
+<div class="flex gap-3 px-1">
+<span class="w-7 text-center">D</span>
+<span class="w-7 text-center">E</span>
+<span class="w-7 text-center">F</span>
+</div>
+</div>
+<div class="w-full flex flex-col gap-1.5">
+<div class="flex items-center justify-between w-full">
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              10B
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              10C
+            </button>
+</div>
+<span class="font-label-md text-[10px] text-text-muted font-semibold w-5 text-center">10</span>
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              10D
+            </button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              10F
+            </button>
+</div>
+</div>
+<div class="flex items-center justify-between w-full">
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              11C
+            </button>
+</div>
+<span class="font-label-md text-[10px] text-text-muted font-semibold w-5 text-center">11</span>
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              11D
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              11E
+            </button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between w-full bg-primary-fixed/20 p-1 rounded-lg">
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-primary-container text-on-primary font-headline-sm text-[10px] flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+<button class="w-8 h-8 rounded bg-primary-container text-on-primary font-headline-sm text-[10px] flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              12C
+            </button>
+</div>
+<span class="font-label-md text-[10px] text-primary font-extrabold w-5 text-center">12</span>
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              12D
+            </button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              12F
+            </button>
+</div>
+</div>
+<div class="flex items-center justify-between w-full">
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              14A
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              14B
+            </button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+</div>
+<span class="font-label-md text-[10px] text-text-muted font-semibold w-5 text-center">14</span>
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              14D
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              14E
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              14F
+            </button>
+</div>
+</div>
+<div class="flex items-center justify-between w-full">
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              15A
+            </button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              15C
+            </button>
+</div>
+<span class="font-label-md text-[10px] text-text-muted font-semibold w-5 text-center">15</span>
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              15E
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              15F
+            </button>
+</div>
+</div>
+<div class="flex items-center justify-between w-full">
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              16A
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              16B
+            </button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              16C
+            </button>
+</div>
+<span class="font-label-md text-[10px] text-text-muted font-semibold w-5 text-center">16</span>
+<div class="flex gap-1.5">
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              16D
+            </button>
+<button class="w-8 h-8 rounded bg-surface-variant text-text-muted flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[12px]">close</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container text-text-primary font-headline-sm text-[10px] flex items-center justify-center shadow-sm">
+              16F
+            </button>
+</div>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-1.5 text-text-muted">
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+<span class="font-label-md text-[10px] uppercase tracking-wider font-semibold">Rows 17 to 32 Behind</span>
+</div>
+</div>
+</div>
+<div class="sticky bottom-0 w-full bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(15,23,42,0.06)] rounded-t-2xl p-space-md flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-muted">Selected Seats (2)</span>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-body-sm text-text-primary font-bold">12A, 12B</span>
+<span class="text-secondary font-label-md text-[11px] bg-secondary-container/40 px-1.5 py-0.5 rounded-full font-semibold">FREE</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-text-muted">Total Fare</span>
+<span class="font-headline-sm text-headline-sm text-primary font-extrabold">₹7,680</span>
+</div>
+</div>
+<button class="w-full h-12 rounded-xl bg-primary-container text-on-primary font-headline-sm text-body-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary-container/30 active:scale-[0.99] transition-transform" onclick="window.location.href='#'">
+<span class="">Continue to Add-ons</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div></main>
+
+</body></html>

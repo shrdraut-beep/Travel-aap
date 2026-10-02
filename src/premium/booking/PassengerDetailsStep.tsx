@@ -4,15 +4,14 @@ import {
   User,
   Mail,
   Phone,
-  Calendar,
   ShieldCheck,
   AlertCircle,
   CheckCircle2,
-  Clock,
-  Plane,
-  X
+  X,
+  Lock,
+  Globe
 } from "lucide-react";
-import { BookingStepHeader } from "./BookingStepHeader";
+import { FlightBookingHeader } from "./FlightBookingHeader";
 import type { SelectedFare } from "./FareSelectionStep";
 
 export interface PassengerDetail {
@@ -28,6 +27,12 @@ export interface PassengerDetail {
   phone?: string;
 }
 
+export const formatTime = (seconds: number): string => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
+};
+
 export interface PassengerDetailsStepProps {
   flight: any;
   searchParams: any;
@@ -41,12 +46,6 @@ export interface PassengerDetailsStepProps {
   onBack: () => void;
   onSessionExpired?: () => void;
 }
-
-export const formatTime = (totalSeconds: number): string => {
-  const mm = String(Math.floor(Math.max(0, totalSeconds) / 60)).padStart(2, "0");
-  const ss = String(Math.floor(Math.max(0, totalSeconds) % 60)).padStart(2, "0");
-  return `${mm}:${ss}`;
-};
 
 export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
   flight,
@@ -63,7 +62,6 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
   const calculatedTotal = adultCount + childCount + infantCount;
   const count = Math.max(1, passengerCount || calculatedTotal);
 
-  // Initialize passengers strictly matching Adults, Children, and Infants counts
   const [passengers, setPassengers] = useState<PassengerDetail[]>(() => {
     if (initialPassengers && initialPassengers.length === count) {
       return initialPassengers;
@@ -71,7 +69,6 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
     const list: PassengerDetail[] = [];
     let paxNum = 1;
 
-    // Adults
     for (let i = 0; i < adultCount; i++) {
       list.push({
         id: `pax-${paxNum}`,
@@ -88,7 +85,6 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
       paxNum++;
     }
 
-    // Children
     for (let i = 0; i < childCount; i++) {
       list.push({
         id: `pax-${paxNum}`,
@@ -103,7 +99,6 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
       paxNum++;
     }
 
-    // Infants
     for (let i = 0; i < infantCount; i++) {
       list.push({
         id: `pax-${paxNum}`,
@@ -118,7 +113,6 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
       paxNum++;
     }
 
-    // If count exceeds adults+children+infants (e.g. manual count passed)
     while (list.length < count) {
       list.push({
         id: `pax-${paxNum}`,
@@ -140,18 +134,12 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [whatsappDelivery, setWhatsappDelivery] = useState(true);
 
-  const org = flight?.origin || flight?.originCode || searchParams.origin || "BOM";
-  const dst = flight?.destination || flight?.destinationCode || searchParams.destination || "DEL";
-  const airline = flight?.airline || "IndiGo";
-  const flightNo = flight?.flightNumber || "6E-2045";
+  const basePrice = Number(flight?.price || flight?.total_amount || 6480);
+  const totalAmount = (basePrice + (selectedFare?.priceDelta || 0)) * count;
 
-  // Field validation logic
-  const validateField = (
-    paxIndex: number,
-    field: keyof PassengerDetail,
-    val: any
-  ): string | null => {
+  const validateField = (paxIndex: number, field: keyof PassengerDetail, val: any): string | null => {
     const strVal = (val || "").toString().trim();
 
     if (field === "firstName") {
@@ -159,30 +147,24 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
       if (strVal.length < 2) return "First name must be at least 2 characters";
       if (!/^[a-zA-Z\s'-]+$/.test(strVal)) return "Only English letters allowed";
     }
-
     if (field === "lastName") {
       if (!strVal) return "Last name is required";
-      if (strVal.length < 1) return "Last name is required";
       if (!/^[a-zA-Z\s'-]+$/.test(strVal)) return "Only English letters allowed";
     }
-
     if (field === "gender") {
       if (!strVal || !["Male", "Female", "Other"].includes(strVal)) {
         return "Please select a gender";
       }
     }
-
     if (field === "dob") {
       if (!strVal) return "Date of Birth is required";
       const dateObj = new Date(strVal);
       if (isNaN(dateObj.getTime())) return "Please enter a valid date (YYYY-MM-DD)";
       const now = new Date();
       if (dateObj > now) return "Date of Birth cannot be in the future";
-      // Age sanity check (not older than 120 years)
       const ageDiff = (now.getTime() - dateObj.getTime()) / (1000 * 3600 * 24 * 365.25);
       if (ageDiff > 120) return "Please enter a valid Date of Birth";
     }
-
     if (paxIndex === 0) {
       if (field === "email") {
         if (!strVal) return "Email address is required for ticket delivery";
@@ -190,15 +172,13 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
           return "Please enter a valid email address";
         }
       }
-
       if (field === "phone") {
         if (!strVal) return "Mobile phone is required for flight updates";
         const digits = strVal.replace(/\D/g, "");
         if (digits.length !== 10) return "Please enter exactly 10 digits";
-        if (!/^[6-9]\d{9}$/.test(digits)) return "Please enter a valid 10-digit mobile number (starts with 6, 7, 8, or 9)";
+        if (!/^[6-9]\d{9}$/.test(digits)) return "Please enter a valid 10-digit mobile number";
       }
     }
-
     return null;
   };
 
@@ -207,7 +187,6 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
     if (field === "phone") {
       sanitized = (value || "").toString().replace(/\D/g, "").slice(0, 10);
     }
-
     setPassengers((prev) => {
       const copy = [...prev];
       copy[paxIndex] = { ...copy[paxIndex], [field]: sanitized };
@@ -217,15 +196,11 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
     const key = `pax_${paxIndex}_${field}`;
     setTouched((prev) => ({ ...prev, [key]: true }));
 
-    // Real-time validation
     const err = validateField(paxIndex, field, sanitized);
     setErrors((prev) => {
       const copy = { ...prev };
-      if (err) {
-        copy[key] = err;
-      } else {
-        delete copy[key];
-      }
+      if (err) copy[key] = err;
+      else delete copy[key];
       return copy;
     });
   };
@@ -237,9 +212,7 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
 
     passengers.forEach((pax, i) => {
       const fieldsToCheck: (keyof PassengerDetail)[] = ["firstName", "lastName", "gender", "dob"];
-      if (i === 0) {
-        fieldsToCheck.push("email", "phone");
-      }
+      if (i === 0) fieldsToCheck.push("email", "phone");
 
       fieldsToCheck.forEach((field) => {
         const key = `pax_${i}_${field}`;
@@ -247,9 +220,7 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
         const err = validateField(i, field, pax[field]);
         if (err) {
           newErrors[key] = err;
-          if (firstErrorPaxIndex === null) {
-            firstErrorPaxIndex = i;
-          }
+          if (firstErrorPaxIndex === null) firstErrorPaxIndex = i;
         }
       });
     });
@@ -258,12 +229,8 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
     setTouched(newTouched);
 
     if (Object.keys(newErrors).length > 0) {
-      if (firstErrorPaxIndex !== null) {
-        setActivePaxIndex(firstErrorPaxIndex);
-      }
-      setToastMessage(
-        "Please fill in all required passenger fields (First Name, Last Name, Gender, DOB) before proceeding."
-      );
+      if (firstErrorPaxIndex !== null) setActivePaxIndex(firstErrorPaxIndex);
+      setToastMessage("Please fill in all required passenger fields before proceeding.");
       return false;
     }
 
@@ -274,27 +241,22 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const isValid = validateAll();
-    if (!isValid) {
-      return;
-    }
+    if (!isValid) return;
     onConfirmPassengers(passengers);
   };
 
   const isPaxComplete = (i: number) => {
     const pax = passengers[i];
     if (!pax) return false;
-    const hasRequired =
-      Boolean(pax.firstName && pax.firstName.trim().length >= 2) &&
-      Boolean(pax.lastName && pax.lastName.trim().length >= 1) &&
+    const hasRequired = Boolean(pax.firstName?.trim().length >= 2) &&
+      Boolean(pax.lastName?.trim().length >= 1) &&
       Boolean(pax.gender) &&
       Boolean(pax.dob && !validateField(i, "dob", pax.dob));
 
     if (i === 0) {
-      return (
-        hasRequired &&
+      return hasRequired &&
         Boolean(pax.email && !validateField(i, "email", pax.email)) &&
-        Boolean(pax.phone && !validateField(i, "phone", pax.phone))
-      );
+        Boolean(pax.phone && !validateField(i, "phone", pax.phone));
     }
     return hasRequired;
   };
@@ -302,376 +264,194 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
   const currentPax = passengers[activePaxIndex] || passengers[0];
 
   return (
-    <div className="min-h-screen bg-[var(--premium-page)] text-[var(--premium-ink)] pb-28">
-      {/* Toast Notification for validation errors */}
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] pb-28">
       {toastMessage && (
-        <div className="fixed top-18 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] bg-rose-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-[120px] left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] bg-rose-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-start gap-3">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-100" />
-          <div className="flex-1 text-xs font-semibold leading-snug">
-            {toastMessage}
-          </div>
-          <button
-            type="button"
-            onClick={() => setToastMessage(null)}
-            className="text-white/80 hover:text-white shrink-0 p-1"
-            aria-label="Dismiss alert"
-          >
+          <div className="flex-1 text-xs font-semibold leading-snug">{toastMessage}</div>
+          <button type="button" onClick={() => setToastMessage(null)} className="text-white/80 hover:text-white shrink-0 p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
-      {/* Top Header */}
-      <BookingStepHeader
-        title="Passenger Details"
-        step="Step 2 of 6"
-        subtitle={
-          <span className="flex items-center gap-1.5">
-            <span>{airline} {flightNo}</span>
-            <span>•</span>
-            <span>{org} ➔ {dst}</span>
-            {selectedFare && (
-              <>
-                <span>•</span>
-                <span className="font-semibold text-slate-700">{selectedFare.name}</span>
-              </>
-            )}
-          </span>
-        }
-        onBack={onBack}
-        backAriaLabel="Back to fare selection"
-        maxWidth="max-w-4xl"
-      >
-        {/* Multi-Passenger Tab Switcher */}
-        {count > 1 && (
-          <div className="max-w-4xl mx-auto px-4 py-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
-            {passengers.map((pax, i) => {
-              const complete = isPaxComplete(i);
-              const isActive = activePaxIndex === i;
-              const hasErrors = Object.keys(errors).some((k) => k.startsWith(`pax_${i}_`));
+      <FlightBookingHeader 
+        flight={flight} 
+        stepNum={2} 
+        stepTitle="Traveller Details" 
+        onClose={onBack} 
+        onBack={onBack} 
+      />
 
-              return (
-                <button
-                  key={pax.id}
-                  type="button"
-                  onClick={() => setActivePaxIndex(i)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-2 cursor-pointer ${
-                    isActive
-                      ? "bg-[var(--premium-violet)] text-white shadow-xs"
-                      : complete
-                      ? "bg-pink-50 text-pink-700 border border-pink-200"
-                      : hasErrors
-                      ? "bg-rose-50 text-rose-700 border border-rose-200"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  <User className="w-3.5 h-3.5" />
-                  <span>
-                    Traveler {i + 1} ({pax.type})
-                    {pax.firstName ? `: ${pax.firstName}` : ""}
-                  </span>
-                  {complete ? (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-pink-500" />
-                  ) : hasErrors ? (
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
-                  ) : null}
-                </button>
-              );
-            })}
+      <main className="max-w-4xl mx-auto pt-[100px] pb-6">
+        {/* Passenger Tabs */}
+        {count > 1 && (
+          <div className="px-4 py-2">
+            <div className="flex overflow-x-auto gap-2 bg-[#eaeef4] rounded-xl p-1 no-scrollbar">
+              {passengers.map((pax, i) => {
+                const isActive = activePaxIndex === i;
+                const complete = isPaxComplete(i);
+                return (
+                  <button
+                    key={pax.id}
+                    onClick={() => setActivePaxIndex(i)}
+                    className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg font-['Outfit'] font-bold text-[12px] transition-all whitespace-nowrap min-w-0 flex-1 ${
+                      isActive ? "bg-white text-[#171c20] shadow-sm" : "bg-transparent text-[#475569] hover:bg-white/50"
+                    }`}
+                  >
+                    {isActive && <span className="w-2 h-2 rounded-full bg-[#006c49] shrink-0"></span>}
+                    <span className="truncate">{pax.type} {i + 1} {i === 0 ? "(Lead)" : "(Mandatory)"}</span>
+                    {complete && <CheckCircle2 className="w-3.5 h-3.5 text-[#006c49] shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
-      </BookingStepHeader>
 
-      {/* Main Content Form */}
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Government ID Warning Banner */}
-        <div className="bg-sky-50 text-sky-900 rounded-2xl p-4 border border-sky-100 flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-          <div className="text-xs space-y-1">
-            <h4 className="font-bold text-sky-950">Strict Airline ID Verification Rule</h4>
-            <p className="text-slate-600 leading-relaxed">
-              Please ensure first and last names, gender, and date of birth match your government-issued ID
-              (Passport, Aadhaar, Voter ID, or Driver's License) exactly. Airlines do not permit ticket name changes after issuance.
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
-          {/* Passenger Form Card */}
-          <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/80 shadow-xs space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-violet-50 text-[var(--premium-violet)] flex items-center justify-center font-bold">
-                  <User className="w-5 h-5" />
-                </div>
+        <form onSubmit={handleSubmit} noValidate className="px-4 pt-2 flex flex-col gap-4">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[#0ea5e9]/20 text-[#0ea5e9] flex items-center justify-center font-['Outfit'] text-[14px] font-bold">
+                  {activePaxIndex + 1}
+                </span>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    Traveler {activePaxIndex + 1} of {count} ({currentPax.type})
-                    {activePaxIndex === 0 ? " • Primary Contact" : ""}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Enter details as per government-issued photo ID
-                  </p>
+                  <h2 className="font-['Outfit'] text-[16px] font-bold text-[#0F172A]">{currentPax.type} {activePaxIndex + 1} Details</h2>
+                  <p className="font-['Outfit'] text-[12px] text-[#94A3B8]">Must match Gov. Photo ID exactly</p>
                 </div>
               </div>
-              {isPaxComplete(activePaxIndex) ? (
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-pink-700 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-200">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Verified
-                </span>
-              ) : (
-                <span className="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
-                  Required
-                </span>
+              {isPaxComplete(activePaxIndex) && (
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#10B981]/10 text-[#10B981] text-[12px] font-['Outfit'] font-bold">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Verified</span>
+                </div>
               )}
             </div>
 
-            {/* Inputs Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
-              {/* Salutation / Title */}
-              <div className="sm:col-span-2">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                  Title <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={currentPax.title}
-                  onChange={(e) => handleUpdate(activePaxIndex, "title", e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-[var(--premium-violet)] focus:outline-none bg-white"
-                >
-                  <option value="Mr">Mr</option>
-                  <option value="Ms">Ms</option>
-                  <option value="Mrs">Mrs</option>
-                  <option value="Mstr">Mstr</option>
-                </select>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-['Outfit'] text-[12px] uppercase tracking-wider text-[#475569] font-semibold">Title</label>
+              <div className="grid grid-cols-3 gap-2">
+                {["Mr", "Ms", "Mrs"].map(t => (
+                  <label key={t} className={`relative flex items-center justify-center py-2 px-3 rounded-lg font-['Outfit'] text-[14px] cursor-pointer transition-all text-center ${currentPax.title === t ? "bg-[#c9e6ff] text-[#001e2f] shadow-sm font-bold" : "bg-[#f0f4fa] text-[#475569] hover:bg-[#eaeef4]"}`}>
+                    <input type="radio" name={`title_${activePaxIndex}`} className="sr-only" checked={currentPax.title === t} onChange={() => handleUpdate(activePaxIndex, "title", t)} />
+                    <span>{t}.</span>
+                  </label>
+                ))}
               </div>
+            </div>
 
-              {/* First Name (Strictly Required) */}
-              <div className="sm:col-span-2">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                  First Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Cara"
-                  value={currentPax.firstName}
-                  onChange={(e) => handleUpdate(activePaxIndex, "firstName", e.target.value)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none ${
-                    errors[`pax_${activePaxIndex}_firstName`] && touched[`pax_${activePaxIndex}_firstName`]
-                      ? "border-rose-400 bg-rose-50/20 text-rose-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 focus:ring-2 focus:ring-[var(--premium-violet)]"
-                  }`}
-                />
-                {errors[`pax_${activePaxIndex}_firstName`] && touched[`pax_${activePaxIndex}_firstName`] && (
-                  <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1 mt-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errors[`pax_${activePaxIndex}_firstName`]}</span>
-                  </p>
-                )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className={`flex flex-col gap-1 border bg-white p-2.5 rounded-xl shadow-xs focus-within:border-sky-500 ${errors[`pax_${activePaxIndex}_firstName`] && touched[`pax_${activePaxIndex}_firstName`] ? "border-rose-400" : "border-slate-300"}`}>
+                <label className="font-['JetBrains_Mono',monospace] text-[12px] text-[#475569] font-medium">First & Middle Name</label>
+                <div className="flex items-center gap-2">
+                  <input type="text" placeholder="First Name" value={currentPax.firstName} onChange={(e) => handleUpdate(activePaxIndex, "firstName", e.target.value)} className="w-full bg-transparent font-['Outfit'] text-[16px] text-[#0F172A] font-semibold focus:outline-none" />
+                </div>
+                {errors[`pax_${activePaxIndex}_firstName`] && touched[`pax_${activePaxIndex}_firstName`] && <span className="text-[10px] text-rose-500">{errors[`pax_${activePaxIndex}_firstName`]}</span>}
               </div>
-
-              {/* Last Name (Strictly Required) */}
-              <div className="sm:col-span-2">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                  Last Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sharma"
-                  value={currentPax.lastName}
-                  onChange={(e) => handleUpdate(activePaxIndex, "lastName", e.target.value)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none ${
-                    errors[`pax_${activePaxIndex}_lastName`] && touched[`pax_${activePaxIndex}_lastName`]
-                      ? "border-rose-400 bg-rose-50/20 text-rose-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 focus:ring-2 focus:ring-[var(--premium-violet)]"
-                  }`}
-                />
-                {errors[`pax_${activePaxIndex}_lastName`] && touched[`pax_${activePaxIndex}_lastName`] && (
-                  <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1 mt-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errors[`pax_${activePaxIndex}_lastName`]}</span>
-                  </p>
-                )}
+              <div className={`flex flex-col gap-1 border bg-white p-2.5 rounded-xl shadow-xs focus-within:border-sky-500 ${errors[`pax_${activePaxIndex}_lastName`] && touched[`pax_${activePaxIndex}_lastName`] ? "border-rose-400" : "border-slate-300"}`}>
+                <label className="font-['JetBrains_Mono',monospace] text-[12px] text-[#475569] font-medium">Last Name</label>
+                <div className="flex items-center gap-2">
+                  <input type="text" placeholder="Last Name" value={currentPax.lastName} onChange={(e) => handleUpdate(activePaxIndex, "lastName", e.target.value)} className="w-full bg-transparent font-['Outfit'] text-[16px] text-[#0F172A] font-semibold focus:outline-none" />
+                </div>
+                {errors[`pax_${activePaxIndex}_lastName`] && touched[`pax_${activePaxIndex}_lastName`] && <span className="text-[10px] text-rose-500">{errors[`pax_${activePaxIndex}_lastName`]}</span>}
               </div>
+            </div>
 
-              {/* Gender (Strictly Required) */}
-              <div className="sm:col-span-3">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                  Gender <span className="text-rose-500">*</span>
-                </label>
-                <select
-                  value={currentPax.gender}
-                  onChange={(e) => handleUpdate(activePaxIndex, "gender", e.target.value as any)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none bg-white ${
-                    errors[`pax_${activePaxIndex}_gender`] && touched[`pax_${activePaxIndex}_gender`]
-                      ? "border-rose-400 bg-rose-50/20 text-rose-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                      : "border-slate-200 focus:ring-2 focus:ring-[var(--premium-violet)]"
-                  }`}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Female">Female</option>
+            <div className="grid grid-cols-3 gap-2">
+              <div className={`flex flex-col gap-1 border bg-slate-50/80 p-2 rounded-xl ${errors[`pax_${activePaxIndex}_dob`] && touched[`pax_${activePaxIndex}_dob`] ? "border-rose-400" : "border-slate-200"}`}>
+                <label className="font-['JetBrains_Mono',monospace] text-[10px] uppercase text-[#475569]">Date of Birth</label>
+                <input type="date" value={currentPax.dob} max={new Date().toISOString().split("T")[0]} onChange={(e) => handleUpdate(activePaxIndex, "dob", e.target.value)} className="w-full bg-transparent font-['Outfit'] text-[14px] font-semibold text-[#0F172A] focus:outline-none" />
+              </div>
+              <div className={`flex flex-col gap-1 border bg-slate-50/80 p-2 rounded-xl ${errors[`pax_${activePaxIndex}_gender`] && touched[`pax_${activePaxIndex}_gender`] ? "border-rose-400" : "border-slate-200"}`}>
+                <label className="font-['JetBrains_Mono',monospace] text-[10px] uppercase text-[#475569]">Gender</label>
+                <select value={currentPax.gender} onChange={(e) => handleUpdate(activePaxIndex, "gender", e.target.value)} className="w-full bg-transparent font-['Outfit'] text-[14px] font-semibold text-[#0F172A] focus:outline-none appearance-none">
+                  <option value="" disabled>Select</option>
                   <option value="Male">Male</option>
+                  <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
-                {errors[`pax_${activePaxIndex}_gender`] && touched[`pax_${activePaxIndex}_gender`] && (
-                  <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1 mt-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errors[`pax_${activePaxIndex}_gender`]}</span>
-                  </p>
-                )}
               </div>
-
-              {/* Date of Birth (DOB) (Strictly Required) */}
-              <div className="sm:col-span-3">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                  Date of Birth (DOB) <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    max={new Date().toISOString().split("T")[0]}
-                    value={currentPax.dob}
-                    onChange={(e) => handleUpdate(activePaxIndex, "dob", e.target.value)}
-                    className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none ${
-                      errors[`pax_${activePaxIndex}_dob`] && touched[`pax_${activePaxIndex}_dob`]
-                        ? "border-rose-400 bg-rose-50/20 text-rose-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                        : "border-slate-200 focus:ring-2 focus:ring-[var(--premium-violet)]"
-                    }`}
-                  />
+              <div className="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl">
+                <label className="font-['JetBrains_Mono',monospace] text-[10px] uppercase text-[#475569]">Nationality</label>
+                <div className="flex items-center gap-1 font-['Outfit'] text-[14px] font-semibold text-[#0F172A] truncate">
+                  <Globe className="w-4 h-4 text-[#475569] shrink-0" />
+                  <span className="truncate">Indian (IND)</span>
                 </div>
-                {errors[`pax_${activePaxIndex}_dob`] && touched[`pax_${activePaxIndex}_dob`] ? (
-                  <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1 mt-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errors[`pax_${activePaxIndex}_dob`]}</span>
-                  </p>
-                ) : (
-                  <span className="text-[10px] text-slate-400 block mt-1">
-                    Required for airline security check-in & e-ticket
-                  </span>
-                )}
               </div>
             </div>
-
-            {/* Contact Details (Lead Passenger only) */}
-            {activePaxIndex === 0 && (
-              <div className="border-t border-slate-100 pt-5 space-y-4">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Primary Booking Contact Information</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Email Address <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="e.g. cara@routripo.app"
-                      value={currentPax.email || ""}
-                      onChange={(e) => handleUpdate(0, "email", e.target.value)}
-                      className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors focus:outline-none ${
-                        errors["pax_0_email"] && touched["pax_0_email"]
-                          ? "border-rose-400 bg-rose-50/20 text-rose-900 focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-                          : "border-slate-200 focus:ring-2 focus:ring-[var(--premium-violet)]"
-                      }`}
-                    />
-                    {errors["pax_0_email"] && touched["pax_0_email"] && (
-                      <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1 mt-1.5">
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span>{errors["pax_0_email"]}</span>
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                        Mobile Phone <span className="text-rose-500">*</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-slate-400">
-                        {(currentPax.phone || "").length}/10 digits
-                      </span>
-                    </div>
-                    <div className="flex rounded-xl overflow-hidden border border-slate-200 focus-within:border-[var(--premium-violet)] focus-within:ring-2 focus-within:ring-[var(--premium-violet)]/20">
-                      <span className="bg-slate-100 px-3 py-2.5 text-xs font-bold text-slate-600 flex items-center border-r border-slate-200 select-none">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        inputMode="numeric"
-                        maxLength={10}
-                        placeholder="9820012345"
-                        value={currentPax.phone || ""}
-                        onChange={(e) => handleUpdate(0, "phone", e.target.value)}
-                        className={`w-full px-3.5 py-2.5 text-sm font-medium focus:outline-none bg-white ${
-                          errors["pax_0_phone"] && touched["pax_0_phone"]
-                            ? "bg-rose-50/20 text-rose-900"
-                            : ""
-                        }`}
-                      />
-                    </div>
-                    {errors["pax_0_phone"] && touched["pax_0_phone"] && (
-                      <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1 mt-1.5">
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span>{errors["pax_0_phone"]}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {count > 1 && (
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  disabled={activePaxIndex === 0}
-                  onClick={() => setActivePaxIndex(Math.max(0, activePaxIndex - 1))}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  Previous Traveler
-                </button>
-                {activePaxIndex < count - 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => setActivePaxIndex(activePaxIndex + 1)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[var(--premium-violet)] hover:opacity-95 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>Next: Traveler {activePaxIndex + 2} ({passengers[activePaxIndex + 1]?.type})</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                ) : (
-                  <span className="text-xs font-semibold text-pink-600 flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4" /> All {count} Travelers Reviewed
-                  </span>
-                )}
-              </div>
-            )}
           </div>
 
-          {/* Sticky Bottom Bar with Action Button */}
-          <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 p-4 shadow-lg">
-            <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Passengers
-                </span>
-                <div className="text-sm sm:text-base font-bold text-slate-900">
-                  {passengers.filter((_, i) => isPaxComplete(i)).length} of {count} Completed
+          {/* Contact Details (Lead Passenger only) */}
+          {activePaxIndex === 0 && (
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#10B981]/10 text-[#10B981] flex items-center justify-center">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <h2 className="font-['Outfit'] text-[16px] font-bold text-[#0F172A]">Ticket & Flight Alerts</h2>
+                </div>
+                <span className="font-['JetBrains_Mono',monospace] text-[12px] text-[#94A3B8]">Primary Booking Contact</span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className={`bg-[#F8FAFC] border p-2.5 rounded-lg flex items-center justify-between ${errors["pax_0_phone"] && touched["pax_0_phone"] ? "border-rose-400" : "border-[#E2E8F0]"}`}>
+                  <div className="flex flex-col min-w-0 w-full">
+                    <span className="font-['JetBrains_Mono',monospace] text-[12px] text-[#475569]">Mobile Number</span>
+                    <div className="flex items-center gap-1.5 w-full">
+                      <Phone className="w-4 h-4 text-[#475569] shrink-0" />
+                      <span className="font-['Outfit'] text-[14px] font-semibold text-[#0F172A]">+91</span>
+                      <input type="tel" maxLength={10} placeholder="Enter 10 digit number" value={currentPax.phone || ""} onChange={(e) => handleUpdate(0, "phone", e.target.value)} className="bg-transparent font-['Outfit'] text-[14px] font-semibold text-[#0F172A] focus:outline-none w-full" />
+                    </div>
+                    {errors["pax_0_phone"] && touched["pax_0_phone"] && <span className="text-[10px] text-rose-500 mt-1">{errors["pax_0_phone"]}</span>}
+                  </div>
+                </div>
+
+                <div className={`bg-[#F8FAFC] border p-2.5 rounded-lg flex items-center justify-between ${errors["pax_0_email"] && touched["pax_0_email"] ? "border-rose-400" : "border-[#E2E8F0]"}`}>
+                  <div className="flex flex-col min-w-0 w-full">
+                    <span className="font-['JetBrains_Mono',monospace] text-[12px] text-[#475569]">Official E-Ticket Destination</span>
+                    <input type="email" placeholder="Enter email address" value={currentPax.email || ""} onChange={(e) => handleUpdate(0, "email", e.target.value)} className="w-full bg-transparent font-['Outfit'] text-[14px] font-semibold text-[#0F172A] focus:outline-none truncate" />
+                    {errors["pax_0_email"] && touched["pax_0_email"] && <span className="text-[10px] text-rose-500 mt-1">{errors["pax_0_email"]}</span>}
+                  </div>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="px-6 sm:px-8 py-3.5 rounded-xl bg-[var(--premium-violet)] text-white font-bold text-sm shadow-xs hover:opacity-95 transition-opacity flex items-center gap-2 cursor-pointer"
-              >
-                <span>Proceed to Seat Selection</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center justify-between p-3 bg-[#10B981]/5 rounded-lg border border-[#10B981]/20">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#10B981] text-white flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                  </div>
+                  <div>
+                    <p className="font-['Outfit'] text-[14px] font-bold text-[#0F172A]">Instant WhatsApp Boarding Pass</p>
+                    <p className="font-['Outfit'] text-[12px] text-[#475569]">Receive web check-in links & gate updates</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input type="checkbox" className="sr-only peer" checked={whatsappDelivery} onChange={(e) => setWhatsappDelivery(e.target.checked)} />
+                  <div className="w-11 h-6 bg-[#dee3e9] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#10B981]"></div>
+                </label>
+              </div>
             </div>
-          </footer>
+          )}
         </form>
       </main>
+
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md shadow-[0_-6px_20px_rgba(0,0,0,0.06)] px-4 py-3 pb-safe flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+              <span className="font-['Outfit'] text-[24px] font-extrabold text-[#0F172A]">₹{totalAmount.toLocaleString("en-IN")}</span>
+              <span className="bg-[#6ffbbe]/50 text-[#005236] font-['JetBrains_Mono',monospace] text-[10px] px-1.5 py-0.5 rounded-full uppercase font-bold">Best Fare</span>
+            </div>
+            <span className="font-['Outfit'] text-[12px] text-[#475569]">Total ({count} Travellers) • Incl. all taxes</span>
+          </div>
+          <button onClick={handleSubmit} type="button" className="bg-[#0ea5e9] hover:opacity-90 text-white font-['Outfit'] text-[14px] font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all active:scale-95 shrink-0">
+            <span>Continue to Seat Selection</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
+      </footer>
     </div>
   );
 };

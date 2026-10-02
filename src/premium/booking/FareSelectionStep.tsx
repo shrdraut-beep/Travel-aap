@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { CheckCircle2, ShieldCheck, Briefcase, Info } from "lucide-react";
-import { BookingStepHeader } from "./BookingStepHeader";
+import { CheckCircle2, ShieldCheck, Briefcase, Info, ChevronRight, Check } from "lucide-react";
+import { FlightBookingHeader } from "./FlightBookingHeader";
 
 export interface SelectedFare {
   id: string;
@@ -24,14 +24,9 @@ export const FareSelectionStep: React.FC<FareSelectionStepProps> = ({
   onConfirmFare,
   onBack
 }) => {
-  const [selectedFareId, setSelectedFareId] = useState<string>("saver");
+  const [selectedFareId, setSelectedFareId] = useState<string>("flexi");
 
-  const org = flight?.origin || "BOM";
-  const dst = flight?.destination || "DEL";
-  const airline = flight?.airline || "IndiGo";
-  const flightNo = flight?.flightNumber || "6E-2045";
-  const aircraft = flight?.aircraft || "Airbus A320neo";
-  const basePrice = Number(flight?.price || flight?.total_amount || 4890);
+  const basePrice = Number(flight?.price || flight?.total_amount || 6480);
   const totalPax = passengerCount || ((searchParams?.adults || 1) + (searchParams?.children || 0) + (searchParams?.infants || 0));
 
   const fares: SelectedFare[] = [
@@ -40,10 +35,10 @@ export const FareSelectionStep: React.FC<FareSelectionStepProps> = ({
       name: "Saver",
       priceDelta: 0,
       benefits: [
-        "🧳 7kg Cabin + 15kg Check-in baggage",
-        "💺 Standard Seat Selection (Chargeable)",
-        "🔄 Cancellation Charge: ₹2,500 per pax",
-        "📅 Date Change Fee: ₹1,500 + fare diff"
+        "Check-in 15 kg",
+        "Standard Seat Selection (Chargeable)",
+        "Cancellation Charge: ₹2,500 per pax",
+        "Date Change Fee: ₹1,500 + diff"
       ]
     },
     {
@@ -51,92 +46,96 @@ export const FareSelectionStep: React.FC<FareSelectionStepProps> = ({
       name: "Flexi Plus",
       priceDelta: 1200,
       benefits: [
-        "🧳 7kg Cabin + 15kg Check-in baggage",
-        "💺 Free Standard Seat Selection",
-        "🍱 Free In-flight Snack & Drink",
-        "🔄 Reduced Cancellation Fee: ₹1,000",
-        "📅 Reduced Date Change Fee: ₹500"
+        "Free Seat Choice",
+        "Complimentary Meal",
+        "₹10 Change Fee",
+        "Check-in 15 kg"
       ]
     },
     {
-      id: "premium",
-      name: "Super 6E / Premium",
+      id: "vip",
+      name: "Super Saver VIP",
       priceDelta: 2500,
       benefits: [
-        "🧳 7kg Cabin + 25kg Check-in (+10kg Extra)",
-        "💺 Free Any Seat (including XL Legroom)",
-        "🍱 Free Premium Gourmet Hot Meal",
-        "🛡️ Zero Cancellation Fee (100% Refund)",
-        "📅 Zero Date Change Fee",
-        "⚡ Priority Check-in & Baggage Handling"
+        "Check-in 20 kg",
+        "Row 1-3 Upfront Seat",
+        "Gourmet Hot Meal",
+        "Priority Boarding"
       ]
     }
   ];
 
   const handleContinue = () => {
-    const selected = fares.find((f) => f.id === selectedFareId) || fares[0];
+    const selected = fares.find((f) => f.id === selectedFareId) || fares[1];
     onConfirmFare(selected);
   };
 
+  const selectedFare = fares.find(f => f.id === selectedFareId);
+  const totalAmount = (basePrice + (selectedFare?.priceDelta || 0)) * totalPax;
+
   return (
-    <div className="min-h-screen bg-[var(--premium-page)] text-[var(--premium-ink)] pb-28">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] pb-28">
       {/* Header */}
-      <BookingStepHeader
-        title="Select Fare Type"
-        step="Step 2 of 6"
-        subtitle={<>{airline} {flightNo} • {aircraft} • {org} to {dst} • {totalPax} Traveler{totalPax > 1 ? "s" : ""}</>}
-        onBack={onBack}
-        backAriaLabel="Back to results"
-        maxWidth="max-w-4xl"
+      <FlightBookingHeader 
+        flight={flight} 
+        stepNum={1} 
+        stepTitle="Flight Review" 
+        onClose={onBack} 
+        onBack={onBack} 
       />
 
-      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        <div className="bg-sky-50 text-sky-800 rounded-2xl p-4 border border-sky-100 flex items-start gap-3">
-          <Info className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-          <p className="text-xs sm:text-sm font-medium leading-relaxed">
-            Upgrade your fare for added benefits like free seat selection, extra baggage, free meals, and zero cancellation fees.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <main className="max-w-4xl mx-auto px-4 py-6 mt-[100px] space-y-4">
+        
+        <div className="flex flex-col space-y-4">
           {fares.map((fare) => {
             const isSelected = selectedFareId === fare.id;
             return (
               <div
                 key={fare.id}
                 onClick={() => setSelectedFareId(fare.id)}
-                className={`relative rounded-3xl p-5 border-2 cursor-pointer transition-all ${
+                className={`cursor-pointer rounded-xl p-4 transition-all duration-200 border ${
                   isSelected
-                    ? "border-[var(--premium-violet)] bg-violet-50/30 shadow-md scale-[1.02]"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                    ? "border-[#0ea5e9] bg-[#0ea5e9]/5 shadow-md"
+                    : "border-[#E2E8F0] bg-white shadow-sm"
                 }`}
               >
-                {isSelected && (
-                  <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-[var(--premium-violet)] text-white flex items-center justify-center shadow-sm">
-                    <CheckCircle2 className="w-5 h-5" />
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${isSelected ? "bg-[#0ea5e9]" : "bg-[#eaeef4]"}`}>
+                      <div className={`w-2 h-2 rounded-full bg-white transition-opacity ${isSelected ? "opacity-100" : "opacity-0"}`}></div>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-['Outfit'] text-[16px] font-bold text-[#0F172A]">{fare.name}</h3>
+                        {fare.id === "flexi" && (
+                          <span className="bg-[#c9e6ff] text-[#004c6e] font-['JetBrains_Mono',monospace] text-[12px] px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">RECOMMENDED</span>
+                        )}
+                        {fare.id === "vip" && (
+                          <span className="bg-[#ffdcbd] text-[#693c00] font-['JetBrains_Mono',monospace] text-[12px] px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">VIP Perks</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
-                
-                <div className="mb-4">
-                  <h3 className="text-lg font-black text-slate-900">{fare.name}</h3>
-                  <div className="mt-2 text-2xl font-bold text-[var(--premium-violet)]">
-                    ₹{basePrice + fare.priceDelta}
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="font-['Outfit'] text-[18px] font-bold tracking-tight">
+                        ₹{(basePrice + fare.priceDelta).toLocaleString("en-IN")}
+                      </span>
+                      <span className="font-['JetBrains_Mono',monospace] text-[11px] text-[#94A3B8] font-medium">/pax</span>
+                    </div>
+                    {totalPax > 1 && (
+                      <span className="font-['JetBrains_Mono',monospace] text-[11px] text-[#94A3B8]">
+                        ₹{((basePrice + fare.priceDelta) * totalPax).toLocaleString("en-IN")} total
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block">
-                    Per adult (taxes incl.)
-                  </span>
-                  {totalPax > 1 && (
-                    <span className="text-xs font-bold text-slate-800 mt-1 block">
-                      Total: ₹{(basePrice + fare.priceDelta) * totalPax} ({totalPax} travelers)
-                    </span>
-                  )}
                 </div>
-                
-                <div className="space-y-3 pt-4 border-t border-slate-100">
+
+                <div className={`grid grid-cols-2 gap-y-2 gap-x-2 mt-4 p-2 rounded-lg ${isSelected ? "bg-[#0ea5e9]/5" : "bg-[#F8FAFC]"}`}>
                   {fare.benefits.map((benefit, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-sm text-slate-700">
-                      <ShieldCheck className="w-4 h-4 text-pink-500 shrink-0 mt-0.5" />
-                      <span className="font-medium leading-snug">{benefit}</span>
+                    <div key={idx} className="flex items-center gap-1.5 whitespace-nowrap min-w-0">
+                      <Check className={`w-4 h-4 shrink-0 ${isSelected ? "text-[#0ea5e9]" : "text-[#475569]"}`} />
+                      <span className={`font-['Outfit'] text-[14px] truncate ${isSelected ? "text-[#0F172A]" : "text-[#475569]"}`}>{benefit}</span>
                     </div>
                   ))}
                 </div>
@@ -144,26 +143,35 @@ export const FareSelectionStep: React.FC<FareSelectionStepProps> = ({
             );
           })}
         </div>
+
+        {/* Assurance Strip */}
+        <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-md border border-[#E2E8F0]/80 rounded-lg px-4 mt-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-[#10B981] w-5 h-5" />
+            <span className="font-['Outfit'] text-[14px] text-[#475569]">RouTripo SafeFare Guarantee included</span>
+          </div>
+          <ChevronRight className="text-[#94A3B8] w-4 h-4" />
+        </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 p-4 shadow-lg">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-              Selected Fare ({totalPax} Traveler{totalPax > 1 ? "s" : ""})
+      {/* Bottom Fixed Action Bar */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(15,23,42,0.06)] px-4 py-3 pb-safe flex items-center justify-between gap-2">
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-baseline gap-1">
+            <span className="font-['Outfit'] text-[20px] leading-tight font-bold text-[#0F172A]">
+              ₹{totalAmount.toLocaleString("en-IN")}
             </span>
-            <div className="text-lg font-bold text-slate-900">
-              ₹{(basePrice + (fares.find(f => f.id === selectedFareId)?.priceDelta || 0)) * totalPax}
-            </div>
+            <span className="font-['JetBrains_Mono',monospace] text-[12px] text-[#94A3B8] whitespace-nowrap">({totalPax} Travellers)</span>
           </div>
-          <button
-            type="button"
-            onClick={handleContinue}
-            className="px-8 py-3.5 rounded-xl bg-[var(--premium-violet)] text-white font-bold text-sm shadow-xs hover:opacity-95 transition-opacity cursor-pointer"
-          >
-            Continue
-          </button>
+          <span className="font-['JetBrains_Mono',monospace] text-[12px] text-[#10B981] truncate">Incl. all taxes & fees</span>
         </div>
+        <button
+          onClick={handleContinue}
+          className="bg-[#0ea5e9] text-white px-4 py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all duration-150 whitespace-nowrap min-h-[44px]"
+        >
+          <span className="font-['Outfit'] text-[14px] font-semibold tracking-wide">Continue to Passengers</span>
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </footer>
     </div>
   );

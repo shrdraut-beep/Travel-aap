@@ -42,6 +42,107 @@ app.post("/api/cars/search", async (req, res) => {
   }
 });
 
+// Dynamic Cab Add-ons for Step 3
+app.get("/api/cabs/addons", async (_req, res) => {
+  const addons = [
+    {
+      id: "addon_zero_dep",
+      name: "Zero-Deductible Damage Shield",
+      price: 249,
+      subtitle: "100% bumper-to-bumper collision waiver without excess liability",
+      icon: "verified_user",
+      recommended: true
+    },
+    {
+      id: "addon_extra_driver",
+      name: "Additional Verified Chauffeur",
+      price: 399,
+      subtitle: "Relief co-driver for journeys exceeding 300 km or 6 hours",
+      icon: "person_add"
+    },
+    {
+      id: "addon_child_seat",
+      name: "Infant & Child Safety Seat",
+      price: 199,
+      subtitle: "ISOFIX certified baby booster seat sanitized before pickup",
+      icon: "child_care"
+    },
+    {
+      id: "addon_luggage_carrier",
+      name: "Rooftop Luggage Carrier Rack",
+      price: 149,
+      subtitle: "Accommodates 3 additional oversized suitcases safely",
+      icon: "luggage"
+    }
+  ];
+
+  return res.status(200).json({ success: true, addons });
+});
+
+// Cab Booking API for Step 4
+app.post("/api/cabs/book", async (req, res) => {
+  try {
+    const { vehicle, pickupLocation, dropLocation, pickupDateTime, passenger, addons, totalAmount } = req.body || {};
+    const bookingId = "CAB" + Math.floor(100000 + Math.random() * 900000);
+    const rideOtp = String(Math.floor(1000 + Math.random() * 9000));
+
+    return res.status(200).json({
+      success: true,
+      bookingId,
+      rideOtp,
+      status: "CONFIRMED",
+      message: "Chauffeur assigned & cab booked successfully",
+      driver: {
+        name: "Rajesh Shinde",
+        rating: 4.9,
+        tripsCount: 1420,
+        phone: "+91 98201 44556",
+        plateNumber: "MH 01 CR 4829",
+        vehicleModel: vehicle?.title || "White Swift Dzire Tour",
+        photo: "https://lh3.googleusercontent.com/aida-public/AB6AXuBSw5RxjsUkTiz8j5QkxMdQcHJxHnWnZp8ympoKWZRVBfRfMd3VHJ5gAJ0MxETQD9NQ9VtUVgzgciPnQWLr7Dm5rpjGWN3zXVn91AD6iczGr70OyN6KdqMOEVHDbebsPGz0D0iXEVAwFcmMjoM3otGrcW-Ez-pmwYNKWL_QPXIFVOovF1GaV-z0npllpCHyU_vc49OjZ9fZdd0tNdRf5_otRt-y17rPNtyHtd28rA0gqU1Yo7iNESom"
+      },
+      rideDetails: {
+        pickupLocation: pickupLocation || "Dadar T.T. Circle, Mumbai",
+        dropLocation: dropLocation || "Pune Station / Hinjewadi",
+        pickupDateTime: pickupDateTime || "15 Oct 2026, 08:30 AM",
+        passenger: passenger || { name: "Aditya Patil", phone: "9876543210" },
+        addons: addons || [],
+        totalAmount: totalAmount || 2850
+      }
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: "Cab booking failed" });
+  }
+});
+
+// Cab Live Tracking & Handshake OTP API for Step 5
+app.all(["/api/cabs/track", "/api/cabs/:bookingId/track"], async (req, res) => {
+  try {
+    const bookingId = req.params?.bookingId || req.body?.bookingId || req.query?.bookingId || "CAB482901";
+    return res.status(200).json({
+      success: true,
+      bookingId,
+      status: "ARRIVED",
+      statusMessage: "Driver Arrived at Pickup Location",
+      arrivalDetail: "Parked near main gate • 2 min wait",
+      rideOtp: "4829",
+      sosActive: true,
+      gpsActive: true,
+      driver: {
+        name: "Rajesh Shinde",
+        rating: 4.9,
+        tripsCount: 1420,
+        phone: "+91 98201 44556",
+        plateNumber: "MH 01 CR 4829",
+        vehicleModel: "White Swift Dzire Tour",
+        photo: "https://lh3.googleusercontent.com/aida-public/AB6AXuBSw5RxjsUkTiz8j5QkxMdQcHJxHnWnZp8ympoKWZRVBfRfMd3VHJ5gAJ0MxETQD9NQ9VtUVgzgciPnQWLr7Dm5rpjGWN3zXVn91AD6iczGr70OyN6KdqMOEVHDbebsPGz0D0iXEVAwFcmMjoM3otGrcW-Ez-pmwYNKWL_QPXIFVOovF1GaV-z0npllpCHyU_vc49OjZ9fZdd0tNdRf5_otRt-y17rPNtyHtd28rA0gqU1Yo7iNESom"
+      }
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get("/api/zuelpay/status", (req, res) => {
   try {
     const status = zuelpayService.getStatus();

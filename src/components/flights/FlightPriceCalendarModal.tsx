@@ -165,17 +165,17 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
 
             const category = day.category || (day.isCheapest ? 'low' : day.isExpensive ? 'high' : 'average');
 
-            let priceColor = 'text-premium-pink font-semibold';
-            let bgStyle = 'bg-premium-pink-soft/50 border-premium-pink/60 hover:bg-[var(--premium-pink-soft)]';
-            let dotBadge = 'bg-[var(--premium-pink)]';
+            let priceColor = 'text-slate-600 font-semibold';
+            let bgStyle = 'bg-slate-50 text-slate-800 border-slate-200/80 hover:bg-slate-100';
+            let dotBadge = 'bg-slate-400';
 
             if (category === 'low') {
-              priceColor = 'text-premium-sky-deep font-bold';
-              bgStyle = 'bg-premium-sky-soft/80 border-premium-sky-deep hover:bg-premium-sky-soft/80';
-              dotBadge = 'bg-premium-sky-soft0';
+              priceColor = 'text-emerald-700 font-bold';
+              bgStyle = 'bg-emerald-50 text-emerald-900 border-emerald-200/80 hover:bg-emerald-100';
+              dotBadge = 'bg-emerald-500';
             } else if (category === 'high') {
               priceColor = 'text-rose-700 font-semibold';
-              bgStyle = 'bg-rose-50/50 border-rose-200/60 hover:bg-rose-100/60';
+              bgStyle = 'bg-rose-50 text-rose-900 border-rose-200/80 hover:bg-rose-100';
               dotBadge = 'bg-rose-500';
             }
 
@@ -187,11 +187,11 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
                 onClick={() => {
                   setTempSelected(day.dateStr);
                 }}
-                className={`h-14 sm:h-16 rounded-[16px] flex flex-col items-center justify-center p-1 transition-all relative cursor-pointer border ${
+                className={`h-14 sm:h-16 rounded-2xl flex flex-col items-center justify-center p-1 transition-all relative cursor-pointer border ${
                   isDisabled
                     ? 'opacity-25 cursor-not-allowed bg-slate-50/50 border-transparent'
                     : isSelected
-                    ? 'bg-rose-600 text-white shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] scale-102 ring-2 ring-rose-600/40 border-transparent'
+                    ? 'bg-[#0ea5e9] text-white shadow-md ring-2 ring-sky-300 scale-102 border-transparent'
                     : bgStyle
                 }`}
               >
@@ -200,7 +200,7 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
                     isSelected
                       ? 'text-white'
                       : day.isToday
-                      ? 'text-rose-600 font-black'
+                      ? 'text-sky-600 font-black'
                       : 'text-slate-900'
                   }`}
                 >
@@ -210,7 +210,7 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
                 {!isDisabled && (
                   <span
                     className={`text-[10px] sm:text-[11px] tracking-tight leading-tight ${
-                      isSelected ? 'text-white/90 font-black' : priceColor
+                      isSelected ? 'text-sky-100 font-black' : priceColor
                     }`}
                   >
                     {day.displayPrice}
@@ -232,26 +232,26 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-xs p-0 sm:p-4 ">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 backdrop-blur-xs p-0 sm:p-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
           className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
         >
-          {/* Header */}
-          <div className="bg-rose-600 text-white p-4 flex items-center justify-between shrink-0 shadow-xs">
+          {/* Header (Signature RouTripo Curved Gradient Header) */}
+          <div className="bg-gradient-to-b from-[#e8f4fc] via-[#f4f9fd] to-white border-b border-[#bae6fd]/50 text-slate-900 p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
-                <CalendarIcon className="w-4 h-4 text-white" />
+              <div className="w-9 h-9 rounded-full bg-sky-100 text-[#0ea5e9] flex items-center justify-center shadow-xs">
+                <span className="material-symbols-outlined text-[20px]">calendar_month</span>
               </div>
               <div>
-                <h2 className="text-base font-black leading-tight">
+                <h2 className="text-base font-black text-slate-900 leading-tight">
                   {title || (isReturnDate 
                     ? (isMr ? 'परतीची तारीख निवडा' : 'Select Return Date') 
                     : (isMr ? 'प्रवासाची तारीख निवडा' : 'Select Departure Date'))}
                 </h2>
-                <p className="text-[11px] text-white/80 font-medium">
+                <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
                   {originCode} ➔ {destCode} • {isMr ? 'किमान दर कॅलेंडर' : 'Lowest Fare Calendar'}
                 </p>
               </div>
@@ -259,24 +259,24 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="size-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5 text-slate-700" />
             </button>
           </div>
 
           {/* Month Navigation & Legend Bar */}
-          <div className="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shrink-0">
+          <div className="bg-slate-50/80 border-b border-slate-200/80 px-4 py-2 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1 font-bold text-premium-sky-deep">
-                <span className="w-2 h-2 rounded-full bg-premium-sky-soft0 inline-block" />
+              <span className="flex items-center gap-1 font-bold text-emerald-700">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
                 {isMr ? 'कमी दर' : 'Best Fare'}
               </span>
-              <span className="flex items-center gap-1 font-bold text-slate-500">
+              <span className="flex items-center gap-1 font-bold text-slate-600">
                 <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
-                {isMr ? 'मध्यम' : 'Regular'}
+                {isMr ? 'नियमित दर' : 'Regular'}
               </span>
-              <span className="flex items-center gap-1 font-bold text-rose-500">
+              <span className="flex items-center gap-1 font-bold text-rose-600">
                 <span className="w-2 h-2 rounded-full bg-rose-500 inline-block" />
                 {isMr ? 'जास्त दर' : 'Peak'}
               </span>
@@ -315,7 +315,7 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
           </div>
 
           {/* Footer Action */}
-          <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between gap-4 shrink-0 shadow-[0_12px_28px_-10px_rgba(40,32,79,0.35)]">
+          <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between gap-4 shrink-0 shadow-sm">
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                 {isMr ? 'निवडलेली तारीख' : 'Selected Date'}
@@ -327,7 +327,7 @@ export const FlightPriceCalendarModal: React.FC<FlightPriceCalendarModalProps> =
 
             <button
               onClick={handleConfirm}
-              className="bg-rose-600 hover:bg-rose-700 active:scale-98 text-white font-extrabold px-6 py-3 rounded-[16px] shadow-[0_8px_20px_-8px_rgba(40,32,79,0.25)] transition-all flex items-center gap-2 cursor-pointer"
+              className="bg-[#0ea5e9] hover:bg-sky-600 active:scale-95 text-white font-bold px-6 py-3 rounded-xl shadow-md shadow-sky-500/20 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Check className="w-4 h-4" />
               <span>{isMr ? 'तारीख निश्चित करा' : 'Confirm Date'}</span>

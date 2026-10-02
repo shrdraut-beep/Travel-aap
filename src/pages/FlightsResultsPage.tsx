@@ -501,10 +501,10 @@ export const FlightsResultsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickSort('cheapest')}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer ${
                   filters.sortBy === 'cheapest'
-                    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 text-white font-black shadow-xs'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
+                    ? 'bg-[#0ea5e9] text-white shadow-xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 hover:border-sky-300'
                 }`}
               >
                 <span>₹ Cheapest</span>
@@ -513,36 +513,36 @@ export const FlightsResultsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickSort('fastest')}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer ${
                   filters.sortBy === 'fastest'
-                    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 text-white font-black shadow-xs'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
+                    ? 'bg-[#0ea5e9] text-white shadow-xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 hover:border-sky-300'
                 }`}
               >
-                <Zap className="w-3 h-3 text-orange-500" />
+                <Zap className="w-3 h-3 text-amber-500" />
                 <span>Fastest</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickSort('depart_early')}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer ${
                   filters.sortBy === 'depart_early'
-                    ? 'bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 text-white font-black shadow-xs'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
+                    ? 'bg-[#0ea5e9] text-white shadow-xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 hover:border-sky-300'
                 }`}
               >
-                <Sunrise className="w-3 h-3 text-orange-500" />
+                <Sunrise className="w-3 h-3 text-amber-500" />
                 <span>Early Depart</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickToggleStop('0')}
-                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer ${
                   filters.stops.includes('0')
-                    ? 'bg-pink-600 text-white font-black shadow-xs'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
+                    ? 'bg-[#0ea5e9] text-white shadow-xs'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 hover:border-sky-300'
                 }`}
               >
                 <span>🟢 Non-Stop</span>
@@ -552,7 +552,7 @@ export const FlightsResultsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-pink-600 hover:bg-pink-50 border border-pink-200 whitespace-nowrap transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-sky-700 hover:bg-sky-50 border border-sky-200 whitespace-nowrap transition-all cursor-pointer"
                 >
                   <RotateCcw className="w-3 h-3" />
                   <span>Reset</span>

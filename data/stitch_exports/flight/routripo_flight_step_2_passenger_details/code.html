@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { 'colors': { 'on-secondary-fixed-variant': '#005236', 'inverse-primary': '#89ceff', 'text-muted': '#94A3B8', 'on-primary-fixed': '#001e2f', 'secondary': '#006c49', 'surface-variant': '#dee3e9', 'text-primary': '#0F172A', 'on-error': '#ffffff', 'on-tertiary-container': '#4d2b00', 'canvas-bg': '#F8FAFC', 'on-primary-fixed-variant': '#004c6e', 'text-secondary': '#475569', 'primary': '#006591', 'on-surface': '#171c20', 'secondary-container': '#6cf8bb', 'inverse-on-surface': '#edf1f7', 'on-secondary': '#ffffff', 'border-color': '#E2E8F0', 'tertiary-fixed': '#ffdcbd', 'secondary-fixed': '#6ffbbe', 'error-container': '#ffdad6', 'tertiary-container': '#de8712', 'surface-tint': '#006591', 'on-tertiary-fixed-variant': '#693c00', 'surface-container': '#eaeef4', 'surface-bg': '#FFFFFF', 'surface-bright': '#f6faff', 'surface-container-lowest': '#ffffff', 'tertiary-fixed-dim': '#ffb86e', 'inverse-surface': '#2c3135', 'error': '#ba1a1a', 'primary-fixed-dim': '#89ceff', 'surface-container-high': '#e4e8ee', 'surface-container-highest': '#dee3e9', 'surface': '#f6faff', 'surface-container-low': '#f0f4fa', 'secondary-fixed-dim': '#4edea3', 'on-tertiary-fixed': '#2c1600', 'on-primary-container': '#003751', 'on-secondary-container': '#00714d', 'on-primary': '#ffffff', 'tertiary': '#8a5100', 'primary-container': '#0ea5e9', 'on-background': '#171c20', 'outline': '#6e7881', 'background': '#f6faff', 'on-error-container': '#93000a', 'on-surface-variant': '#3e4850', 'on-secondary-fixed': '#002113', 'surface-dim': '#d6dae0', 'outline-variant': '#bec8d2', 'on-tertiary': '#ffffff', 'admin-violet': '#8B5CF6', 'primary-fixed': '#c9e6ff' }, 'borderRadius': { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, 'spacing': { 'space-sm': '0.5rem', 'space-xl': '2rem', 'space-lg': '1.5rem', 'gutter': '1rem', 'space-md': '1rem', 'margin': '1.5rem', 'space-xs': '0.25rem' }, 'fontFamily': { 'body-md': ['Outfit'], 'headline-lg': ['Outfit'], 'headline-sm': ['Outfit'], 'body-sm': ['Outfit'], 'headline-md': ['Outfit'], 'label-md': ['JetBrains Mono'] }, 'fontSize': { 'body-md': ['1rem', { 'lineHeight': '1.6', 'fontWeight': '400' }], 'headline-lg': ['1.875rem', { 'lineHeight': '2.25rem', 'fontWeight': '800' }], 'headline-sm': ['1.25rem', { 'lineHeight': '1.75rem', 'fontWeight': '700' }], 'body-sm': ['0.875rem', { 'lineHeight': '1.5', 'fontWeight': '400' }], 'headline-md': ['1.5rem', { 'lineHeight': '2rem', 'fontWeight': '700' }], 'label-md': ['0.75rem', { 'lineHeight': '1rem', 'fontWeight': '500' }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-canvas-bg font-body-md text-body-md text-text-primary flex flex-col min-h-screen" style="background: linear-gradient(rgb(224, 242, 254) 0%, rgb(240, 249, 255) 25%, rgb(248, 250, 252) 100%); min-height: 100vh;"><header class="fixed top-0 w-full z-50 pt-safe bg-primary-container rounded-b-2xl shadow-[0_4px_15px_rgba(14,165,233,0.18)]"><div class="h-24 px-gutter flex flex-col justify-between py-space-xs"><div class="flex items-center justify-between gap-space-sm"><div class="flex items-center justify-center min-w-[44px] min-h-[44px]"><button aria-label="Go back" class="w-7 h-7 rounded-full bg-white/20 text-on-primary flex items-center justify-center backdrop-blur-md transition-colors hover:bg-white/30" onclick="history.back()"><span class="material-symbols-outlined text-[18px]">arrow_back</span></button></div><div class="flex flex-col items-center justify-center text-center flex-1 px-space-xs"><div class="flex items-center justify-center gap-space-xs text-on-primary font-headline-sm text-body-sm font-bold leading-tight"><span class="">Mumbai (BOM)</span><span class="material-symbols-outlined text-[16px] leading-none">flight_takeoff</span><span class="">Goa (GOI)</span></div><div class="text-white/90 font-label-md text-label-md tracking-tight leading-normal">15 Oct • 2 Travellers • Economy</div></div><div class="flex items-center justify-center min-w-[44px] min-h-[44px]"><button aria-label="Close booking" class="w-7 h-7 rounded-full bg-white/20 text-on-primary flex items-center justify-center backdrop-blur-md transition-colors hover:bg-white/30" onclick="window.location.href='#'"><span class="material-symbols-outlined text-[18px]">close</span></button></div></div><div class="flex flex-col gap-1 px-space-xs pb-1"><div class="flex items-center justify-between text-white/90 font-label-md text-label-md"><span class="tracking-wider uppercase font-semibold">STEP 2 OF 6: TRAVELLER DETAILS</span><span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[14px]">timer</span><span class="">14:45 left</span></span></div><div class="w-full h-1 bg-white/30 rounded-full overflow-hidden"><div class="h-full bg-white rounded-full transition-all duration-300 w-1/3"></div></div></div></div></header><main class="flex flex-col relative w-full pt-24 pb-safe min-h-screen bg-transparent"><div class="flex flex-col w-full pb-32">
+<!-- Interactive Progress & DigiLocker Pre-fill Banner -->
+<!-- Passenger Tabs Pill Bar -->
+<div class="px-gutter py-space-xs">
+<div class="grid grid-cols-2 gap-space-sm bg-surface-container rounded-xl p-1"><button class="flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-lg bg-surface-bg text-on-surface font-headline-sm text-label-md shadow-sm transition-all" id="tab-p1" type="button"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="truncate">Adult 1 (Lead)</span><span class="material-symbols-outlined text-[14px] text-secondary" style='font-variation-settings: "FILL" 1;'>check_circle</span></button><button class="flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-lg bg-surface-container-lowest/80 text-on-surface font-headline-sm text-label-md transition-all shadow-sm" id="tab-p2" type="button"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="truncate">Adult 2 (Mandatory)</span><span class="material-symbols-outlined text-[14px] text-secondary" style='font-variation-settings: "FILL" 1;'>check_circle</span></button></div>
+</div>
+<!-- Main Passenger Form Card -->
+<div class="px-gutter pt-space-xs flex flex-col gap-space-md">
+<div class="bg-surface-bg rounded-xl p-space-md shadow-sm border border-slate-200 flex flex-col gap-space-md"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-primary-container/20 text-on-primary-container flex items-center justify-center font-headline-sm text-body-sm font-bold">1</span><div><h2 class="font-headline-sm text-body-md font-bold text-on-surface">Adult 1 Details</h2><p class="font-body-sm text-label-md text-text-muted">Must match Gov. Photo ID exactly</p></div></div><div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-on-secondary-container text-label-md font-headline-sm"><span class="material-symbols-outlined text-[14px]" style='font-variation-settings: "FILL" 1;'>verified_user</span><span class="">Verified</span></div></div><div class="flex flex-col gap-1.5"><label class="font-headline-sm text-label-md uppercase tracking-wider text-text-secondary">Title</label><div class="grid grid-cols-3 gap-space-sm"><label class="relative flex items-center justify-center py-2 px-3 rounded-lg bg-primary-fixed text-on-primary-fixed font-headline-sm text-body-sm cursor-pointer shadow-sm transition-all text-center"><input checked="" class="sr-only" name="lead_title" type="radio" value="Mr"/><span class="">Mr.</span></label><label class="relative flex items-center justify-center py-2 px-3 rounded-lg bg-surface-container-low text-text-secondary font-headline-sm text-body-sm cursor-pointer hover:bg-surface-container transition-all text-center"><input class="sr-only" name="lead_title" type="radio" value="Ms"/><span class="">Ms.</span></label><label class="relative flex items-center justify-center py-2 px-3 rounded-lg bg-surface-container-low text-text-secondary font-headline-sm text-body-sm cursor-pointer hover:bg-surface-container transition-all text-center"><input class="sr-only" name="lead_title" type="radio" value="Mrs"/><span class="">Mrs.</span></label></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm"><div class="flex flex-col gap-1 border border-slate-300 bg-white p-2.5 rounded-xl shadow-xs focus-within:border-sky-500"><label class="font-label-md text-label-md text-text-secondary">First &amp; Middle Name</label><div class="flex items-center gap-2"><input class="w-full bg-transparent font-headline-sm text-body-md text-on-surface font-semibold focus:outline-none cursor-default" readonly="" type="text" value="Rohan"/><span class="material-symbols-outlined text-[18px] text-secondary shrink-0" style='font-variation-settings: "FILL" 1;'>lock</span></div></div><div class="flex flex-col gap-1 border border-slate-300 bg-white p-2.5 rounded-xl shadow-xs focus-within:border-sky-500"><label class="font-label-md text-label-md text-text-secondary">Last Name</label><div class="flex items-center gap-2"><input class="w-full bg-transparent font-headline-sm text-body-md text-on-surface font-semibold focus:outline-none cursor-default" readonly="" type="text" value="Deshmukh"/><span class="material-symbols-outlined text-[18px] text-secondary shrink-0" style='font-variation-settings: "FILL" 1;'>lock</span></div></div></div><div class="grid grid-cols-3 gap-space-xs"><div class="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl"><label class="font-label-md text-[10px] uppercase text-text-secondary">Date of Birth</label><input class="w-full bg-transparent font-body-md text-body-sm font-semibold text-on-surface focus:outline-none" readonly="" type="text" value="14/08/1995"/></div><div class="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl"><label class="font-label-md text-[10px] uppercase text-text-secondary">Gender</label><input class="w-full bg-transparent font-body-md text-body-sm font-semibold text-on-surface focus:outline-none" readonly="" type="text" value="Male"/></div><div class="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl"><label class="font-label-md text-[10px] uppercase text-text-secondary">Nationality</label><div class="flex items-center gap-1 font-body-md text-body-sm font-semibold text-on-surface truncate"><span class="material-symbols-outlined text-[16px] text-text-secondary">public</span><span class="truncate">Indian (IND)</span></div></div></div><div class="flex items-center justify-between pt-space-xs bg-surface-container-low p-space-sm rounded-lg"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container shrink-0"><span class="material-symbols-outlined text-[18px]">accessible</span></div><div><p class="font-headline-sm text-body-sm font-semibold text-on-surface">Special Assistance</p><p class="font-body-sm text-label-md text-text-muted">Wheelchair or elderly support at airport</p></div></div><button class="font-headline-sm text-label-md text-primary font-semibold hover:underline" type="button">Add Request</button></div></div><div class="bg-surface-bg rounded-xl p-space-md shadow-sm border border-slate-200 flex flex-col gap-space-md"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-7 h-7 rounded-lg bg-primary-container/20 text-on-primary-container flex items-center justify-center font-headline-sm text-body-sm font-bold">2</span><div><h2 class="font-headline-sm text-body-md font-bold text-on-surface">Adult 2 (Co-Traveller - Mandatory)</h2><p class="font-body-sm text-label-md text-text-muted">Completed • Match Gov. Photo ID</p></div></div><div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-on-secondary-container text-label-md font-headline-sm"><span class="material-symbols-outlined text-[14px]" style='font-variation-settings: "FILL" 1;'>verified_user</span><span class="">Verified</span></div></div><div class="flex flex-col gap-1.5"><label class="font-headline-sm text-label-md uppercase tracking-wider text-text-secondary">Title</label><div class="grid grid-cols-3 gap-space-sm"><div class="relative flex items-center justify-center py-2 px-3 rounded-lg bg-surface-container-low text-text-secondary font-headline-sm text-body-sm text-center"><span class="">Mr.</span></div><div class="relative flex items-center justify-center py-2 px-3 rounded-lg bg-primary-fixed text-on-primary-fixed font-headline-sm text-body-sm text-center shadow-sm font-bold"><span class="">Ms.</span></div><div class="relative flex items-center justify-center py-2 px-3 rounded-lg bg-surface-container-low text-text-secondary font-headline-sm text-body-sm text-center"><span class="">Mrs.</span></div></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm"><div class="flex flex-col gap-1 border border-slate-300 bg-white p-2.5 rounded-xl shadow-xs focus-within:border-sky-500"><label class="font-label-md text-label-md text-text-secondary">First &amp; Middle Name</label><div class="flex items-center gap-2"><input class="w-full bg-transparent font-headline-sm text-body-md text-on-surface font-semibold focus:outline-none cursor-default" readonly="" type="text" value="Pooja"/><span class="material-symbols-outlined text-[18px] text-secondary shrink-0" style='font-variation-settings: "FILL" 1;'>lock</span></div></div><div class="flex flex-col gap-1 border border-slate-300 bg-white p-2.5 rounded-xl shadow-xs focus-within:border-sky-500"><label class="font-label-md text-label-md text-text-secondary">Last Name</label><div class="flex items-center gap-2"><input class="w-full bg-transparent font-headline-sm text-body-md text-on-surface font-semibold focus:outline-none cursor-default" readonly="" type="text" value="Deshmukh"/><span class="material-symbols-outlined text-[18px] text-secondary shrink-0" style='font-variation-settings: "FILL" 1;'>lock</span></div></div></div><div class="grid grid-cols-3 gap-space-xs"><div class="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl"><label class="font-label-md text-[10px] uppercase text-text-secondary">Date of Birth</label><input class="w-full bg-transparent font-body-md text-body-sm font-semibold text-on-surface focus:outline-none" readonly="" type="text" value="22/11/1997"/></div><div class="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl"><label class="font-label-md text-[10px] uppercase text-text-secondary">Gender</label><input class="w-full bg-transparent font-body-md text-body-sm font-semibold text-on-surface focus:outline-none" readonly="" type="text" value="Female"/></div><div class="flex flex-col gap-1 border border-slate-200 bg-slate-50/80 p-2 rounded-xl"><label class="font-label-md text-[10px] uppercase text-text-secondary">Nationality</label><div class="flex items-center gap-1 font-body-md text-body-sm font-semibold text-on-surface truncate"><span class="material-symbols-outlined text-[16px] text-text-secondary">public</span><span class="truncate">Indian (IND)</span></div></div></div></div>
+<!-- Contact & Instant Delivery Details -->
+<div class="bg-surface-bg rounded-xl p-space-md shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-secondary-container/30 text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">send_to_mobile</span>
+</div>
+<h2 class="font-headline-sm text-body-md font-bold text-on-surface">Ticket &amp; Flight Alerts</h2>
+</div>
+<span class="font-label-md text-label-md text-text-muted">Primary Booking Contact</span>
+</div>
+<!-- Contact Inputs -->
+<div class="flex flex-col gap-space-sm">
+<!-- Phone Field -->
+<div class="bg-surface-container-lowest p-2.5 rounded-lg flex items-center justify-between">
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-text-secondary">Mobile Number</span>
+<div class="flex items-center gap-1.5 font-headline-sm text-body-sm font-semibold text-on-surface"><span class="material-symbols-outlined text-[16px] text-text-secondary">smartphone</span><span class="">+91 98765 •••••</span></div>
+</div>
+<div class="flex items-center gap-1 bg-secondary-container/40 text-on-secondary-container px-2 py-0.5 rounded-full text-label-md font-headline-sm">
+<span class="material-symbols-outlined text-[12px]" style='font-variation-settings: "FILL" 1;'>check_circle</span>
+<span class="">OTP Verified</span>
+</div>
+</div>
+<!-- Email Field -->
+<div class="bg-surface-container-lowest p-2.5 rounded-lg flex items-center justify-between">
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-text-secondary">Official E-Ticket Destination</span>
+<span class="font-headline-sm text-body-sm font-semibold text-on-surface truncate">r•••••@routtripo.com</span>
+</div>
+<button class="font-headline-sm text-label-md text-primary hover:underline shrink-0" type="button">Edit</button>
+</div>
+</div>
+<!-- WhatsApp Delivery Toggle -->
+<div class="flex items-center justify-between p-space-sm bg-secondary-container/20 rounded-lg">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+</div>
+<div>
+<p class="font-headline-sm text-body-sm font-bold text-on-surface">Instant WhatsApp Boarding Pass</p>
+<p class="font-body-sm text-label-md text-text-secondary">Receive web check-in links &amp; gate updates</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer shrink-0">
+<input checked="" class="sr-only peer" id="whatsapp-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface-bg after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-bg after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<!-- Frequent Flyer & GST Expander -->
+<div class="bg-surface-bg rounded-xl shadow-md overflow-hidden">
+<!-- Expander Header -->
+<button class="w-full p-space-md flex items-center justify-between bg-surface-bg hover:bg-surface-container-lowest transition-colors" id="accordion-btn" type="button">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">loyalty</span>
+</div>
+<div class="text-left">
+<p class="font-headline-sm text-body-sm font-bold text-on-surface">Loyalty Points &amp; GST Details</p>
+<p class="font-body-sm text-label-md text-text-muted">6E Rewards linked • Optional tax credit</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[20px] text-text-secondary transition-transform duration-200" id="accordion-icon">expand_more</span>
+</button>
+<!-- Expander Content -->
+<div class="p-space-md pt-0 flex flex-col gap-space-sm" id="accordion-body">
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-[10px] uppercase text-text-muted">IndiGo 6E Rewards</span>
+<span class="font-headline-sm text-body-sm font-semibold text-on-surface">6E-9982410</span>
+</div>
+<div class="flex items-center gap-1 text-label-md text-secondary font-headline-sm">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+<span class="">+384 Pts</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-md text-[10px] uppercase text-text-muted">Business GSTIN (Optional)</span>
+<span class="font-body-sm text-body-sm text-text-muted">27AACCR9941M1ZM (Unchecked)</span>
+</div>
+<button class="font-headline-sm text-label-md text-primary hover:underline" type="button">Apply</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Fixed Sticky Checkout Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface-bg/95 backdrop-blur-md shadow-[0_-6px_20px_rgba(0,0,0,0.06)] px-gutter py-space-sm pb-safe flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-lg text-headline-sm font-extrabold text-on-surface">₹7,680</span>
+<span class="bg-secondary-fixed/50 text-on-secondary-fixed-variant font-label-md text-[10px] px-1.5 py-0.5 rounded-full uppercase font-bold">Best Fare</span>
+</div>
+<span class="font-body-sm text-label-md text-text-secondary">Total (2 Travellers) • Incl. all taxes</span>
+</div>
+<button class="bg-primary-container hover:opacity-90 text-on-primary font-headline-sm text-body-sm font-bold px-space-lg py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all active:scale-95 shrink-0" id="continue-btn" type="button"><span class="">Continue to Seat Selection</span><span class="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+</div>
+</div>
+</div>
+<script>
+  // Simple Title Pill toggle
+  const titleRadios = document.querySelectorAll('input[name="lead_title"]');
+  titleRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      titleRadios.forEach(r => {
+        const parent = r.parentElement;
+        if (r.checked) {
+          parent.className = 'relative flex items-center justify-center py-2 px-3 rounded-lg bg-primary-fixed text-on-primary-fixed font-headline-sm text-body-sm cursor-pointer shadow-sm transition-all text-center';
+        } else {
+          parent.className = 'relative flex items-center justify-center py-2 px-3 rounded-lg bg-surface-container-low text-text-secondary font-headline-sm text-body-sm cursor-pointer hover:bg-surface-container transition-all text-center';
+        }
+      });
+    });
+  });
+
+  // Simple Accordion Expand/Collapse
+  const accordionBtn = document.getElementById('accordion-btn');
+  const accordionBody = document.getElementById('accordion-body');
+  const accordionIcon = document.getElementById('accordion-icon');
+  let isOpen = true;
+
+  accordionBtn?.addEventListener('click', () => {
+    isOpen = !isOpen;
+    if (isOpen) {
+      accordionBody.classList.remove('hidden');
+      accordionIcon.style.transform = 'rotate(0deg)';
+    } else {
+      accordionBody.classList.add('hidden');
+      accordionIcon.style.transform = 'rotate(180deg)';
+    }
+  });
+
+  // Switch tabs feedback
+  const tab1 = document.getElementById('tab-p1');
+  const tab2 = document.getElementById('tab-p2');
+  tab2?.addEventListener('click', () => {
+    tab2.className = 'flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-lg bg-surface-bg text-on-surface font-headline-sm text-label-md shadow-sm transition-all';
+    tab1.className = 'flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-lg text-text-secondary hover:text-text-primary font-headline-sm text-label-md transition-all';
+  });
+  tab1?.addEventListener('click', () => {
+    tab1.className = 'flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-lg bg-surface-bg text-on-surface font-headline-sm text-label-md shadow-sm transition-all';
+    tab2.className = 'flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-lg text-text-secondary hover:text-text-primary font-headline-sm text-label-md transition-all';
+  });
+</script></main>
+</body></html>

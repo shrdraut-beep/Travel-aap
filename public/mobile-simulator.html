@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📱 Mobile Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0c14;
+      --surface: rgba(22, 27, 45, 0.9);
+      --border: rgba(99, 115, 171, 0.15);
+      --border-glow: rgba(99, 140, 255, 0.3);
+      --text: #e8ecf4;
+      --text2: #8892a8;
+      --text3: #5a6375;
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --accent3: #c084fc;
+      --green: #34d399;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* ===== Sidebar Controls ===== */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      backdrop-filter: blur(16px);
+    }
+
+    .sidebar-header {
+      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-header::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .sidebar-header h1 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-header p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 3px;
+      padding-left: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Status */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text3);
+      transition: all 0.3s;
+    }
+
+    .status-dot.active {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% { box-shadow: 0 0 16px var(--green); }
+    }
+
+    .status-text {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Sections */
+    .section {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    /* URL Input */
+    .url-input-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 8px 12px;
+      background: rgba(15, 19, 32, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace, 'Inter';
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    .url-go-btn {
+      padding: 8px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .url-go-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+
+    /* Select */
+    .select {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(15, 19, 32, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238892a8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.2s;
+    }
+
+    .select:focus { border-color: var(--accent); }
+    .select option, .select optgroup { background: #1a1f2e; color: var(--text); }
+
+    /* Dimensions */
+    .dims {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .dim-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .dim-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    .dim-input {
+      width: 72px;
+      padding: 5px 6px;
+      background: rgba(15, 19, 32, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Inter', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+    }
+
+    .dim-input:not([readonly]) { border-color: var(--accent); background: rgba(99,102,241,0.06); }
+    .dim-input:focus { border-color: var(--accent2); }
+
+    .dim-unit { font-size: 9px; color: var(--text3); }
+    .dim-x { color: var(--text3); font-size: 14px; padding-top: 12px; }
+
+    .meta-pills {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .meta-pill {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text3);
+      background: rgba(99, 102, 241, 0.06);
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+
+    /* Toggle */
+    .toggle-group { display: flex; flex-direction: column; gap: 2px; }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 2px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .toggle-row:hover { background: rgba(255,255,255,0.02); }
+
+    .toggle-row span { font-size: 12px; font-weight: 500; }
+
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(88, 98, 125, 0.35);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(16px);
+    }
+
+    /* Buttons */
+    .btn-group { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.25);
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--border-glow); color: var(--text); }
+
+    /* ===== Preview Area ===== */
+    .preview-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background:
+        radial-gradient(circle at 30% 40%, rgba(99,102,241,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(139,92,246,0.03) 0%, transparent 50%),
+        var(--bg);
+    }
+
+    /* Device Frame */
+    .device-wrapper {
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .device-frame {
+      position: relative;
+      border-radius: 44px;
+      background: linear-gradient(145deg, #2a2d3a, #1a1d28);
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,0.05),
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 100px rgba(99,102,241,0.06),
+        inset 0 0 0 1px rgba(255,255,255,0.03);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .device-frame.no-frame {
+      border-radius: 0;
+      background: none;
+      box-shadow: 0 0 60px rgba(0,0,0,0.4);
+      padding: 0;
+    }
+
+    /* Dynamic Island */
+    .dynamic-island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 28px;
+      background: #000;
+      border-radius: 16px;
+      z-index: 10;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .dynamic-island::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1a1e3a 30%, #0a0c14 70%);
+    }
+
+    .no-frame .dynamic-island { display: none; }
+
+    /* Home Indicator */
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 4px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 4px;
+      z-index: 10;
+    }
+
+    .no-frame .home-indicator { display: none; }
+
+    /* Screen */
+    .device-screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 32px;
+      overflow: hidden;
+      background: #fff;
+      position: relative;
+    }
+
+    .no-frame .device-screen {
+      border-radius: 0;
+    }
+
+    .device-screen iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      color: var(--text3);
+      text-align: center;
+      padding: 30px;
+    }
+
+    .empty-state svg { width: 48px; height: 48px; opacity: 0.3; }
+    .empty-state p { font-size: 13px; line-height: 1.5; }
+
+    /* Info pill */
+    .info-pill {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 11px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .info-pill .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* Rotate animation */
+    .device-wrapper.rotated {
+      transform: rotate(90deg);
+    }
+
+    /* Footer */
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text3);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(99,115,171,0.15); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18" stroke-linecap="round"/></svg>
+        Mobile Simulator
+      </h1>
+      <p>Preview on any device</p>
+    </div>
+
+    <div class="status-bar">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">Ready</span>
+    </div>
+
+    <!-- URL -->
+    <div class="section">
+      <div class="section-label">URL</div>
+      <div class="url-input-group">
+        <input type="text" class="url-input" id="urlInput" value="http://localhost:3000" placeholder="Enter URL...">
+        <button class="url-go-btn" id="goBtn">Go</button>
+      </div>
+    </div>
+
+    <!-- Device -->
+    <div class="section">
+      <div class="section-label">Device Preset</div>
+      <select class="select" id="deviceSelect">
+        <optgroup label="Apple">
+          <option value="iphone-15-pro" selected>iPhone 15 Pro</option>
+          <option value="iphone-15-pro-max">iPhone 15 Pro Max</option>
+          <option value="iphone-14">iPhone 14</option>
+          <option value="iphone-se">iPhone SE</option>
+          <option value="ipad-pro-11">iPad Pro 11"</option>
+          <option value="ipad-mini">iPad Mini</option>
+        </optgroup>
+        <optgroup label="Samsung">
+          <option value="galaxy-s24-ultra">Galaxy S24 Ultra</option>
+          <option value="galaxy-s24">Galaxy S24</option>
+          <option value="galaxy-z-fold5">Galaxy Z Fold5</option>
+          <option value="galaxy-tab-s9">Galaxy Tab S9</option>
+        </optgroup>
+        <optgroup label="Google">
+          <option value="pixel-8-pro">Pixel 8 Pro</option>
+          <option value="pixel-8">Pixel 8</option>
+          <option value="pixel-7a">Pixel 7a</option>
+        </optgroup>
+        <optgroup label="Custom">
+          <option value="custom">Custom Size…</option>
+        </optgroup>
+      </select>
+
+      <div class="dims">
+        <div class="dim-box">
+          <span class="dim-label">Width</span>
+          <input type="number" class="dim-input" id="widthInput" value="393" readonly>
+          <span class="dim-unit">px</span>
+        </div>
+        <span class="dim-x">×</span>
+        <div class="dim-box">
+          <span class="dim-label">Height</span>
+          <input type="number" class="dim-input" id="heightInput" value="852" readonly>
+          <span class="dim-unit">px</span>
+        </div>
+      </div>
+
+      <div class="meta-pills">
+        <span class="meta-pill" id="ratioPill">19.5:9</span>
+        <span class="meta-pill" id="dprPill">3x</span>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="section">
+      <div class="section-label">Settings</div>
+      <div class="toggle-group">
+        <div class="toggle-row">
+          <span>Rotate (Landscape)</span>
+          <label class="toggle"><input type="checkbox" id="rotateToggle"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>Show Device Frame</span>
+          <label class="toggle"><input type="checkbox" id="frameToggle" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-group">
+      <button class="btn btn-primary" id="refreshBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Refresh Preview
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <span>v1.0</span>
+      <span>·</span>
+      <span>Mobile Simulator</span>
+    </div>
+  </aside>
+
+  <!-- Preview Area -->
+  <main class="preview-area">
+    <div class="device-wrapper" id="deviceWrapper">
+      <div class="device-frame" id="deviceFrame">
+        <div class="dynamic-island"></div>
+        <div class="device-screen" id="deviceScreen">
+          <div class="empty-state" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18" stroke-linecap="round" stroke-width="2"/></svg>
+            <p>Click <strong>Go</strong> to load<br>your app in mobile view</p>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="info-pill" id="infoPill" style="display:none;">
+      <span class="dot"></span>
+      <span id="infoDevice">iPhone 15 Pro</span>
+      <span style="color:var(--text3)">|</span>
+      <span id="infoDims">393 × 852</span>
+    </div>
+  </main>
+
+  <script>
+    // ===== Device Database =====
+    const DEVICES = {
+      'iphone-15-pro':     { name: 'iPhone 15 Pro',     w: 393, h: 852,  dpr: 3,   ratio: '19.5:9' },
+      'iphone-15-pro-max': { name: 'iPhone 15 Pro Max', w: 430, h: 932,  dpr: 3,   ratio: '19.5:9' },
+      'iphone-14':         { name: 'iPhone 14',          w: 390, h: 844,  dpr: 3,   ratio: '19.5:9' },
+      'iphone-se':         { name: 'iPhone SE',          w: 375, h: 667,  dpr: 2,   ratio: '16:9' },
+      'ipad-pro-11':       { name: 'iPad Pro 11"',       w: 834, h: 1194, dpr: 2,   ratio: '4.3:3' },
+      'ipad-mini':         { name: 'iPad Mini',          w: 768, h: 1024, dpr: 2,   ratio: '4:3' },
+      'galaxy-s24-ultra':  { name: 'Galaxy S24 Ultra',  w: 412, h: 915,  dpr: 3.5, ratio: '19.3:9' },
+      'galaxy-s24':        { name: 'Galaxy S24',         w: 360, h: 780,  dpr: 3,   ratio: '19.5:9' },
+      'galaxy-z-fold5':    { name: 'Galaxy Z Fold5',     w: 373, h: 846,  dpr: 3,   ratio: '21.6:18' },
+      'galaxy-tab-s9':     { name: 'Galaxy Tab S9',      w: 800, h: 1280, dpr: 2,   ratio: '16:10' },
+      'pixel-8-pro':       { name: 'Pixel 8 Pro',       w: 412, h: 892,  dpr: 3.5, ratio: '20:9' },
+      'pixel-8':           { name: 'Pixel 8',            w: 412, h: 892,  dpr: 2.6, ratio: '20:9' },
+      'pixel-7a':          { name: 'Pixel 7a',           w: 412, h: 892,  dpr: 2.6, ratio: '20:9' },
+    };
+
+    // ===== DOM =====
+    const urlInput     = document.getElementById('urlInput');
+    const goBtn        = document.getElementById('goBtn');
+    const deviceSelect = document.getElementById('deviceSelect');
+    const widthInput   = document.getElementById('widthInput');
+    const heightInput  = document.getElementById('heightInput');
+    const ratioPill    = document.getElementById('ratioPill');
+    const dprPill      = document.getElementById('dprPill');
+    const rotateToggle = document.getElementById('rotateToggle');
+    const frameToggle  = document.getElementById('frameToggle');
+    const refreshBtn   = document.getElementById('refreshBtn');
+    const deviceWrapper= document.getElementById('deviceWrapper');
+    const deviceFrame  = document.getElementById('deviceFrame');
+    const deviceScreen = document.getElementById('deviceScreen');
+    const emptyState   = document.getElementById('emptyState');
+    const infoPill     = document.getElementById('infoPill');
+    const infoDevice   = document.getElementById('infoDevice');
+    const infoDims     = document.getElementById('infoDims');
+    const statusDot    = document.getElementById('statusDot');
+    const statusText   = document.getElementById('statusText');
+
+    let currentIframe = null;
+
+    // ===== Functions =====
+    function getDeviceDims() {
+      const id = deviceSelect.value;
+      if (id === 'custom') {
+        return {
+          w: parseInt(widthInput.value) || 375,
+          h: parseInt(heightInput.value) || 812,
+          dpr: 2,
+          ratio: '—',
+          name: 'Custom'
+        };
+      }
+      return { ...DEVICES[id] };
+    }
+
+    function updateDimensions() {
+      const id = deviceSelect.value;
+      const isCustom = id === 'custom';
+      const d = getDeviceDims();
+
+      widthInput.readOnly = !isCustom;
+      heightInput.readOnly = !isCustom;
+
+      if (rotateToggle.checked) {
+        widthInput.value = d.h;
+        heightInput.value = d.w;
+      } else {
+        widthInput.value = d.w;
+        heightInput.value = d.h;
+      }
+
+      ratioPill.textContent = rotateToggle.checked && d.ratio !== '—'
+        ? d.ratio.split(':').reverse().join(':')
+        : d.ratio;
+      dprPill.textContent = d.dpr + 'x';
+    }
+
+    function applyFrame() {
+      const d = getDeviceDims();
+      let w = d.w, h = d.h;
+      if (rotateToggle.checked) [w, h] = [h, w];
+
+      const showFrame = frameToggle.checked;
+      const framePad = showFrame ? 24 : 0; // 12px each side
+
+      // Scale to fit preview area
+      const area = document.querySelector('.preview-area');
+      const maxW = area.clientWidth - 80;
+      const maxH = area.clientHeight - 80;
+      const totalW = w + framePad;
+      const totalH = h + framePad;
+      const scale = Math.min(maxW / totalW, maxH / totalH, 1);
+
+      deviceFrame.classList.toggle('no-frame', !showFrame);
+      deviceFrame.style.width = (w + framePad) + 'px';
+      deviceFrame.style.height = (h + framePad) + 'px';
+      deviceScreen.style.width = w + 'px';
+      deviceScreen.style.height = h + 'px';
+      deviceWrapper.style.transform = `scale(${scale})`;
+
+      // Info pill
+      infoDevice.textContent = d.name;
+      infoDims.textContent = `${w} × ${h}`;
+    }
+
+    function loadURL() {
+      const url = urlInput.value.trim();
+      if (!url) return;
+
+      // Remove old iframe
+      if (currentIframe) currentIframe.remove();
+      emptyState.style.display = 'none';
+
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.style.display = 'block';
+      iframe.setAttribute('allow', 'geolocation; microphone; camera');
+
+      deviceScreen.appendChild(iframe);
+      currentIframe = iframe;
+
+      statusDot.classList.add('active');
+      statusText.textContent = 'Simulating';
+      statusText.style.color = 'var(--green)';
+      infoPill.style.display = 'flex';
+
+      applyFrame();
+    }
+
+    // ===== Events =====
+    goBtn.addEventListener('click', loadURL);
+    urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadURL(); });
+
+    deviceSelect.addEventListener('change', () => {
+      updateDimensions();
+      applyFrame();
+      if (currentIframe) loadURL(); // reload with new size
+    });
+
+    rotateToggle.addEventListener('change', () => {
+      updateDimensions();
+      applyFrame();
+      if (currentIframe) loadURL();
+    });
+
+    frameToggle.addEventListener('change', () => {
+      applyFrame();
+    });
+
+    widthInput.addEventListener('change', () => { applyFrame(); if (currentIframe) loadURL(); });
+    heightInput.addEventListener('change', () => { applyFrame(); if (currentIframe) loadURL(); });
+
+    refreshBtn.addEventListener('click', () => {
+      if (currentIframe) {
+        currentIframe.src = currentIframe.src;
+        refreshBtn.style.transform = 'scale(0.96)';
+        setTimeout(() => refreshBtn.style.transform = '', 120);
+      } else {
+        loadURL();
+      }
+    });
+
+    // ===== Init =====
+    updateDimensions();
+    applyFrame();
+
+    // Auto-load on open
+    setTimeout(loadURL, 300);
+
+    // Handle resize
+    window.addEventListener('resize', () => { applyFrame(); });
+  </script>
+</body>
+</html>

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { BookingStepHeader } from "./BookingStepHeader";
 import { loadRazorpayScript } from "../../utils/razorpay";
+import { RazorpayCheckoutModal } from "../../components/common/RazorpayCheckoutModal";
 import type { SelectedSeat } from "./SeatSelectionStep";
 import type { SelectedBaggageItem } from "./BaggageSelectionStep";
 import type { SelectedMealItem } from "./MealsSelectionStep";
@@ -107,6 +108,8 @@ export const CheckoutStep: React.FC<CheckoutStepProps> = ({
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState("");
   const [pnrNumber, setPnrNumber] = useState("");
+  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState("");
 
   const passengerName = `${firstName} ${lastName}`.trim();
 
@@ -388,23 +391,22 @@ export const CheckoutStep: React.FC<CheckoutStepProps> = ({
     }
 
     const effectiveKey = orderData.keyId || orderData.key || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID;
-    if (!effectiveKey) {
-      setIsProcessing(false);
-      setToastMessage("Razorpay Key ID is not configured on server.");
-      return;
-    }
+    const hasLiveMerchantKey = Boolean(
+      effectiveKey && 
+      effectiveKey.length > 8 && 
+      !effectiveKey.includes("dummy") && 
+      !effectiveKey.includes("Mock") && 
+      !orderData.isSandbox
+    );
 
     if (typeof (window as any).Razorpay === "undefined") {
       await loadRazorpayScript();
     }
 
-    if (typeof (window as any).Razorpay === "undefined" || orderData.isSandbox) {
-      // In sandbox/dev environment or if script was blocked by browser
-      console.warn("Using verified sandbox payment flow");
-      setToastMessage("Processing instant secure booking confirmation...");
-      setTimeout(async () => {
-        await processBookingSuccess(`pay_sandbox_${Date.now()}`);
-      }, 900);
+    if (!hasLiveMerchantKey || typeof (window as any).Razorpay === "undefined") {
+      setIsProcessing(false);
+      setCreatedOrderId(orderData.id || orderData.orderId || `order_${Date.now()}`);
+      setShowRazorpayModal(true);
       return;
     }
 
@@ -467,8 +469,10 @@ export const CheckoutStep: React.FC<CheckoutStepProps> = ({
       });
       rzp.open();
     } catch (e: any) {
-      console.warn("Razorpay SDK modal error, proceeding with instant sandbox confirmation:", e);
-      await processBookingSuccess(`pay_sandbox_${Date.now()}`);
+      console.warn("Opening interactive Razorpay modal:", e);
+      setIsProcessing(false);
+      setCreatedOrderId(orderData?.id || orderData?.orderId || `order_${Date.now()}`);
+      setShowRazorpayModal(true);
     }
   };
 
@@ -1081,6 +1085,31 @@ export const CheckoutStep: React.FC<CheckoutStepProps> = ({
           </button>
         </div>
       </footer>
+
+      {showRazorpayModal && (
+        <RazorpayCheckoutModal
+          isOpen={showRazorpayModal}
+          onClose={() => {
+            setShowRazorpayModal(false);
+            setToastMessage("Payment window was closed. No booking was made.");
+          }}
+          amount={grandTotal}
+          orderId={createdOrderId}
+          serviceName="RouTripO Flights"
+          orderDescription={`Flight Booking - ${airline} ${flightNo}`}
+          customerName={passengerName}
+          customerEmail={passengerEmail}
+          customerPhone={passengerPhone}
+          onSuccess={async (details) => {
+            setShowRazorpayModal(false);
+            await processBookingSuccess(details.razorpay_payment_id);
+          }}
+          onFailure={(err) => {
+            setShowRazorpayModal(false);
+            setToastMessage(`Payment Failed: ${err}`);
+          }}
+        />
+      )}
     </div>
   );
 };

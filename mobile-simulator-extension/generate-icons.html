@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate Icons</title></head>
+<body>
+<h2>Mobile Simulator Icon Generator</h2>
+<p>Right-click each icon below and "Save image as..." to the <code>icons/</code> folder.</p>
+<div id="output" style="display:flex;gap:20px;align-items:end;margin-top:20px;"></div>
+<script>
+const sizes = [16, 48, 128];
+
+sizes.forEach(size => {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#6366f1');
+  grad.addColorStop(0.5, '#8b5cf6');
+  grad.addColorStop(1, '#c084fc');
+
+  // Rounded rect background
+  const r = size * 0.22;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, size, size, r);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Phone outline
+  const px = size * 0.3;
+  const py = size * 0.14;
+  const pw = size * 0.4;
+  const ph = size * 0.72;
+  const pr = size * 0.08;
+  ctx.beginPath();
+  ctx.roundRect(px, py, pw, ph, pr);
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = Math.max(1, size * 0.04);
+  ctx.stroke();
+
+  // Screen area
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  const sx = px + size * 0.04;
+  const sy = py + size * 0.1;
+  const sw = pw - size * 0.08;
+  const sh = ph * 0.6;
+  ctx.fillRect(sx, sy, sw, sh);
+
+  // Home button dot
+  ctx.beginPath();
+  ctx.arc(size / 2, py + ph - size * 0.06, size * 0.03, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fill();
+
+  const container = document.createElement('div');
+  container.style.textAlign = 'center';
+  const label = document.createElement('p');
+  label.textContent = `icon-${size}.png`;
+  container.appendChild(canvas);
+  container.appendChild(label);
+  document.getElementById('output').appendChild(container);
+});
+</script>
+</body>
+</html>

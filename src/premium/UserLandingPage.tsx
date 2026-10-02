@@ -217,7 +217,10 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
   }, []);
 
   const handleCardSearch = (payload: SearchPayload) => {
-    onSearch?.(payload);
+    if (onSearch) {
+      onSearch(payload);
+      return;
+    }
 
     const formatDate = (d: any, fallbackDays: number) => {
       if (!d) return new Date(Date.now() + 86400000 * fallbackDays).toISOString().split("T")[0];

@@ -131,25 +131,137 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
     return raw;
   };
 
-  const handleProcessPayment = (method: string) => {
+  const handleProcessPayment = async (method: string) => {
     setIsAuthorizing(true);
-    setAuthStepMessage('Verifying credentials with Bank...');
+    setAuthStepMessage('Contacting Razorpay Payment Gateway...');
 
-    setTimeout(() => {
-      setAuthStepMessage('Authorizing Transaction via Razorpay...');
-      setTimeout(() => {
-        setAuthStepMessage('Payment Authorized Successfully!');
-        setTimeout(() => {
-          setIsAuthorizing(false);
-          const paymentId = `pay_rzp_${Date.now().toString(36).toUpperCase()}_${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-          onSuccess({
-            razorpay_payment_id: paymentId,
-            razorpay_order_id: orderId,
-            method,
+    try {
+      // Step 1: Create order on server
+      const orderRes = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          supplierBaseFare: amount,
+          supplierTaxes: 0,
+          serviceType: 'direct_booking',
+          buyerState: 'MH',
+        }),
+      });
+
+      if (!orderRes.ok) {
+        throw new Error('Failed to create payment order');
+      }
+
+      const orderData = await orderRes.json();
+      const rzpOrderId = orderData.id || orderData.orderId;
+      const rzpKeyId = orderData.keyId || orderData.key || '';
+      const isSandbox = orderData.isSandbox || !rzpKeyId || rzpKeyId.includes('dummy') || rzpKeyId.includes('Mock') || rzpKeyId.length < 8;
+
+      setAuthStepMessage('Connecting to Payment Gateway...');
+
+      // Step 2: Try to open real Razorpay popup if we have real keys
+      if (!isSandbox && rzpKeyId) {
+        // Load Razorpay script if needed
+        if (typeof (window as any).Razorpay === 'undefined') {
+          await new Promise<void>((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error('Razorpay script failed to load'));
+            document.head.appendChild(s);
           });
-        }, 600);
-      }, 700);
-    }, 800);
+        }
+
+        if (typeof (window as any).Razorpay !== 'undefined') {
+          setIsAuthorizing(false);
+          const options = {
+            key: rzpKeyId,
+            amount: orderData.amount || Math.round(amount * 100),
+            currency: 'INR',
+            name: 'RoutTripo Travel',
+            description: `${method} Payment`,
+            order_id: rzpOrderId,
+            prefill: { name: customerName, email: customerEmail, contact: customerPhone },
+            theme: { color: '#072654' },
+            handler: async (response: any) => {
+              setIsAuthorizing(true);
+              setAuthStepMessage('Verifying payment signature...');
+              try {
+                const verifyRes = await fetch('/api/razorpay/verify', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                  }),
+                });
+                const verifyData = await verifyRes.json();
+                setIsAuthorizing(false);
+                if (verifyData.success || verifyData.verified) {
+                  onSuccess({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    method,
+                  });
+                } else {
+                  if (onFailure) onFailure(verifyData.error || 'Payment signature verification failed');
+                }
+              } catch (err: any) {
+                setIsAuthorizing(false);
+                if (onFailure) onFailure(err?.message || 'Verification network error');
+              }
+            },
+            modal: {
+              ondismiss: () => {
+                setIsAuthorizing(false);
+                if (onFailure) onFailure('Payment window closed by user');
+              },
+            },
+          };
+          const rzp = new (window as any).Razorpay(options);
+          rzp.on('payment.failed', (resp: any) => {
+            setIsAuthorizing(false);
+            if (onFailure) onFailure(resp.error?.description || 'Payment failed');
+          });
+          rzp.open();
+          return;
+        }
+      }
+
+      // Step 3: Sandbox / dev mode — use sandbox order ID, call verify which passes it through
+      setAuthStepMessage('Processing sandbox payment...');
+      const sandboxPaymentId = `pay_sandbox_${Date.now().toString(36).toUpperCase()}`;
+      const sandboxSig = 'sig_sandbox_test';
+
+      const verifyRes = await fetch('/api/razorpay/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: rzpOrderId,
+          razorpay_payment_id: sandboxPaymentId,
+          razorpay_signature: sandboxSig,
+        }),
+      });
+
+      const verifyData = await verifyRes.json();
+      setIsAuthorizing(false);
+
+      if (verifyData.success || verifyData.verified) {
+        onSuccess({
+          razorpay_payment_id: sandboxPaymentId,
+          razorpay_order_id: rzpOrderId,
+          razorpay_signature: sandboxSig,
+          method,
+        });
+      } else {
+        if (onFailure) onFailure(verifyData.error || 'Sandbox payment verification failed');
+      }
+    } catch (err: any) {
+      setIsAuthorizing(false);
+      if (onFailure) onFailure(err?.message || 'Payment processing error');
+    }
   };
 
   const handleSimulateDecline = () => {
