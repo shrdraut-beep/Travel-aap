@@ -14,6 +14,7 @@ import biddingRouter from './server/routes/bidding.ts';
 import paymentRouter from './server/routes/payment.ts';
 import documentsRouter from './server/routes/documents.ts';
 import vendorApiKeyRouter from './server/routes/vendorApiKey.ts';
+import ticketsRouter from './server/routes/tickets.ts';
 import { aiAgentOrchestrator } from './server/services/aiAgentOrchestrator.ts';
 import { getCuratedRealItinerary, REAL_DESTINATIONS } from './server/realDestinationsData.ts';
 import path from "path";
@@ -108,6 +109,15 @@ app.get(["/download-architecture", "/api/download/architecture"], (_req, res) =>
     return res.sendFile(filePath);
   }
   return res.status(404).send("Architecture diagram not found.");
+});
+
+// Mobile Device Simulator route
+app.get(["/simulator", "/mobile-simulator"], (_req, res) => {
+  const filePath = path.join(process.cwd(), "mobile-simulator.html");
+  if (fs.existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+  return res.sendFile(path.join(process.cwd(), "public", "mobile-simulator.html"));
 });
 
 
@@ -588,6 +598,7 @@ app.use('/api/search', searchRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/vendor-api-key', vendorApiKeyRouter);
+app.use('/api/tickets', ticketsRouter);
 
 // --- DYNAMIC LIVE REVERSE-BIDDING FEED ---
 app.get('/api/bids/live-feed', (req, res) => {

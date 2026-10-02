@@ -11,7 +11,8 @@ import { PremiumDocsTab } from './premium/account/PremiumDocsTab';
 import { BargainingTab } from './premium/account/BargainingTab';
 import { ExpensesTab } from './premium/account/ExpensesTab';
 import { SettingsTab } from './premium/account/SettingsTab';
-import { Gavel, Briefcase, Compass, User, Wallet, Calendar, Users, FileText, Plus } from 'lucide-react';
+import { Gavel, Briefcase, Compass, User, Wallet, Calendar, Users, FileText, Plus, Ticket } from 'lucide-react';
+import { MyTicketsView } from './components/views/MyTicketsView';
 
 import { AccountScreen } from './premium/account/AccountScreen';
 import { AdminScreen } from './premium/admin/AdminScreen';
@@ -454,8 +455,7 @@ function MainApp() {
         break;
       case 'my-tickets':
       case 'hotel-reservations':
-        setIsTripLevel(true);
-        setTripTab('docs');
+        setGlobalTab('tickets');
         break;
       case 'calendar':
         setIsCalendarOpen(true);
@@ -615,6 +615,7 @@ function MainApp() {
                         { id: "bargaining", label: "Bargaining", Icon: Gavel, stitchIcon: "toll", imgSrc: "/icons/bargaining.png" },
                         { id: "trips", label: "My Trips", Icon: Briefcase, stitchIcon: "luggage", imgSrc: "/icons/my_trips.png" },
                         { id: "booking", label: "Booking", Icon: Compass, stitchIcon: "airplane_ticket", imgSrc: "/icons/booking.png" },
+                        { id: "tickets", label: lang === 'mr' ? 'तिकीट्स' : 'My Tickets', Icon: Ticket, stitchIcon: "confirmation_number", imgSrc: "/icons/tickets.png" },
                         { id: "settings", label: "Profile", Icon: User, stitchIcon: "account_circle", imgSrc: "/icons/profile.png" }
                       ]}
                     >
@@ -638,6 +639,12 @@ function MainApp() {
                            onSelectOffer={(o) => setSelectedOffer(o as any)}
                            onSearch={handleSearch}
                          />
+                      )}
+                      {globalTab === "tickets" && (
+                        <MyTicketsView 
+                          hideHeader={false} 
+                          isMr={lang === 'mr'} 
+                        />
                       )}
                       {globalTab === "settings" && (
                         <SettingsTab
