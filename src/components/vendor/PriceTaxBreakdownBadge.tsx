@@ -107,7 +107,7 @@ export const PriceTaxBreakdownBadge: React.FC<PriceTaxBreakdownBadgeProps> = ({
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            {isMr ? '📍 राज्यांतर्गत (CGST+SGST)' : '📍 Intra-State (CGST+SGST)'}
+            {isMr ? 'राज्यांतर्गत (CGST+SGST)' : 'Intra-State (CGST+SGST)'}
           </button>
           <button
             type="button"
@@ -118,7 +118,7 @@ export const PriceTaxBreakdownBadge: React.FC<PriceTaxBreakdownBadgeProps> = ({
                 : 'text-slate-600 hover:text-indigo-700'
             }`}
           >
-            {isMr ? '🌐 आंतर-राज्य (IGST)' : '🌐 Inter-State (IGST)'}
+            {isMr ? 'आंतर-राज्य (IGST)' : 'Inter-State (IGST)'}
           </button>
         </div>
 
@@ -173,8 +173,8 @@ export const PriceTaxBreakdownBadge: React.FC<PriceTaxBreakdownBadgeProps> = ({
           >
             <span>
               {expanded
-                ? (isMr ? 'तपशील लपवा ▴' : 'Hide Tax Breakdown ▴')
-                : (isMr ? 'सरकारी GST व IGST कर तपशील पहा ▾' : 'View Statutory GST & IGST Breakdown ▾')}
+                ? (isMr ? 'तपशील लपवा' : 'Hide Tax Breakdown')
+                : (isMr ? 'सरकारी GST व IGST कर तपशील पहा' : 'View Statutory GST & IGST Breakdown')}
             </span>
           </button>
 
@@ -195,8 +195,8 @@ export const PriceTaxBreakdownBadge: React.FC<PriceTaxBreakdownBadgeProps> = ({
                 <div className="flex items-center justify-between font-bold text-[11px] text-indigo-950 border-b border-indigo-100/70 pb-1">
                   <span className="flex items-center gap-1">
                     {supplyType === 'INTER_STATE'
-                      ? (isMr ? '🌐 आंतर-राज्य पुरवठा (Inter-State IGST)' : '🌐 Inter-State Supply (IGST Breakdown)')
-                      : (isMr ? '📍 राज्यांतर्गत पुरवठा (Intra-State CGST + SGST)' : '📍 Intra-State Supply (CGST + SGST)')}
+                      ? (isMr ? 'आंतर-राज्य पुरवठा (Inter-State IGST)' : 'Inter-State Supply (IGST Breakdown)')
+                      : (isMr ? 'राज्यांतर्गत पुरवठा (Intra-State CGST + SGST)' : 'Intra-State Supply (CGST + SGST)')}
                   </span>
                   <span className="text-[10px] text-indigo-700 bg-white px-1.5 py-0.5 rounded border border-indigo-200 font-bold">
                     SAC {breakdown.sacCode}
@@ -278,7 +278,7 @@ export const PriceTaxBreakdownBadge: React.FC<PriceTaxBreakdownBadgeProps> = ({
 
               <div className="pt-1 text-[9px] text-slate-400 flex items-center justify-between flex-wrap gap-1">
                 <span>TCS Sec 52: 1% (₹{breakdown.tcsAmount}) · TDS Sec 194-O: 1%</span>
-                <span className="font-bold text-sky-600">GST Council & CBIC Compliant ✓</span>
+                <span className="font-bold text-sky-600">GST Council & CBIC Compliant</span>
               </div>
             </div>
           )}

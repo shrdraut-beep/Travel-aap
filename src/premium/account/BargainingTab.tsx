@@ -52,11 +52,11 @@ const STATUS_TONE: Record<BargainingRequest["status"], string> = {
 };
 
 const LIVE_ACTIVITY_MESSAGES = [
-  "🟢 3 verified vendors are reviewing your trip demands in real-time...",
-  "⚡ Verified Partner #403 is adjusting their quote downwards...",
-  "🔥 Best quote dropped by ₹1,500 in the last 2 minutes!",
-  "👀 2 new transport partners joined the bidding pool for Pune → Goa",
-  "🛡️ RouTripo Escrow Anti-Leakage Shield is active for all sealed bids"
+  "Live: 3 verified vendors are reviewing your trip demands in real-time...",
+  "Instant: Verified Partner #403 is adjusting their quote downwards...",
+  "Update: Best quote dropped by ₹1,500 in the last 2 minutes!",
+  "Active: 2 new transport partners joined the bidding pool for Pune → Goa",
+  "Secure: RouTripo Escrow Anti-Leakage Shield is active for all sealed bids"
 ];
 
 // Featured verified deals from Google Stitch design
@@ -1050,7 +1050,7 @@ export const BargainingTab: React.FC<{
             {isOfflineUnlocked ? (
               <div className="bg-pink-50 border border-pink-200 p-4 rounded-2xl text-left space-y-2">
                 <p className="text-[12px] font-bold text-pink-900">
-                  ✓ Unlocked Contacts for Trip #REQ-5519:
+                  Unlocked Contacts for Trip #REQ-5519:
                 </p>
                 <div className="text-[13px] font-mono text-slate-800 space-y-1">
                   <p><strong>Sai Holidays Goa:</strong> +91 98221 44550</p>

@@ -131,7 +131,7 @@ export const PendingPayoutsQueueFlowPage: React.FC<PendingPayoutsQueueFlowPagePr
                         : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}
                   >
-                    {isSettled ? 'Disbursed ✓' : 'Awaiting Release'}
+                    {isSettled ? 'Disbursed' : 'Awaiting Release'}
                   </span>
                 </div>
               </div>

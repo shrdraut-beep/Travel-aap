@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   BellRing,
+  Zap,
   Check,
   Filter,
   Plus,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import type { AccountItemId } from "./types";
 import { ListRow, PillButton, SectionHeader } from "./ui";
+import { SettleViaUpiModal } from "./SettleViaUpiModal";
 
 import { useTripContext } from "../../context/TripContext";
 
@@ -107,6 +109,7 @@ export const ExpensesTab: React.FC<{
   });
 
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("All");
+  const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   
   // Quick Add State
   const [showAddForm, setShowAddForm] = useState(false);
@@ -192,6 +195,14 @@ export const ExpensesTab: React.FC<{
 
       {/* 3D Action Buttons */}
       <div className="flex gap-2.5 px-5 pt-4 overflow-x-auto no-scrollbar">
+        <button
+          type="button"
+          onClick={() => setIsSettleModalOpen(true)}
+          className="h-10 px-4 shrink-0 rounded-full bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-[0_2px_10px_rgba(2,132,199,0.3)] text-[13px] font-black flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+        >
+          <Zap className="w-4 h-4 text-amber-300 stroke-[2.5]" />
+          <span>Settle UPI</span>
+        </button>
         <button
           type="button"
           onClick={() => setShowAddForm(true)}
@@ -443,6 +454,13 @@ export const ExpensesTab: React.FC<{
           onClick={() => onSelect("expenses-scanner")}
         />
         <ListRow
+          Icon={Zap}
+          label="Settle all via UPI"
+          caption="1-click Smart Split settlement with GPay, PhonePe, Paytm, BHIM"
+          tone="sky"
+          onClick={() => setIsSettleModalOpen(true)}
+        />
+        <ListRow
           Icon={Users}
           label="Split & pool deposit"
           caption="Group kitty, per-person balances and settle up"
@@ -464,6 +482,10 @@ export const ExpensesTab: React.FC<{
           onClick={() => onSelect("expenses-budget-alerts")}
         />
       </div>
+      <SettleViaUpiModal
+        isOpen={isSettleModalOpen}
+        onClose={() => setIsSettleModalOpen(false)}
+      />
     </div>
   );
 };

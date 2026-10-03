@@ -102,7 +102,7 @@ export const FullPageVendorOffers: React.FC<FullPageVendorOffersProps> = ({
       (res) => {
         setUnlockingId(null);
         setUnlockedContacts((prev) => ({ ...prev, [bid.id]: true }));
-        showToast(`📞 Contact unlocked for ${bid.maskedName}: ${bid.directPhone}`);
+        showToast(`Contact unlocked for ${bid.maskedName}: ${bid.directPhone}`);
       },
       (err) => {
         setUnlockingId(null);
@@ -245,11 +245,11 @@ export const FullPageVendorOffers: React.FC<FullPageVendorOffersProps> = ({
                       {/* Requirement 3: Registered Legal Name and City */}
                       <div className="mt-1 text-[11px] text-slate-600 flex items-center gap-1.5 flex-wrap">
                         <span className="font-semibold text-slate-800">
-                          🏛️ {bid.legalName || bid.realName}
+                          {bid.legalName || bid.realName}
                         </span>
                         <span className="text-slate-300">·</span>
                         <span className="text-slate-600 font-medium">
-                          📍 {bid.city}
+                          {bid.city}
                         </span>
                       </div>
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import {
   Building2,
+  Package,
+  Check,
   Car,
   Bus,
   KeyRound,
@@ -18,6 +20,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import { useVendorStore } from '../../store/useVendorStore';
+import { SubPageHeader } from '../common/SubPageHeader';
 import { authedFetch } from '../../utils/apiClient';
 import { CarRegistrationForm } from './CarRegistrationForm';
 import { BusRegistrationForm } from './BusRegistrationForm';
@@ -370,40 +373,43 @@ export function VendorKYCForm({ onComplete }: { onComplete?: () => void }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
-            <Tag className="w-4 h-4" /> 2. Services You Provide (तुम्ही कोणत्या सेवा देता?)
+            <Tag className="w-4 h-4" /> 2. Services You Provide
           </h3>
-          <span className="text-[11px] text-slate-400 font-semibold">फक्त निवडलेल्या सेवांचेच फॉर्म दिसतील</span>
+          <span className="text-[11px] text-slate-400 font-semibold">Customized for selected services</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {[
-            { id: 'CAB_OPERATOR', label: 'Cab & Car Rental', icon: '🚗', desc: 'टॅक्सी, कार व ड्रायव्हर फ्लीट व्यवस्थापन' },
-            { id: 'BUS_OPERATOR', label: 'Local & Intercity Bus', icon: '🚌', desc: 'स्थानिक व आंतरशहर बसेस, शेड्युल व सीट्स' },
-            { id: 'HOTEL', label: 'Hotel & Stay Partner', icon: '🏨', desc: 'हॉटेल्स, रिसॉर्ट्स व होमस्टे इन्व्हेंटरी' },
-            { id: 'TOUR_OPERATOR', label: 'Tour Packages', icon: '🎒', desc: 'प्रेक्षणीय टूर पॅकेजेस व हॉलिडे प्लॅनर' }
+            { id: 'CAB_OPERATOR', label: 'Cab & Car Rental', Icon: Car, desc: 'Taxi, cab and driver fleet management' },
+            { id: 'BUS_OPERATOR', label: 'Local & Intercity Bus', Icon: Bus, desc: 'Local & intercity bus routes, schedules and seat inventory' },
+            { id: 'HOTEL', label: 'Hotel & Stay Partner', Icon: Building2, desc: 'Hotels, luxury resorts, villas and homestay inventory' },
+            { id: 'TOUR_OPERATOR', label: 'Tour Packages', Icon: Package, desc: 'Scenic holiday packages and tour itinerary planning' }
           ].map((srv) => {
             const isSelected = selectedServices.includes(srv.id);
+            const SrvIcon = srv.Icon;
             return (
               <button
                 key={srv.id}
                 type="button"
                 onClick={() => toggleService(srv.id)}
-                className={`p-3 rounded-xl border text-left flex items-start gap-3 transition-all cursor-pointer ${
+                className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all cursor-pointer active:scale-95 ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-50/70 shadow-xs ring-1 ring-blue-400'
+                    ? 'border-sky-500 bg-sky-50/80 shadow-xs ring-1 ring-sky-400'
                     : 'border-slate-200 bg-white hover:border-slate-300 opacity-75'
                 }`}
               >
-                <span className="text-2xl shrink-0 mt-0.5">{srv.icon}</span>
+                <span className="p-2 rounded-xl bg-white border border-slate-200 text-sky-800 shadow-2xs shrink-0 mt-0.5">
+                  <SrvIcon className="w-5 h-5 text-sky-700" />
+                </span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-slate-800">{srv.label}</p>
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs font-black text-slate-900">{srv.label}</p>
                     <div className={`w-4 h-4 rounded-md flex items-center justify-center border text-[10px] ${
-                      isSelected ? 'bg-blue-600 border-blue-600 text-white font-bold' : 'border-slate-300 bg-white'
+                      isSelected ? 'bg-sky-600 border-sky-600 text-white font-bold' : 'border-slate-300 bg-white'
                     }`}>
-                      {isSelected ? '✓' : ''}
+                      {isSelected ? <Check className="w-3 h-3 text-white" /> : null}
                     </div>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">{srv.desc}</p>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5 leading-snug">{srv.desc}</p>
                 </div>
               </button>
             );
@@ -411,7 +417,6 @@ export function VendorKYCForm({ onComplete }: { onComplete?: () => void }) {
         </div>
       </div>
 
-      {/* 3. Tax & Legal */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
           <FileText className="w-4 h-4" /> 3. Legal & Taxation
@@ -600,8 +605,16 @@ export default function VendorRegistrationPortal({
     : activeTab;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-5">
-      {/* Tab Switcher */}
+    <div className="w-full min-h-screen bg-slate-50 flex flex-col">
+      <SubPageHeader
+        title="Vendor Onboarding & Verification Portal"
+        subtitle="Fast-Track KYC, Multi-Vertical Fleet Activation & B2B API Desk"
+        badge="PARTNER KYC"
+        maxWidth="max-w-4xl"
+      />
+
+      <div className="max-w-4xl mx-auto w-full p-4 space-y-5 flex-1">
+        {/* Tab Switcher */}
       <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-2 border border-slate-200 overflow-x-auto">
         <button
           type="button"
@@ -674,6 +687,7 @@ export default function VendorRegistrationPortal({
           onCompleteKYC={() => setActiveTab('KYC')}
         />
       )}
+      </div>
     </div>
   );
 }

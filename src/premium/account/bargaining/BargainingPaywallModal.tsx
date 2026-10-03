@@ -1,3 +1,4 @@
+import { SubPageHeader } from "../ui";
 import React, { useState } from 'react';
 import { Lock, Sparkles, ShieldCheck, Zap, X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { initiateBargainMicroPayment } from '../../../utils/razorpay';
@@ -50,31 +51,13 @@ export const BargainingPaywallModal: React.FC<BargainingPaywallModalProps> = ({
     <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
         
-        {/* Top Header Banner */}
-        <div className="premium-gradient-pink text-white p-5 relative">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3">
-            <Lock className="w-6 h-6 text-white" />
-          </div>
-
-          <span className="text-[11px] font-black uppercase tracking-wider bg-white/25 px-2.5 py-0.5 rounded-full inline-block mb-1.5">
-            24-Hour Rate Limit
-          </span>
-
-          <h3 className="text-[19px] font-black leading-snug">
-            Daily limit reached. Pay ₹29 to submit another custom offer.
-          </h3>
-          <p className="text-[12px] text-white/80 mt-1 font-medium">
-            You have used all 3 free offers for this 24-hour cycle.
-          </p>
-        </div>
+        {/* Unified Brand Ocean SubPageHeader with Curved Bottom */}
+        <SubPageHeader
+          title="Daily Limit Reached"
+          subtitle="Pay ₹29 to submit another custom offer"
+          badge="24-Hour Limit"
+          onClose={onClose}
+        />
 
         {/* Content Body */}
         <div className="p-5 space-y-4">

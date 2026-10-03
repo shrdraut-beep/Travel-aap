@@ -101,11 +101,11 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
         'Daily Sightseeing in North & South Goa'
       ],
       revisionCount: 2,
-      lastPriceDrop: '⚡ Dropped ₹1,200 2 mins ago',
+      lastPriceDrop: 'Dropped ₹1,200 recently',
       aiDealScore: {
         type: 'great',
-        badgeLabel: '🔥 Great Deal (15% below AI baseline)',
-        description: 'Priced ₹6,200 below market standard with verified 4.9★ fleet.',
+        badgeLabel: 'Great Deal: 15% below baseline',
+        description: 'Priced ₹6,200 below market standard with verified 4.9-rated fleet.',
         percentDiff: 15
       },
       cancellationPolicy: '100% Free Cancellation up to 24 hours before pickup. Instant escrow refund.'
@@ -147,10 +147,10 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       ],
       unfulfilledInclusions: [],
       revisionCount: 1,
-      lastPriceDrop: '🏷️ Dropped ₹800 recently',
+      lastPriceDrop: 'Dropped ₹800 recently',
       aiDealScore: {
         type: 'great',
-        badgeLabel: '🔥 Great Deal (12% below AI baseline)',
+        badgeLabel: 'Great Deal: 12% below baseline',
         description: 'All 6 demands 100% fulfilled at ₹36,800 total locked price.',
         percentDiff: 12
       },
@@ -195,7 +195,7 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       revisionCount: 0,
       aiDealScore: {
         type: 'fair',
-        badgeLabel: '⚖️ Fair Price (Best Market Match)',
+        badgeLabel: 'Fair Price: Best Market Match',
         description: 'Matches regional seasonal rates for Crysta luxury class.',
         percentDiff: 9
       },
@@ -240,7 +240,7 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       revisionCount: 1,
       aiDealScore: {
         type: 'premium',
-        badgeLabel: '💎 Premium Upgrade (Luxury Hybrid)',
+        badgeLabel: 'Premium Upgrade: Luxury Hybrid',
         description: 'Includes brand new 2025 Hycross Hybrid vehicle with VIP amenities.',
         percentDiff: 5
       },
@@ -279,7 +279,7 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       revisionCount: 0,
       aiDealScore: {
         type: 'fair',
-        badgeLabel: '⚖️ Fair Price',
+        badgeLabel: 'Fair Price',
         description: 'Standard budget option for long distances.',
         percentDiff: 4
       },
@@ -318,7 +318,7 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       revisionCount: 0,
       aiDealScore: {
         type: 'fair',
-        badgeLabel: '⚖️ Fair Price',
+        badgeLabel: 'Fair Price',
         description: 'Close to user target budget.',
         percentDiff: 2
       },
@@ -361,10 +361,10 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       ],
       unfulfilledInclusions: [],
       revisionCount: 1,
-      lastPriceDrop: '🔥 Dropped ₹2,000 recently',
+      lastPriceDrop: 'Dropped ₹2,000 recently',
       aiDealScore: {
         type: 'great',
-        badgeLabel: '🔥 Great Deal (8% below AI baseline)',
+        badgeLabel: 'Great Deal: 8% below baseline',
         description: 'Heritage riverside stay with all meals and dedicated transport.',
         percentDiff: 8
       },
@@ -402,7 +402,7 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       revisionCount: 0,
       aiDealScore: {
         type: 'fair',
-        badgeLabel: '⚖️ Fair Price',
+        badgeLabel: 'Fair Price',
         description: 'Standard 3-star package.',
         percentDiff: 5
       },
@@ -440,7 +440,7 @@ export const SAMPLE_VENDOR_OFFERS: Record<string, VendorBidOffer[]> = {
       revisionCount: 0,
       aiDealScore: {
         type: 'premium',
-        badgeLabel: '💎 Premium Upgrade',
+        badgeLabel: 'Premium Upgrade',
         description: 'Luxury heritage experience with personal escort.',
         percentDiff: 1
       },

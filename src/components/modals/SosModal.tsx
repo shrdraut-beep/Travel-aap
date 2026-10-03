@@ -117,8 +117,8 @@ export const SosModal: React.FC<SosModalProps> = ({
       : 'Location unavailable';
 
     const text = isMr
-      ? `🚨 *आपत्कालीन SOS इशारा!* \nमी अडचणीत आहे! माझी मदत करा.\nस्थान: ${mapUrl}`
-      : `🚨 *EMERGENCY SOS ALERT!* \nI need urgent help! Please assist me.\nMy Location: ${mapUrl}`;
+      ? `*आपत्कालीन SOS इशारा!* \nमी अडचणीत आहे! माझी मदत करा.\nस्थान: ${mapUrl}`
+      : `*EMERGENCY SOS ALERT!* \nI need urgent help! Please assist me.\nMy Location: ${mapUrl}`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -208,7 +208,7 @@ export const SosModal: React.FC<SosModalProps> = ({
                 <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
                   <span className="flex items-center gap-1.5 text-premium-sky-deep">
                     <MapPin className="w-4 h-4" />
-                    {isMr ? 'तुमचे वर्तमान स्थान (GPS)' : 'Live GPS Location'}
+                    {isMr ? 'तुमचे वर्तमान स्थान ' : 'Live GPS Location'}
                   </span>
                   <span className="text-[10px] bg-premium-sky-soft0/20 text-pink-300 px-2 py-0.5 rounded-full border border-premium-sky-deep/30">
                     ACCURATE
@@ -238,7 +238,7 @@ export const SosModal: React.FC<SosModalProps> = ({
                 <span>
                   {broadcastSent
                     ? (isMr ? 'अ‍ॅलर्ट पाठवला! (पुन्हा पाठवा)' : 'SOS Broadcasted! (Send Again)')
-                    : (isMr ? '🚨 मित्रांना व व्हाट्सअ‍ॅपवर SOS पाठवा' : '🚨 Broadcast SOS & Share Location')}
+                    : (isMr ? ' मित्रांना व व्हाट्सअ‍ॅपवर SOS पाठवा' : 'Broadcast SOS & Share Location')}
                 </span>
               </button>
 
@@ -333,7 +333,7 @@ export const SosModal: React.FC<SosModalProps> = ({
                 <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
                   {emergencyContacts.map((phone, idx) => (
                     <div key={idx} className="flex items-center justify-between p-2 bg-slate-900/60 rounded-[16px] border border-slate-800 text-xs font-mono font-bold">
-                      <span className="text-slate-300">📞 {phone}</span>
+                      <span className="text-slate-300">{phone}</span>
                       <a
                         href={`tel:${phone}`}
                         className="px-2.5 py-1 bg-premium-sky-deep text-white rounded-lg text-[10px] font-black uppercase hover:bg-premium-sky-soft0 transition-colors"

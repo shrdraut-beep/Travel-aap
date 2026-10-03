@@ -217,7 +217,7 @@ export function TourPackageUploadForm({
         { dayNumber: 4, title: 'South Goa Heritage Churches & Miramar', activities: 'Old Goa Churches, Mangueshi Temple, Miramar beach sunset.', hotelCity: 'Calangute 4-Star Resort', meals: ['Breakfast', 'Dinner'] },
         { dayNumber: 5, title: 'Souvenir Shopping & Airport Drop', activities: 'Anjuna flea market shopping, drop to airport with sweet memories.', hotelCity: 'Checkout', meals: ['Breakfast'] }
       ]);
-      setToast(isMr ? '✨ गोवा 4N/5D टेम्पलेट यशस्वीपणे लोड झाले!' : '✨ Loaded Goa 4N/5D Template with full itinerary!');
+      setToast(isMr ? 'गोवा 4N/5D टेम्पलेट यशस्वीपणे लोड झाले!' : 'Loaded Goa 4N/5D Template with full itinerary!');
     } else if (templateName === 'rajasthan') {
       setPackageName('Royal Rajasthan Heritage Tour: Jaipur, Jodhpur & Udaipur');
       setDestination('Rajasthan (Jaipur-Jodhpur-Udaipur)');
@@ -245,7 +245,7 @@ export function TourPackageUploadForm({
         { dayNumber: 5, title: 'Udaipur City Palace & Lake Pichola Cruise', activities: 'City Palace, Saheliyon ki Bari, evening boat ride on Lake Pichola.', hotelCity: 'Udaipur Lakeview Hotel', meals: ['Breakfast', 'Dinner'] },
         { dayNumber: 6, title: 'Bagore Ki Haveli & Departure', activities: 'Morning lakeside walk, souvenir shopping, drop to Udaipur airport.', hotelCity: 'Checkout', meals: ['Breakfast'] }
       ]);
-      setToast(isMr ? '✨ राजस्थान हेरिटेज 6D टेम्पलेट लोड झाले!' : '✨ Loaded Royal Rajasthan 6-Day Tour Template!');
+      setToast(isMr ? 'राजस्थान हेरिटेज 6D टेम्पलेट लोड झाले!' : 'Loaded Royal Rajasthan 6-Day Tour Template!');
     } else if (templateName === 'konkan') {
       setPackageName('Konkan Coastal Escape: Ganpatipule, Ratnagiri & Malvan');
       setDestination('Konkan Coast (Ratnagiri & Sindhudurg)');
@@ -271,7 +271,7 @@ export function TourPackageUploadForm({
         { dayNumber: 3, title: 'Malvan Scuba Diving & Sindhudurg Sea Fort', activities: 'Boat ride to Shivaji Maharaj sea fort, guided scuba diving with video, authentic Malvani feast.', hotelCity: 'Tarkarli Beach Resort', meals: ['Breakfast', 'Lunch', 'Dinner'] },
         { dayNumber: 4, title: 'Kunkeshwar Temple & Return Journey', activities: 'Kunkeshwar coastal temple, mango pulp shopping, return drive to Pune/Mumbai.', hotelCity: 'Return Drop', meals: ['Breakfast'] }
       ]);
-      setToast(isMr ? '✨ कोकण 4D टेम्पलेट लोड झाले!' : '✨ Loaded Konkan Coastal 4-Day Template!');
+      setToast(isMr ? 'कोकण 4D टेम्पलेट लोड झाले!' : 'Loaded Konkan Coastal 4-Day Template!');
     }
     setTimeout(() => setToast(null), 3500);
   };
@@ -403,7 +403,7 @@ export function TourPackageUploadForm({
 
       const res = await packageService.createPackage(payload);
       if (res.success && res.package) {
-        setToast(isMr ? `🎉 "${packageName}" टूर पॅकेज यशस्वीरित्या बाजारात प्रकाशित झाले!` : `🎉 Tour package "${packageName}" published successfully to B2B & traveller marketplace!`);
+        setToast(isMr ? `"${packageName}" टूर पॅकेज यशस्वीरित्या बाजारात प्रकाशित झाले!` : `Tour package "${packageName}" published successfully to B2B & traveller marketplace!`);
         if (onSuccess) onSuccess(res.package);
       } else {
         setToast(res.message || (isMr ? 'पॅकेज प्रकाशित करताना त्रुटी आली.' : 'Failed to publish tour package.'));
@@ -422,7 +422,7 @@ export function TourPackageUploadForm({
       {toast && (
         <div className="sticky top-2 z-50 mx-4 p-3 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-lg border border-slate-700 flex items-center justify-between animate-fade-in">
           <span>{toast}</span>
-          <button type="button" onClick={() => setToast(null)} className="text-slate-400 hover:text-white">✕</button>
+          <button type="button" onClick={() => setToast(null)} className="text-slate-400 hover:text-white">X</button>
         </div>
       )}
 
@@ -431,7 +431,7 @@ export function TourPackageUploadForm({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-lg shadow-sm shrink-0">
-              🎒
+              
             </div>
             <div>
               <h3 className="text-sm font-black text-white leading-tight">
@@ -462,21 +462,21 @@ export function TourPackageUploadForm({
               onClick={() => handlePreFillTemplate('goa')}
               className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-sky-200 hover:text-white text-[10px] font-bold transition-all cursor-pointer border border-white/10"
             >
-              🏖️ Goa 4N/5D
+              Goa 4N/5D
             </button>
             <button
               type="button"
               onClick={() => handlePreFillTemplate('rajasthan')}
               className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 hover:text-white text-[10px] font-bold transition-all cursor-pointer border border-white/10"
             >
-              🏰 Rajasthan 6D
+              Rajasthan 6D
             </button>
             <button
               type="button"
               onClick={() => handlePreFillTemplate('konkan')}
               className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-emerald-200 hover:text-white text-[10px] font-bold transition-all cursor-pointer border border-white/10"
             >
-              🌊 Konkan 4D
+              Konkan 4D
             </button>
           </div>
         </div>
@@ -576,14 +576,14 @@ export function TourPackageUploadForm({
                 onChange={(e) => setTourTheme(e.target.value)}
                 className="w-full h-11 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-800 bg-slate-50/60 outline-none focus:border-sky-500"
               >
-                <option value="Family & Leisure">👨‍👩‍👧 Family & Leisure</option>
-                <option value="Honeymoon Special">💍 Honeymoon Special</option>
-                <option value="Beach & Watersports">🏖️ Beach & Watersports</option>
-                <option value="Adventure & Trekking">🧗 Adventure & Trekking</option>
-                <option value="Heritage & Culture">🏰 Heritage & Culture</option>
-                <option value="Wildlife Safari">🐅 Wildlife Safari</option>
-                <option value="Spiritual / Pilgrimage">🕉️ Spiritual / Pilgrimage</option>
-                <option value="Weekend Getaway">🚗 Weekend Getaway</option>
+                <option value="Family & Leisure">Family & Leisure</option>
+                <option value="Honeymoon Special">Honeymoon Special</option>
+                <option value="Beach & Watersports">Beach & Watersports</option>
+                <option value="Adventure & Trekking">Adventure & Trekking</option>
+                <option value="Heritage & Culture">Heritage & Culture</option>
+                <option value="Wildlife Safari">Wildlife Safari</option>
+                <option value="Spiritual / Pilgrimage">Spiritual / Pilgrimage</option>
+                <option value="Weekend Getaway">Weekend Getaway</option>
               </select>
             </div>
 
@@ -689,7 +689,7 @@ export function TourPackageUploadForm({
                               : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
                           }`}
                         >
-                          {meal === 'Breakfast' ? '🍳 B' : meal === 'Lunch' ? '🍲 L' : '🍽️ D'}
+                          {meal === 'Breakfast' ? 'Breakfast' : meal === 'Lunch' ? 'Lunch' : 'Dinner'}
                         </button>
                       );
                     })}
@@ -752,12 +752,12 @@ export function TourPackageUploadForm({
                 onChange={(e) => setHotelStarRating(e.target.value)}
                 className="w-full h-11 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-800 bg-slate-50/60 outline-none focus:border-emerald-500"
               >
-                <option value="3-Star Deluxe">⭐⭐⭐ 3-Star Deluxe Hotel</option>
-                <option value="4-Star Premium">⭐⭐⭐⭐ 4-Star Premium Resort</option>
-                <option value="5-Star Luxury">⭐⭐⭐⭐⭐ 5-Star Luxury Palace</option>
-                <option value="Heritage Palace / Haveli">👑 Heritage Palace / Haveli</option>
-                <option value="Boutique Villa / Homestay">🏡 Boutique Villa / Homestay</option>
-                <option value="Glamping Tents / Camp">⛺ Luxury Glamping / Swiss Tents</option>
+                <option value="3-Star Deluxe">3-Star Deluxe Hotel</option>
+                <option value="4-Star Premium">4-Star Premium Resort</option>
+                <option value="5-Star Luxury">5-Star Luxury Palace</option>
+                <option value="Heritage Palace / Haveli">Heritage Palace / Haveli</option>
+                <option value="Boutique Villa / Homestay">Boutique Villa / Homestay</option>
+                <option value="Glamping Tents / Camp">Luxury Glamping / Swiss Tents</option>
               </select>
             </div>
 
@@ -784,11 +784,11 @@ export function TourPackageUploadForm({
               onChange={(e) => setVehicleType(e.target.value)}
               className="w-full h-11 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-800 bg-slate-50/60 outline-none focus:border-emerald-500"
             >
-              <option value="Private AC Sedan (Dzire / Etios)">🚗 Private AC Sedan (Dzire / Etios) - Up to 4 Pax</option>
-              <option value="Private AC SUV (Innova Crysta / Ertiga)">🚙 Private AC SUV (Innova Crysta / Ertiga) - Up to 6 Pax</option>
-              <option value="AC Tempo Traveller (13/17-Seater)">🚐 AC Tempo Traveller (13/17 Seater) - Family/Groups</option>
-              <option value="Luxury Volvo AC Sleeper Coach">🚌 Luxury Volvo AC Sleeper Coach (Group Tour)</option>
-              <option value="Self-Drive Rental Car / Bike">🛵 Self-Drive Scooter / SUV Option</option>
+              <option value="Private AC Sedan (Dzire / Etios)">Private AC Sedan (Dzire / Etios) - Up to 4 Pax</option>
+              <option value="Private AC SUV (Innova Crysta / Ertiga)">Private AC SUV (Innova Crysta / Ertiga) - Up to 6 Pax</option>
+              <option value="AC Tempo Traveller (13/17-Seater)">AC Tempo Traveller (13/17 Seater) - Family/Groups</option>
+              <option value="Luxury Volvo AC Sleeper Coach">Luxury Volvo AC Sleeper Coach (Group Tour)</option>
+              <option value="Self-Drive Rental Car / Bike">Self-Drive Scooter / SUV Option</option>
             </select>
           </div>
 
@@ -821,7 +821,7 @@ export function TourPackageUploadForm({
                         : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
                     }`}
                   >
-                    {active ? `✓ ${item}` : `+ ${item}`}
+                    {active ? `${item}` : `+ ${item}`}
                   </button>
                 );
               })}
@@ -1006,7 +1006,7 @@ export function TourPackageUploadForm({
           {/* Inclusions */}
           <div className="space-y-2">
             <span className="block text-[11px] font-black uppercase tracking-wider text-emerald-700">
-              ✓ Inclusions (समाविष्ट बाबी)
+              Inclusions & Complimentary Services
             </span>
             <div className="flex flex-wrap gap-1.5">
               {selectedInclusions.map((inc, i) => (
@@ -1014,13 +1014,13 @@ export function TourPackageUploadForm({
                   key={i}
                   className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5"
                 >
-                  <span>✓ {inc}</span>
+                  <span>{inc}</span>
                   <button
                     type="button"
                     onClick={() => setSelectedInclusions((prev) => prev.filter((_, idx) => idx !== i))}
                     className="text-emerald-500 hover:text-emerald-800 cursor-pointer"
                   >
-                    ✕
+                    X
                   </button>
                 </span>
               ))}
@@ -1052,7 +1052,7 @@ export function TourPackageUploadForm({
           {/* Exclusions */}
           <div className="space-y-2 pt-2 border-t border-slate-100">
             <span className="block text-[11px] font-black uppercase tracking-wider text-rose-700">
-              ✕ Exclusions (वगळलेल्या बाबी)
+              Exclusions & Personal Expenses
             </span>
             <div className="flex flex-wrap gap-1.5">
               {selectedExclusions.map((exc, i) => (
@@ -1060,13 +1060,13 @@ export function TourPackageUploadForm({
                   key={i}
                   className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5"
                 >
-                  <span>✕ {exc}</span>
+                  <span>{exc}</span>
                   <button
                     type="button"
                     onClick={() => setSelectedExclusions((prev) => prev.filter((_, idx) => idx !== i))}
                     className="text-rose-400 hover:text-rose-700 cursor-pointer"
                   >
-                    ✕
+                    X
                   </button>
                 </span>
               ))}
@@ -1119,7 +1119,7 @@ export function TourPackageUploadForm({
                   : 'bg-slate-50 text-slate-700 border-slate-200'
               }`}
             >
-              📅 Daily Flexible Departures
+              Daily Flexible Departures
             </button>
             <button
               type="button"
@@ -1130,7 +1130,7 @@ export function TourPackageUploadForm({
                   : 'bg-slate-50 text-slate-700 border-slate-200'
               }`}
             >
-              🎯 Fixed Batch Dates
+              Fixed Batch Dates
             </button>
           </div>
 
@@ -1148,7 +1148,7 @@ export function TourPackageUploadForm({
                       onClick={() => setBatchDates((prev) => prev.filter((_, i) => i !== idx))}
                       className="text-purple-400 hover:text-purple-700 cursor-pointer"
                     >
-                      ✕
+                      X
                     </button>
                   </span>
                 ))}
@@ -1208,9 +1208,9 @@ export function TourPackageUploadForm({
               onChange={(e) => setCancellationPolicy(e.target.value)}
               className="w-full h-11 rounded-xl border border-slate-200 px-3 text-xs font-bold text-slate-800 bg-slate-50/60 outline-none"
             >
-              <option value="Flexible">🟢 Flexible: 100% refund up to 7 days before departure</option>
-              <option value="Moderate">🟡 Moderate: 100% up to 15 days, 50% up to 7 days, non-refundable within 7 days</option>
-              <option value="Strict">🔴 Strict: 50% refund up to 30 days, non-refundable within 30 days</option>
+              <option value="Flexible">Flexible: 100% refund up to 7 days before departure</option>
+              <option value="Moderate">Moderate: 100% up to 15 days, 50% up to 7 days, non-refundable within 7 days</option>
+              <option value="Strict">Strict: 50% refund up to 30 days, non-refundable within 30 days</option>
             </select>
           </div>
 
@@ -1305,7 +1305,7 @@ export function TourPackageUploadForm({
                       onClick={() => setGalleryUrls((prev) => prev.filter((_, i) => i !== idx))}
                       className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-xs"
                     >
-                      ✕
+                      X
                     </button>
                   </div>
                 ))}

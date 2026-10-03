@@ -106,33 +106,12 @@ export const TripRequirementModal: React.FC<TripRequirementModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
       {/* Header */}
-      <div className="bg-gradient-to-r from-sky-400 to-sky-500 text-white px-5 pt-12 pb-8 relative overflow-hidden">
-        {/* Background blobs */}
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-        <div className="absolute top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-6 left-12 w-20 h-20 bg-white rounded-full opacity-100"></div>
-        <div className="absolute -bottom-10 left-24 w-32 h-32 bg-white rounded-full opacity-100"></div>
-        <div className="absolute -bottom-16 right-16 w-32 h-32 bg-white rounded-full opacity-100"></div>
-        <div className="absolute -bottom-6 right-8 w-16 h-16 bg-white rounded-full opacity-100"></div>
-        
-        <div className="relative z-10 flex justify-between items-start">
-          <div>
-            <h2 className="text-xl font-bold mb-1">
-              {existingTrip ? 'Edit Offer' : 'Make an Offer'}
-            </h2>
-            <p className="text-sky-100 text-sm">
-              Submit your preferred budget & get private operator quotes<br/>
-              (3 of 3 free today)
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-colors backdrop-blur-sm"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      </div>
+      <SubPageHeader
+        title={existingTrip ? 'Edit Offer' : 'Make an Offer'}
+        subtitle="Submit preferred budget & get private operator quotes"
+        badge="3 of 3 Free Today"
+        onClose={onClose}
+      />
 
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto px-5 pt-6 pb-24 bg-white rounded-t-3xl -mt-6 relative z-20">

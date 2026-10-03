@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  Luggage,
   ShieldCheck,
   CheckCircle2,
   Lock,
@@ -17,15 +18,19 @@ import {
   X,
   ArrowRight
 } from "lucide-react";
-import { BookingStepHeader } from "./BookingStepHeader";
-import { loadRazorpayScript } from "../../utils/razorpay";
-import { RazorpayCheckoutModal } from "../../components/common/RazorpayCheckoutModal";
+import {
+  Luggage, BookingStepHeader } from "./BookingStepHeader";
+import {
+  Luggage, loadRazorpayScript } from "../../utils/razorpay";
+import {
+  Luggage, RazorpayCheckoutModal } from "../../components/common/RazorpayCheckoutModal";
 import type { SelectedSeat } from "./SeatSelectionStep";
 import type { SelectedBaggageItem } from "./BaggageSelectionStep";
 import type { SelectedMealItem } from "./MealsSelectionStep";
 import type { SelectedFare } from "./FareSelectionStep";
 import type { PassengerDetail } from "./PassengerDetailsStep";
-import { formatTime } from "./PassengerDetailsStep";
+import {
+  Luggage, formatTime } from "./PassengerDetailsStep";
 
 export interface FlightPricingAPIResponse {
   priceToken: string;
@@ -1038,7 +1043,7 @@ export const CheckoutStep: React.FC<CheckoutStepProps> = ({
 
             <div className="pt-1 flex flex-wrap items-center gap-2.5 text-xs text-slate-600">
               <span className="inline-flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-lg font-semibold">
-                🧳 Baggage Allowance: <strong>{pricing.fareRules.baggageAllowance || "7kg Cabin + 15kg Check-in"}</strong>
+                <Luggage className="w-4 h-4 inline mr-1 text-slate-500" />Baggage Allowance: <strong>{pricing.fareRules.baggageAllowance || "7kg Cabin + 15kg Check-in"}</strong>
               </span>
               <span className="inline-flex items-center gap-1.5 bg-pink-50 text-pink-700 px-3 py-1 rounded-lg font-semibold border border-pink-200">
                 ⏱️ Free 24h cancellation window from booking

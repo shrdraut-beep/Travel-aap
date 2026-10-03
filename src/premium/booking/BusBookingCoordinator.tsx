@@ -292,7 +292,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
   // Step Header Component
   const renderStepHeader = (currentStepNum: number, stepTitle: string, progressPct: string) => {
     return (
-      <header className="fixed top-0 w-full z-50 pt-safe bg-[#0ea5e9] text-white rounded-b-[18px] shadow-[0_4px_16px_rgba(14,165,233,0.25)]">
+      <header className="fixed top-0 w-full z-50 pt-safe bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] text-[#0F172A] rounded-b-[24px] border-b border-sky-200/80 shadow-[0_4px_20px_rgba(2,132,199,0.08)] backdrop-blur-xl">
         <div className="px-4 pt-2.5 pb-2 flex flex-col justify-between max-w-lg mx-auto">
           <div className="flex items-center justify-between gap-2">
             <button
@@ -305,7 +305,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                 else if (step === "addons") setStep("passengers");
                 else if (step === "checkout") setStep("addons");
               }}
-              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0 active:scale-95 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-xs border border-sky-200/80 flex items-center justify-center shrink-0 active:scale-95 cursor-pointer"
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">arrow_back</span>
@@ -313,11 +313,11 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
 
             <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-1 text-center">
               <div className="flex items-center justify-center gap-1 w-full truncate">
-                <span className="font-bold text-sm text-white truncate">
+                <span className="font-bold text-sm text-[#0F172A] truncate">
                   {initialSearchParams.origin} ⇄ {initialSearchParams.destination}
                 </span>
               </div>
-              <p className="text-[10px] text-white/90 truncate mt-0.5 font-['JetBrains_Mono',monospace]">
+              <p className="text-[10px] text-[#0369a1] font-semibold truncate mt-0.5 font-['JetBrains_Mono',monospace]">
                 {initialSearchParams.date} • {maxSeats} Traveller{maxSeats > 1 ? "s" : ""} • AC Sleeper
               </p>
             </div>
@@ -325,7 +325,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
             <button
               aria-label="Close booking"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white active:scale-95 shrink-0 cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-xs border border-sky-200/80 flex items-center justify-center active:scale-95 shrink-0 cursor-pointer"
               type="button"
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
@@ -350,7 +350,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
             </div>
             <div className="w-full bg-white/30 h-1 rounded-full overflow-hidden">
               <div
-                className="bg-white h-full rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 h-full rounded-full transition-all duration-300"
                 style={{ width: progressPct }}
               ></div>
             </div>
@@ -370,11 +370,11 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
       {/* ============================================================== */}
       {step === "results" && (
         <div className="min-h-screen bg-[#f6faff] flex flex-col">
-          <header className="fixed top-0 w-full z-50 pt-safe bg-white/95 backdrop-blur-xl rounded-b-[24px] shadow-[0_4px_20px_rgba(0,101,145,0.06)] border-b border-slate-100">
+          <header className="fixed top-0 w-full z-50 pt-safe bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] backdrop-blur-xl rounded-b-[24px] shadow-[0_4px_20px_rgba(2,132,199,0.08)] border-b border-sky-200/80">
             <div className="h-20 px-4 flex items-center justify-between gap-2 max-w-4xl mx-auto">
               <button
                 onClick={onClose}
-                className="w-11 h-11 rounded-full bg-[#f0f4fa] flex items-center justify-center text-[#0F172A] hover:bg-[#eaeef4] active:scale-95 transition-all shrink-0 cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-xs border border-sky-200/80 flex items-center justify-center text-[#0F172A] hover:bg-[#eaeef4] active:scale-95 transition-all shrink-0 cursor-pointer"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[22px]">arrow_back</span>
@@ -391,7 +391,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="w-11 h-11 rounded-full bg-[#c9e6ff]/40 flex items-center justify-center text-[#006591] shrink-0 cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-xs border border-sky-200/80 flex items-center justify-center text-[#006591] shrink-0 cursor-pointer"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
@@ -432,7 +432,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                       <span className="text-[12px] text-[#475569]">{bus.busType || bus.type}</span>
                     </div>
                     <div className="flex items-center gap-1 bg-[#006c49] text-white px-2 py-0.5 rounded-md text-xs font-bold font-['JetBrains_Mono',monospace]">
-                      ★ {bus.rating || 4.8}
+                      Rating {bus.rating || 4.8}
                     </div>
                   </div>
 
@@ -565,13 +565,13 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-3.5 h-3.5 rounded-sm bg-[#0ea5e9] flex items-center justify-center text-white text-[9px] font-bold">
-                      ✓
+                      
                     </div>
                     <span className="text-slate-600">Selected</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <div className="w-3.5 h-3.5 rounded-sm bg-rose-100 text-rose-600 flex items-center justify-center text-[9px] font-bold">
-                      ♀
+                      F
                     </div>
                     <span className="text-slate-600">Female</span>
                   </div>
@@ -625,9 +625,9 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                               {rowGroup[0].seatNumber}
                             </span>
                             {selectedSeats.some(s => s.id === rowGroup[0].id) ? (
-                              <span className="text-[10px] font-bold">✓</span>
+                              <span className="text-[10px] font-bold"></span>
                             ) : rowGroup[0].isLadies ? (
-                              <span className="text-[10px]">♀</span>
+                              <span className="text-[10px]">F</span>
                             ) : (
                               <span className="material-symbols-outlined text-[13px] opacity-60">airline_seat_flat</span>
                             )}
@@ -666,9 +666,9 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                                 {seat.seatNumber}
                               </span>
                               {selectedSeats.some(s => s.id === seat.id) ? (
-                                <span className="text-[10px] font-bold">✓</span>
+                                <span className="text-[10px] font-bold"></span>
                               ) : seat.isLadies ? (
-                                <span className="text-[10px]">♀</span>
+                                <span className="text-[10px]">F</span>
                               ) : (
                                 <span className="material-symbols-outlined text-[13px] opacity-60">airline_seat_flat</span>
                               )}
@@ -858,7 +858,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                   SELECTED STOPS
                 </span>
                 <span className="text-xs font-bold text-slate-900 truncate">
-                  {selectedBoarding?.name?.split("(")[1]?.replace(")", "") || "Boarding"} ➔{" "}
+                  {selectedBoarding?.name?.split("(")[1]?.replace(")", "") || "Boarding"} →{" "}
                   {selectedDropping?.name?.split("(")[1]?.replace(")", "") || "Dropping"}
                 </span>
               </div>
@@ -1460,7 +1460,7 @@ export const BusBookingCoordinator: React.FC<BusBookingCoordinatorProps> = ({
                 <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 shadow-md flex flex-col gap-3">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold">
-                      ✓
+                      
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-emerald-900">Ticket Reserved Successfully!</h4>

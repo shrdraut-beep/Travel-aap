@@ -72,7 +72,7 @@ export const INITIAL_VENDOR_BIDS: Record<string, VendorBid[]> = {
       taxes: 1725,
       totalPrice: 36225,
       aiDealScore: 'great',
-      dealScoreLabel: '🔥 Great Deal (14% Below AI Fair Value)',
+      dealScoreLabel: 'Great Deal: 14% Below Fair Value',
       inclusions: [
         '4 Nights 3-Star AC Beach Resort',
         'Daily Buffet Breakfast (CP Plan)',
@@ -99,7 +99,7 @@ export const INITIAL_VENDOR_BIDS: Record<string, VendorBid[]> = {
       taxes: 1790,
       totalPrice: 37590,
       aiDealScore: 'fair',
-      dealScoreLabel: '⚖️ Fair Price (Optimal Value)',
+      dealScoreLabel: 'Fair Price: Optimal Value',
       inclusions: [
         '4 Nights Clean AC Deluxe Rooms',
         'Breakfast Included',
@@ -125,7 +125,7 @@ export const INITIAL_VENDOR_BIDS: Record<string, VendorBid[]> = {
       taxes: 1860,
       totalPrice: 39060,
       aiDealScore: 'premium',
-      dealScoreLabel: '💎 Premium Option (Includes Extras)',
+      dealScoreLabel: 'Premium Option: Includes Extras',
       inclusions: [
         '4 Nights 4-Star Resort with Pool Access',
         'Both Breakfast and Dinner Included (MAP Plan)',
@@ -153,7 +153,7 @@ export const INITIAL_VENDOR_BIDS: Record<string, VendorBid[]> = {
       taxes: 2560,
       totalPrice: 53760,
       aiDealScore: 'great',
-      dealScoreLabel: '🔥 Great Deal (Below AI Baseline)',
+      dealScoreLabel: 'Great Deal: Below Baseline',
       inclusions: [
         '6 Nights Temple-adjacent 3-Star AC Hotels',
         'VIP Darshan Assistance at Kashi Vishwanath & Annapurna',
@@ -180,7 +180,7 @@ export const INITIAL_VENDOR_BIDS: Record<string, VendorBid[]> = {
       taxes: 2700,
       totalPrice: 56700,
       aiDealScore: 'fair',
-      dealScoreLabel: '⚖️ Fair Price',
+      dealScoreLabel: 'Fair Price',
       inclusions: [
         '6 Nights AC Deluxe Hotel Stay with Breakfast',
         'AC Cab for all City Sightseeing & Outstation Excursions'

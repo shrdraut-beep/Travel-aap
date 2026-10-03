@@ -1,3 +1,4 @@
+import { SubPageHeader } from '../../components/common/SubPageHeader';
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -97,35 +98,15 @@ export const SecurityAuthModal: React.FC<SecurityAuthModalProps> = ({
           </div>
         )}
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-50 via-white to-purple-50 px-5 py-4 border-b border-indigo-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <Lock className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                  Security &amp; 2-Factor Authentication
-                </h3>
-                <span className="text-[9.5px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Protected
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Biometric FaceID, SMS 2FA &amp; Device Session Management
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        {/* SubPageHeader matching Bus Booking Flow and Brand Header Ocean Colors */}
+        <SubPageHeader
+          title="Security & 2FA"
+          subtitle="Enterprise encryption, biometrics & account safety"
+          badge="Zero-Trust"
+          icon={Lock}
+          onClose={onClose}
+          maxWidth="w-full"
+        />
 
         {/* Body */}
         <div className="overflow-y-auto p-5 space-y-5 flex-1">

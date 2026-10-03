@@ -256,18 +256,18 @@ export const MakeAnOfferModal: React.FC<MakeAnOfferModalProps> = ({
         {/* =========================================================================
             TOP HEADER (Exact Google Stitch Layout)
             ========================================================================= */}
-        <header className="bg-[#0EA5E9] px-5 pt-5 pb-5 text-white relative shrink-0 shadow-md">
-          {/* Top Brand Bar & Close Button */}
-          <div className="flex items-center justify-between mb-2.5">
+        <header className="bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] px-5 pt-4 pb-4 border-b border-sky-200/80 rounded-b-[24px] shadow-[0_4px_20px_rgba(2,132,199,0.08)] relative shrink-0">
+          {/* Top Brand Bar & Circular Close Button */}
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-white/20 backdrop-blur-md text-white font-black text-sm shadow-xs border border-white/30">
+              <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-sky-100 border border-sky-300 text-sky-800 font-black text-sm shadow-xs">
                 R
               </span>
               <div>
-                <span className="text-[11px] font-black tracking-wider uppercase text-sky-100 block leading-tight">
+                <span className="text-[11px] font-black tracking-wider uppercase text-sky-900 block leading-tight">
                   ROUTTRIPO BARGAIN
                 </span>
-                <span className="text-[10px] text-white/80 font-medium leading-tight">
+                <span className="text-[10px] text-sky-700/80 font-medium leading-tight">
                   Direct Verified Travel Deals
                 </span>
               </div>
@@ -276,7 +276,7 @@ export const MakeAnOfferModal: React.FC<MakeAnOfferModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 transition-all flex items-center justify-center text-white backdrop-blur-md border border-white/20 cursor-pointer shadow-xs"
+              className="w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-700 border border-sky-200/80 shadow-xs flex items-center justify-center active:scale-95 transition-all cursor-pointer"
               aria-label="Close"
             >
               <X className="w-4 h-4" />
@@ -284,31 +284,18 @@ export const MakeAnOfferModal: React.FC<MakeAnOfferModalProps> = ({
           </div>
 
           {/* Title & Free Tier Badge */}
-          <div className="flex items-center justify-between gap-2 mt-2">
-            <div>
-              <h1 className="text-xl font-black tracking-tight text-white leading-tight">
+          <div className="flex items-center justify-between gap-2 mt-1">
+            <div className="min-w-0">
+              <h1 className="text-lg font-black tracking-tight text-[#0F172A] leading-tight">
                 Make an Offer
               </h1>
-              <p className="text-[11.5px] text-sky-100 font-medium leading-tight mt-0.5">
+              <p className="text-[11.5px] text-[#0369a1] font-medium leading-tight mt-0.5 truncate">
                 Submit your target budget & operators will compete live
               </p>
             </div>
-            <span className="bg-amber-400 text-slate-900 font-extrabold px-2.5 py-1 rounded-full text-[10px] tracking-wide uppercase shrink-0 shadow-sm border border-amber-300">
+            <span className="bg-sky-100/90 text-sky-800 font-extrabold px-2.5 py-1 rounded-full text-[10px] tracking-wide uppercase shrink-0 shadow-xs border border-sky-300/60 whitespace-nowrap">
               2 of 3 FREE
             </span>
-          </div>
-
-          {/* Hero Banner Graphic Preview */}
-          <div className="mt-3 rounded-2xl overflow-hidden shadow-inner border border-white/20 max-h-24 bg-sky-600/50">
-            <img
-              src="/images/bargaining/make-offer-banner.jpg"
-              alt="Make An Offer Live Bidding"
-              className="w-full h-24 object-cover object-center"
-              onError={(e) => {
-                // Graceful fallback if image is not loaded yet
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
           </div>
         </header>
 

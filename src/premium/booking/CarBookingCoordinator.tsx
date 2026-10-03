@@ -327,32 +327,32 @@ export const CarBookingCoordinator: React.FC<CarBookingCoordinatorProps> = ({
       className="fixed inset-0 z-50 overflow-y-auto bg-[#F8FAFC] text-slate-800 antialiased flex flex-col font-['Outfit',sans-serif]"
     >
       {/* 1. Curved Stitch Header */}
-      <header className="sticky top-0 inset-x-0 z-40 bg-[#0ea5e9] text-white shadow-[0_4px_16px_rgba(14,165,233,0.18)] rounded-b-[20px] pt-safe transition-all">
+      <header className="sticky top-0 inset-x-0 z-40 bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] text-[#0F172A] rounded-b-[24px] border-b border-sky-200/80 shadow-[0_4px_20px_rgba(2,132,199,0.08)] pt-safe transition-all backdrop-blur-xl font-['Outfit',sans-serif]">
         <div className="px-4 py-2.5 flex items-center justify-between gap-3 max-w-xl mx-auto">
           <button
             aria-label="Go back"
-            className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center active:scale-95 transition-all hover:bg-white/30 shrink-0 cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-xs border border-sky-200/80 flex items-center justify-center active:scale-95 transition-all shrink-0 cursor-pointer"
             onClick={() => {
               if (step > 1 && step < 5) setStep((s) => (s - 1) as any);
               else onClose();
             }}
             type="button"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5 text-slate-700 stroke-[2.5]" />
           </button>
 
           <div className="flex-1 text-center min-w-0 px-1">
-            <h1 className="font-bold text-sm sm:text-base text-white tracking-tight truncate leading-tight">
+            <h1 className="font-bold text-sm sm:text-base text-[#0F172A] tracking-tight truncate leading-tight">
               {pickupLocation.split(",")[0]} ⇄ {dropLocation.split("/")[0]}
             </h1>
-            <p className="text-[11px] font-semibold text-white/90 truncate mt-0.5">
+            <p className="text-[11px] font-semibold text-[#0369a1] font-semibold truncate mt-0.5">
               {pickupDate} • Outstation One-Way • {selectedCar?.title || "Prime Sedan"}
             </p>
           </div>
 
           <button
             aria-label="Close booking"
-            className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center active:scale-95 transition-all hover:bg-white/30 shrink-0 cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-xs border border-sky-200/80 flex items-center justify-center active:scale-95 transition-all shrink-0 cursor-pointer"
             onClick={onClose}
             type="button"
           >
@@ -804,7 +804,7 @@ export const CarBookingCoordinator: React.FC<CarBookingCoordinatorProps> = ({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <h3 className="font-extrabold text-sm text-slate-900 truncate">
-                      {pickupLocation.split(",")[0]} ➔ {dropLocation.split("/")[0]}
+                      {pickupLocation.split(",")[0]} → {dropLocation.split("/")[0]}
                     </h3>
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   </div>
@@ -988,7 +988,7 @@ export const CarBookingCoordinator: React.FC<CarBookingCoordinatorProps> = ({
                 <div className="flex items-center gap-1.5">
                   <h4 className="font-extrabold text-sm text-white truncate">Rajesh Shinde</h4>
                   <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-1.5 py-0.2 rounded-xs">
-                    ★ 4.9
+                    Rating 4.9
                   </span>
                 </div>
                 <p className="text-xs text-sky-200 truncate">
@@ -1194,7 +1194,7 @@ export const CarBookingCoordinator: React.FC<CarBookingCoordinatorProps> = ({
                       {bookingResponse?.driver?.name || "Rajesh Shinde"}
                     </h3>
                     <span className="bg-amber-100 text-amber-900 font-['JetBrains_Mono',monospace] text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                      ★ {bookingResponse?.driver?.rating || 4.9}
+                      Rating {bookingResponse?.driver?.rating || 4.9}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5 font-medium">

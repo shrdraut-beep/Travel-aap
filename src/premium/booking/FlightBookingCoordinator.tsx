@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
+  Briefcase,
+  MessageSquare,
+  Zap,
   Plane,
   ArrowRight,
   Clock,
@@ -28,11 +31,13 @@ import {
   Sun,
   Shield,
   Coffee,
-  CheckCheck
+  CheckCheck,
+  Briefcase,
+  MessageSquare,
+  Zap
 } from "lucide-react";
 import { FlightBookingHeader } from "./FlightBookingHeader";
 import { RazorpayPaymentModal } from "./RazorpayPaymentModal";
-
 export interface FlightSearchParams {
   origin: string;
   destination: string;
@@ -585,7 +590,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
               <div>
                 <h2 className="text-base font-bold text-slate-900 font-['Outfit']">Available Flights</h2>
                 <span className="text-xs text-slate-500 font-['JetBrains_Mono']">
-                  {searchParams.origin || "BOM"} ➔ {searchParams.destination || "DEL"} • {searchParams.departDate || "Today"}
+                  {searchParams.origin || "BOM"} → {searchParams.destination || "DEL"} • {searchParams.departDate || "Today"}
                 </span>
               </div>
               <span className="text-xs font-bold text-[#0ea5e9] bg-sky-50 px-2.5 py-1 rounded-full font-['JetBrains_Mono']">
@@ -619,7 +624,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                     : "bg-white text-slate-700 border border-slate-200 hover:border-sky-300"
                 }`}
               >
-                🚀 Fastest
+                Fastest
               </button>
 
               <button
@@ -631,7 +636,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                     : "bg-white text-slate-700 border border-slate-200 hover:border-sky-300"
                 }`}
               >
-                🟢 Non-stop Only
+                Non-stop Only
               </button>
 
               <button
@@ -643,7 +648,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                     : "bg-white text-slate-700 border border-slate-200 hover:border-sky-300"
                 }`}
               >
-                🌅 Early Departure
+                Early Departure
               </button>
             </div>
 
@@ -1082,7 +1087,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                   <input
                     type="text"
                     disabled
-                    value="Indian 🇮🇳"
+                    value="Indian"
                     className="w-full bg-slate-100 border border-slate-200 rounded-xl px-2 py-2 text-[11px] font-bold text-slate-700"
                   />
                 </div>
@@ -1143,7 +1148,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
               {/* WhatsApp instant alerts */}
               <div className="flex items-center justify-between p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">💬</span>
+                  <MessageSquare className="w-4 h-4 inline text-slate-500" />
                   <span className="text-xs font-medium text-emerald-900">
                     Send Boarding Passes & Delay Alerts via WhatsApp
                   </span>
@@ -1341,7 +1346,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <div className="w-3.5 h-3.5 rounded-sm bg-[#0ea5e9] flex items-center justify-center text-white text-[9px]">
-                  ✓
+                  
                 </div>
                 <span className="text-[#0ea5e9] font-bold">Selected</span>
               </div>
@@ -1355,7 +1360,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <div className="w-3.5 h-3.5 rounded-sm bg-slate-200 text-slate-400 flex items-center justify-center text-[8px]">
-                  ✕
+                  
                 </div>
                 <span className="text-slate-400">Occupied</span>
               </div>
@@ -1419,7 +1424,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                                   : "bg-slate-50 hover:bg-sky-50 text-slate-700 border border-slate-200"
                               }`}
                             >
-                              {isSelected ? (isAssignedToP1 ? "P1" : "P2") : isOccupied ? "✕" : seatCode}
+                              {isSelected ? (isAssignedToP1 ? "P1" : "P2") : isOccupied ? "" : seatCode}
                             </button>
                           );
                         })}
@@ -1455,7 +1460,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                                   : "bg-slate-50 hover:bg-sky-50 text-slate-700 border border-slate-200"
                               }`}
                             >
-                              {isSelected ? (isAssignedToP1 ? "P1" : "P2") : isOccupied ? "✕" : seatCode}
+                              {isSelected ? (isAssignedToP1 ? "P1" : "P2") : isOccupied ? "" : seatCode}
                             </button>
                           );
                         })}
@@ -1663,7 +1668,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-base">🏷️</span>
+                  <Tag className="w-4 h-4 inline text-slate-500" />
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">Fragile Baggage Priority Tag</span>
                     <span className="text-[11px] text-slate-500">Careful handling + Priority belt delivery</span>
@@ -1903,14 +1908,14 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center gap-2">
-                  <span className="text-base">🎒</span>
+                  <Briefcase className="w-4 h-4 inline text-slate-500" />
                   <div>
                     <span className="text-[10px] text-slate-400 font-['JetBrains_Mono'] block">Cabin Bag</span>
                     <span className="font-bold text-slate-900">7 kg × {totalPax} pcs</span>
                   </div>
                 </div>
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center gap-2">
-                  <span className="text-base">🧳</span>
+                  <Luggage className="w-4 h-4 inline text-slate-500" />
                   <div>
                     <span className="text-[10px] text-slate-400 font-['JetBrains_Mono'] block">Check-in Bag</span>
                     <span className="font-bold text-slate-900">
@@ -2083,7 +2088,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
               <div className="flex items-center justify-between text-xs">
                 <div>
                   <span className="font-bold text-slate-900 text-sm">
-                    {confirmedBookingData.origin} ✈ {confirmedBookingData.destination}
+                    {confirmedBookingData.origin} → {confirmedBookingData.destination}
                   </span>
                   <span className="text-slate-500 block text-[11px]">
                     {confirmedBookingData.airline} {confirmedBookingData.flightNumber} • {confirmedBookingData.date}
@@ -2149,7 +2154,7 @@ export const FlightBookingCoordinator: React.FC<FlightBookingCoordinatorProps> =
           isOpen={isRazorpayOpen}
           amount={finalTotal}
           serviceName={`${selectedFlight?.airline || "Flight"} Booking`}
-          title={`Flight: ${selectedFlight?.origin || searchParams.origin || "BOM"} ➔ ${selectedFlight?.destination || searchParams.destination || "DEL"}`}
+          title={`Flight: ${selectedFlight?.origin || searchParams.origin || "BOM"} → ${selectedFlight?.destination || searchParams.destination || "DEL"}`}
           customerName={`${leadFirstName} ${leadLastName}`}
           customerEmail={contactEmail}
           customerPhone={contactPhone}

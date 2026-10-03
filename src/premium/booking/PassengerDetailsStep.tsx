@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   ArrowRight,
+  Users,
   User,
   Mail,
   Phone,
@@ -12,6 +13,7 @@ import {
   Globe
 } from "lucide-react";
 import { FlightBookingHeader } from "./FlightBookingHeader";
+import { MasterPassengerService, type Passenger } from "../../services/MasterPassengerService";
 import type { SelectedFare } from "./FareSelectionStep";
 
 export interface PassengerDetail {
@@ -135,6 +137,35 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [whatsappDelivery, setWhatsappDelivery] = useState(true);
+  const [savedPassengers, setSavedPassengers] = useState<Passenger[]>(() => {
+    try {
+      return MasterPassengerService.getPassengers();
+    } catch {
+      return [];
+    }
+  });
+
+  const handleAutofillSavedPax = (saved: Passenger) => {
+    const parts = (saved.fullName || "").trim().split(" ");
+    const first = parts[0] || "";
+    const last = parts.slice(1).join(" ") || "";
+    const gen = saved.gender || "Male";
+    const inferredTitle = gen === "Female" ? "Ms" : "Mr";
+
+    setPassengers((prev) => {
+      const copy = [...prev];
+      copy[activePaxIndex] = {
+        ...copy[activePaxIndex],
+        firstName: first,
+        lastName: last,
+        gender: gen,
+        title: inferredTitle as any
+      };
+      return copy;
+    });
+
+    setToastMessage(`Autofilled details for ${saved.fullName}!`);
+  };
 
   const basePrice = Number(flight?.price || flight?.total_amount || 6480);
   const totalAmount = (basePrice + (selectedFare?.priceDelta || 0)) * count;
@@ -305,6 +336,46 @@ export const PassengerDetailsStep: React.FC<PassengerDetailsStepProps> = ({
                   </button>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Autofill from Saved Travellers (Google Stitch feature) */}
+        {savedPassengers.length > 0 && (
+          <div className="px-4 pb-2">
+            <div className="bg-white rounded-2xl p-3 border border-slate-200/90 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-slate-600 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                  <Users className="w-3.5 h-3.5 text-sky-600" />
+                  <span>Saved Travellers (1-Click Autofill)</span>
+                </span>
+                <span className="text-[10px] text-sky-800 font-bold bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200 whitespace-nowrap shrink-0">
+                  Verified KYC
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-1">
+                {savedPassengers.map((saved) => (
+                  <button
+                    key={saved.id}
+                    type="button"
+                    onClick={() => handleAutofillSavedPax(saved)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-sky-200 bg-sky-50/50 hover:bg-sky-100/70 text-slate-800 transition-all active:scale-95 cursor-pointer shrink-0 shadow-2xs"
+                  >
+                    <span className="w-6 h-6 rounded-full bg-sky-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                      {saved.fullName.charAt(0).toUpperCase()}
+                    </span>
+                    <div className="text-left min-w-0">
+                      <span className="block text-xs font-bold text-slate-900 truncate">
+                        {saved.fullName}
+                      </span>
+                      <span className="block text-[10px] text-slate-500 font-medium truncate">
+                        {saved.gender} · {saved.mealPreference || "Veg"}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

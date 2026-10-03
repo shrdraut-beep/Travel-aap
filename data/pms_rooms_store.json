@@ -1,0 +1,66 @@
+[
+  {
+    "roomId": "302",
+    "roomNumber": "Suite #302",
+    "floor": 3,
+    "roomType": "Deluxe Sea-Facing Suite",
+    "status": "IN_CLEANING",
+    "attendant": "Radha Mandloi",
+    "departedGuest": "Rajesh & Neha Sharma (04:10 PM)",
+    "nextGuestWindow": "18 hrs window",
+    "vipNote": "Stock sparkling water & sea-breeze welcome kit.",
+    "etaMinutes": 45,
+    "checklist": [
+      "Full Linen Replacement",
+      "Minibar Restock",
+      "Deep Sanitize"
+    ],
+    "lastUpdated": "2026-10-03T15:08:49.570Z"
+  },
+  {
+    "roomId": "204",
+    "roomNumber": "Room 204",
+    "floor": 2,
+    "roomType": "Deluxe King Room",
+    "status": "IN_CLEANING",
+    "attendant": "Vikram Sen",
+    "timeElapsed": "00:22",
+    "notes": "Stayover Clean: Towels refreshed, dusting bed",
+    "lastUpdated": "2026-10-03T15:08:20.858Z"
+  },
+  {
+    "roomId": "105",
+    "roomNumber": "Room 105",
+    "floor": 1,
+    "roomType": "Standard Garden Villa",
+    "status": "AWAITING_INSPECTION",
+    "attendant": "Priya K.",
+    "completedTime": "04:02 PM",
+    "notes": "14 Checklist items completed. Keycards refreshed & welcome note placed.",
+    "lastUpdated": "2026-10-03T15:08:20.858Z"
+  },
+  {
+    "roomId": "301",
+    "roomNumber": "Room 301",
+    "floor": 3,
+    "roomType": "Presidential Suite",
+    "status": "CLEAN_READY",
+    "inspector": "Sunil Verma (03:30 PM)",
+    "telemetry": {
+      "acTemp": "22°C",
+      "safeStatus": "Zeroed",
+      "hubStatus": "Online"
+    },
+    "lastUpdated": "2026-10-03T15:08:20.858Z"
+  },
+  {
+    "roomId": "208",
+    "roomNumber": "Room 208",
+    "floor": 2,
+    "roomType": "Deluxe Twin Room",
+    "status": "OCCUPIED_DND",
+    "privacyLight": true,
+    "notes": "Privacy light active. Service scheduled at 06:00 PM. Extra Egyptian bath sheets & decaf pods requested.",
+    "lastUpdated": "2026-10-03T15:08:20.858Z"
+  }
+]

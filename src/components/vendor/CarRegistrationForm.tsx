@@ -502,7 +502,7 @@ export function CarRegistrationForm({ onCabRegistered, vendorId = 'VEND-1001' }:
         <div className="p-5 bg-white rounded-2xl border border-slate-200 space-y-3">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <h3 className="text-sm font-bold text-slate-800">Your Registered Fleet ({cabs.length} Cabs)</h3>
-            <span className="text-[11px] text-emerald-600 font-bold">✓ Vahan Verified</span>
+            <span className="text-[11px] text-emerald-600 font-bold">Vahan Verified</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {cabs.map((cab) => (

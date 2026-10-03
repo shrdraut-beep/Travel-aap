@@ -30,7 +30,7 @@ export const FullScreenChatView: React.FC<FullScreenChatViewProps> = ({
     {
       id: 'm1',
       sender: 'system',
-      text: `🔒 Safe Bargaining Room Active. Real contact details are protected under RouTripO Escrow. Complete 'Accept & Lock' to unmask direct contact numbers.`,
+      text: `Safe Bargaining Room Active. Real contact details are protected under RouTripO Escrow. Complete 'Accept & Lock' to unmask direct contact numbers.`,
       time: '10:00 AM'
     },
     {
@@ -59,7 +59,7 @@ export const FullScreenChatView: React.FC<FullScreenChatViewProps> = ({
         {
           id: `sys-${Date.now()}`,
           sender: 'system',
-          text: `⚠️ Phone numbers and personal contacts cannot be shared prior to Escrow Lock for your safety. Please use the sticky 'ACCEPT & LOCK' button above to securely unlock direct phone access.`,
+          text: `Notice: Phone numbers and personal contacts cannot be shared prior to Escrow Lock for your safety. Please use the sticky 'ACCEPT & LOCK' button above to securely unlock direct phone access.`,
           time: 'Just now'
         }
       ]);
@@ -104,7 +104,7 @@ export const FullScreenChatView: React.FC<FullScreenChatViewProps> = ({
             <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" title="Online" />
           </span>
         }
-        subtitle={<>★ {offer.rating} · {offer.vehicleOrRoomTitle}</>}
+        subtitle={<>{offer.rating} Stars · {offer.vehicleOrRoomTitle}</>}
         onBack={onBack}
         backAriaLabel="Back"
         maxWidth="max-w-2xl"

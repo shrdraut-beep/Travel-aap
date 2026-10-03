@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
+export { SubPageHeader, type SubPageHeaderProps } from "../../components/common/SubPageHeader";
 
 export const SectionHeader: React.FC<{
   title: string;
@@ -14,7 +15,7 @@ export const SectionHeader: React.FC<{
       <button
         type="button"
         onClick={onAction}
-        className="text-[13px] font-bold text-[var(--premium-sky-deep)] hover:underline active:scale-95 transition-all cursor-pointer"
+        className="text-[13px] font-bold text-[var(--premium-sky-deep)] hover:underline active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
       >
         {action}
       </button>
@@ -69,7 +70,7 @@ export const ListRow: React.FC<{
         )}
       </span>
       {value && (
-        <span className="shrink-0 text-[13px] font-bold text-[var(--premium-muted)]">
+        <span className="shrink-0 text-[13px] font-bold text-[var(--premium-muted)] whitespace-nowrap">
           {value}
         </span>
       )}
@@ -81,7 +82,7 @@ export const ListRow: React.FC<{
 export const PillButton: React.FC<{
   label: string;
   onClick?: () => void;
-  variant?: "outline" | "solid" | "pink" | "emerald" | "secondary" | "danger";
+  variant?: "outline" | "solid" | "pink" | "emerald" | "secondary" | "danger" | "frosted" | "frostedEmerald";
   icon?: React.ReactNode;
   Icon?: LucideIcon;
   size?: "sm" | "md" | "lg";
@@ -118,6 +119,11 @@ export const PillButton: React.FC<{
     // 3D Elevated Rose Danger
     danger:
       "bg-gradient-to-r from-rose-500 to-red-600 text-white font-extrabold shadow-[0_4px_14px_rgba(244,63,94,0.32)] hover:shadow-[0_6px_20px_rgba(244,63,94,0.42)] border-t border-white/25",
+    // Transparent Frosted Glass Pills (Sky / Emerald)
+    frosted:
+      "bg-sky-500/10 hover:bg-sky-500/20 text-sky-800 border border-sky-400/30 backdrop-blur-md font-bold shadow-xs active:scale-95",
+    frostedEmerald:
+      "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 border border-emerald-400/30 backdrop-blur-md font-bold shadow-xs active:scale-95",
     // 3D White Card with Sky Border
     outline:
       "bg-white border-2 border-sky-300 text-sky-700 font-extrabold shadow-[0_2px_8px_rgba(2,132,199,0.12)] hover:bg-sky-50/70 hover:border-sky-400",
@@ -131,7 +137,7 @@ export const PillButton: React.FC<{
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-full transition-all cursor-pointer active:scale-95 ${
+      className={`inline-flex items-center justify-center gap-1.5 rounded-full transition-all cursor-pointer active:scale-95 whitespace-nowrap shrink-0 ${
         fullWidth ? "w-full" : ""
       } ${sizeClasses[size]} ${variantClasses[variant] || variantClasses.outline} ${className}`}
     >
@@ -156,14 +162,14 @@ export const StatCard: React.FC<{
 
   return (
     <div className="premium-card flex-1 px-4 py-3.5 border border-slate-100 shadow-[0_4px_16px_rgba(2,132,199,0.06)] hover:shadow-md transition-all hover:scale-[1.01]">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--premium-muted)]">
+      <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--premium-muted)] whitespace-nowrap">
         {label}
       </p>
       <p className={`pt-1 text-[20px] font-black leading-none ${tones[tone]}`}>
         {value}
       </p>
       {hint && (
-        <p className="pt-1 text-[11px] font-medium text-[var(--premium-muted)]">
+        <p className="pt-1 text-[11px] font-medium text-[var(--premium-muted)] truncate">
           {hint}
         </p>
       )}

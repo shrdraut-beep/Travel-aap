@@ -292,11 +292,11 @@ export const HolidayBookingCoordinator: React.FC<HolidayBookingCoordinatorProps>
   return (
     <div ref={containerRef} className="fixed inset-0 z-50 bg-[#f8fafc] text-slate-800 overflow-y-auto font-['Outfit',sans-serif] flex flex-col antialiased">
       {/* 1. Curved Stitch Header (Matches zip3/code.html header) */}
-      <header className="sticky top-0 inset-x-0 z-40 bg-gradient-to-b from-[#e8f4fc] via-[#f4f9fd] to-white shadow-sm rounded-b-[24px] border-b border-[#bae6fd]/50 pt-safe transition-all">
+      <header className="sticky top-0 inset-x-0 z-40 bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] shadow-[0_4px_20px_rgba(2,132,199,0.08)] rounded-b-[24px] border-b border-sky-200/80 pt-safe transition-all backdrop-blur-xl">
         <div className="px-4 py-3 flex items-center justify-between gap-3">
           <button
             aria-label="Go back"
-            className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center active:scale-95 transition-all hover:bg-slate-200 shrink-0 cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 text-slate-700 border border-sky-200/80 shadow-xs flex items-center justify-center active:scale-95 transition-all hover:bg-slate-200 shrink-0 cursor-pointer"
             onClick={() => {
               if (step === "checkout") setStep("results");
               else onExit();

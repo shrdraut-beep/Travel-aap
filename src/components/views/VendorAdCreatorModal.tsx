@@ -162,32 +162,33 @@ export const VendorAdCreatorModal: React.FC<VendorAdCreatorModalProps> = ({
 
   return (
     <FullScreenPortal isOpen={isOpen} layer="modal" onBackdropClick={onClose} backdropClassName="bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 my-8 space-y-6">
+      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 my-8 space-y-6 overflow-hidden">
         
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        {/* Header - Curved Bus Booking Style with Ocean Brand Palette */}
+        <div className="-mx-6 sm:-mx-8 -mt-6 sm:-mt-8 px-6 sm:px-8 py-4 bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] border-b border-sky-200/80 rounded-b-[20px] shadow-[0_4px_20px_rgba(2,132,199,0.08)] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-              <Megaphone className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-sky-100/90 text-sky-800 border border-sky-200 flex items-center justify-center font-bold shadow-xs">
+              <Megaphone className="w-5 h-5 text-sky-700" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
-                <span>Advertise with RouTripO</span>
-                <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2 py-0.5 rounded-full uppercase">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-black tracking-tight text-[#0F172A]">Advertise with RouTripO</h2>
+                <span className="text-[10px] bg-sky-100/90 text-sky-800 border border-sky-300/60 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                   Vendor Portal
                 </span>
-              </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Promote your hotel, cab, or tour package directly to active travelers in your city
+              </div>
+              <p className="text-xs text-[#0369a1] font-semibold mt-0.5">
+                Promote your hotel, cab, or tour package directly to active travelers
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+            aria-label="Close"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/90 hover:bg-white border border-sky-200/80 text-sky-800 shadow-xs transition-transform active:scale-95 cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 

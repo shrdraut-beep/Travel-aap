@@ -1,3 +1,4 @@
+import { SubPageHeader } from '../../components/common/SubPageHeader';
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -98,35 +99,15 @@ export const MasterPassengerModal: React.FC<MasterPassengerModalProps> = ({
           </div>
         )}
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-50 via-white to-sky-50 px-5 py-4 border-b border-blue-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-              <Users className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                  Master Passenger List
-                </h3>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                  {passengers.length} Saved
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                1-Click Auto-Fill Co-Travellers across Flights &amp; Trains
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        {/* SubPageHeader matching Bus Booking Flow and Brand Header Ocean Colors */}
+        <SubPageHeader
+          title="Master Passenger List"
+          subtitle="1-Click Auto-Fill Co-Travellers across Flights & Trains"
+          badge={`${passengers.length} Saved`}
+          icon={Users}
+          onClose={onClose}
+          maxWidth="w-full"
+        />
 
         {/* Body */}
         <div className="overflow-y-auto p-5 space-y-4 flex-1">

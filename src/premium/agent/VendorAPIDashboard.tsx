@@ -343,7 +343,7 @@ export function VendorAPIDashboard({
           <div>
             <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
               <Code2 className="w-5 h-5 text-indigo-600" />
-              <span>🚀 RouTripO B2B API Documentation</span>
+              <span>RouTripO B2B API Documentation</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Base URL: <code className="text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.5 rounded">https://api.routripo.com/v1</code> · Format: JSON
@@ -519,7 +519,7 @@ export function VendorAPIDashboard({
           <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4">
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 text-orange-600 font-bold text-sm">
-                🚀
+                
               </span>
               <div>
                 <h4 className="text-sm font-bold text-slate-800">Postman मध्ये API टेस्टिंग कशी करावी?</h4>

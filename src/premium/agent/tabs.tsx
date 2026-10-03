@@ -71,6 +71,7 @@ import { TourPackageFlowCoordinator } from "../../components/vendor/flows/TourPa
 import { CabRegistrationFlowCoordinator } from "../../components/vendor/flows/CabRegistrationFlowCoordinator";
 import { BusRegistrationFlowCoordinator } from "../../components/vendor/flows/BusRegistrationFlowCoordinator";
 import { HotelOnboardingFlowCoordinator } from "../../components/vendor/flows/HotelOnboardingFlowCoordinator";
+import { HotelPropertyOperationsDesk } from "../../components/vendor/HotelPropertyOperationsDesk";
 import { PromotionalAdsRail } from "../../components/common/PromotionalAdsRail";
 import { ActiveOfferCouponsGrid } from "../../components/common/ActiveOfferCouponsGrid";
 import type { AgentActionId } from "./types";
@@ -158,12 +159,12 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
       name: "Grand Sun Luxury Beach Resort & Spa, Candolim",
       type: 'HOTEL' as const,
       categoryLabel: isMr ? "हॉटेल व रिसॉर्ट" : "Hotel & Resort",
-      badge: isMr ? "🏆 #1 सर्वाधिक मागणी असलेले हॉटेल" : "🏆 #1 Most Booked Hotel",
+      badge: isMr ? "#1 सर्वाधिक मागणी असलेले हॉटेल" : "#1 Most Booked Hotel",
       rating: 4.9,
       reviewsCount: 342,
       totalBookings: 618,
       totalGross: "₹84,20,000",
-      iconEmoji: "🏨",
+      iconEmoji: "",
       accentBg: "from-blue-600 to-indigo-700",
       years: [
         { fy: "FY 2025-26" as const, label: isMr ? "चालू आर्थिक वर्ष (YTD)" : "Current Financial Year (YTD)", bookings: 242, gross: "₹34,50,000", net: "₹31,05,000", occupancyOrLoad: "96%", peakSeasonShare: "46%", aov: "₹14,250" },
@@ -176,12 +177,12 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
       name: "Goa 4N/5D Monsoon Magic & Beach Tour",
       type: 'TOUR_OPERATOR' as const,
       categoryLabel: isMr ? "टूर पॅकेज" : "Tour Package",
-      badge: isMr ? "🔥 सर्वाधिक विक्री पॅकेज" : "🔥 Best-Selling Tour Package",
+      badge: isMr ? "सर्वाधिक विक्री पॅकेज" : "Best-Selling Tour Package",
       rating: 4.8,
       reviewsCount: 214,
       totalBookings: 310,
       totalGross: "₹48,90,000",
-      iconEmoji: "🌴",
+      iconEmoji: "",
       accentBg: "from-emerald-600 to-teal-700",
       years: [
         { fy: "FY 2025-26" as const, label: isMr ? "चालू आर्थिक वर्ष (YTD)" : "Current Financial Year (YTD)", bookings: 138, gross: "₹21,80,000", net: "₹19,62,000", occupancyOrLoad: "94%", peakSeasonShare: "48%", aov: "₹15,800" },
@@ -194,12 +195,12 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
       name: "Toyota Innova Crysta 2.4 VX (MH 12 AB 1234)",
       type: 'CAB_OPERATOR' as const,
       categoryLabel: isMr ? "कॅब व फ्लीट" : "Cab & Taxi Fleet",
-      badge: isMr ? "⚡ सर्वाधिक धावणारी आऊटस्टेशन कॅब" : "⚡ Most Hired Outstation Cab",
+      badge: isMr ? "सर्वाधिक धावणारी आऊटस्टेशन कॅब" : "Most Hired Outstation Cab",
       rating: 4.9,
       reviewsCount: 186,
       totalBookings: 248,
       totalGross: "₹29,60,000",
-      iconEmoji: "🚗",
+      iconEmoji: "",
       accentBg: "from-amber-600 to-orange-700",
       years: [
         { fy: "FY 2025-26" as const, label: isMr ? "चालू आर्थिक वर्ष (YTD)" : "Current Financial Year (YTD)", bookings: 108, gross: "₹13,20,000", net: "₹11,88,000", occupancyOrLoad: "92%", peakSeasonShare: "41%", aov: "₹12,220" },
@@ -212,12 +213,12 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
       name: "Scania Multi-Axle AC Sleeper (Pune ⇄ Goa)",
       type: 'BUS_OPERATOR' as const,
       categoryLabel: isMr ? "बस मार्ग" : "Bus Route",
-      badge: isMr ? "🚍 सर्वाधिक लोड असलेला बस मार्ग" : "🚍 Top Seat Load Route",
+      badge: isMr ? "सर्वाधिक लोड असलेला बस मार्ग" : "Top Seat Load Route",
       rating: 4.7,
       reviewsCount: 290,
       totalBookings: 380,
       totalGross: "₹36,40,000",
-      iconEmoji: "🚌",
+      iconEmoji: "",
       accentBg: "from-rose-600 to-red-700",
       years: [
         { fy: "FY 2025-26" as const, label: isMr ? "चालू आर्थिक वर्ष (YTD)" : "Current Financial Year (YTD)", bookings: 165, gross: "₹16,10,000", net: "₹14,49,000", occupancyOrLoad: "93%", peakSeasonShare: "45%", aov: "₹9,750" },
@@ -244,7 +245,7 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {showPackages && (
             <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-2.5">
-              <span className="text-xl">🌴</span>
+              <span className="text-sm font-black text-sky-800">TOURS</span>
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-black text-slate-800 leading-tight">8</p>
                 <p className="text-[10px] font-bold text-slate-500 truncate">
@@ -255,7 +256,7 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
           )}
           {showHotel && (
             <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-2.5">
-              <span className="text-xl">🏨</span>
+              <span className="text-sm font-black text-sky-800">HOTEL</span>
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-black text-slate-800 leading-tight">2 / 34</p>
                 <p className="text-[10px] font-bold text-slate-500 truncate">
@@ -266,7 +267,7 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
           )}
           {showCabs && (
             <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-2.5">
-              <span className="text-xl">🚗</span>
+              <span className="text-sm font-black text-sky-800">CABS</span>
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-black text-slate-800 leading-tight">6</p>
                 <p className="text-[10px] font-bold text-slate-500 truncate">
@@ -277,7 +278,7 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
           )}
           {showBuses && (
             <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-2.5">
-              <span className="text-xl">🚌</span>
+              <span className="text-sm font-black text-sky-800">BUSES</span>
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-black text-slate-800 leading-tight">4</p>
                 <p className="text-[10px] font-bold text-slate-500 truncate">
@@ -296,7 +297,7 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
             {isMr ? "मागील ३० दिवसांची कामगिरी" : "Last 30 Days Performance"}
           </h3>
           <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-            ● Live
+             Live
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -312,7 +313,7 @@ export const OverviewPanel: React.FC<PanelProps> = ({ onAction, onNavigateTab })
         <div className="flex items-center justify-between pb-2">
           <div>
             <h3 className="text-[13px] font-black text-slate-800 flex items-center gap-1.5">
-              <span>🌟</span> {isMr ? "सर्वाधिक चालणारे ॲसेट्स" : "Top Performing Inventory"}
+               {isMr ? "सर्वाधिक चालणारे ॲसेट्स" : "Top Performing Inventory"}
             </h3>
             <p className="text-[11px] font-medium text-slate-500">
               {isMr ? "३ वर्षांचे उत्पन्न व तपशील पाहण्यासाठी कोणत्याही कार्डवर टॅप करा" : "Tap any asset to inspect 3-Year Financials, Bookings & P&L"}
@@ -618,8 +619,8 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
       setOffers((prev) => prev.map((o) => ({ ...o, quoted: true })));
       setToast(
         isMr
-          ? `⚡ १-क्लिक मास्टर ऑटो-बिड सुरू! सर्व ${offers.length} लीड्सवर स्वयंचलित बोली लागू झाली (${globalMarginPercent}% मार्जिन तळ).`
-          : `⚡ Master Auto-Bid ENABLED! Applied algorithmic bids across all ${offers.length} leads (${globalMarginPercent}% reserve margin).`
+          ? `१-क्लिक मास्टर ऑटो-बिड सुरू! सर्व ${offers.length} लीड्सवर स्वयंचलित बोली लागू झाली (${globalMarginPercent}% मार्जिन तळ).`
+          : `Master Auto-Bid ENABLED! Applied algorithmic bids across all ${offers.length} leads (${globalMarginPercent}% reserve margin).`
       );
     } else {
       setAutoBids({});
@@ -712,8 +713,8 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
 
     setToast(
       isMr
-        ? `🤖 ऑटो-बिडिंग सुरू झाली! (किमान तळ: ₹${floor.toLocaleString("en-IN")}, कपात: ₹${modalStepDecrement})`
-        : `🤖 Smart Auto-Bidding activated! (Floor: ₹${floor.toLocaleString("en-IN")}, Step: ₹${modalStepDecrement})`
+        ? ` ऑटो-बिडिंग सुरू झाली! (किमान तळ: ₹${floor.toLocaleString("en-IN")}, कपात: ₹${modalStepDecrement})`
+        : ` Smart Auto-Bidding activated! (Floor: ₹${floor.toLocaleString("en-IN")}, Step: ₹${modalStepDecrement})`
     );
     setSelectedOfferForAutoBid(null);
     setTimeout(() => setToast(null), 4000);
@@ -740,7 +741,7 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-amber-400 to-indigo-500 flex items-center justify-center text-lg shadow-sm shrink-0">
-              ⚡
+              
             </div>
             <div className="min-w-0">
               <h4 className="text-[13px] font-black text-white flex items-center gap-1.5 leading-tight">
@@ -790,7 +791,7 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
             onClick={() => setShowGlobalSettingsModal(true)}
             className="text-[10px] font-bold text-sky-300 hover:text-white flex items-center gap-1 underline cursor-pointer"
           >
-            <span>⚙️ {isMr ? "नियम बदला" : "Edit Global Rules"}</span>
+            <span> {isMr ? "नियम बदला" : "Edit Global Rules"}</span>
           </button>
         </div>
       </div>
@@ -842,7 +843,7 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
                 <div className="px-2.5 py-1.5 rounded-lg bg-indigo-50/70 border border-indigo-200/80 text-[11px] flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0 flex-wrap">
                     <span className="font-bold text-indigo-950 flex items-center gap-1">
-                      <span>🤖</span> {isMr ? "थेट बोली:" : "Bid:"} <strong className="text-emerald-700">₹{autoBid.currentCalculatedBid.toLocaleString("en-IN")}</strong>
+                      <span></span> {isMr ? "थेट बोली:" : "Bid:"} <strong className="text-emerald-700">₹{autoBid.currentCalculatedBid.toLocaleString("en-IN")}</strong>
                     </span>
                     <span className="text-slate-300">·</span>
                     <span className="text-slate-600 text-[10px]">
@@ -902,7 +903,7 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
       <ModalSheet
         isOpen={!!selectedOfferForAutoBid}
         onClose={() => setSelectedOfferForAutoBid(null)}
-        title={isMr ? "🤖 स्मार्ट ऑटो-बिडिंग अल्गोरिदम (Auto-Bid Engine)" : "🤖 Smart Algorithmic Auto-Bid Engine"}
+        title={isMr ? " स्मार्ट ऑटो-बिडिंग अल्गोरिदम (Auto-Bid Engine)" : " Smart Algorithmic Auto-Bid Engine"}
         subtitle={isMr ? "स्पर्धकांना हरवण्यासाठी पायरीनिहाय कपात व तोटा टाळण्यासाठी तळ दर संरक्षण" : "Step-by-step competitive outbidding with reserve floor price protection"}
       >
         {selectedOfferForAutoBid && (
@@ -1015,7 +1016,7 @@ export const OffersPanel: React.FC<PanelProps> = ({ onAction }) => {
       <ModalSheet
         isOpen={showGlobalSettingsModal}
         onClose={() => setShowGlobalSettingsModal(false)}
-        title={isMr ? "⚡ मास्टर ऑटो-बिड जागतिक नियम (Global Auto-Bid Rules)" : "⚡ Master Auto-Bid Engine Settings"}
+        title={isMr ? "मास्टर ऑटो-बिड जागतिक नियम (Global Auto-Bid Rules)" : "Master Auto-Bid Engine Settings"}
         subtitle={isMr ? "सर्व थेट लीड्ससाठी किमान नफा मार्जिन व स्पर्धात्मक पायरी कपात" : "Global floor margin & undercut step applied automatically to all live leads"}
       >
         <div className="space-y-4 pb-2">
@@ -1153,6 +1154,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
   const [newBlackoutDate, setNewBlackoutDate] = useState<string>("");
   const [showPackageFlow, setShowPackageFlow] = useState<boolean>(false);
   const [showHotelFlow, setShowHotelFlow] = useState<boolean>(false);
+  const [showHotelOpsDesk, setShowHotelOpsDesk] = useState<boolean>(false);
   const [showCabFlow, setShowCabFlow] = useState<boolean>(false);
   const [showBusFlow, setShowBusFlow] = useState<boolean>(false);
 
@@ -1394,7 +1396,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
             type="button"
             onClick={() => {
               setPricingMode("peak");
-              setToast(isMr ? `🚀 पिक सीझन दर (+${peakSurgePercent}%) सर्व सक्रिय इन्व्हेंटरीवर लागू केला!` : `🚀 Peak season surge (+${peakSurgePercent}%) applied across all listings!`);
+              setToast(isMr ? ` पिक सीझन दर (+${peakSurgePercent}%) सर्व सक्रिय इन्व्हेंटरीवर लागू केला!` : ` Peak season surge (+${peakSurgePercent}%) applied across all listings!`);
               setTimeout(() => setToast(null), 3500);
             }}
             className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
@@ -1403,7 +1405,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 : "bg-white/10 text-white border-white/10 hover:bg-white/15"
             }`}
           >
-            <span className="text-xs block">{isMr ? "🔥 पिक सीझन" : "🔥 Peak Season"}</span>
+            <span className="text-xs block">{isMr ? "पिक सीझन" : "Peak Season"}</span>
             <span className="text-[11px] font-black leading-none block pt-0.5">+{peakSurgePercent}% {isMr ? "वाढ" : "Surge"}</span>
           </button>
 
@@ -1411,7 +1413,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
             type="button"
             onClick={() => {
               setPricingMode("monsoon");
-              setToast(isMr ? `🌧️ मान्सून सवलत (-${monsoonDiscountPercent}%) लागू केली!` : `🌧️ Monsoon / off-season discount (-${monsoonDiscountPercent}%) applied!`);
+              setToast(isMr ? ` मान्सून सवलत (-${monsoonDiscountPercent}%) लागू केली!` : ` Monsoon / off-season discount (-${monsoonDiscountPercent}%) applied!`);
               setTimeout(() => setToast(null), 3500);
             }}
             className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
@@ -1420,7 +1422,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 : "bg-white/10 text-white border-white/10 hover:bg-white/15"
             }`}
           >
-            <span className="text-xs block">{isMr ? "🌧️ मान्सून/ऑफ" : "🌧️ Monsoon/Off"}</span>
+            <span className="text-xs block">{isMr ? " मान्सून/ऑफ" : " Monsoon/Off"}</span>
             <span className="text-[11px] font-black leading-none block pt-0.5">-{monsoonDiscountPercent}% {isMr ? "सूट" : "Discount"}</span>
           </button>
 
@@ -1428,7 +1430,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
             type="button"
             onClick={() => {
               setPricingMode("weekend");
-              setToast(isMr ? `🏖️ वीकेंड मल्टीप्लायर (+${weekendSurgePercent}%) लागू केला!` : `🏖️ Weekend multiplier (+${weekendSurgePercent}%) applied!`);
+              setToast(isMr ? ` वीकेंड मल्टीप्लायर (+${weekendSurgePercent}%) लागू केला!` : ` Weekend multiplier (+${weekendSurgePercent}%) applied!`);
               setTimeout(() => setToast(null), 3500);
             }}
             className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
@@ -1437,7 +1439,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 : "bg-white/10 text-white border-white/10 hover:bg-white/15"
             }`}
           >
-            <span className="text-xs block">{isMr ? "🏖️ वीकेंड" : "🏖️ Weekend"}</span>
+            <span className="text-xs block">{isMr ? " वीकेंड" : " Weekend"}</span>
             <span className="text-[11px] font-black leading-none block pt-0.5">+{weekendSurgePercent}% {isMr ? "वाढ" : "Surge"}</span>
           </button>
 
@@ -1454,7 +1456,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 : "bg-white/10 text-white border-white/10 hover:bg-white/15"
             }`}
           >
-            <span className="text-xs block">{isMr ? "⚖️ सामान्य बेस" : "⚖️ Standard Base"}</span>
+            <span className="text-xs block">{isMr ? " सामान्य बेस" : " Standard Base"}</span>
             <span className="text-[11px] font-black leading-none block pt-0.5">1.0x {isMr ? "मूळ दर" : "Standard"}</span>
           </button>
         </div>
@@ -1798,13 +1800,53 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                   : "Dedicated multi-step onboarding wizard: Basic details, room inventory, amenities, reverse bidding, and cancellation policy."}
               </p>
             </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowHotelOpsDesk(true)}
+                className="px-4 py-2.5 rounded-xl bg-emerald-800/90 hover:bg-emerald-900 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-1.5 cursor-pointer border border-emerald-400/40"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-300" />
+                <span>Live Floor Ops & PMS</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowHotelFlow(true)}
+                className="px-4 py-2.5 rounded-xl bg-white text-teal-800 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>{isMr ? "हॉटेल नोंदणी सुरू करा" : "Register Hotel Property"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Stitch Hotel PMS Ops Live Banner Card */}
+          <div className="p-4 rounded-2xl bg-white border border-sky-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-sky-100 text-sky-800 flex items-center justify-center font-bold shrink-0">
+                <Hotel className="w-5 h-5 text-sky-700" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs sm:text-sm font-black text-slate-900">
+                    Front Desk & Housekeeping Ops Desk
+                  </h4>
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                    Live Shift B
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                  Supervisor: Sunil Verma · Suite #302 Priority Turnover · Guest Folio & Incidentals
+                </p>
+              </div>
+            </div>
             <button
               type="button"
-              onClick={() => setShowHotelFlow(true)}
-              className="px-5 py-2.5 rounded-xl bg-white text-teal-800 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-md transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+              onClick={() => setShowHotelOpsDesk(true)}
+              className="px-4 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold text-xs transition-colors shrink-0 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>{isMr ? "हॉटेल नोंदणी सुरू करा" : "Register Hotel Property"}</span>
+              <span>Open Ops Console</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -1838,6 +1880,15 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                 setToast(`Property "${listing.propertyName}" successfully registered with Routripo!`);
                 setTimeout(() => setToast(null), 6000);
               }}
+            />
+          )}
+
+          {/* Stitch Hotel Front Desk & Housekeeping Operations Console */}
+          {showHotelOpsDesk && (
+            <HotelPropertyOperationsDesk
+              isOpen={showHotelOpsDesk}
+              onClose={() => setShowHotelOpsDesk(false)}
+              hotelName={profile?.agencyName || "Blue Horizon Luxury Beach Resort"}
             />
           )}
         </div>
@@ -2040,7 +2091,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
       <ModalSheet
         isOpen={showBlackoutModal}
         onClose={() => setShowBlackoutModal(false)}
-        title={isMr ? "📅 ब्लॅकआऊट तारखा व्यवस्थापक (Blackout Dates Manager)" : "📅 Blackout Dates & Sold-Out Manager"}
+        title={isMr ? " ब्लॅकआऊट तारखा व्यवस्थापक (Blackout Dates Manager)" : " Blackout Dates & Sold-Out Manager"}
         subtitle={isMr ? "ज्या दिवशी इन्व्हेंटरी पूर्ण बुक आहे किंवा उपलब्ध नाही त्या तारखा राखून ठेवा" : "Reserve blackout dates when your rooms, vehicles or seats are fully booked"}
       >
         <div className="space-y-4 pb-2">
@@ -2086,7 +2137,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
                     }}
                     className="text-rose-600 hover:text-rose-800 font-bold text-xs cursor-pointer px-2 py-1 rounded-lg hover:bg-rose-50"
                   >
-                    {isMr ? "काढून टाका ✕" : "Remove ✕"}
+                    {isMr ? "काढून टाका " : "Remove "}
                   </button>
                 </div>
               ))}
@@ -2405,8 +2456,8 @@ export const EarningsPanel: React.FC<PanelProps> = ({ onAction }) => {
       ]);
       setToast(
         isMr
-          ? "✅ अरायव्हल OTP पडताळला! ₹13,800 थेट तुमच्या बँक खात्यात (HDFC ****4821) IMPS द्वारे जमा झाले. प्लॅटफॉर्म शिल्लक: ₹0."
-          : "✅ Arrival OTP Verified! ₹13,800 auto-transferred directly to your verified bank account (HDFC ****4821) via Escrow. Platform custodial balance: ₹0."
+          ? " अरायव्हल OTP पडताळला! ₹13,800 थेट तुमच्या बँक खात्यात (HDFC ****4821) IMPS द्वारे जमा झाले. प्लॅटफॉर्म शिल्लक: ₹0."
+          : " Arrival OTP Verified! ₹13,800 auto-transferred directly to your verified bank account (HDFC ****4821) via Escrow. Platform custodial balance: ₹0."
       );
       setCheckInOtp("");
     } catch {
@@ -2417,8 +2468,8 @@ export const EarningsPanel: React.FC<PanelProps> = ({ onAction }) => {
       ]);
       setToast(
         isMr
-          ? "✅ अरायव्हल OTP पडताळला! ₹13,800 थेट तुमच्या बँक खात्यात (HDFC ****4821) जमा झाले. प्लॅटफॉर्म शिल्लक: ₹0."
-          : "✅ Arrival OTP Verified! ₹13,800 auto-transferred directly to your verified bank account (HDFC ****4821). Platform custodial balance: ₹0."
+          ? " अरायव्हल OTP पडताळला! ₹13,800 थेट तुमच्या बँक खात्यात (HDFC ****4821) जमा झाले. प्लॅटफॉर्म शिल्लक: ₹0."
+          : " Arrival OTP Verified! ₹13,800 auto-transferred directly to your verified bank account (HDFC ****4821). Platform custodial balance: ₹0."
       );
       setCheckInOtp("");
     } finally {
@@ -2504,7 +2555,7 @@ export const EarningsPanel: React.FC<PanelProps> = ({ onAction }) => {
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
               <div>
                 <h4 className="text-[13px] font-black text-slate-900 flex items-center gap-1.5">
-                  <span>📊</span> {isMr ? `${selectedFY} नफा-तोटा व कर विवरण (P&L Tax Breakdown)` : `${selectedFY} P&L Statement & Statutory Tax Summary`}
+                  <span></span> {isMr ? `${selectedFY} नफा-तोटा व कर विवरण (P&L Tax Breakdown)` : `${selectedFY} P&L Statement & Statutory Tax Summary`}
                 </h4>
                 <p className="text-[10px] text-slate-500 font-medium">
                   {fyData.label} · {isMr ? `एकूण ${fyData.bookingsCount} यशस्वी बुकिंग्ज` : `${fyData.bookingsCount} total completed bookings`}
@@ -2562,7 +2613,7 @@ export const EarningsPanel: React.FC<PanelProps> = ({ onAction }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
-              🏦
+              
             </div>
             <div>
               <h4 className="text-[13px] font-black text-white leading-tight">
@@ -2607,7 +2658,7 @@ export const EarningsPanel: React.FC<PanelProps> = ({ onAction }) => {
             </span>
           </div>
           <span className="text-[10px] font-black text-emerald-300 bg-emerald-900/50 px-2 py-0.5 rounded-md border border-emerald-400/30 shrink-0">
-            Verified ✓
+            Verified 
           </span>
         </div>
       </div>

@@ -59,11 +59,11 @@ export const VendorOffersView: React.FC<VendorOffersViewProps> = ({
 
   // Live Activity Urgency Indicators (Requirement 10)
   const activityMessages = [
-    '⚡ 2 verified vendors are viewing your trip requirement right now...',
-    '🏷️ Verified Partner #842 is adjusting their quote downward...',
-    '🔥 Verified Partner #311 just dropped their quote by ₹1,200!',
-    '👀 4 regional fleet partners are competing to win your trip...',
-    '✨ A partner just added complimentary airport pickup to their bid!'
+    'Live: 2 verified vendors are viewing your trip requirement right now...',
+    'Update: Verified Partner #842 is adjusting their quote downward...',
+    'Price Drop: Verified Partner #311 just dropped their quote by ₹1,200!',
+    'Active: 4 regional fleet partners are competing to win your trip...',
+    'Perk: A partner just added complimentary airport pickup to their bid!'
   ];
   const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
 
@@ -297,11 +297,11 @@ export const VendorOffersView: React.FC<VendorOffersViewProps> = ({
                         <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0" />
                       </div>
                       <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                        <span className="text-amber-500 font-bold">★ {offer.rating}</span>
+                        <span className="text-amber-500 font-bold">{offer.rating} / 5</span>
                         <span>({offer.reviewCount} verified trips)</span>
                         {!trip.offlineUnlocked && (
                           <span className="text-[10px] text-slate-400 font-medium">
-                            · 🔒 Masked
+                            · Masked
                           </span>
                         )}
                       </p>
@@ -376,7 +376,7 @@ export const VendorOffersView: React.FC<VendorOffersViewProps> = ({
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent flex flex-col justify-between p-3 text-white">
                       <div className="flex items-center justify-between">
                         <span className="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold">
-                          📸 {photoIdx + 1} of {offer.photos.length} Photos
+                          Photo {photoIdx + 1} of {offer.photos.length} Photos
                         </span>
                         <span className="bg-pink-600/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black">
                           Verified Fleet
@@ -446,8 +446,8 @@ export const VendorOffersView: React.FC<VendorOffersViewProps> = ({
                         {offer.realAgencyName}
                       </p>
                       <p className="text-[12px] text-slate-600 flex items-center gap-2">
-                        <span>📞 {offer.realPhone}</span>
-                        <span>✉️ {offer.realEmail}</span>
+                        <span>Phone: {offer.realPhone}</span>
+                        <span>Email: {offer.realEmail}</span>
                       </p>
                     </div>
                   )}

@@ -620,4 +620,234 @@ app.post("/api/admin/security/rotate-keys", requireAdmin, async (req, res) => {
     }
   });
 
+
+  // =========================================================================
+  // STITCH MASTER ADMIN PORTAL: COUPONS, KILLSWITCH, SOC THREATS & CLAIMS
+  // =========================================================================
+
+  let adminCoupons = [
+    {
+      id: "coup-1",
+      code: "DIWALI2026",
+      title: "Festive Grand Dhamaka",
+      discountType: "percentage",
+      discountValue: 20,
+      maxDiscount: 1500,
+      minSpend: 4000,
+      verticals: ["Stays", "Flights", "Buses", "Packages"],
+      status: "ACTIVE",
+      totalBudget: 400000,
+      spentBudget: 284000,
+      redemptions: 1420,
+      redemptionCap: 2000,
+      expiryDate: "2026-11-15"
+    },
+    {
+      id: "coup-2",
+      code: "FLYHIGH15",
+      title: "Domestic Flights Saver",
+      discountType: "percentage",
+      discountValue: 15,
+      maxDiscount: 2000,
+      minSpend: 3500,
+      verticals: ["Flights"],
+      status: "ACTIVE",
+      totalBudget: 300000,
+      spentBudget: 178000,
+      redemptions: 890,
+      redemptionCap: 1500,
+      expiryDate: "2026-10-31"
+    },
+    {
+      id: "coup-3",
+      code: "MONSOONSTAYS",
+      title: "Villa & Homestay Monsoon Getaway",
+      discountType: "flat_amount",
+      discountValue: 800,
+      maxDiscount: 800,
+      minSpend: 5000,
+      verticals: ["Stays"],
+      status: "ACTIVE",
+      totalBudget: 250000,
+      spentBudget: 112000,
+      redemptions: 412,
+      redemptionCap: 1000,
+      expiryDate: "2026-10-25"
+    },
+    {
+      id: "coup-4",
+      code: "BUSPASS50",
+      title: "Intercity Sleeper Instant Rebate",
+      discountType: "flat_amount",
+      discountValue: 50,
+      maxDiscount: 50,
+      minSpend: 500,
+      verticals: ["Buses"],
+      status: "PAUSED",
+      totalBudget: 150000,
+      spentBudget: 107500,
+      redemptions: 2150,
+      redemptionCap: 3000,
+      expiryDate: "2026-10-20"
+    }
+  ];
+
+  let adminKillswitchState = {
+    paymentFreeze: false,
+    agentSwarmFreeze: false,
+    bookingLockdown: false,
+    lastUpdated: new Date().toISOString(),
+    updatedBy: "super_admin"
+  };
+
+  let adminThreats = [
+    {
+      id: "th-101",
+      type: "BRUTE_FORCE",
+      ip: "185.220.101.45",
+      country: "Netherlands (Tor Node)",
+      endpoint: "/api/vendor/auth",
+      attempts: 420,
+      severity: "CRITICAL",
+      status: "QUARANTINED",
+      detectedAt: "3 mins ago"
+    },
+    {
+      id: "th-102",
+      type: "LOCATION_SPOOF",
+      ip: "103.211.54.12",
+      country: "India (Pune)",
+      endpoint: "/api/driver/checkin",
+      attempts: 14,
+      severity: "HIGH",
+      status: "FLAGGED",
+      detectedAt: "18 mins ago"
+    },
+    {
+      id: "th-103",
+      type: "PAYLOAD_TAMPER",
+      ip: "45.134.140.20",
+      country: "Russia (Proxy)",
+      endpoint: "/api/booking/calculate-fare",
+      attempts: 86,
+      severity: "MEDIUM",
+      status: "BLOCKED",
+      detectedAt: "42 mins ago"
+    }
+  ];
+
+  // --- GET /api/admin/coupons ---
+  app.get("/api/admin/coupons", requireAdmin, (req, res) => {
+    res.json({ success: true, coupons: adminCoupons });
+  });
+
+  // --- POST /api/admin/coupons ---
+  app.post("/api/admin/coupons", requireAdmin, (req, res) => {
+    try {
+      const { code, title, discountType, discountValue, maxDiscount, minSpend, verticals, totalBudget, redemptionCap, expiryDate } = req.body || {};
+      if (!code || !discountValue) {
+        return res.status(400).json({ error: "Coupon code and discount value are required" });
+      }
+      const newCoupon = {
+        id: `coup-${Date.now()}`,
+        code: String(code).trim().toUpperCase(),
+        title: title || `${String(code).toUpperCase()} Special Offer`,
+        discountType: discountType || "percentage",
+        discountValue: Number(discountValue),
+        maxDiscount: maxDiscount ? Number(maxDiscount) : Number(discountValue),
+        minSpend: minSpend ? Number(minSpend) : 0,
+        verticals: Array.isArray(verticals) && verticals.length > 0 ? verticals : ["Stays", "Flights", "Buses", "Packages"],
+        status: "ACTIVE",
+        totalBudget: totalBudget ? Number(totalBudget) : 100000,
+        spentBudget: 0,
+        redemptions: 0,
+        redemptionCap: redemptionCap ? Number(redemptionCap) : 1000,
+        expiryDate: expiryDate || "2026-12-31"
+      };
+      adminCoupons.unshift(newCoupon);
+      secureLogger.audit("COUPON_CREATED", { code: newCoupon.code, admin: (req as any).user?.uid });
+      res.json({ success: true, coupon: newCoupon });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to create coupon", details: err.message });
+    }
+  });
+
+  // --- PATCH /api/admin/coupons/:id/toggle ---
+  app.patch("/api/admin/coupons/:id/toggle", requireAdmin, (req, res) => {
+    const { id } = req.params;
+    const item = adminCoupons.find((c) => c.id === id || c.code === id.toUpperCase());
+    if (!item) {
+      return res.status(404).json({ error: "Coupon not found" });
+    }
+    item.status = item.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
+    secureLogger.audit("COUPON_TOGGLED", { id, status: item.status, admin: (req as any).user?.uid });
+    res.json({ success: true, coupon: item, message: `Coupon is now ${item.status}` });
+  });
+
+  // --- PATCH /api/admin/coupons/:id/budget ---
+  app.patch("/api/admin/coupons/:id/budget", requireAdmin, (req, res) => {
+    const { id } = req.params;
+    const { totalBudget } = req.body || {};
+    const item = adminCoupons.find((c) => c.id === id || c.code === id.toUpperCase());
+    if (!item) {
+      return res.status(404).json({ error: "Coupon not found" });
+    }
+    if (totalBudget !== undefined) {
+      item.totalBudget = Number(totalBudget);
+    }
+    secureLogger.audit("COUPON_BUDGET_UPDATED", { id, totalBudget: item.totalBudget, admin: (req as any).user?.uid });
+    res.json({ success: true, coupon: item });
+  });
+
+  // --- GET /api/admin/security/killswitch ---
+  app.get("/api/admin/security/killswitch", requireAdmin, (req, res) => {
+    res.json({ success: true, ...adminKillswitchState });
+  });
+
+  // --- POST /api/admin/security/killswitch ---
+  app.post("/api/admin/security/killswitch", requireAdmin, (req, res) => {
+    const { paymentFreeze, agentSwarmFreeze, bookingLockdown } = req.body || {};
+    if (paymentFreeze !== undefined) adminKillswitchState.paymentFreeze = !!paymentFreeze;
+    if (agentSwarmFreeze !== undefined) adminKillswitchState.agentSwarmFreeze = !!agentSwarmFreeze;
+    if (bookingLockdown !== undefined) adminKillswitchState.bookingLockdown = !!bookingLockdown;
+    adminKillswitchState.lastUpdated = new Date().toISOString();
+    adminKillswitchState.updatedBy = (req as any).user?.uid || "admin";
+    secureLogger.audit("SECURITY_KILLSWITCH_TRIGGERED", { ...adminKillswitchState });
+    res.json({ success: true, message: "Autonomous emergency killswitch state updated", ...adminKillswitchState });
+  });
+
+  // --- GET /api/admin/security/threats ---
+  app.get("/api/admin/security/threats", requireAdmin, (req, res) => {
+    res.json({ success: true, threats: adminThreats });
+  });
+
+  // --- POST /api/admin/security/threats/block ---
+  app.post("/api/admin/security/threats/block", requireAdmin, (req, res) => {
+    const { ip, subnet, threatId } = req.body || {};
+    if (threatId) {
+      const th = adminThreats.find((t) => t.id === threatId);
+      if (th) th.status = "BLOCKED";
+    }
+    secureLogger.audit("SECURITY_IP_BLOCKED", { ip, subnet, threatId, admin: (req as any).user?.uid });
+    res.json({ success: true, message: `Subnet / IP ${ip || subnet} quarantined and propagated to WAF edge.` });
+  });
+
+  // --- POST /api/admin/tickets/dispute-refund ---
+  app.post("/api/admin/tickets/dispute-refund", requireAdmin, async (req, res) => {
+    try {
+      const { claimId, ticketId, refundAmount, vendorId } = req.body || {};
+      secureLogger.audit("DISPUTE_FASTSETTLE_REFUND", { claimId, ticketId, refundAmount, vendorId, admin: (req as any).user?.uid });
+      res.json({
+        success: true,
+        claimId,
+        refundAmount: refundAmount || 4350,
+        status: "SETTLED_VIA_UPI",
+        clawbackStatus: "ESCROW_CLAWBACK_RECORDED",
+        message: `Instant FastSettle refund of ₹${(refundAmount || 4350).toLocaleString('en-IN')} approved and disbursed via UPI. Escrow clawback deducted from partner ledger.`
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to process dispute refund", details: err.message });
+    }
+  });
+
 }

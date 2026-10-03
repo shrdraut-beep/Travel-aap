@@ -52,19 +52,19 @@ export const ModalSheet: React.FC<ModalSheetProps> = ({
               <div className="w-12 h-1.5 rounded-full bg-slate-300" />
             </div>
 
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5 bg-slate-50/90 backdrop-blur-sm shrink-0">
+            {/* Modal Header - Curved Bus Booking Style with Ocean Brand Palette */}
+            <div className="flex items-center justify-between border-b border-sky-200/80 rounded-b-[20px] shadow-[0_4px_20px_rgba(2,132,199,0.08)] px-5 py-3.5 bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] backdrop-blur-md shrink-0">
               <div className="min-w-0 flex-1 pr-3">
-                <h3 className="text-[15px] font-bold tracking-tight text-slate-900 truncate">{title}</h3>
-                {subtitle && <p className="text-[11px] font-medium text-slate-500 line-clamp-1">{subtitle}</p>}
+                <h3 className="text-[15px] font-black tracking-tight text-[#0F172A] truncate">{title}</h3>
+                {subtitle && <p className="text-[11px] font-semibold text-[#0369a1] line-clamp-1">{subtitle}</p>}
               </div>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-700 transition-colors cursor-pointer"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-rose-600 border border-sky-200/80 shadow-xs transition-all active:scale-95 cursor-pointer"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 stroke-[2.5]" />
               </button>
             </div>
 

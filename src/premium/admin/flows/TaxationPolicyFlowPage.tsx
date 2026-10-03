@@ -269,7 +269,7 @@ export const TaxationPolicyFlowPage: React.FC<TaxationPolicyFlowPageProps> = ({
             </p>
           </div>
           <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            Enforced ✓
+            Enforced
           </span>
         </div>
       </main>

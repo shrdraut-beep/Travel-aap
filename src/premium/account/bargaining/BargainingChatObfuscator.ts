@@ -175,7 +175,7 @@ export function renderObfuscatedMessageContent(content: string): React.ReactNode
             className:
               'inline-flex items-center gap-1 px-2 py-0.5 mx-1 rounded-md text-[11px] font-black bg-rose-100 text-rose-700 border border-rose-300 select-none shadow-xs'
           },
-          React.createElement('span', { className: 'text-xs' }, '🚫'),
+          React.createElement('span', { className: 'text-xs' }, '[Blocked]'),
           ' [CONTACT INFO BLOCKED]'
         )
       );

@@ -167,7 +167,7 @@ export const FullScreenBargainChat: React.FC<FullScreenBargainChatProps> = ({
           {
             id: Date.now(),
             sender: 'vendor',
-            text: `🔓 Direct Contact Unlocked! You can call us directly at ${bid.directPhone} or continue messaging here. Standard keyboard enabled.`,
+            text: `Direct Contact Unlocked! You can call us directly at ${bid.directPhone} or continue messaging here. Standard keyboard enabled.`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
@@ -209,7 +209,7 @@ export const FullScreenBargainChat: React.FC<FullScreenBargainChatProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-medium truncate max-w-[200px] sm:max-w-none">
-              Legal Entity: {bid.legalName || bid.realName} · {bid.rating}★
+              Legal Entity: {bid.legalName || bid.realName} · {bid.rating} Stars
             </p>
           </div>
         </div>
@@ -305,7 +305,7 @@ export const FullScreenBargainChat: React.FC<FullScreenBargainChatProps> = ({
                   </div>
                   {msg.offer.perks && (
                     <p className="text-[11px] text-pink-700 font-medium mt-0.5">
-                      ✓ {msg.offer.perks}
+                      {msg.offer.perks}
                     </p>
                   )}
                   <button
@@ -460,14 +460,14 @@ export const FullScreenBargainChat: React.FC<FullScreenBargainChatProps> = ({
 
             {/* Numeric Keypad Grid */}
             <div className="grid grid-cols-3 gap-2">
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map((key) => (
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', 'DEL'].map((key) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => {
                     if (key === 'C') {
                       setDialerAmount('');
-                    } else if (key === '⌫') {
+                    } else if (key === 'DEL') {
                       setDialerAmount((prev) => prev.slice(0, -1));
                     } else {
                       setDialerAmount((prev) => (prev.length < 7 ? prev + key : prev));
@@ -476,7 +476,7 @@ export const FullScreenBargainChat: React.FC<FullScreenBargainChatProps> = ({
                   className={`py-3 rounded-2xl font-black text-base transition-all cursor-pointer ${
                     key === 'C'
                       ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
-                      : key === '⌫'
+                      : key === 'DEL'
                       ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       : 'bg-slate-50 hover:bg-slate-100 text-slate-800'
                   }`}

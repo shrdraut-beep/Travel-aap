@@ -274,7 +274,7 @@ export const CabRegistrationFlowCoordinator: React.FC<CabRegistrationFlowCoordin
                   onClick={() => applyPreset(p)}
                   className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-amber-900 border border-amber-200 hover:bg-amber-100 active:scale-95 transition"
                 >
-                  🚕 {p.label}
+                  {p.label}
                 </button>
               ))}
             </div>
@@ -315,7 +315,7 @@ export const CabRegistrationFlowCoordinator: React.FC<CabRegistrationFlowCoordin
                     className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition"
                   >
                     {rcChecking ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4 text-emerald-400" />}
-                    <span>{rcVerified ? 'Verified ✓' : 'Verify RC'}</span>
+                    <span>{rcVerified ? 'Verified' : 'Verify RC'}</span>
                   </button>
                 </div>
                 {rcVerified && (
@@ -529,7 +529,7 @@ export const CabRegistrationFlowCoordinator: React.FC<CabRegistrationFlowCoordin
                   </div>
                 </div>
                 <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  Ready to Deploy ✓
+                  Ready to Deploy
                 </span>
               </div>
 
@@ -594,7 +594,7 @@ export const CabRegistrationFlowCoordinator: React.FC<CabRegistrationFlowCoordin
                 className="px-6 sm:px-7 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>{loading ? (isMr ? 'नोंदणी होत आहे...' : 'Registering...') : (isMr ? '🚀 कॅब फ्लीटमध्ये जोडा' : '🚀 Register Cab')}</span>
+                <span>{loading ? (isMr ? 'नोंदणी होत आहे...' : 'Registering...') : (isMr ? 'कॅब फ्लीटमध्ये जोडा' : 'Register Cab')}</span>
               </button>
             )}
           </div>

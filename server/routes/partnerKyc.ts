@@ -1389,4 +1389,239 @@ router.get('/buses', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// --- 11. Hotel PMS, Floor Ops, Housekeeping & Guest Folio Incidentals (Stitch Partner Desk) ---
+const PMS_ROOMS_STORE_FILE = path.join(process.cwd(), 'data', 'pms_rooms_store.json');
+const PMS_FOLIOS_STORE_FILE = path.join(process.cwd(), 'data', 'pms_folios_store.json');
+
+const INITIAL_PMS_ROOMS = [
+  {
+    roomId: "302",
+    roomNumber: "Suite #302",
+    floor: 3,
+    roomType: "Deluxe Sea-Facing Suite",
+    status: "DIRTY",
+    attendant: "Radha Mandloi",
+    departedGuest: "Rajesh & Neha Sharma (04:10 PM)",
+    nextGuestWindow: "18 hrs window",
+    vipNote: "Stock sparkling water & sea-breeze welcome kit.",
+    etaMinutes: 45,
+    checklist: ["Full Linen Replacement", "Minibar Restock", "Deep Sanitize"],
+    lastUpdated: new Date().toISOString()
+  },
+  {
+    roomId: "204",
+    roomNumber: "Room 204",
+    floor: 2,
+    roomType: "Deluxe King Room",
+    status: "IN_CLEANING",
+    attendant: "Vikram Sen",
+    timeElapsed: "00:22",
+    notes: "Stayover Clean: Towels refreshed, dusting bed",
+    lastUpdated: new Date().toISOString()
+  },
+  {
+    roomId: "105",
+    roomNumber: "Room 105",
+    floor: 1,
+    roomType: "Standard Garden Villa",
+    status: "AWAITING_INSPECTION",
+    attendant: "Priya K.",
+    completedTime: "04:02 PM",
+    notes: "14 Checklist items completed. Keycards refreshed & welcome note placed.",
+    lastUpdated: new Date().toISOString()
+  },
+  {
+    roomId: "301",
+    roomNumber: "Room 301",
+    floor: 3,
+    roomType: "Presidential Suite",
+    status: "CLEAN_READY",
+    inspector: "Sunil Verma (03:30 PM)",
+    telemetry: { acTemp: "22°C", safeStatus: "Zeroed", hubStatus: "Online" },
+    lastUpdated: new Date().toISOString()
+  },
+  {
+    roomId: "208",
+    roomNumber: "Room 208",
+    floor: 2,
+    roomType: "Deluxe Twin Room",
+    status: "OCCUPIED_DND",
+    privacyLight: true,
+    notes: "Privacy light active. Service scheduled at 06:00 PM. Extra Egyptian bath sheets & decaf pods requested.",
+    lastUpdated: new Date().toISOString()
+  }
+];
+
+const INITIAL_PMS_FOLIO_302 = {
+  roomId: "302",
+  guestName: "Rajesh & Neha Sharma",
+  bookingId: "RT-89204",
+  pax: "2 Guests (Couple)",
+  keycard: "A-302 (Active)",
+  checkOut: "26 Oct, 11:00 AM (2 Days)",
+  phone: "+91 98765 43210",
+  prePaidEscrow: 10752,
+  incidentalsDue: 3198,
+  totalCharges: 13950,
+  prePaidItems: [
+    { title: "Deluxe Sea-Facing Suite (2 Nights)", description: "Rate 4,000 / night · 24 Oct - 26 Oct", amount: 8000, status: "PRE_PAID" },
+    { title: "Airport Transfer (Sedan Pickup)", description: "Goa Dabolim Airport · Driver assigned", amount: 1200, status: "PRE_PAID" },
+    { title: "Stay Taxes & GST (12%)", description: "Government Accommodation Surcharges", amount: 1552, status: "PRE_PAID" }
+  ],
+  incidentalsItems: [
+    { id: "inc-1", title: "Bayview Bistro & Cafe", description: "Today, 01:15 PM · Grilled Pomfret, Garlic Naan, 2x Fresh Lime Soda", ref: "Bill #B-4091", amount: 1650, category: "DINING" },
+    { id: "inc-2", title: "Minibar Consumption", description: "Today, 04:30 PM · 2x Sparkling Mineral Water, Roasted Cashews", ref: "HK Log #HK-12", amount: 450, category: "MINIBAR" },
+    { id: "inc-3", title: "AyurSpa Aromatherapy Massage", description: "Advance: Tomorrow, 10:00 AM · 60-min Couple Session", ref: "Partner Promo Applied", amount: 950, category: "SPA" },
+    { id: "inc-4", title: "GST on In-House Services (18%)", description: "18% GST on Dining & Spa", ref: "Statutory GST", amount: 148, category: "TAX" }
+  ],
+  isSettled: false,
+  settlementTxn: null
+};
+
+// GET /api/partner/pms/housekeeping/rooms
+router.get('/pms/housekeeping/rooms', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rooms = getStoredJson(PMS_ROOMS_STORE_FILE, INITIAL_PMS_ROOMS);
+    res.status(200).json({
+      success: true,
+      supervisor: "Sunil Verma (Shift B)",
+      shiftStatus: "Front Desk Active · Live Floor Ops",
+      totalUnits: 24,
+      summary: {
+        turnover: rooms.filter((r: any) => r.status === 'DIRTY').length,
+        inClean: rooms.filter((r: any) => r.status === 'IN_CLEANING').length,
+        ready: rooms.filter((r: any) => r.status === 'CLEAN_READY').length,
+        dndOcc: rooms.filter((r: any) => r.status === 'OCCUPIED_DND').length
+      },
+      rooms
+    });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch housekeeping rooms', error: e?.message });
+  }
+});
+
+// POST /api/partner/pms/housekeeping/update-status
+router.post('/pms/housekeeping/update-status', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { roomId, status, attendant, notes } = req.body;
+    if (!roomId || !status) {
+      res.status(400).json({ success: false, message: 'Missing roomId or status' });
+      return;
+    }
+    const rooms = getStoredJson(PMS_ROOMS_STORE_FILE, INITIAL_PMS_ROOMS);
+    const roomIndex = rooms.findIndex((r: any) => r.roomId === roomId);
+    if (roomIndex === -1) {
+      res.status(404).json({ success: false, message: 'Room not found' });
+      return;
+    }
+    rooms[roomIndex].status = status;
+    if (attendant) rooms[roomIndex].attendant = attendant;
+    if (notes) rooms[roomIndex].notes = notes;
+    rooms[roomIndex].lastUpdated = new Date().toISOString();
+
+    saveStoredJson(PMS_ROOMS_STORE_FILE, rooms);
+    res.status(200).json({ success: true, message: `Room ${roomId} updated to ${status}`, room: rooms[roomIndex] });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: 'Failed to update room status', error: e?.message });
+  }
+});
+
+// GET /api/partner/pms/guest-folio/:roomId
+router.get('/pms/guest-folio/:roomId', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { roomId } = req.params;
+    const folios = getStoredJson(PMS_FOLIOS_STORE_FILE, [INITIAL_PMS_FOLIO_302]);
+    let folio = folios.find((f: any) => f.roomId === roomId);
+    if (!folio) {
+      folio = { ...INITIAL_PMS_FOLIO_302, roomId };
+    }
+    res.status(200).json({ success: true, folio });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: 'Failed to fetch guest folio', error: e?.message });
+  }
+});
+
+// POST /api/partner/pms/guest-folio/post-charge
+router.post('/pms/guest-folio/post-charge', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { roomId = "302", title, category = "DINING", amount, description, ref } = req.body;
+    if (!title || !amount || isNaN(Number(amount))) {
+      res.status(400).json({ success: false, message: 'Invalid charge details' });
+      return;
+    }
+    const folios = getStoredJson(PMS_FOLIOS_STORE_FILE, [INITIAL_PMS_FOLIO_302]);
+    let folioIndex = folios.findIndex((f: any) => f.roomId === roomId);
+    if (folioIndex === -1) {
+      folios.push({ ...INITIAL_PMS_FOLIO_302, roomId });
+      folioIndex = folios.length - 1;
+    }
+    const chargeAmt = Number(amount);
+    const newCharge = {
+      id: `inc-${Date.now()}`,
+      title,
+      description: description || `Incidentals charge posted at ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`,
+      ref: ref || `POS-Desk #${Math.floor(1000 + Math.random() * 9000)}`,
+      amount: chargeAmt,
+      category: category.toUpperCase()
+    };
+    folios[folioIndex].incidentalsItems.push(newCharge);
+    folios[folioIndex].incidentalsDue += chargeAmt;
+    folios[folioIndex].totalCharges += chargeAmt;
+
+    saveStoredJson(PMS_FOLIOS_STORE_FILE, folios);
+    res.status(200).json({ success: true, message: `Charged INR ${chargeAmt} to Suite #${roomId}`, folio: folios[folioIndex] });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: 'Failed to post charge', error: e?.message });
+  }
+});
+
+// POST /api/partner/pms/guest-folio/settle-upi
+router.post('/pms/guest-folio/settle-upi', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { roomId = "302", amount } = req.body;
+    const folios = getStoredJson(PMS_FOLIOS_STORE_FILE, [INITIAL_PMS_FOLIO_302]);
+    let folioIndex = folios.findIndex((f: any) => f.roomId === roomId);
+    if (folioIndex === -1) {
+      folios.push({ ...INITIAL_PMS_FOLIO_302, roomId });
+      folioIndex = folios.length - 1;
+    }
+    const txnId = `UPI-PMS-${Date.now().toString().slice(-8)}`;
+    folios[folioIndex].isSettled = true;
+    folios[folioIndex].settlementTxn = txnId;
+    folios[folioIndex].incidentalsDue = 0;
+    folios[folioIndex].settledAt = new Date().toISOString();
+
+    saveStoredJson(PMS_FOLIOS_STORE_FILE, folios);
+    res.status(200).json({
+      success: true,
+      message: `Folio for Suite #${roomId} settled instantly via FastSettle UPI QR!`,
+      transactionId: txnId,
+      settledAmount: amount || INITIAL_PMS_FOLIO_302.incidentalsDue,
+      folio: folios[folioIndex]
+    });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: 'Failed to settle folio', error: e?.message });
+  }
+});
+
+// POST /api/partner/pms/concierge/send-whatsapp
+router.post('/pms/concierge/send-whatsapp', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { roomId = "302", guestPhone = "+91 98765 43210", messageType = "FOLIO_BILL", customText } = req.body;
+    const paymentLink = `https://routtripo.com/pay/folio?room=${roomId}&token=${crypto.randomBytes(6).toString('hex')}`;
+    const text = customText || `Namaste Rajesh ji, here is your Suite #${roomId} incidental statement of INR 3,198. Pay securely via UPI link: ${paymentLink} - RoutTripo Desk`;
+    const whatsappUrl = `https://wa.me/${guestPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`;
+
+    res.status(200).json({
+      success: true,
+      message: `WhatsApp notification generated for Suite #${roomId}!`,
+      guestPhone,
+      whatsappUrl,
+      dispatchedAt: new Date().toISOString()
+    });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: 'Failed to generate WhatsApp notification', error: e?.message });
+  }
+});
+
 export default router;

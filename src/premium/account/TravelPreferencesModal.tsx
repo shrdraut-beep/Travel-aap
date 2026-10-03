@@ -1,3 +1,4 @@
+import { SubPageHeader } from '../../components/common/SubPageHeader';
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
@@ -134,30 +135,15 @@ export const TravelPreferencesModal: React.FC<TravelPreferencesModalProps> = ({
           </div>
         )}
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-amber-50 via-white to-orange-50 px-5 py-4 border-b border-amber-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-xs">
-              <Compass className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                {isMr ? 'प्रवास व बुकिंग प्राधान्ये' : 'Travel & Booking Preferences'}
-              </h3>
-              <p className="text-[11px] text-slate-500 font-medium">
-                {isMr ? 'फ्लाइट्स, हॉटेल्स व कॅब्ससाठी एकत्रित प्राधान्ये' : 'Consolidated preferences for Flights, Hotels & Cabs'}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        {/* SubPageHeader matching Bus Booking Flow and Brand Header Ocean Colors */}
+        <SubPageHeader
+          title={isMr ? 'प्रवास प्राधान्ये' : 'Travel Preferences'}
+          subtitle={isMr ? 'विमान, हॉटेल व प्रवास सेवांसाठी पसंती' : 'Preferences for Flights, Stays & Transit'}
+          badge="VIP Concierge"
+          icon={Compass}
+          onClose={onClose}
+          maxWidth="w-full"
+        />
 
         {/* Form Body - Consolidated Travel Preferences */}
         <form onSubmit={handleSave} className="overflow-y-auto p-5 space-y-4 flex-1">

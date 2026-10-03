@@ -230,7 +230,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
 
   // Header component with 4-step progress tracker
   const renderHeader = (stepNum: number, stepTitle: string, progressPct: string) => (
-    <header className="fixed top-0 w-full z-50 pt-safe bg-[#0ea5e9] text-white rounded-b-[20px] shadow-[0_4px_16px_rgba(14,165,233,0.18)]">
+    <header className="fixed top-0 w-full z-50 pt-safe bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] text-[#0F172A] rounded-b-[24px] border-b border-sky-200/80 shadow-[0_4px_20px_rgba(2,132,199,0.08)] backdrop-blur-xl">
       <div className="px-4 py-2 flex flex-col justify-between max-w-lg mx-auto">
         <div className="flex items-center justify-between w-full">
           <button
@@ -242,17 +242,17 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
               else if (step === "addons") setStep("guests");
               else if (step === "checkout") setStep("addons");
             }}
-            className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors text-white shrink-0 cursor-pointer active:scale-95"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all text-slate-700 shadow-xs border border-sky-200/80 shrink-0 cursor-pointer active:scale-95"
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
           </button>
 
           <div className="flex flex-col items-center text-center px-2 flex-1 min-w-0">
-            <h1 className="font-bold text-xs sm:text-sm text-white truncate max-w-[240px] leading-tight">
+            <h1 className="font-bold text-xs sm:text-sm text-[#0F172A] truncate max-w-[240px] leading-tight">
               {selectedHotel?.name || "Grand Hyatt Resort & Spa, Goa"}
             </h1>
-            <span className="text-[10px] text-white/90 font-['JetBrains_Mono',monospace] truncate max-w-[260px] leading-none mt-0.5">
+            <span className="text-[10px] text-[#0369a1] font-semibold truncate max-w-[260px] leading-none mt-0.5">
               {initialSearchParams.checkInDate}–{initialSearchParams.checkOutDate} • {nights}N/{nights + 1}D • {guestsCount} Guests
             </span>
           </div>
@@ -260,7 +260,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
           <button
             aria-label="Close"
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors text-white shrink-0 cursor-pointer active:scale-95"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all text-slate-700 shadow-xs border border-sky-200/80 shrink-0 cursor-pointer active:scale-95"
             type="button"
           >
             <span className="material-symbols-outlined text-[16px]">close</span>
@@ -278,7 +278,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
           </div>
           <div className="w-full h-1 bg-white/25 rounded-full overflow-hidden">
             <div
-              className="bg-white h-full rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-sky-500 to-sky-600 h-full rounded-full transition-all duration-300"
               style={{ width: progressPct }}
             ></div>
           </div>
@@ -297,11 +297,11 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
       {/* ============================================================== */}
       {step === "results" && (
         <div className="min-h-screen bg-[#f6faff] flex flex-col">
-          <header className="fixed top-0 w-full z-50 pt-safe bg-white/95 backdrop-blur-xl rounded-b-[24px] shadow-[0_4px_20px_rgba(0,101,145,0.06)] border-b border-slate-100">
+          <header className="fixed top-0 w-full z-50 pt-safe bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] backdrop-blur-xl rounded-b-[24px] shadow-[0_4px_20px_rgba(2,132,199,0.08)] border-b border-sky-200/80">
             <div className="h-20 px-4 flex items-center justify-between gap-2 max-w-4xl mx-auto">
               <button
                 onClick={onClose}
-                className="w-11 h-11 rounded-full bg-[#f0f4fa] flex items-center justify-center text-[#0F172A] hover:bg-[#eaeef4] active:scale-95 transition-all shrink-0 cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-xs border border-sky-200/80 flex items-center justify-center text-[#0F172A] hover:bg-[#eaeef4] active:scale-95 transition-all shrink-0 cursor-pointer"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[22px]">arrow_back</span>
@@ -322,7 +322,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
 
               <button
                 onClick={onClose}
-                className="w-11 h-11 rounded-full bg-[#c9e6ff]/40 flex items-center justify-center text-[#006591] shrink-0 cursor-pointer"
+                className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-700 shadow-xs border border-sky-200/80 flex items-center justify-center text-[#006591] shrink-0 cursor-pointer"
                 type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
@@ -435,7 +435,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0 bg-[#6cf8bb]/30 px-2 py-0.5 rounded-full text-[#00714d] text-xs font-bold font-mono">
-                  ★ 5.0
+                  5.0 Stars
                 </div>
               </section>
 
@@ -1206,7 +1206,7 @@ export const HotelBookingCoordinator: React.FC<HotelBookingCoordinatorProps> = (
                 <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-200 shadow-md flex flex-col gap-3">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold">
-                      ✓
+                      
                     </div>
                     <div>
                       <h4 className="font-bold text-sm text-emerald-900">Reservation Confirmed!</h4>

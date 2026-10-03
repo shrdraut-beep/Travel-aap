@@ -78,7 +78,7 @@ export const SeatSelectionStep: React.FC<SeatSelectionStepProps> = ({
       <BookingStepHeader
         title="Select Seats"
         step="Step 3 of 6"
-        subtitle={<>{airline} {flightNo} • {org} ➔ {dst}</>}
+        subtitle={<>{airline} {flightNo} • {org} → {dst}</>}
         onBack={onBack}
         backAriaLabel="Back to passenger details"
         rightElement={

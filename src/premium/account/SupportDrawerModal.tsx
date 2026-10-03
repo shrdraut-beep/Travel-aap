@@ -351,7 +351,7 @@ export const SupportDrawerModal: React.FC<SupportDrawerModalProps> = ({
         </div>
 
         {/* Drawer Header (Specific to the opened topic) */}
-        <div className="px-5 py-3 border-b border-slate-200/80 flex items-center justify-between shrink-0 bg-slate-50/70">
+        <div className="px-5 py-3.5 border-b border-sky-200/80 flex items-center justify-between shrink-0 bg-gradient-to-r from-[#e0f2fe] via-[#f0f9ff] to-[#e0f7fa] rounded-t-[28px]">
           <div className="flex items-center gap-2.5 min-w-0">
             {topic === 'guarantee' && (
               <div className="w-9 h-9 rounded-xl bg-[#006591] text-white flex items-center justify-center shrink-0 shadow-xs">
@@ -387,8 +387,8 @@ export const SupportDrawerModal: React.FC<SupportDrawerModalProps> = ({
             <div className="min-w-0">
               <h3 className="text-base font-black text-slate-900 leading-tight truncate">
                 {topic === 'guarantee' && (isMr ? 'ROUTRIPO गॅरंटी व एस्क्रो संरक्षण' : 'ROUTRIPO Guarantee & Escrow')}
-                {topic === 'terms' && (isMr ? 'नियम आणि अटी (Terms & Conditions)' : 'Terms & Conditions')}
-                {topic === 'privacy' && (isMr ? 'गोपनीयता धोरण (Privacy Policy)' : 'Privacy Policy & DPDP Act')}
+                {topic === 'terms' && (isMr ? 'नियम आणि अटी' : 'Terms & Conditions')}
+                {topic === 'privacy' && (isMr ? 'गोपनीयता धोरण' : 'Privacy Policy & DPDP Act')}
                 {topic === 'cancellation' && (isMr ? 'रद्दीकरण व परतावा धोरण' : 'Cancellation & Refund Policy')}
                 {topic === 'bargaining' && (isMr ? 'बार्गेनिंग व बिडिंग नियम' : 'Bargaining & Bidding Fair-Play Rules')}
                 {topic === 'faq' && (isMr ? 'ग्राहक साहाय्य आणि वारंवार विचारले जाणारे प्रश्न' : 'Customer Helpdesk & Account FAQs')}
@@ -408,7 +408,7 @@ export const SupportDrawerModal: React.FC<SupportDrawerModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="w-8 h-8 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-2"
+            className="w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-slate-900 border border-sky-200/80 flex items-center justify-center transition-all active:scale-95 shadow-xs cursor-pointer shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>

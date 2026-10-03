@@ -1,0 +1,79 @@
+[
+  {
+    "roomId": "302",
+    "guestName": "Rajesh & Neha Sharma",
+    "bookingId": "RT-89204",
+    "pax": "2 Guests (Couple)",
+    "keycard": "A-302 (Active)",
+    "checkOut": "26 Oct, 11:00 AM (2 Days)",
+    "phone": "+91 98765 43210",
+    "prePaidEscrow": 10752,
+    "incidentalsDue": 0,
+    "totalCharges": 14110,
+    "prePaidItems": [
+      {
+        "title": "Deluxe Sea-Facing Suite (2 Nights)",
+        "description": "Rate 4,000 / night · 24 Oct - 26 Oct",
+        "amount": 8000,
+        "status": "PRE_PAID"
+      },
+      {
+        "title": "Airport Transfer (Sedan Pickup)",
+        "description": "Goa Dabolim Airport · Driver assigned",
+        "amount": 1200,
+        "status": "PRE_PAID"
+      },
+      {
+        "title": "Stay Taxes & GST (12%)",
+        "description": "Government Accommodation Surcharges",
+        "amount": 1552,
+        "status": "PRE_PAID"
+      }
+    ],
+    "incidentalsItems": [
+      {
+        "id": "inc-1",
+        "title": "Bayview Bistro & Cafe",
+        "description": "Today, 01:15 PM · Grilled Pomfret, Garlic Naan, 2x Fresh Lime Soda",
+        "ref": "Bill #B-4091",
+        "amount": 1650,
+        "category": "DINING"
+      },
+      {
+        "id": "inc-2",
+        "title": "Minibar Consumption",
+        "description": "Today, 04:30 PM · 2x Sparkling Mineral Water, Roasted Cashews",
+        "ref": "HK Log #HK-12",
+        "amount": 450,
+        "category": "MINIBAR"
+      },
+      {
+        "id": "inc-3",
+        "title": "AyurSpa Aromatherapy Massage",
+        "description": "Advance: Tomorrow, 10:00 AM · 60-min Couple Session",
+        "ref": "Partner Promo Applied",
+        "amount": 950,
+        "category": "SPA"
+      },
+      {
+        "id": "inc-4",
+        "title": "GST on In-House Services (18%)",
+        "description": "18% GST on Dining & Spa",
+        "ref": "Statutory GST",
+        "amount": 148,
+        "category": "TAX"
+      },
+      {
+        "id": "inc-1791040150977",
+        "title": "Fresh Coconut Water (2x)",
+        "description": "Incidentals charge posted at 08:39 pm",
+        "ref": "POS-Desk #5272",
+        "amount": 160,
+        "category": "DINING"
+      }
+    ],
+    "isSettled": true,
+    "settlementTxn": "UPI-PMS-40153047",
+    "settledAt": "2026-10-03T15:09:13.047Z"
+  }
+]

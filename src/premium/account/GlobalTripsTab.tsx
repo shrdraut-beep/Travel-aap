@@ -274,22 +274,22 @@ export const GlobalTripsTab: React.FC<GlobalTripsTabProps> = ({
       return;
     }
 
-    setAiLoadingStep('📍 Calculating optimal route & travel times...');
+    setAiLoadingStep('Calculating optimal route & travel times...');
     setAiPreviewPlan(null);
 
     try {
       await new Promise(r => setTimeout(r, 600));
       setAiLoadingStep(aiTransport === 'train'
-        ? '🚂 Checking IRCTC trains & schedules...'
+        ? 'Checking train routes & schedules...'
         : aiTransport === 'flight'
-        ? '✈️ Checking flight schedules & fares...'
-        : '🚗 Calculating highways, ghats, tolls & fuel estimates...');
+        ? 'Checking flight schedules & fares...'
+        : 'Calculating highways, tolls & fuel estimates...');
 
       await new Promise(r => setTimeout(r, 600));
-      setAiLoadingStep('✨ Curating top attractions, sights & daily itinerary...');
+      setAiLoadingStep('Curating top attractions, sights & daily itinerary...');
 
       await new Promise(r => setTimeout(r, 500));
-      setAiLoadingStep('🏨 Curating verified stays & local cuisine experiences...');
+      setAiLoadingStep('Curating verified stays & local dining...');
 
       const response = await fetch('/api/generate-future-trip-plan', {
         method: 'POST',
@@ -426,7 +426,7 @@ export const GlobalTripsTab: React.FC<GlobalTripsTabProps> = ({
     setActiveTrip(newTrip);
     setShowAiModal(false);
     setAiPreviewPlan(null);
-    showToast('✨ AI trip planned and saved to your vault!');
+    showToast('AI trip planned and saved successfully!');
   };
 
   // Manual Trip Form Submission
@@ -464,7 +464,7 @@ export const GlobalTripsTab: React.FC<GlobalTripsTabProps> = ({
 
     setActiveTrip(newTrip);
     setShowManualModal(false);
-    showToast('🎉 New trip created & active!');
+    showToast('New trip created & active!');
   };
 
   // Add Member in Manual Form
@@ -1052,7 +1052,7 @@ export const GlobalTripsTab: React.FC<GlobalTripsTabProps> = ({
                   <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-black uppercase">
-                        ✨ Generated Itinerary
+                        Generated Itinerary
                       </span>
                       {aiPreviewPlan.route_info && (
                         <span className="text-xs font-bold text-slate-500">

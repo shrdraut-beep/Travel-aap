@@ -123,8 +123,8 @@ export const AcceptLockFlowView: React.FC<AcceptLockFlowViewProps> = ({
               </div>
 
               <div className="p-3 bg-slate-50 rounded-2xl flex items-center justify-between text-[12px] text-slate-700 font-medium">
-                <span>📍 {trip.route}</span>
-                <span>📅 {trip.dates}</span>
+                <span>{trip.route}</span>
+                <span>{trip.dates}</span>
               </div>
             </div>
 
@@ -371,7 +371,7 @@ export const AcceptLockFlowView: React.FC<AcceptLockFlowViewProps> = ({
                       <span>{offer.realPhone}</span>
                     </p>
                     <p className="text-[11px] text-slate-500">
-                      ✉️ {offer.realEmail}
+                      {offer.realEmail}
                     </p>
                   </div>
                   <a

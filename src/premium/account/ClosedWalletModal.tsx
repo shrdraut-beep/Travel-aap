@@ -1,3 +1,4 @@
+import { SubPageHeader } from '../../components/common/SubPageHeader';
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
@@ -89,36 +90,15 @@ export const ClosedWalletModal: React.FC<ClosedWalletModalProps> = ({
           </div>
         )}
 
-        {/* Header with View Tabs */}
-        <div className="bg-gradient-to-r from-indigo-50 via-white to-sky-50 px-5 py-3.5 border-b border-indigo-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <Wallet className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                  RouTripo Travel Wallet
-                </h3>
-                <span className="text-[9px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-0.5">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                  <span>Closed PPI</span>
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Reserve Bank of India (RBI) Closed-Loop PPI Compliant
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        {/* SubPageHeader matching Bus Booking Flow and Brand Header Ocean Colors */}
+        <SubPageHeader
+          title="RouTripo Travel Wallet"
+          subtitle="Reserve Bank of India (RBI) Closed-Loop PPI Compliant"
+          badge="Closed PPI"
+          icon={Wallet}
+          onClose={onClose}
+          maxWidth="w-full"
+        />
 
         {/* View Switcher Tabs: Main Wallet vs Detailed English Regulations */}
         <div className="flex border-b border-slate-200 bg-slate-50/80 p-1 shrink-0">
