@@ -22,12 +22,12 @@
   --premium-pink-soft: #fdf2f8;
   --premium-ink: #0f172a;
   --premium-muted: #64748b;
-  --premium-page: #f8f6f0;
+  --premium-page: #e8f4fd;
   --premium-accent: #0284c7;
   --premium-accent-soft: #e0f2fe;
-  --premium-sand: #f0ebe1;
-  --premium-sand-light: #faf8f5;
-  --premium-sand-deep: #bfa98d;
+  --premium-sand: #e0f2fe;
+  --premium-sand-light: #f0f9ff;
+  --premium-sand-deep: #38bdf8;
 
   /*
    * Z-INDEX SCALE — use these instead of arbitrary z-[N] values.

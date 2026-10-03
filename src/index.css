@@ -10,7 +10,7 @@ html, body {
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-  background-color: var(--premium-page, #f8f6f0);
+  background-color: var(--premium-page, #e8f4fd);
 }
 
 #root {
@@ -18,7 +18,7 @@ html, body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: var(--premium-page, #f8f6f0);
+  background-color: var(--premium-page, #e8f4fd);
 }
 
 /* Allow text selection only in input fields and specific areas */
@@ -34,7 +34,7 @@ html {
 }
 
 body {
-  background-color: var(--premium-page, #f8f6f0);
+  background-color: var(--premium-page, #e8f4fd);
   min-height: 100vh;
   font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;

@@ -339,7 +339,7 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
   };
 
   return (
-    <div className="bg-[#f8fafc] text-slate-800 antialiased min-h-screen pb-24 font-['Plus_Jakarta_Sans','Outfit',sans-serif] relative">
+    <div className="bg-[var(--premium-page)] text-slate-800 antialiased min-h-screen pb-24 font-['Plus_Jakarta_Sans','Outfit',sans-serif] relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-4 inset-x-0 mx-auto z-[100] max-w-sm px-4 pointer-events-none">
@@ -573,8 +573,8 @@ export const UserLandingPage: React.FC<UserLandingPageProps> = ({
 
             {/* Perforated Divider with realistic semicircular notch bite cutouts */}
             <div className="relative flex sm:flex-col items-center justify-between py-0 border-t sm:border-t-0 sm:border-l border-dashed border-slate-300 bg-white px-2 sm:px-0">
-              <div className="size-3 rounded-full bg-[#f8fafc] border border-slate-300 absolute -top-1.5 left-6 sm:-left-1.5 z-10" />
-              <div className="size-3 rounded-full bg-[#f8fafc] border border-slate-300 absolute -bottom-1.5 left-6 sm:-left-1.5 z-10" />
+              <div className="size-3 rounded-full bg-[var(--premium-page)] border border-slate-300 absolute -top-1.5 left-6 sm:-left-1.5 z-10" />
+              <div className="size-3 rounded-full bg-[var(--premium-page)] border border-slate-300 absolute -bottom-1.5 left-6 sm:-left-1.5 z-10" />
             </div>
 
             {/* Right Stub / Boarding Action Section */}

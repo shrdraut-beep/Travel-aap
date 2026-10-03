@@ -142,7 +142,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   return (
-    <div className="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex justify-center selection:bg-sky-100 selection:text-sky-700">
+    <div className="bg-[var(--premium-page)] text-slate-800 font-sans antialiased min-h-screen flex justify-center selection:bg-sky-100 selection:text-sky-700">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-slate-900/95 text-white text-[13px] font-bold rounded-2xl shadow-xl backdrop-blur-md flex items-center gap-2 border border-white/20 animate-in fade-in slide-in-from-top-2">

@@ -145,7 +145,7 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-slate-50/50 pb-24 font-['Outfit',sans-serif]">
+    <div className="flex-1 flex flex-col min-h-screen bg-[var(--premium-page)] pb-24 font-['Outfit',sans-serif]">
       {/* Toast Alert */}
       {toastMessage && (
         <div className="fixed top-4 inset-x-0 mx-auto z-[200] max-w-sm px-4 pointer-events-none">
@@ -169,7 +169,7 @@ export const MyTicketsView: React.FC<MyTicketsViewProps> = ({
       )}
 
       {/* 2. Status Sorting Tabs: ONLY Upcoming, Completed, Cancelled */}
-      <div className="px-4 pt-3 pb-1 sticky top-[60px] z-20 bg-slate-50/90 backdrop-blur-md">
+      <div className="px-4 pt-3 pb-1 sticky top-[60px] z-20 bg-[var(--premium-page)]/90 backdrop-blur-md">
         <div className="flex bg-slate-200/80 p-1.5 rounded-2xl border border-slate-300/70 gap-1.5 shadow-2xs">
           {[
             { 

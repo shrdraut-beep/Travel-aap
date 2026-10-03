@@ -172,7 +172,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-[#F8FAFC] min-h-screen flex flex-col font-['Outfit',sans-serif] text-slate-900 pb-28 relative">
+    <div className="w-full max-w-md mx-auto bg-[var(--premium-page)] min-h-screen flex flex-col font-['Outfit',sans-serif] text-slate-900 pb-28 relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-4 inset-x-0 mx-auto z-[100] max-w-xs px-4">

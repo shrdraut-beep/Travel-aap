@@ -486,7 +486,7 @@ export const GlobalTripsTab: React.FC<GlobalTripsTabProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 text-slate-900 pb-28 font-['Outfit',sans-serif]">
+    <div className="min-h-screen bg-[var(--premium-page)] text-slate-900 pb-28 font-['Outfit',sans-serif]">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="fixed top-4 inset-x-0 mx-auto z-[200] max-w-sm px-4 pointer-events-none">

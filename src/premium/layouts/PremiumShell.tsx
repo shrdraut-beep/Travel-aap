@@ -51,7 +51,7 @@ export const PremiumShell: React.FC<PremiumShellProps> = ({
   return (
     <div
       ref={bodyRef}
-      className="mx-auto flex h-[100dvh] w-full max-w-[520px] flex-col bg-[#F8FAFC] overflow-y-auto overscroll-contain relative"
+      className="mx-auto flex h-[100dvh] w-full max-w-[520px] flex-col bg-[var(--premium-page)] overflow-y-auto overscroll-contain relative"
     >
       {!hideHeader && (
         <header className="premium-sky-panel px-5 py-4 shadow-sm shrink-0">
