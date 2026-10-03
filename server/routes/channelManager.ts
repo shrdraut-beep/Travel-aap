@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import crypto from 'crypto';
-import { getApps } from 'firebase-admin/app';
-import { getFirestore, FieldValue, type Firestore, type DocumentReference } from 'firebase-admin/firestore';
+import { FieldValue, type Firestore, type DocumentReference } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 import { UniversalIdGenerator } from '../services/universalIdService.ts';
 import { meilisearchService, MEILI_INDEX_HOTELS } from '../services/meilisearchService.ts';
 
@@ -68,14 +68,7 @@ router.post(['/webhook', '/'], async (req: Request, res: Response): Promise<void
     }
 
     // 2. Check idempotency in Firestore (webhook_logs collection)
-    let db: Firestore | null = null;
-    try {
-      if (getApps().length > 0) {
-        db = getFirestore();
-      }
-    } catch (e) {
-      /* ignore if not initialized in local dev */
-    }
+    const db: Firestore | null = getSafeAdminFirestore();
 
     let logRef: DocumentReference | null = null;
     if (db) {

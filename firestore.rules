@@ -44,6 +44,26 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+    match /packages/{packageId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /cabs/{cabId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /buses/{busId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /vendor_profiles/{vendorId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    match /vendors/{vendorId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
 
     // 2. Users and Profiles: Strict Owner-only access (PDF Directive: Ram cannot read Sham's profile)
     match /users/{userId} {

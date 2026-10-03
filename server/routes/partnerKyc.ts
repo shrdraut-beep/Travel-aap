@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 import express, { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import axios from 'axios';
@@ -859,14 +858,15 @@ router.get('/packages', async (req: Request, res: Response): Promise<void> => {
     
     // 1. Try Firestore Admin if available
     try {
-      if (getApps().length > 0) {
-        const snap = await getFirestore().collection('packages').get();
+      const db = getSafeAdminFirestore();
+      if (db) {
+        const snap = await db.collection('packages').get();
         if (!snap.empty) {
           packages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         }
       }
-    } catch (e) {
-      console.warn('[partnerKyc] Firestore fetch failed, using disk store:', e);
+    } catch {
+      // Quietly fall back to disk store
     }
 
     // 2. Fall back to local persistent store if Firestore is empty or unconfigured
@@ -946,11 +946,12 @@ router.post(['/register-package', '/create-package'], async (req: Request, res: 
 
     // Save to Firestore if available
     try {
-      if (getApps().length > 0) {
-        await getFirestore().collection('packages').doc(packageId).set(packageData);
+      const db = getSafeAdminFirestore();
+      if (db) {
+        await db.collection('packages').doc(packageId).set(packageData);
       }
-    } catch (dbErr) {
-      console.warn('[partnerKyc] Firestore set error (falling back to disk):', dbErr);
+    } catch {
+      // Quietly fall back to disk store
     }
 
     // Also persist to disk store
@@ -1068,11 +1069,12 @@ router.post(['/register-vendor', '/vendor-kyc'], async (req: Request, res: Respo
 
     // Save to Firestore 'vendor_profiles' collection
     try {
-      if (getApps().length > 0) {
-        await getFirestore().collection('vendor_profiles').doc(vendorId).set(vendorData);
+      const db = getSafeAdminFirestore();
+      if (db) {
+        await db.collection('vendor_profiles').doc(vendorId).set(vendorData);
       }
-    } catch (e: any) {
-      console.warn('[partnerKyc] Firestore vendor_profiles write failed (dev mode fallback):', e?.message);
+    } catch {
+      // Quietly fall back to disk store
     }
 
     // Persist to disk store
@@ -1157,11 +1159,12 @@ router.post('/register-cab', async (req: Request, res: Response): Promise<void> 
 
     // Save to Firestore 'cabs' collection
     try {
-      if (getApps().length > 0) {
-        await getFirestore().collection('cabs').doc(cabId).set(cabData);
+      const db = getSafeAdminFirestore();
+      if (db) {
+        await db.collection('cabs').doc(cabId).set(cabData);
       }
-    } catch (e: any) {
-      console.warn('[partnerKyc] Firestore cabs write failed:', e?.message);
+    } catch {
+      // Quietly fall back to disk store
     }
 
     // Persist to disk store
@@ -1286,11 +1289,12 @@ router.post('/register-bus', async (req: Request, res: Response): Promise<void> 
 
     // Save to Firestore 'buses' collection
     try {
-      if (getApps().length > 0) {
-        await getFirestore().collection('buses').doc(busId).set(busData);
+      const db = getSafeAdminFirestore();
+      if (db) {
+        await db.collection('buses').doc(busId).set(busData);
       }
-    } catch (e: any) {
-      console.warn('[partnerKyc] Firestore buses write failed:', e?.message);
+    } catch {
+      // Quietly fall back to disk store
     }
 
     // Persist to disk store
@@ -1337,9 +1341,14 @@ router.post('/register-bus', async (req: Request, res: Response): Promise<void> 
 router.get('/cabs', async (req: Request, res: Response): Promise<void> => {
   try {
     let cabs: any[] = [];
-    if (getApps().length > 0) {
-      const snap = await getFirestore().collection('cabs').get();
-      if (!snap.empty) cabs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const db = getSafeAdminFirestore();
+    if (db) {
+      try {
+        const snap = await db.collection('cabs').get();
+        if (!snap.empty) cabs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch {
+        // Quiet fallback
+      }
     }
     if (cabs.length === 0) cabs = getStoredJson(CABS_STORE_FILE, []);
     res.status(200).json({ success: true, cabs, count: cabs.length });
@@ -1352,9 +1361,14 @@ router.get('/cabs', async (req: Request, res: Response): Promise<void> => {
 router.all('/cabs/search', async (req: Request, res: Response): Promise<void> => {
   try {
     let cabs: any[] = [];
-    if (getApps().length > 0) {
-      const snap = await getFirestore().collection('cabs').get();
-      if (!snap.empty) cabs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const db = getSafeAdminFirestore();
+    if (db) {
+      try {
+        const snap = await db.collection('cabs').get();
+        if (!snap.empty) cabs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch {
+        // Quiet fallback
+      }
     }
     if (cabs.length === 0) cabs = getStoredJson(CABS_STORE_FILE, []);
 
@@ -1378,9 +1392,14 @@ router.all('/cabs/search', async (req: Request, res: Response): Promise<void> =>
 router.get('/buses', async (req: Request, res: Response): Promise<void> => {
   try {
     let buses: any[] = [];
-    if (getApps().length > 0) {
-      const snap = await getFirestore().collection('buses').get();
-      if (!snap.empty) buses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const db = getSafeAdminFirestore();
+    if (db) {
+      try {
+        const snap = await db.collection('buses').get();
+        if (!snap.empty) buses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch {
+        // Quiet fallback
+      }
     }
     if (buses.length === 0) buses = getStoredJson(BUSES_STORE_FILE, []);
     res.status(200).json({ success: true, buses, count: buses.length });

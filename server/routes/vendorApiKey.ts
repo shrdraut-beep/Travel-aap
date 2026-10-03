@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 import { getAuth } from 'firebase-admin/auth';
 
 /**
@@ -80,15 +80,15 @@ router.post('/generate-api-key', verifyFirebaseToken, async (req: Request, res: 
 
     // 4. Update in Firestore ('vendors' and 'vendor_profiles' collections)
     try {
-      if (getApps().length > 0) {
-        const firestore = getFirestore();
+      const db = getSafeAdminFirestore();
+      if (db) {
         await Promise.all([
-          firestore.collection('vendors').doc(targetVendorId).set(updatePayload, { merge: true }),
-          firestore.collection('vendor_profiles').doc(targetVendorId).set(updatePayload, { merge: true })
+          db.collection('vendors').doc(targetVendorId).set(updatePayload, { merge: true }),
+          db.collection('vendor_profiles').doc(targetVendorId).set(updatePayload, { merge: true })
         ]);
       }
-    } catch (dbErr: any) {
-      console.warn('[vendorApiKey] Firestore key update warning (using disk store fallback):', dbErr?.message);
+    } catch {
+      // Quiet disk store fallback
     }
 
     // 5. Update local disk store (NEVER save rawKey!)
@@ -144,15 +144,16 @@ export async function authenticateB2BKey(req: Request, res: Response, next: Next
   // Check Firestore first
   let vendorMatched: any = null;
   try {
-    if (getApps().length > 0) {
-      const snap = await getFirestore().collection('vendors').where('apiKeyHash', '==', hashedIncoming).limit(1).get();
+    const db = getSafeAdminFirestore();
+    if (db) {
+      const snap = await db.collection('vendors').where('apiKeyHash', '==', hashedIncoming).limit(1).get();
       if (!snap.empty) {
         vendorMatched = snap.docs[0].data();
         vendorMatched.id = snap.docs[0].id;
       }
     }
-  } catch (err) {
-    console.warn('[vendorApiKey] Firestore auth lookup fallback:', err);
+  } catch {
+    // Quiet disk fallback
   }
 
   // Check disk store fallback
@@ -196,16 +197,17 @@ router.post(['/inventory/bus/update', '/v1/inventory/bus/update'], authenticateB
 
     // Also update Firestore if available
     try {
-      if (getApps().length > 0) {
-        await getFirestore().collection('buses').doc(busId).set({
+      const db = getSafeAdminFirestore();
+      if (db) {
+        await db.collection('buses').doc(busId).set({
           availableSeats: availableSeats ?? 12,
           blockedSeats: blockedSeats ?? 0,
           travelDate,
           updatedAt
         }, { merge: true });
       }
-    } catch (e: any) {
-      console.warn('[vendorApiKey] Firestore bus sync warning:', e?.message);
+    } catch {
+      // Quiet disk fallback
     }
 
     res.status(200).json({
@@ -245,15 +247,16 @@ router.post(['/inventory/car/update', '/v1/inventory/car/update'], authenticateB
 
     // Also update Firestore if available
     try {
-      if (getApps().length > 0) {
-        await getFirestore().collection('cabs').doc(carId).set({
+      const db = getSafeAdminFirestore();
+      if (db) {
+        await db.collection('cabs').doc(carId).set({
           status: normalizedStatus,
           date,
           updatedAt
         }, { merge: true });
       }
-    } catch (e: any) {
-      console.warn('[vendorApiKey] Firestore cab sync warning:', e?.message);
+    } catch {
+      // Quiet disk fallback
     }
 
     res.status(200).json({
@@ -315,10 +318,15 @@ router.get('/key-status/:vendorId', verifyFirebaseToken, async (req: Request, re
     const { vendorId } = req.params;
     let vendorData: any = null;
 
-    if (getApps().length > 0) {
-      const doc = await getFirestore().collection('vendors').doc(vendorId).get();
-      if (doc.exists) {
-        vendorData = doc.data();
+    const db = getSafeAdminFirestore();
+    if (db) {
+      try {
+        const doc = await db.collection('vendors').doc(vendorId).get();
+        if (doc.exists) {
+          vendorData = doc.data();
+        }
+      } catch {
+        // Quiet disk fallback
       }
     }
 

@@ -1,5 +1,5 @@
-import { getFirestore, type Firestore } from 'firebase-admin/firestore';
-import { getApps } from 'firebase-admin/app';
+import { type Firestore } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 
 export type ServiceType = 'vendor_commission' | 'direct_app_booking' | 'direct_booking' | 'vendor_ads' | 'hotel_registration' | 'flight' | 'hotel';
 
@@ -7,14 +7,7 @@ export type ServiceType = 'vendor_commission' | 'direct_app_booking' | 'direct_b
  * Helper to safely retrieve Firestore instance even if initialized lazily
  */
 const getDb = (): Firestore | null => {
-  try {
-    if (getApps().length > 0) {
-      return getFirestore();
-    }
-  } catch (err) {
-    console.warn('[TaxService] Firestore not yet initialized, using defaults:', err);
-  }
-  return null;
+  return getSafeAdminFirestore();
 };
 
 export const calculateServerTax = async (

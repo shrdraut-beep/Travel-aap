@@ -5,20 +5,12 @@ import {
   renderInvoiceHTML, 
   BookingDocumentData 
 } from '../services/documentTemplateEngine.ts';
-import { getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 
 export const documentsRouter = express.Router();
 
 const getDb = () => {
-  if (getApps().length > 0) {
-    try {
-      return getFirestore();
-    } catch {
-      return null;
-    }
-  }
-  return null;
+  return getSafeAdminFirestore();
 };
 
 /**

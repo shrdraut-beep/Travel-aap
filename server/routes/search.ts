@@ -2,8 +2,7 @@ import express, { Request, Response } from 'express';
 import { travelportService } from '../services/travelport.ts';
 import { busLookupService } from '../services/busLookup.ts';
 import { CarService } from '../services/CarService.ts';
-import { getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 import {
   meilisearchService,
   syncAllVerticalsToMeilisearch,
@@ -120,10 +119,14 @@ router.post(['/sync-search', '/sync'], async (req: Request, res: Response) => {
     }
 
     let documents: any[] = [];
-    if (getApps().length > 0) {
-      const db = getFirestore();
-      const snapshot = await db.collection(collectionName).get();
-      documents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const db = getSafeAdminFirestore();
+    if (db) {
+      try {
+        const snapshot = await db.collection(collectionName).get();
+        documents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      } catch {
+        // Fallback to local
+      }
     }
 
     // Fallback if local collections are empty
@@ -156,7 +159,7 @@ router.post(['/sync-search', '/sync'], async (req: Request, res: Response) => {
 // 3. Multi-Vertical Full Sync Trigger (POST /api/sync-all)
 router.post('/sync-all', async (_req: Request, res: Response) => {
   try {
-    const db = getApps().length > 0 ? getFirestore() : null;
+    const db = getSafeAdminFirestore();
     const stats = await syncAllVerticalsToMeilisearch(db);
     return res.status(200).json({
       success: true,

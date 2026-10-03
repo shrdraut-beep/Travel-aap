@@ -1,7 +1,7 @@
 import ical from 'node-ical';
 import icalGenerator, { ICalCalendarMethod } from 'ical-generator';
-import { getApps } from 'firebase-admin/app';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { FieldValue } from 'firebase-admin/firestore';
+import { getSafeAdminFirestore } from '../firebaseAdmin.ts';
 import { lookup } from 'node:dns/promises';
 
 /**
@@ -164,9 +164,9 @@ export async function syncAndBlockDatesFromICal(hotelId: string, icalUrl: string
 
     // Update Firebase Firestore if initialized
     let firestoreUpdated = false;
-    if (getApps().length > 0) {
+    const db = getSafeAdminFirestore();
+    if (db) {
       try {
-        const db = getFirestore();
         const hotelRef = db.collection('master_hotels').doc(hotelId);
         
         if (newBlockedDates.length > 0) {
@@ -235,10 +235,10 @@ export async function generateHotelICalFeed(hotelId: string, hotelName: string =
   }
 
   // Fetch Firestore blocked_dates & active bookings
-  if (getApps().length > 0) {
+  const dbForBlock = getSafeAdminFirestore();
+  if (dbForBlock) {
     try {
-      const db = getFirestore();
-      const doc = await db.collection('master_hotels').doc(hotelId).get();
+      const doc = await dbForBlock.collection('master_hotels').doc(hotelId).get();
       if (doc.exists) {
         const data = doc.data();
         if (Array.isArray(data?.blocked_dates)) {
@@ -247,7 +247,7 @@ export async function generateHotelICalFeed(hotelId: string, hotelName: string =
       }
 
       // Also fetch confirmed reservations for this hotel
-      const bookingsSnap = await db.collection('bookings')
+      const bookingsSnap = await dbForBlock.collection('bookings')
         .where('hotel_id', '==', hotelId)
         .where('status', 'in', ['CONFIRMED', 'PAID', 'CHECKED_IN'])
         .get();
@@ -331,18 +331,18 @@ export async function getBlockedDatesForHotel(hotelId: string): Promise<string[]
     memoryBlockedDates.get(hotelId)!.forEach(d => dates.add(d));
   }
 
-  if (getApps().length > 0) {
+  const dbForDates = getSafeAdminFirestore();
+  if (dbForDates) {
     try {
-      const db = getFirestore();
-      const doc = await db.collection('master_hotels').doc(hotelId).get();
+      const doc = await dbForDates.collection('master_hotels').doc(hotelId).get();
       if (doc.exists) {
         const data = doc.data();
         if (Array.isArray(data?.blocked_dates)) {
           data.blocked_dates.forEach((d: string) => dates.add(d));
         }
       }
-    } catch (err) {
-      console.warn(`[iCalSync] Error reading blocked dates:`, err);
+    } catch {
+      // Quiet fallback
     }
   }
 
