@@ -1888,7 +1888,7 @@ export const InventoryPanel: React.FC<InventoryPanelProps> = ({ onAction, initia
             <HotelPropertyOperationsDesk
               isOpen={showHotelOpsDesk}
               onClose={() => setShowHotelOpsDesk(false)}
-              hotelName={profile?.agencyName || "Blue Horizon Luxury Beach Resort"}
+              hotelName={profile?.business_name || "Blue Horizon Luxury Beach Resort"}
             />
           )}
         </div>

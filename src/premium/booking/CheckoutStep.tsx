@@ -18,19 +18,15 @@ import {
   X,
   ArrowRight
 } from "lucide-react";
-import {
-  Luggage, BookingStepHeader } from "./BookingStepHeader";
-import {
-  Luggage, loadRazorpayScript } from "../../utils/razorpay";
-import {
-  Luggage, RazorpayCheckoutModal } from "../../components/common/RazorpayCheckoutModal";
+import { BookingStepHeader } from "./BookingStepHeader";
+import { loadRazorpayScript } from "../../utils/razorpay";
+import { RazorpayCheckoutModal } from "../../components/common/RazorpayCheckoutModal";
 import type { SelectedSeat } from "./SeatSelectionStep";
 import type { SelectedBaggageItem } from "./BaggageSelectionStep";
 import type { SelectedMealItem } from "./MealsSelectionStep";
 import type { SelectedFare } from "./FareSelectionStep";
 import type { PassengerDetail } from "./PassengerDetailsStep";
-import {
-  Luggage, formatTime } from "./PassengerDetailsStep";
+import { formatTime } from "./PassengerDetailsStep";
 
 export interface FlightPricingAPIResponse {
   priceToken: string;

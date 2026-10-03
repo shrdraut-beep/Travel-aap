@@ -31,10 +31,7 @@ import {
   Sun,
   Shield,
   Coffee,
-  CheckCheck,
-  Briefcase,
-  MessageSquare,
-  Zap
+  CheckCheck
 } from "lucide-react";
 import { FlightBookingHeader } from "./FlightBookingHeader";
 import { RazorpayPaymentModal } from "./RazorpayPaymentModal";

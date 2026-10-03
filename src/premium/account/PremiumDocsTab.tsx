@@ -151,7 +151,7 @@ Status: Verified Offline Available`], { type: "text/plain" });
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <SectionHeader title="Travel Documents Vault" />
-          <PillButton label="Upload" tone="frosted" onClick={() => setIsUploadModalOpen(true)} />
+          <PillButton label="Upload" variant="frosted" onClick={() => setIsUploadModalOpen(true)} />
         </div>
 
         {/* Documents Cards List */}

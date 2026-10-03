@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, MapPin, Calendar, Users, DollarSign, Check, Car, Hotel, Package, ShieldCheck, Sparkles, Plus } from 'lucide-react';
 import { BargainingTrip, BargainingCategory } from './types';
+import { SubPageHeader } from '../../../components/common/SubPageHeader';
 
 interface TripRequirementModalProps {
   isOpen: boolean;
